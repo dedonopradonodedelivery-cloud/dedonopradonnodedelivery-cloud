@@ -1,7 +1,7 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// Fixed: Changed App import to named import
-import { App } from './App'; 
+import App from './App'; 
 import { AuthProvider } from './contexts/AuthContext'; 
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FeatureProvider } from './contexts/FeatureContext';

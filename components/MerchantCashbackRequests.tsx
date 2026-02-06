@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, XCircle, Clock, User, Loader2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { CashbackTransaction } from '../types';
 
@@ -8,7 +9,7 @@ interface MerchantCashbackRequestsProps {
   onBack: () => void;
 }
 
-// Fixed: Ensured compatibility with CashbackTransaction which has mandatory 'id'
+// Estendendo CashbackTransaction para incluir campos voláteis da UI
 interface ExtendedCashbackTransaction extends CashbackTransaction {
   customer_name?: string; 
 }
@@ -19,6 +20,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<ExtendedCashbackTransaction | null>(null);
 
+  // --- Realtime & Fetch ---
   useEffect(() => {
     fetchPendingRequests();
 
@@ -47,19 +49,20 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
   const fetchPendingRequests = async () => {
     if (!supabase) {
+        // Mock data corrigido com propriedades obrigatórias da interface CashbackTransaction
         setRequests([
             {
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
-                user_id: 'cust-1',
+                user_id: 'cust-1', // Corrigido de customer_id para user_id
                 customer_name: 'Maria Silva (Simulação)',
-                amount_cents: 725,
-                type: 'earn',
                 total_amount_cents: 15000,
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
                 amount_to_pay_now_cents: 14500,
+                amount_cents: 725, // Campo obrigatório
+                type: 'earn',      // Campo obrigatório
                 status: 'pending',
                 created_at: new Date().toISOString()
             }
@@ -85,10 +88,10 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
     }
   };
 
+  // --- Actions ---
+
   const handleApprove = async (tx: ExtendedCashbackTransaction) => {
-    // Fixed: Ensuring 'id' is treated as string
-    const txId = tx.id;
-    setProcessingId(txId);
+    setProcessingId(tx.id);
 
     try {
       if (supabase) {
@@ -98,14 +101,14 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 status: 'approved',
                 approved_at: new Date().toISOString()
             })
-            .eq('id', txId);
+            .eq('id', tx.id);
 
           if (updateError) throw updateError;
       } else {
           await new Promise(r => setTimeout(r, 1000));
       }
 
-      setRequests((prev) => prev.filter((r) => r.id !== txId));
+      setRequests((prev) => prev.filter((r) => r.id !== tx.id));
       setSelectedRequest(null); 
 
     } catch (err: any) {
@@ -117,9 +120,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
   };
 
   const handleReject = async (tx: ExtendedCashbackTransaction) => {
-    // Fixed: Ensuring 'id' is treated as string
-    const txId = tx.id;
-    setProcessingId(txId);
+    setProcessingId(tx.id);
 
     try {
       if (supabase) {
@@ -129,14 +130,14 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 status: 'rejected',
                 rejected_at: new Date().toISOString()
             })
-            .eq('id', txId);
+            .eq('id', tx.id);
 
           if (error) throw error;
       } else {
           await new Promise(r => setTimeout(r, 1000));
       }
 
-      setRequests((prev) => prev.filter((r) => r.id !== txId));
+      setRequests((prev) => prev.filter((r) => r.id !== tx.id));
       setSelectedRequest(null);
 
     } catch (err: any) {
@@ -157,6 +158,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300">
+      
+      {/* Header */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -222,6 +225,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
         )}
       </div>
 
+      {/* DETALHE MODAL */}
       {selectedRequest && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200">
             <div 

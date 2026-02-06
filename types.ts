@@ -2,6 +2,7 @@
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
+export type PlanType = 'free' | 'professional' | 'enterprise' | 'master' | 'founder';
 
 export enum AdType {
   ORGANIC = 'ORGANIC',
@@ -26,6 +27,25 @@ export interface StoreReview {
     text: string;
     responded_at: string;
   };
+}
+
+export type PromotionType = 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
+export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'paused';
+
+export interface StorePromotion {
+  id: string;
+  storeId: string;
+  title: string;
+  description: string;
+  type: PromotionType;
+  startDate: string;
+  endDate: string;
+  value?: number;
+  discount?: number;
+  images: string[];
+  status: PromotionStatus;
+  createdAt: string;
+  publishToCommunity?: boolean;
 }
 
 export interface Store {
@@ -82,102 +102,16 @@ export interface Store {
   cnpj?: string;
   email_fiscal?: string;
   whatsapp_financeiro?: string;
-  telefone_fixo_publico?: string;
   telefone_fixo_fiscal?: string;
   inscricao_municipal?: string;
   inscricao_estadual?: string;
   email_publico?: string;
+  plan?: PlanType;
+  ads_count?: number;
   accepts_online_orders?: boolean;
   min_order_value?: number;
+  videos?: string[];
   tags?: string[];
-}
-
-export type ServiceUrgency = 'Hoje' | 'Essa semana' | 'Sem pressa' | 'Para hoje' | 'Amanhã' | 'Até 3 dias' | 'Não tenho pressa';
-
-export interface ServiceRequest {
-  id: string;
-  userId: string;
-  userName: string;
-  serviceType: string;
-  description: string;
-  neighborhood: string;
-  urgency: ServiceUrgency;
-  images: string[];
-  status: 'open' | 'closed';
-  createdAt: string;
-  winnerId?: string;
-}
-
-export interface ServiceLead {
-  id: string;
-  requestId: string;
-  merchantId: string;
-  merchantName: string;
-  status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid';
-  merchantLogo?: string;
-  unlockedAt?: string;
-  purchasedAt?: string;
-}
-
-export interface ServiceMessage {
-  id: string;
-  requestId: string;
-  senderId: string;
-  senderName: string;
-  senderRole: 'resident' | 'merchant';
-  text: string;
-  timestamp: string;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  slug: string;
-}
-
-export interface ChatMessage {
-  role: 'user' | 'model';
-  text: string;
-}
-
-export interface Job {
-  id: string;
-  role: string;
-  company: string;
-  neighborhood: string;
-  category: string;
-  type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros';
-  salary?: string;
-  description: string;
-  requirements: string[];
-  benefits?: string[];
-  postedAt: string;
-  isUrgentToday?: boolean;
-  schedule?: string;
-  contactWhatsapp?: string;
-  isSponsored?: boolean;
-  sponsoredUntil?: string;
-  isUrgent?: boolean;
-  logoUrl?: string;
-  candidacy_method?: 'cv' | 'whatsapp';
-  modality?: 'Presencial' | 'Híbrido' | 'Remoto';
-  experience?: string;
-  schedule_type?: 'Integral' | 'Meio período' | 'Escala';
-  isVerified?: boolean;
-  isVerifiedMerchant?: boolean;
-}
-
-export interface NeighborhoodCommunity {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  icon: React.ReactNode;
-  color: string;
-  membersCount: string;
-  type?: 'official' | 'user';
 }
 
 export interface CommunityPost {
@@ -203,217 +137,53 @@ export interface CommunityPost {
   isActiveResident?: boolean;
 }
 
-export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
-
-export interface Story {
-  id: string;
-  name: string;
-  image: string;
-}
-
-export interface EditorialCollection {
-  id: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  keywords: string[];
-}
-
-export interface Classified {
-  id: string;
-  title: string;
-  advertiser: string;
-  category: string;
-  neighborhood: string;
-  description: string;
-  timestamp: string;
-  contactWhatsapp: string;
-  typeLabel: string;
-  price?: string;
-  imageUrl?: string;
-  jobDetails?: Job;
+export type SlotStatus = 'available' | 'reserved' | 'sold';
+export interface CategoryBannerSlot { uniqueKey: string; bairroSlug: string; categoriaSlug: string; slotNumber: 1 | 2; status: SlotStatus; merchantId?: string; merchantName?: string; expiresAt?: string; image?: string; title?: string; subtitle?: string; }
+export interface RealEstateProperty { id: string; type: 'Residencial' | 'Comercial'; title: string; description: string; image: string; neighborhood: string; price: number; transaction: 'aluguel' | 'venda'; area: number; postedAt: string; buildingName?: string; bedrooms?: number; bathrooms?: number; parkingSpaces?: number; propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura'; condoFee?: number; isFurnished?: boolean; petsAllowed?: boolean; propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial'; hasBathroom?: boolean; highCeiling?: boolean; loadingAccess?: boolean; isVerifiedMerchant?: boolean; }
+export type ServiceUrgency = 'Para hoje' | 'Amanhã' | 'Até 3 dias' | 'Não tenho pressa' | 'Hoje' | 'Essa semana' | 'Sem pressa';
+export interface ServiceRequest { id: string; userId: string; userName: string; serviceType: string; description: string; neighborhood: string; urgency: ServiceUrgency; images: string[]; status: 'open' | 'closed'; createdAt: string; winnerId?: string; }
+export interface ServiceLead { id: string; requestId: string; merchantId: string; merchantName: string; merchantLogo?: string; status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid'; unlockedAt?: string; purchasedAt?: string; }
+export interface ServiceMessage { id: string; requestId: string; senderId: string; senderName: string; senderRole: 'resident' | 'merchant'; text: string; timestamp: string; }
+export interface Category { id: string; name: string; icon: React.ReactNode; color: string; slug: string; }
+export interface ChatMessage { role: 'user' | 'model'; text: string; }
+export interface Job { id: string; role: string; company: string; neighborhood: string; category: string; type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros'; salary?: string; description: string; requirements: string[]; benefits?: string[]; postedAt: string; isUrgentToday?: boolean; schedule?: string; contactWhatsapp?: string; isSponsored?: boolean; sponsoredUntil?: string; isUrgent?: boolean; logoUrl?: string; candidacy_method?: 'cv' | 'whatsapp'; modality?: 'Presencial' | 'Híbrido' | 'Remoto'; experience?: string; schedule_type?: 'Integral' | 'Meio período' | 'Escala'; isVerified?: boolean; isVerifiedMerchant?: boolean; }
+export interface NeighborhoodCommunity { id: string; name: string; description: string; image: string; icon: React.ReactNode; color: string; membersCount: string; type?: 'official' | 'user'; }
+export interface Story { id: string; name: string; image: string; }
+export interface EditorialCollection { id: string; title: string; subtitle: string; image: string; keywords: string[]; }
+export interface Classified { 
+  id: string; 
+  title: string; 
+  advertiser: string; 
+  category: string; 
+  neighborhood: string; 
+  description: string; 
+  timestamp: string; 
+  contactWhatsapp: string; 
+  typeLabel: string; 
+  price?: string; 
+  imageUrl?: string; 
+  jobDetails?: Job; 
   isVerifiedMerchant?: boolean;
   acceptsTrade?: boolean;
-  tradeInterests?: string[]; 
+  tradeInterests?: string[];
   tradeCondition?: 'direct' | 'diff_money' | 'any';
 }
-
-export interface RealEstateProperty {
-  id: string;
-  type: 'Residencial' | 'Comercial';
-  title: string;
-  description: string;
-  image: string;
-  neighborhood: string;
-  price: number;
-  transaction: 'aluguel' | 'venda';
-  area: number;
-  postedAt: string;
-  buildingName?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  parkingSpaces?: number;
-  propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura';
-  condoFee?: number;
-  isFurnished?: boolean;
-  petsAllowed?: boolean;
-  propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial';
-  hasBathroom?: boolean;
-  highCeiling?: boolean;
-  loadingAccess?: boolean;
-  isVerifiedMerchant?: boolean;
-}
-
-export interface StoreCredit {
-  id: string;
-  user_id: string;
-  store_id: string;
-  store_name: string;
-  store_logo?: string;
-  balance_cents: number;
-  expiring_soon_cents?: number;
-  updated_at: string;
-}
-
-export interface CashbackTransaction {
-  id: string;
-  user_id: string;
-  user_name?: string;
-  store_id: string;
-  merchant_id: string;
-  amount_cents: number;
-  purchase_total_cents?: number;
-  type: 'earn' | 'use';
-  status: 'pending' | 'approved' | 'rejected' | 'expired';
-  created_at: string;
-  approved_at?: string;
-  customer_id?: string;
-  customer_name?: string;
-  total_amount_cents?: number;
-  cashback_used_cents?: number;
-  cashback_to_earn_cents?: number;
-  amount_to_pay_now_cents?: number;
-  rejected_at?: string;
-}
-
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
+export interface StoreCredit { id: string; user_id: string; store_id: string; store_name: string; store_logo?: string; balance_cents: number; expiring_soon_cents?: number; updated_at: string; }
+export interface CashbackTransaction { id: string; user_id: string; user_name?: string; store_id: string; merchant_id: string; amount_cents: number; purchase_total_cents?: number; type: 'earn' | 'use'; status: 'pending' | 'approved' | 'rejected' | 'expired'; created_at: string; approved_at?: string; customer_id?: string; customer_name?: string; total_amount_cents?: number; cashback_used_cents?: number; cashback_to_earn_cents?: number; amount_to_pay_now_cents?: number; rejected_at?: string; }
 export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
 export type ReportStatus = 'open' | 'resolved' | 'dismissed';
 export type ReportPriority = 'high' | 'medium' | 'low';
-
-export interface PostReport {
-  id: string;
-  postId: string;
-  postAuthorId: string;
-  authorUsername: string;
-  reporterUserId: string;
-  postNeighborhood: string;
-  reporterNeighborhood: string;
-  reason: ReportReason;
-  status: ReportStatus;
-  priority: ReportPriority;
-  timestamp: string;
-  postContentSnippet: string;
-  postThumbnail: string;
-}
-
-export interface TaxonomySuggestion {
-  id: string;
-  type: 'category' | 'subcategory' | 'specialty';
-  name: string;
-  parentName?: string;
-  justification?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  storeName: string;
-  createdAt: string;
-  merchantId: string;
-  rejectionReason?: string;
-}
-
-export interface AppNotification {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'chat' | 'design' | 'coupon' | 'payment' | 'ad' | 'system';
-  referenceId?: string;
-  read: boolean;
-  createdAt: string;
-}
-
-export interface StoreClaimRequest {
-  id: string;
-  store_id: string;
-  store_name: string;
-  user_id: string;
-  user_email: string;
-  method: 'whatsapp' | 'email' | 'manual';
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  responsible_name?: string;
-  cnpj?: string;
-  contact_phone?: string;
-  justification?: string;
-}
-
-export interface StorePromotion {
-  id: string;
-  storeId: string;
-  title: string;
-  description: string;
-  type: 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
-  startDate: string;
-  endDate: string;
-  value?: number;
-  discount?: number;
-  images: string[];
-  status: 'active' | 'scheduled' | 'expired' | 'paused';
-  createdAt: string;
-  publishToCommunity?: boolean;
-}
-
-export type PromotionType = 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
-export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'paused';
-
-export type HappeningType = 'promo' | 'event' | 'notice';
-
-export interface HappeningNowPost {
-  id: string;
-  title: string;
-  type: HappeningType;
-  expiresAt: string; // ISO String
-  imageUrl?: string;
-  authorId: string;
-  authorName: string;
-  status: 'active' | 'pending';
-  link?: string;
-}
-
-export type PlanType = 'free' | 'professional' | 'enterprise' | 'master' | 'founder';
-
-// Added missing interface for app suggestions
-export interface AppSuggestion {
-    id: string;
-    userId: string;
-    userName: string;
-    timestamp: string;
-    subject: string;
-    message: string;
-    category: 'bug' | 'idea' | 'improve' | 'other';
-    contactConsent: boolean;
-    status: 'new' | 'analyzing' | 'responded';
-}
-
-// Added missing interface for category banner slots
-export interface CategoryBannerSlot {
-  uniqueKey: string;
-  bairroSlug: string;
-  categoriaSlug: string;
-  slotNumber: 1 | 2;
-  status: 'available' | 'reserved' | 'sold';
-  merchantId?: string;
-  merchantName?: string;
-  expiresAt?: string;
-  image?: string;
-  title?: string;
-  subtitle?: string;
-}
+export interface PostReport { id: string; postId: string; postAuthorId: string; authorUsername: string; reporterUserId: string; postNeighborhood: string; reporterNeighborhood: string; reason: ReportReason; status: ReportStatus; priority: ReportPriority; timestamp: string; postContentSnippet: string; postThumbnail: string; }
+export interface TaxonomySuggestion { id: string; type: TaxonomyType; name: string; parentName?: string; justification?: string; status: 'pending' | 'approved' | 'rejected'; storeName: string; createdAt: string; merchantId: string; rejectionReason?: string; }
+export interface AppNotification { id: string; userId: string; title: string; message: string; type: 'chat' | 'design' | 'coupon' | 'payment' | 'ad' | 'system'; referenceId?: string; read: boolean; createdAt: string; }
+export interface StoreClaimRequest { id: string; store_id: string; store_name: string; user_id: string; user_email: string; method: 'whatsapp' | 'email' | 'manual'; status: 'pending' | 'approved' | 'rejected'; created_at: string; responsible_name?: string; cnpj?: string; contact_phone?: string; justification?: string; }
+export type TransactionStatus = 'pending' | 'approved' | 'rejected';
+export type SessionType = 'qr' | 'pin';
+export type MovementType = 'credit' | 'debit';
+export interface DbUser { id: string; name: string; email: string; wallet_balance: number; created_at: string; isActiveResident?: boolean; engagementScore?: number; }
+export interface DbMerchant { id: string; name: string; cashback_percent: number; is_active: boolean; created_at: string; }
+export interface DbMerchantSession { id: string; merchant_id: string; session_type: SessionType; pin_code?: string; expires_at: string; is_used: boolean; created_at: string; }
+export interface DbCashbackTransaction { id: string; user_id: string; merchant_id: string; session_id?: string; purchase_value: number; amount_from_balance: number; amount_to_pay: number; cashback_value: number; status: TransactionStatus; created_at: string; approved_at?: string; rejected_at?: string; }
+export interface DbWalletMovement { id: string; user_id: string; transaction_id?: string; type: MovementType; amount: number; description: string; created_at: string; }
+export interface AppSuggestion { id: string; userId: string; userName: string; timestamp: string; subject: string; message: string; whitepace_reason?: string; category: 'bug' | 'idea' | 'improve' | 'other'; contactConsent: boolean; status: 'new' | 'analyzing' | 'responded'; }
