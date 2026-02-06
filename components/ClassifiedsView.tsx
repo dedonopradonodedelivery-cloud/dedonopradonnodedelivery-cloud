@@ -50,23 +50,27 @@ const getFallbackImage = (id: string) => {
 };
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate_wizard', icon: <Building2 />, color: 'bg-brand-blue' },
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue' },
-  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue' },
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue', bentoClass: 'col-span-2 aspect-[2/1]' },
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate_wizard', icon: <Building2 />, color: 'bg-brand-blue', bentoClass: 'col-span-1 row-span-2' },
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-square' },
+  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-2 aspect-[2.1/1]' },
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/1.1]' },
 ];
 
-const ClassifiedCategoryButton: React.FC<{ category: any; isLarge?: boolean; onClick: () => void }> = ({ category, isLarge, onClick }) => (
+const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center group active:scale-95 transition-all w-full ${isLarge ? 'col-span-2' : 'col-span-1'}`}
+    className={`flex flex-col items-center group active:scale-95 transition-all w-full h-full ${category.bentoClass}`}
   >
-    <div className={`w-full ${isLarge ? 'aspect-[2.1/1]' : 'aspect-square'} rounded-[25px] border border-white/20 shadow-sm flex flex-col items-center justify-between p-2 ${category.color}`}>
+    <div className={`w-full h-full rounded-[25px] border border-white/20 shadow-sm flex flex-col items-center justify-between p-2 ${category.color}`}>
       <div className="flex-1 flex items-center justify-center">
-        {React.cloneElement(category.icon as any, { className: `${isLarge ? 'w-10 h-10' : 'w-6 h-6'} text-white drop-shadow-md`, strokeWidth: 3 })}
+        {React.cloneElement(category.icon as any, { 
+            className: "text-white drop-shadow-md", 
+            size: category.bentoClass.includes('col-span-2') ? 32 : 24,
+            strokeWidth: 3 
+        })}
       </div>
-      <span className={`${isLarge ? 'text-[11px]' : 'text-[8px]'} w-full font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate`}>
+      <span className="text-[8px] w-full font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate">
         {category.name}
       </span>
     </div>
@@ -278,13 +282,12 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
       <main className="p-5 space-y-4">
         
-        {/* BENTO GRID DE CATEGORIAS */}
-        <div className="grid grid-cols-2 gap-3 mb-8 mt-2">
+        {/* BENTO GRID DE CATEGORIAS EQUILIBRADO */}
+        <div className="grid grid-cols-4 gap-3 mb-8 mt-2">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton 
                     key={cat.id} 
                     category={cat} 
-                    isLarge={cat.id === 'servicos'}
                     onClick={() => onNavigate(cat.slug)} 
                 />
             ))}
