@@ -20,7 +20,7 @@ import {
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor, BannerPreview } from '@/components/StoreBannerEditor';
 import { supabase } from '@/lib/supabaseClient';
-import { MandatoryVideoLock } from './MandatoryVideoLock';
+import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
 
 interface StoreAdsModuleProps {
   onBack: () => void;

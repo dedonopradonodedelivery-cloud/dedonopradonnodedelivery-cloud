@@ -37,7 +37,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { InstitutionalSponsorBanner } from '@/components/InstitutionalSponsorBanner';
-import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
+import { MandatoryVideoLock } from './components/MandatoryVideoLock';
 
 interface StoreAreaViewProps {
   onBack: () => void;

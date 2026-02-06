@@ -27,6 +27,8 @@ import {
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { InstitutionalSponsorBanner } from '@/components/InstitutionalSponsorBanner';
+import { MandatoryVideoLock } from './MandatoryVideoLock';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -63,7 +65,7 @@ const ServiceBlock: React.FC<{
         ) : null}
       </div>
       <div className="text-left">
-        <p className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
+        <p className={`text-sm font-bold ${isDestructive ? 'text-red-600' : 'text-gray-900 dark:text-gray-100'}`}>
           {label}
         </p>
         {description && (
@@ -101,141 +103,147 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
-      
-      <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
-            <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
+    <MandatoryVideoLock 
+      videoUrl="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
+      storageKey="merchant_panel"
+    >
+      <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
+        
+        <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
+              <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
+                {storeName}
+              </h1>
+              <p className="text-xs text-[#1E5BFF] font-bold uppercase tracking-widest mt-1">Painel do Lojista</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
-              {storeName}
-            </h1>
-            <p className="text-xs text-[#1E5BFF] font-bold uppercase tracking-widest mt-1">Painel do Lojista</p>
-          </div>
+          
+          <button 
+            onClick={() => onNavigate('store_profile')}
+            className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
+          >
+            <User size={14} />
+            Minha Loja (Perfil Público)
+          </button>
         </div>
-        
-        <button 
-          onClick={() => onNavigate('store_profile')}
-          className="w-full mt-6 py-3.5 rounded-2xl border-2 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-[0.98]"
-        >
-          <User size={14} />
-          Minha Loja (Perfil Público)
-        </button>
+
+        <div className="px-6 space-y-10">
+          
+          <section>
+            <SectionHeader title="Ações de Crescimento" icon={Sparkles} />
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+              <ServiceBlock 
+                icon={Crown} 
+                label="Patrocinador Master" 
+                description="Apareça em destaque em 90% das telas do bairro"
+                onClick={() => onNavigate('sponsor_info')}
+                colorClass="bg-amber-50 text-amber-600"
+              />
+              <ServiceBlock 
+                icon={TrendingUp} 
+                label="Patrocinados" 
+                description="Suba para o topo da lista por R$ 0,90/dia"
+                onClick={() => onNavigate('store_sponsored')}
+                colorClass="bg-emerald-50 text-emerald-600"
+              />
+              <ServiceBlock 
+                icon={LayoutGrid} 
+                label="Banners em Destaque" 
+                description="Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador."
+                onClick={() => onNavigate('store_ads_module')}
+                colorClass="bg-purple-50 text-purple-600"
+              />
+            </div>
+          </section>
+
+          <section>
+            <SectionHeader title="Serviços" />
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+              <ServiceBlock 
+                icon={MessageSquare} 
+                label="Chat com Designer" 
+                description="Criação e acompanhamento do seu banner"
+                onClick={() => onNavigate('store_ads_module', 'chat')} 
+              />
+              <ServiceBlock 
+                icon={BarChart3} 
+                label="Performance" 
+                description="Estatísticas de visualização e cliques"
+                onClick={() => onNavigate('merchant_performance')}
+              />
+              <ServiceBlock 
+                icon={CreditCard} 
+                label="Pagamentos" 
+                description="Extratos, faturas e assinaturas"
+                onClick={() => onNavigate('store_finance')} 
+              />
+            </div>
+          </section>
+
+          <section>
+            <SectionHeader title="Preferências" />
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+              <ServiceBlock 
+                icon={theme === 'dark' ? Moon : Sun} 
+                label="Modo Noite" 
+                description={theme === 'dark' ? "Ativado" : "Desativado"}
+                onClick={toggleTheme}
+                rightElement={
+                  <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#1E5BFF]' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </div>
+                }
+              />
+            </div>
+          </section>
+
+          <section>
+            <SectionHeader title="Suporte" />
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+              <ServiceBlock 
+                icon={LifeBuoy} 
+                label="Suporte ao Lojista" 
+                description="Ajuda com o app e conta"
+                onClick={() => onNavigate('store_support')} 
+              />
+            </div>
+          </section>
+
+          <section>
+            <SectionHeader title="Geral" />
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+              <ServiceBlock 
+                icon={Heart} 
+                label="Favoritos" 
+                onClick={() => onNavigate('favorites')} 
+              />
+              <ServiceBlock 
+                icon={Compass} 
+                label="Quem Somos" 
+                onClick={() => onNavigate('about')} 
+              />
+              <ServiceBlock 
+                icon={LogOut} 
+                label="Sair da conta" 
+                isDestructive
+                onClick={handleLogout} 
+              />
+            </div>
+          </section>
+
+          <InstitutionalSponsorBanner type="merchant" className="mt-8" />
+        </div>
+
+        <div className="mt-12 text-center opacity-30 px-10">
+          <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
+            Localizei JPA Parceiros <br/> v1.5.0
+          </p>
+        </div>
       </div>
-
-      <div className="px-6 space-y-10">
-        
-        <section>
-          <SectionHeader title="Ações de Crescimento" icon={Sparkles} />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={Crown} 
-              label="Patrocinador Master" 
-              description="Apareça em destaque em 90% das telas do bairro"
-              onClick={() => onNavigate('sponsor_info')}
-              colorClass="bg-amber-50 text-amber-600"
-            />
-            <ServiceBlock 
-              icon={TrendingUp} 
-              label="Patrocinados" 
-              description="Suba para o topo da lista por R$ 0,90/dia"
-              onClick={() => onNavigate('store_sponsored')}
-              colorClass="bg-emerald-50 text-emerald-600"
-            />
-            <ServiceBlock 
-              icon={LayoutGrid} 
-              label="Banners em Destaque" 
-              description="Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador."
-              onClick={() => onNavigate('store_ads_module')}
-              colorClass="bg-purple-50 text-purple-600"
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Serviços" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={MessageSquare} 
-              label="Chat com Designer" 
-              description="Criação e acompanhamento do seu banner"
-              onClick={() => onNavigate('store_ads_module', 'chat')} 
-            />
-            <ServiceBlock 
-              icon={BarChart3} 
-              label="Performance" 
-              description="Estatísticas de visualização e cliques"
-              onClick={() => onNavigate('merchant_performance')}
-            />
-            <ServiceBlock 
-              icon={CreditCard} 
-              label="Pagamentos" 
-              description="Extratos, faturas e assinaturas"
-              onClick={() => onNavigate('store_finance')} 
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Preferências" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={theme === 'dark' ? Moon : Sun} 
-              label="Modo Noite" 
-              description={theme === 'dark' ? "Ativado" : "Desativado"}
-              onClick={toggleTheme}
-              rightElement={
-                <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#1E5BFF]' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                  <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
-                </div>
-              }
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={LifeBuoy} 
-              label="Suporte ao Lojista" 
-              description="Ajuda com o app e conta"
-              onClick={() => onNavigate('store_support')} 
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Geral" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={Heart} 
-              label="Favoritos" 
-              onClick={() => onNavigate('favorites')} 
-            />
-            <ServiceBlock 
-              icon={Compass} 
-              label="Quem Somos" 
-              onClick={() => onNavigate('about')} 
-            />
-            <ServiceBlock 
-              icon={LogOut} 
-              label="Sair da conta" 
-              isDestructive
-              onClick={handleLogout} 
-            />
-          </div>
-        </section>
-
-      </div>
-
-      <div className="mt-12 text-center opacity-30 px-10">
-        <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
-          Localizei JPA Parceiros <br/> v1.5.0
-        </p>
-      </div>
-    </div>
+    </MandatoryVideoLock>
   );
 };
