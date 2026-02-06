@@ -142,6 +142,7 @@ const App: React.FC = () => {
   const handleNavigate = (view: string, data?: any) => {
     // Verificar se a funcionalidade de destino está ativa antes de permitir a navegação
     const routeMapping: Partial<Record<string, FeatureKey>> = {
+        'home': 'home_tab',
         'neighborhood_posts': 'community_feed',
         'explore': 'explore_guide',
         'coupon_landing': 'coupons',

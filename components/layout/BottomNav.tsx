@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -37,14 +36,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   const navItems = useMemo(() => {
     const items: NavItem[] = [
-      { id: 'home', icon: Home, label: 'Início', isMainAction: false },
+      { id: 'home', icon: Home, label: 'Início', isMainAction: false, featureKey: 'home_tab' },
       { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true, featureKey: 'community_feed' },
       { id: 'cupom_trigger', icon: Ticket, label: 'Cupom', isMainAction: true, badge: userRole !== 'lojista' ? hasActiveCoupons : false, featureKey: 'coupons' },
       { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true, featureKey: 'classifieds' },
       { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },
     ];
 
-    // Filtrar abas baseadas nas feature flags (exceto para Admin)
+    // Filtrar abas baseadas nas feature flags (exceto para Admin e Menu)
     return items.filter(item => {
         if (!item.featureKey) return true;
         return isFeatureActive(item.featureKey as any);
@@ -115,7 +114,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
-        <div className={`grid w-full h-full items-center ${navItems.length === 5 ? 'grid-cols-5' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+        <div className={`grid w-full h-full items-center ${navItems.length === 5 ? 'grid-cols-5' : navItems.length === 4 ? 'grid-cols-4' : navItems.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
           {navItems.map((item) => {
             let isActive = false;
             

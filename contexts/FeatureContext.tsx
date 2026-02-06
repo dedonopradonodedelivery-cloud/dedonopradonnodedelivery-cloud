@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type FeatureKey = 
+  | 'home_tab'
   | 'community_feed' 
   | 'explore_guide' 
   | 'coupons' 
@@ -18,21 +18,18 @@ interface FeatureState {
   id: FeatureKey;
   label: string;
   active: boolean;
-  category: 'main' | 'growth' | 'other';
-}
-
-interface FeatureContextType {
-  features: Record<FeatureKey, boolean>;
-  toggleFeature: (key: FeatureKey) => void;
-  isFeatureActive: (key: FeatureKey) => boolean;
-  featureList: FeatureState[];
+  category: 'navigation' | 'main' | 'growth' | 'other';
 }
 
 const DEFAULT_FEATURES: FeatureState[] = [
-  { id: 'community_feed', label: 'JPA Conversa', active: true, category: 'main' },
-  { id: 'explore_guide', label: 'Guia do Bairro', active: true, category: 'main' },
-  { id: 'coupons', label: 'Cupons', active: true, category: 'main' },
-  { id: 'classifieds', label: 'Classificados', active: true, category: 'main' },
+  // Grupo: Abas de Navegação
+  { id: 'home_tab', label: 'Aba: Home', active: true, category: 'navigation' },
+  { id: 'explore_guide', label: 'Aba: Guia do Bairro', active: true, category: 'navigation' },
+  { id: 'classifieds', label: 'Aba: Classificados', active: true, category: 'navigation' },
+  { id: 'coupons', label: 'Aba: Cupons', active: true, category: 'navigation' },
+  { id: 'community_feed', label: 'Aba: JPA Conversa', active: true, category: 'navigation' },
+  
+  // Grupo: Blocos e Funcionalidades
   { id: 'sponsored_ads', label: 'Patrocinados (Ads)', active: true, category: 'growth' },
   { id: 'banner_highlights', label: 'Banners em Destaque', active: true, category: 'growth' },
   { id: 'master_sponsor', label: 'Patrocinador Master', active: true, category: 'growth' },
@@ -41,6 +38,13 @@ const DEFAULT_FEATURES: FeatureState[] = [
   { id: 'store_feed', label: 'Feed da Loja', active: true, category: 'other' },
   { id: 'explainer_videos', label: 'Vídeos Explicativos', active: true, category: 'other' },
 ];
+
+interface FeatureContextType {
+  features: Record<FeatureKey, boolean>;
+  toggleFeature: (key: FeatureKey) => void;
+  isFeatureActive: (key: FeatureKey) => boolean;
+  featureList: FeatureState[];
+}
 
 const FeatureContext = createContext<FeatureContextType | undefined>(undefined);
 

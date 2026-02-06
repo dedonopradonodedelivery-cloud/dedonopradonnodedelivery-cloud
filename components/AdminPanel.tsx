@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ShieldCheck, Users, Store, History, Search, 
@@ -25,7 +24,7 @@ const FeatureManagement: React.FC = () => {
     const { featureList, toggleFeature } = useFeatures();
 
     const sections = [
-        { id: 'main', label: 'Navegação / Blocos Principais' },
+        { id: 'navigation', label: 'Abas de Navegação' },
         { id: 'growth', label: 'Crescimento e Anúncios' },
         { id: 'other', label: 'Outros Módulos' },
     ];
@@ -192,7 +191,6 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
             <AdminMonetizationView onBack={() => setActiveTab('hub')} />
         )}
         
-        {/* Outras tabs omitidas por brevidade, mantendo foco na solicitação */}
       </main>
     </div>
   );
