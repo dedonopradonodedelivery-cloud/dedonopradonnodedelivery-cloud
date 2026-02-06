@@ -235,9 +235,8 @@ export interface Classified {
   imageUrl?: string;
   jobDetails?: Job;
   isVerifiedMerchant?: boolean;
-  // Novos campos para Troca-Troca
   acceptsTrade?: boolean;
-  tradeInterests?: string[]; // Categorias aceitas
+  tradeInterests?: string[];
   tradeCondition?: 'direct' | 'diff_money' | 'any';
 }
 
@@ -388,8 +387,8 @@ export interface DbUser {
   email: string;
   wallet_balance: number;
   created_at: string;
-  isActiveResident?: boolean; // Selo de Morador Ativo
-  engagementScore?: number;   // Pontuação de Engajamento
+  isActiveResident?: boolean; 
+  engagementScore?: number;
 }
 
 export interface DbMerchant {
@@ -467,7 +466,7 @@ export interface HappeningNowPost {
   id: string;
   title: string;
   type: HappeningType;
-  expiresAt: string; // ISO String
+  expiresAt: string;
   imageUrl?: string;
   authorId: string;
   authorName: string;
@@ -484,4 +483,18 @@ export interface NeighborhoodTalent {
   whatsapp: string;
   availability?: string;
   category?: string;
+}
+
+export type LostFoundType = 'lost' | 'found';
+
+export interface LostFoundItem {
+  id: string;
+  type: LostFoundType;
+  title: string;
+  description: string;
+  location: string;
+  timestamp: string;
+  imageUrl: string;
+  contactPhone: string;
+  status: 'active' | 'resolved';
 }

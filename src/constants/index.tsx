@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -16,7 +15,7 @@ import {
   Key, Fan, Truck, Shovel,
   Meh, ThumbsDown, Gift, RefreshCw
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty, HappeningNowPost, NeighborhoodTalent } from '../types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty, NeighborhoodTalent, HappeningNowPost, LostFoundItem } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
 
@@ -380,6 +379,42 @@ export const MOCK_TALENTS: NeighborhoodTalent[] = [
     imageUrl: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=400',
     whatsapp: '5521955555555',
     availability: 'Almoço pronto'
+  }
+];
+
+export const MOCK_LOST_FOUND: LostFoundItem[] = [
+  {
+    id: 'lf1',
+    type: 'lost',
+    title: 'Cachorro Golden Retriever',
+    location: 'Perto da Praça da Freguesia',
+    imageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=400',
+    contactPhone: '5521999999999',
+    description: 'Atende por Bob. Sumiu hoje cedo. É dócil.',
+    status: 'active',
+    timestamp: 'Há 2h'
+  },
+  {
+    id: 'lf2',
+    type: 'found',
+    title: 'Chave de carro Honda',
+    location: 'Rua Tirol',
+    imageUrl: 'https://images.unsplash.com/photo-1583574932306-6967520448a3?q=80&w=400',
+    contactPhone: '5521988888888',
+    description: 'Encontrada na calçada em frente à farmácia.',
+    status: 'active',
+    timestamp: 'Há 4h'
+  },
+  {
+    id: 'lf3',
+    type: 'lost',
+    title: 'Gato Siamês',
+    location: 'Condomínio Bora Bora',
+    imageUrl: 'https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=400',
+    contactPhone: '5521977777777',
+    description: 'Fugiu pela janela. Usa coleira azul.',
+    status: 'active',
+    timestamp: 'Ontem'
   }
 ];
 
@@ -750,252 +785,3 @@ export const SPECIALTIES: Record<string, string[]> = {
   'Informática': ['Formatação', 'Remoção de vírus', 'Upgrade de memória/SSD', 'Limpeza interna', 'Configuração de rede'],
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
-
-export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
-  {
-    id: 'comm-residents',
-    name: 'Moradores de JPA',
-    description: 'Comunidade oficial para troca de informações entre vizinhos de Jacarepaguá.',
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
-    icon: <Users />,
-    color: 'bg-blue-500',
-    membersCount: '12.4k',
-    type: 'official'
-  },
-  {
-    id: 'comm-tips',
-    name: 'Recomendações e dicas no bairro',
-    description: 'Onde encontrar the melhor serviço? Peça e dê dicas para seus vizinhos.',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
-    icon: <HelpCircle />,
-    color: 'bg-orange-500',
-    membersCount: '8.2k',
-    type: 'official'
-  },
-  {
-    id: 'comm-jobs',
-    name: 'Vagas de empregos',
-    description: 'Encontre ou anuncie oportunidades de trabalho em Jacarepaguá.',
-    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800&auto=format&fit=crop',
-    icon: <Briefcase />,
-    color: 'bg-emerald-500',
-    membersCount: '15.1k',
-    type: 'official'
-  },
-  {
-    id: 'comm-real-estate',
-    name: 'Aluguéis e vendas de imóveis',
-    description: 'Sua casa nova em JPA está aqui. Anúncios diretos e imobiliárias locais.',
-    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop',
-    icon: <HomeIcon />,
-    color: 'bg-purple-500',
-    membersCount: '5.4k',
-    type: 'official'
-  },
-  {
-    id: 'comm-desapega',
-    name: 'Desapega – venda e troca',
-    description: 'Venda o que não usa mais ou encontre achados incríveis perto de você.',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop',
-    icon: <Recycle />,
-    color: 'bg-[#1E5BFF]',
-    membersCount: '22.3k',
-    type: 'official'
-  }
-];
-
-export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [
-  {
-    id: 'user-comm-1',
-    name: 'Clube do Livro Freguesia',
-    description: 'Encontros mensais para discutir literatura na Praça da Freguesia.',
-    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=800&auto=format&fit=crop',
-    icon: <BookOpen />,
-    color: 'bg-amber-600',
-    membersCount: '156',
-    type: 'user'
-  },
-  {
-    id: 'user-comm-2',
-    name: 'Vizinhos do Anil (Reserva)',
-    description: 'Grupo específico para moradores do condomínio Reserva do Anil.',
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
-    icon: <Building2 />,
-    color: 'bg-blue-400',
-    membersCount: '482',
-    type: 'user'
-  },
-  {
-    id: 'user-comm-3',
-    name: 'Trilhas em Jacarepaguá',
-    description: 'Para quem ama explorar o Maciço da Tijuca e arredores aos finais de semana.',
-    image: 'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800&auto=format&fit=crop',
-    icon: <MapIcon />,
-    color: 'bg-green-600',
-    membersCount: '890',
-    type: 'user'
-  },
-  {
-    id: 'user-comm-4',
-    name: 'Donos de Golden Retriever JPA',
-    description: 'Troca de experiências e encontros de pets no Parque de Jacarepaguá.',
-    image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800&auto=format&fit=crop',
-    icon: <Dog />,
-    color: 'bg-yellow-500',
-    membersCount: '312',
-    type: 'user'
-  }
-];
-
-export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
-  ...OFFICIAL_COMMUNITIES,
-  ...MOCK_USER_COMMUNITIES
-];
-
-export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
-  {
-    id: 'post-1',
-    userId: 'u1',
-    userName: 'Taty Oliveira',
-    userAvatar: 'https://i.pravatar.cc/100?u=taty',
-    authorRole: 'resident',
-    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '2h',
-    likes: 8,
-    comments: 16
-  },
-  {
-    id: 'post-2',
-    userId: 'u2',
-    userName: 'Tiago Santos',
-    userAvatar: 'https://i.pravatar.cc/100?u=tiago',
-    authorRole: 'resident',
-    content: 'Olha esse hambúrguer top na casa de carnes aqui do bairro! 🍔🔥 Quem já experimentou?',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Anil',
-    timestamp: '3h',
-    likes: 45,
-    comments: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
-  },
-  {
-    id: 'post-3',
-    userId: 'u3',
-    userName: 'Bruno Rocha',
-    userAvatar: 'https://i.pravatar.cc/100?u=bruno',
-    authorRole: 'resident',
-    content: 'Alguém sabe se a feira de domingo vai acontecer amanhã mesmo com a chuva?',
-    type: 'event',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: '4h',
-    likes: 12,
-    comments: 4
-  },
-  {
-    id: 'post-4',
-    userId: 'u4',
-    userName: 'Mariana Luz',
-    userAvatar: 'https://i.pravatar.cc/100?u=mari',
-    authorRole: 'resident',
-    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Interessados, inbox!',
-    type: 'recommendation',
-    communityId: 'comm-jobs',
-    neighborhood: 'Taquara',
-    timestamp: '5h',
-    likes: 24,
-    comments: 12
-  },
-  {
-    id: 'post-5',
-    userId: 'u5',
-    userName: 'Ricardo Souza',
-    userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
-    authorRole: 'resident',
-    content: 'Cuidado pessoal: semáforo da Geremário Dantas com problema, tá um caos o trânsito agora.',
-    type: 'alert',
-    communityId: 'comm-residents',
-    neighborhood: 'Freguesia',
-    timestamp: '6h',
-    likes: 38,
-    comments: 14
-  },
-  {
-    id: 'post-6',
-    userId: 'u6',
-    userName: 'Luciana Melo',
-    userAvatar: 'https://i.pravatar.cc/100?u=luciana',
-    authorRole: 'resident',
-    content: 'Estou desapegando dessa fritadeira elétrica, funcionando perfeitamente! R$ 150,00 para retirar no Anil.',
-    type: 'recommendation',
-    communityId: 'comm-desapega',
-    neighborhood: 'Anil',
-    timestamp: '8h',
-    likes: 24,
-    comments: 31,
-    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
-  },
-  {
-    id: 'post-7',
-    userId: 'u7',
-    userName: 'Felipe Costa',
-    userAvatar: 'https://i.pravatar.cc/100?u=felipe',
-    authorRole: 'merchant',
-    content: 'Pessoal, abri uma vaga de emprego na minha loja de tintas no Tanque. Interessados, inbox!',
-    type: 'event',
-    communityId: 'comm-jobs',
-    neighborhood: 'Tanque',
-    timestamp: '12h',
-    likes: 15,
-    comments: 22,
-    storeId: 'grupo-esquematiza'
-  },
-  {
-    id: 'post-8',
-    userId: 'u8',
-    userName: 'Amanda Silva',
-    userAvatar: 'https://i.pravatar.cc/100?u=amanda',
-    authorRole: 'resident',
-    content: 'Apartamento disponível para aluguel na Freguesia, 2 quartos, direto com proprietário.',
-    type: 'recommendation',
-    communityId: 'comm-real-estate',
-    neighborhood: 'Freguesia',
-    timestamp: '14h',
-    likes: 18,
-    comments: 45
-  },
-  {
-    id: 'post-9',
-    userId: 'u9',
-    userName: 'Rafael Lima',
-    userAvatar: 'https://i.pravatar.cc/100?u=rafael',
-    authorRole: 'resident',
-    content: 'Alguém para dividir frete de mudança saindo da Freguesia para o Recreio este mês?',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '1d',
-    likes: 5,
-    comments: 7
-  },
-  {
-    id: 'post-10',
-    userId: 'm-padaria',
-    userName: 'Padaria Imperial',
-    userAvatar: 'https://i.pravatar.cc/100?u=padaria',
-    authorRole: 'merchant',
-    content: 'Pão quentinho saindo agora! Venham aproveitar nossa fornada especial de brioche.',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '10 min',
-    likes: 32,
-    comments: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop',
-    storeId: 'f-1'
-  }
-];
