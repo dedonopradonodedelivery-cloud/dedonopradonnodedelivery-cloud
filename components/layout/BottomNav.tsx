@@ -1,7 +1,9 @@
+
 import React, { useMemo, useState } from 'react';
 import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../AuthModal';
+import { useFeatures } from '../../contexts/FeatureContext';
 
 interface BottomNavProps {
   activeTab: string;
@@ -15,31 +17,39 @@ interface NavItem {
   label: string;
   isMainAction?: boolean; 
   badge?: boolean;
+  featureKey?: string;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
+  const { isFeatureActive } = useFeatures();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   const hasActiveCoupons = useMemo(() => {
-    if (!user || userRole !== 'cliente') return false;
+    if (!user || userRole !== 'cliente' || !isFeatureActive('coupons')) return false;
     try {
       const saved = JSON.parse(localStorage.getItem('user_saved_coupons') || '[]');
       return saved.some((c: any) => c.status === 'available');
     } catch {
       return false;
     }
-  }, [user, userRole, activeTab]);
+  }, [user, userRole, activeTab, isFeatureActive]);
 
   const navItems = useMemo(() => {
-    return [
+    const items: NavItem[] = [
       { id: 'home', icon: Home, label: 'Início', isMainAction: false },
-      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true },
-      { id: 'cupom_trigger', icon: Ticket, label: 'Cupom', isMainAction: true, badge: userRole !== 'lojista' ? hasActiveCoupons : false },
-      { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true },
+      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true, featureKey: 'community_feed' },
+      { id: 'cupom_trigger', icon: Ticket, label: 'Cupom', isMainAction: true, badge: userRole !== 'lojista' ? hasActiveCoupons : false, featureKey: 'coupons' },
+      { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true, featureKey: 'classifieds' },
       { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },
     ];
-  }, [userRole, hasActiveCoupons]);
+
+    // Filtrar abas baseadas nas feature flags (exceto para Admin)
+    return items.filter(item => {
+        if (!item.featureKey) return true;
+        return isFeatureActive(item.featureKey as any);
+    });
+  }, [userRole, hasActiveCoupons, isFeatureActive]);
 
   const handleTabClick = (item: NavItem) => {
     if (item.id === 'cupom_trigger') {
@@ -105,7 +115,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
-        <div className="grid w-full h-full grid-cols-5 items-center">
+        <div className={`grid w-full h-full items-center ${navItems.length === 5 ? 'grid-cols-5' : navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
           {navItems.map((item) => {
             let isActive = false;
             

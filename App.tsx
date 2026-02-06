@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { MenuView } from '@/components/MenuView';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 import { ServicesView } from '@/components/ServicesView';
-import { StoreAreaView } from '@/StoreAreaView';
+import { StoreAreaView } from '@/components/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { ClassifiedSearchResultsView } from '@/components/ClassifiedSearchResultsView';
 import { RealEstateView } from '@/components/RealEstateView';
@@ -52,7 +52,7 @@ import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
-import { MapPin, X, Palette } from 'lucide-react';
+import { MapPin, X, Palette, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -62,15 +62,30 @@ import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhood
 import { MerchantPanel } from '@/components/MerchantPanel';
 import { UserProfileFullView } from '@/components/UserProfileFullView';
 import { EditProfileView } from '@/components/EditProfileView';
+import { useFeatures, FeatureKey } from '@/contexts/FeatureContext';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
+const FeatureUnavailableView: React.FC<{ onBack: () => void }> = ({ onBack }) => (
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-6 text-[#1E5BFF]">
+            <AlertCircle size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Em breve</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs leading-relaxed mb-10">
+            Esta funcionalidade não está disponível no momento. Estamos trabalhando para trazê-la o mais rápido possível!
+        </p>
+        <button onClick={onBack} className="w-full max-w-xs bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Voltar ao Início</button>
+    </div>
+);
+
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
+  const { isFeatureActive } = useFeatures();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
@@ -126,7 +141,29 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
+    // Verificar se a funcionalidade de destino está ativa antes de permitir a navegação
+    const routeMapping: Partial<Record<string, FeatureKey>> = {
+        'neighborhood_posts': 'community_feed',
+        'explore': 'explore_guide',
+        'coupon_landing': 'coupons',
+        'user_coupons': 'coupons',
+        'merchant_coupons': 'coupons',
+        'classifieds': 'classifieds',
+        'store_sponsored': 'sponsored_ads',
+        'store_ads_module': 'banner_highlights',
+        'sponsor_info': 'master_sponsor',
+        'merchant_reviews': 'customer_reviews',
+        'merchant_leads': 'service_chat',
+        'service_messages_list': 'service_chat'
+    };
+
+    const requiredFeature = routeMapping[view];
+    if (requiredFeature && !isFeatureActive(requiredFeature) && !isAdmin) {
+        setActiveTab('feature_unavailable');
+        return;
+    }
+
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'feature_unavailable') {
       setPreviousTab(activeTab);
     }
     
@@ -239,7 +276,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'feature_unavailable'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -297,6 +334,7 @@ const App: React.FC = () => {
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
+                    {activeTab === 'feature_unavailable' && <FeatureUnavailableView onBack={() => handleNavigate('home')} />}
                     
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}

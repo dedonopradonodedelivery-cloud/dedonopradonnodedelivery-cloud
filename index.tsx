@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App'; 
 import { AuthProvider } from './contexts/AuthContext'; 
 import { ThemeProvider } from './contexts/ThemeContext';
+import { FeatureProvider } from './contexts/FeatureContext';
 import './index.css';
 
 const rootElement = document.getElementById('root');
@@ -13,7 +14,9 @@ if (rootElement) {
     <React.StrictMode>
       <AuthProvider>
         <ThemeProvider>
-          <App />
+          <FeatureProvider>
+            <App />
+          </FeatureProvider>
         </ThemeProvider>
       </AuthProvider>
     </React.StrictMode>
