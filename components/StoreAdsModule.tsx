@@ -309,22 +309,28 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
             </section>
         </main>
 
-        <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 z-[101] max-w-md mx-auto shadow-2xl flex flex-col gap-4">
+        {/* --- BLOCO DE RESUMO PERSISTENTE (FIXO ACIMA DA BARRA) --- */}
+        <div className="fixed bottom-[165px] left-0 right-0 z-[102] max-w-md mx-auto px-4 pointer-events-none">
+          <div className={`p-4 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto transition-all duration-500 ${!selectedMode ? 'translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
             <div className="flex items-center justify-between">
                 <div className="flex-1 pr-4">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Resumo do Pedido</h4>
+                    <h4 className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Resumo do Pedido</h4>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span className="text-xs font-black text-white uppercase">{selectedMode?.label || 'Selecione Local'}</span>
-                        {prices.totalMonths > 0 && <span className="text-xs font-black text-blue-500 uppercase">{prices.totalMonths} Meses</span>}
-                        {prices.hoodsCount > 0 && <span className="text-xs font-black text-slate-400 uppercase">{prices.hoodsCount} Bairros</span>}
+                        <span className="text-[11px] font-black text-white uppercase">{selectedMode?.label || 'Selecione o Plano'}</span>
+                        {prices.totalMonths > 0 && <span className="text-[11px] font-black text-slate-400 uppercase">{prices.totalMonths} Mês/Meses</span>}
+                        {prices.hoodsCount > 0 && <span className="text-[11px] font-black text-slate-400 uppercase">{prices.hoodsCount} Bairro(s)</span>}
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-[9px] text-slate-500 font-bold uppercase mb-0.5">Total atualizado</p>
-                    <p className="text-xl font-black text-emerald-400 tracking-tighter">R$ {prices.current.toFixed(2)}</p>
+                    <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Total</p>
+                    <p className="text-lg font-black text-emerald-400 tracking-tighter leading-none">R$ {prices.current.toFixed(2)}</p>
                 </div>
             </div>
+          </div>
+        </div>
 
+        {/* --- BARRA FIXA INFERIOR COM CTA --- */}
+        <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 z-[101] max-w-md mx-auto shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
             <button 
               onClick={handleFinalize}
               disabled={!selectedMode || selectedMonths.length === 0 || selectedNeighborhoods.length === 0 || !isArtSaved || isSubmitting}
