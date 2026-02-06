@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -115,7 +114,7 @@ const App: React.FC = () => {
 
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'Onde o bairro conversa 💬';
+  const fullSlogan = 'Seu bairro na palma da mão. 📍';
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
