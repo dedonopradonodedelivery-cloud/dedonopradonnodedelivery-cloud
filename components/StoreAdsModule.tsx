@@ -85,6 +85,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
   const [occupancy, setOccupancy] = useState<OccupancyRecord[]>([]);
   
   const finishStepRef = useRef<HTMLDivElement>(null);
+  const step2Ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const savedOccupancy = localStorage.getItem('localizei_hood_occupancy');
@@ -181,6 +182,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
     }, 2000);
   };
 
+  const handleModeSelection = (mode: typeof DISPLAY_MODES[0]) => {
+    setSelectedMode(mode);
+    setTimeout(() => {
+      if (step2Ref.current) {
+        const yOffset = -100; // Offset para não cobrir o título (considerando o header fixo)
+        const y = step2Ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
   if (view === 'editor') {
     return (
       <StoreBannerEditor 
@@ -231,7 +243,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   {DISPLAY_MODES.map((mode) => (
                       <button 
                         key={mode.id} 
-                        onClick={() => setSelectedMode(mode)} 
+                        onClick={() => handleModeSelection(mode)} 
                         className={`p-6 rounded-[2rem] border-2 transition-all text-left flex gap-5 items-center ${selectedMode?.id === mode.id ? 'bg-blue-600/10 border-blue-500 shadow-2xl' : 'bg-white/5 border-white/10'}`}
                       >
                           <div className={`p-4 rounded-2xl shrink-0 ${selectedMode?.id === mode.id ? 'bg-blue-50 text-blue-600' : 'bg-white/5 text-slate-500'}`}><mode.icon size={24} /></div>
@@ -248,7 +260,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               </div>
             </section>
 
-            <section className={`px-6 space-y-8 transition-all duration-500 ${!selectedMode && 'opacity-20 pointer-events-none'}`}>
+            <section ref={step2Ref} className={`px-6 space-y-8 transition-all duration-500 ${!selectedMode && 'opacity-20 pointer-events-none'}`}>
               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-blue-500">2. Escolha o período</h3>
               <div className="grid grid-cols-2 gap-4">
                   {MONTH_OPTIONS.map(month => {
