@@ -21,6 +21,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const { user } = useAuth();
   const { isFeatureActive } = useFeatures();
   
+  // Verificação de cupons ativos para o badge
   const hasActiveCoupons = useMemo(() => {
     if (!user || userRole !== 'cliente') return false;
     try {
@@ -31,21 +32,25 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     }
   }, [user, userRole]);
 
+  // Lista completa de abas possíveis com seus respectivos mapeamentos de FeatureKey do ADM
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
     { id: 'explore', icon: Compass, label: 'Guia', featureKey: 'explore_guide' },
     { id: 'cupom_trigger', icon: Ticket, label: 'Cupons', featureKey: 'coupons', badge: userRole !== 'lojista' ? hasActiveCoupons : false },
     { id: 'classifieds', icon: Newspaper, label: 'Classificados', featureKey: 'classifieds' },
     { id: 'neighborhood_posts', icon: MessageSquare, label: 'Conversa', featureKey: 'community_feed' },
-    { id: 'profile', icon: UserIcon, label: 'Menu' },
+    { id: 'profile', icon: UserIcon, label: 'Menu' }, // Menu sempre visível
   ];
 
+  // FILTRAGEM REAL: Só renderiza se a funcionalidade estiver ON no ADM
   const activeNavItems = useMemo(() => {
     return allNavItems.filter(item => {
+      // Se não tem featureKey (ex: aba Menu), é sempre visível
       if (!item.featureKey) return true;
+      // Consulta o estado do toggle no ADM via FeatureContext
       return isFeatureActive(item.featureKey);
     });
-  }, [isFeatureActive]);
+  }, [isFeatureActive, userRole, hasActiveCoupons]);
 
   const handleTabClick = (item: NavItem) => {
     if (item.id === 'cupom_trigger') {
@@ -85,25 +90,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     return (
       <div className="relative">
         <Icon 
-          size={isSpecial ? 26 : 22}
-          className={`transition-all duration-300 ${
-            isSpecial 
-              ? (isActive ? 'text-blue-600' : 'text-blue-500') 
-              : (isActive ? 'text-white scale-105' : 'text-white/60')
-          }`} 
-          strokeWidth={isSpecial || isActive ? 2.5 : 2} 
+          size={isSpecial ? 25 : 22}
+          className={`transition-all duration-300 ${isActive ? 'text-white scale-105' : 'text-white/60'}`} 
+          strokeWidth={isActive ? 2.5 : 2} 
         />
         {item.badge && (
-          <span className={`absolute ${isSpecial ? '-top-1 -right-1.5' : '-top-1 -right-1'} w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse shadow-sm`}></span>
+          <span className={`absolute ${isSpecial ? '-top-1 -right-1.5' : '-top-1 -right-1'} w-2 h-2 bg-yellow-400 rounded-full border border-blue-600 animate-pulse`}></span>
         )}
       </div>
     );
   };
 
+  // Se por algum motivo todas as abas forem desativadas, não renderiza a barra
   if (activeNavItems.length === 0) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[80px] rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.25)] border-t border-white/10 px-1">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-blue-600 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10 px-1">
       <div 
         className="grid w-full h-full"
         style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
@@ -117,41 +119,35 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             (item.id === 'profile' && isProfileGroup) ||
             (item.id === 'cupom_trigger' && isCouponGroup);
 
+          // IDENTIFICAÇÃO DE ABAS ESPECIAIS (CUPOM E CLASSIFICADOS)
           const isSpecial = item.id === 'cupom_trigger' || item.id === 'classifieds';
 
           return (
-            <div key={item.id} className="relative flex items-center justify-center">
-              <button 
-                onClick={() => handleTabClick(item)} 
-                className={`flex flex-col items-center justify-center outline-none transition-all duration-300 ${
-                  isSpecial 
-                    ? `w-14 h-14 rounded-2xl bg-white shadow-[0_8px_20px_rgba(0,0,0,0.3)] border-2 border-amber-400 -translate-y-7 active:scale-90` 
-                    : 'w-full h-full active:scale-95'
-                }`} 
-              >
-                <div className={isSpecial ? '' : 'mb-1'}>
-                  {renderIconOrAvatar(item, isActive, isSpecial)}
-                </div>
-                
-                {/* O Label dos botões especiais fica fora do botão elevado para manter alinhamento na barra */}
-                {!isSpecial && (
-                  <span className={`font-black uppercase tracking-tighter text-[8px] ${
-                    isActive ? 'text-white opacity-100' : 'text-white/60'
-                  }`}>
-                    {item.label}
-                  </span>
-                )}
-              </button>
-
-              {/* Label flutuante para itens especiais (posicionado de volta na barra) */}
+            <button 
+              key={item.id}
+              onClick={() => handleTabClick(item)} 
+              className={`w-full h-full flex flex-col items-center justify-center outline-none active:scale-95 transition-all relative ${
+                isSpecial 
+                  ? 'bg-blue-500/10 shadow-[0_-4px_12px_rgba(0,0,0,0.15)] -translate-y-[2px]' 
+                  : ''
+              }`} 
+            >
+              {/* BORDA SUPERIOR INDICADORA PARA ITENS ESPECIAIS */}
               {isSpecial && (
-                <span className={`absolute bottom-2 font-black uppercase tracking-tighter text-[8px] transition-all duration-300 ${
-                  isActive ? 'text-white scale-110' : 'text-white/60'
-                }`}>
-                  {item.label}
-                </span>
+                <div className="absolute top-0 left-[20%] right-[20%] h-[3px] bg-amber-400 rounded-b-full shadow-[0_1px_5px_rgba(251,191,36,0.4)]"></div>
               )}
-            </div>
+
+              <div className={isSpecial ? 'mb-0.5 mt-1' : 'mb-1'}>
+                {renderIconOrAvatar(item, isActive, isSpecial)}
+              </div>
+              <span className={`font-black uppercase tracking-tighter transition-all ${
+                isSpecial ? 'text-[9px]' : 'text-[8px]'
+              } ${
+                isActive ? 'text-white opacity-100' : 'text-white/60'
+              }`}>
+                {item.label}
+              </span>
+            </button>
           );
         })}
       </div>

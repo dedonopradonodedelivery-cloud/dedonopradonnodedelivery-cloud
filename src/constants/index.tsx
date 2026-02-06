@@ -13,17 +13,16 @@ import {
   Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
-  Key, Fan, Truck, Shovel,
-  Meh, ThumbsDown, Gift, RefreshCw
+  Key, Fan, Truck, Shovel
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty, NeighborhoodTalent, HappeningNowPost, LostFoundItem } from '../types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
-  { id: 'cat-pro', name: 'Profissionais', slug: 'profissionais', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'cat-pro', name: 'Pro', slug: 'pro', icon: <Briefcase />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
   { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
@@ -70,7 +69,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Produtos Pet', icon: <Package /> },
     { name: 'Pets Exóticos', icon: <Sparkles /> },
   ],
-  'Profissionais': [
+  'Pro': [
     { name: 'Eletricista', icon: <Zap /> },
     { name: 'Encanador', icon: <Droplets /> },
     { name: 'Pintor', icon: <PaintRoller /> },
@@ -202,33 +201,73 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
+// 🔹 LISTA DE 60 TAGS INICIAIS (OBRIGATÓRIAS)
 export const ALL_TAGS = [
+  // 👕 MODA
   'tênis', 'camisa', 'camiseta', 'calça', 'bermuda', 'vestido', 'saia', 'moletom', 'jaqueta', 'roupa social', 'roupa feminina', 'roupa masculina',
+  // ⌚ ACESSÓRIOS
   'relógio', 'óculos', 'bolsa', 'mochila', 'cinto', 'pulseira', 'colar', 'boné',
+  // 🐶 PET
   'ração', 'banho e tosa', 'brinquedo pet', 'coleira', 'petiscos', 'veterinário', 'adestramento', 'transporte pet',
+  // 🧴 BELEZA
   'corte de cabelo', 'manicure', 'pedicure', 'maquiagem', 'estética facial', 'sobrancelha', 'depilação', 'hidratação capilar',
+  // 🚗 AUTOS
   'troca de óleo', 'alinhamento', 'balanceamento', 'revisão automotiva', 'lava jato', 'auto elétrica', 'funilaria', 'vistoria veicular',
+  // 🏥 SAÚDE
   'clínica médica', 'dentista', 'psicologia', 'fisioterapia', 'exames laboratoriais', 'nutrição', 'terapias alternativas', 'saúde preventiva',
+  // 🛠️ SERVIÇOS GERAIS
   'eletricista', 'encanador', 'pedreiro', 'pintor', 'chaveiro', 'montagem de móveis', 'limpeza residencial', 'manutenção geral'
 ];
 
 const IMG_IDS: Record<string, string[]> = {
-  'Comida': ['1504674900247-0877df9cc836', '1555939594-58d7cb561ad1', '1565299624946-b28f40a0ae38', '1567620905732-2d1ec7ab7445', '1467003909585-63c6385cdb26', '1540189549336-e6e99c3679fe', '1568901346375-23c9450c58cd', '1484723091739-30a097e8f929'],
-  'Pets': ['1516734212186-a967f81ad0d7', '1543466835-00a7907e9de1', '1537151608828-ea2b11777ee8', '1514888286974-6c27e9cce25b', '1583511655857-d19b40a7a54e', '1583337130417-3346a1be7dee'],
-  'Profissionais': ['1556761175-5973dc0f32e7', '1542744173-8e7e53415bb0', '1507679799938-d738f46fbcfc', '1521791136064-7986c292027b'],
-  'Saúde': ['1579684385127-1ef15d508118', '1584515933487-9d317552d894', '1576091160399-112ba8d25d1d', '1551076805-e2983fe3600c'],
-  'Serviços': ['1581578731117-10d52b4d8051', '1621905251189-08b45d6a269e', '1504328345606-18aff0858706', '1584622024886-0a02091d3744'],
-  'Beleza': ['1560066984-118c38b64a75', '1522337660859-02fbefca4702', '1562322140-8baeececf3df', '1616394584738-fc6e612e71b9'],
-  'Autos': ['1486262715619-67b85e0b08d3', '1492144534655-ae79c964c9d7', '1562920618-971c26b268b6', '1503376763036-066120622c74'],
-  'Mercado': ['1542838132-92c53300491e', '1578916171728-566855ce2dce', '1583258292688-d0213dc5a3a8', '1534723452202-428aae1ad99d'],
-  'Casa': ['1556228453-efd6c1ff04f6', '1583847268964-b8bc40f9e2b8', '1513694203232-719a280e022f', '1493809842364-78817add7ffb'],
-  'Esportes': ['1534438327276-14e5300c3a48', '1517836357463-c25dfe9495ac', '1574680096141-1c5700243a36', '1571902943202-507ec2618e8f'],
-  'Lazer': ['1514525253361-bee23e63d890', '1470225620780-dba8ba36b745', '1533174072545-a8cd56c24385', '1564057865243-d343468b8d0e'],
-  'Educação': ['1503676260728-1c00da094a0b', '1524178232363-1fb2b075b655', '1497633762265-9d179a990aa6', '1523240795612-9a054b0db644'],
-  'Farmácia': ['1585435557343-3b092031a831', '1631549733277-628f3281783f', '1576602976047-1743ef509a18', '1587854692152-cbe660dbbb88'],
-  'Moda': ['1445205170230-053b83016050', '1512436991641-6745cdb1723f', '1483985988355-763728e1935b', '1515886657613-9f3515b0c78f'],
-  'Eventos': ['1511632765486-a01980e01a18', '1492684223066-81342ee5ff30', '1533174072545-a8cd56c24385', '1514525253361-bee23e63d890'],
-  'Condomínio': ['1560518883-ce09059eeffa', '1486406146926-c627a92ad1ab', '1460317442991-08cf2a256144', '1497366811353-6870744d04b2']
+  'Comida': [
+    '1504674900247-0877df9cc836', '1555939594-58d7cb561ad1', '1565299624946-b28f40a0ae38', '1567620905732-2d1ec7ab7445', '1467003909585-63c6385cdb26', '1540189549336-e6e99c3679fe', '1568901346375-23c9450c58cd', '1484723091739-30a097e8f929'
+  ],
+  'Pets': [
+    '1516734212186-a967f81ad0d7', '1543466835-00a7907e9de1', '1537151608828-ea2b11777ee8', '1514888286974-6c27e9cce25b', '1583511655857-d19b40a7a54e', '1583337130417-3346a1be7dee'
+  ],
+  'Pro': [
+    '1556761175-5973dc0f32e7', '1542744173-8e7e53415bb0', '1507679799938-d738f46fbcfc', '1521791136064-7986c292027b'
+  ],
+  'Saúde': [
+    '1579684385127-1ef15d508118', '1584515933487-9d317552d894', '1576091160399-112ba8d25d1d', '1551076805-e2983fe3600c'
+  ],
+  'Serviços': [
+    '1581578731117-10d52b4d8051', '1621905251189-08b45d6a269e', '1504328345606-18aff0858706', '1584622024886-0a02091d3744'
+  ],
+  'Beleza': [
+    '1560066984-118c38b64a75', '1522337660859-02fbefca4702', '1562322140-8baeececf3df', '1616394584738-fc6e612e71b9'
+  ],
+  'Autos': [
+    '1486262715619-67b85e0b08d3', '1492144534655-ae79c964c9d7', '1562920618-971c26b268b6', '1503376763036-066120622c74'
+  ],
+  'Mercado': [
+    '1542838132-92c53300491e', '1578916171728-566855ce2dce', '1583258292688-d0213dc5a3a8', '1534723452202-428aae1ad99d'
+  ],
+  'Casa': [
+    '1556228453-efd6c1ff04f6', '1583847268964-b8bc40f9e2b8', '1513694203232-719a280e022f', '1493809842364-78817add7ffb'
+  ],
+  'Esportes': [
+    '1534438327276-14e5300c3a48', '1517836357463-c25dfe9495ac', '1574680096141-1c5700243a36', '1571902943202-507ec2618e8f'
+  ],
+  'Lazer': [
+    '1514525253361-bee23e63d890', '1470225620780-dba8ba36b745', '1533174072545-a8cd56c24385', '1564057865243-d343468b8d0e'
+  ],
+  'Educação': [
+    '1503676260728-1c00da094a0b', '1524178232363-1fb2b075b655', '1497633762265-9d179a990aa6', '1523240795612-9a054b0db644'
+  ],
+  'Farmácia': [
+    '1585435557343-3b092031a831', '1631549733277-628f3281783f', '1576602976047-1743ef509a18', '1587854692152-cbe660dbbb88'
+  ],
+  'Moda': [
+    '1445205170230-053b83016050', '1512436991641-6745cdb1723f', '1483985988355-763728e1935b', '1515886657613-9f3515b0c78f'
+  ],
+  'Eventos': [
+    '1511632765486-a01980e01a18', '1492684223066-81342ee5ff30', '1533174072545-a8cd56c24385', '1514525253361-bee23e63d890'
+  ],
+  'Condomínio': [
+    '1560518883-ce09059eeffa', '1486406146926-c627a92ad1ab', '1460317442991-08cf2a256144', '1497366811353-6870744d04b2'
+  ]
 };
 
 const generateFakeStores = () => {
@@ -253,7 +292,7 @@ const generateFakeStores = () => {
                 else if (catName === 'Beleza') storeTags = ['corte de cabelo', 'manicure', 'maquiagem'].sort(() => 0.5 - Math.random()).slice(0, 2);
                 else if (catName === 'Autos') storeTags = ['troca de óleo', 'lava jato', 'alinhamento'].sort(() => 0.5 - Math.random()).slice(0, 2);
                 else if (catName === 'Saúde') storeTags = ['dentista', 'fisioterapia', 'exames laboratoriais'].sort(() => 0.5 - Math.random()).slice(0, 2);
-                else if (catName === 'Serviços' || catName === 'Profissionais') storeTags = ['eletricista', 'encanador', 'chaveiro'].sort(() => 0.5 - Math.random()).slice(0, 2);
+                else if (catName === 'Serviços' || catName === 'Pro') storeTags = ['eletricista', 'encanador', 'chaveiro'].sort(() => 0.5 - Math.random()).slice(0, 2);
 
                 allStores.push({
                     id: `fake-${catName}-${sub.name}-${i}`.replace(/\s+/g, '-').toLowerCase(),
@@ -368,7 +407,7 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
   },
   'mercado': {
     'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=800', storeId: 'f-7' },
+      { image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=800', storeId: 'f-7' },
       { image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', storeId: 'fake-mercado-0' }
     ]
   },
@@ -390,7 +429,7 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
       { image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800', storeId: 'fake-casa-1' }
     ]
   },
-  'profissionais': {
+  'pro': {
     'Freguesia': [
       { image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', storeId: 'fake-pro-0' },
       { image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=800', storeId: 'fake-pro-1' }
@@ -484,9 +523,9 @@ export const MOCK_JOBS: Job[] = [
     postedAt: 'Há 2h',
     isSponsored: true,
     sponsoredUntil: '2025-12-31',
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
-    isVerified: true
   },
   {
     id: 'job-2',
@@ -502,9 +541,9 @@ export const MOCK_JOBS: Job[] = [
     contactWhatsapp: '5521988888888',
     postedAt: 'Há 1 dia',
     isUrgent: true,
+    // FIX: Added missing properties 'candidacy_method' and 'modality' to conform to the Job interface.
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
-    isVerified: false
   }
 ];
 
@@ -608,6 +647,8 @@ export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
   },
 ];
 
+
+export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 
 export const SPECIALTIES: Record<string, string[]> = {
   'Chaveiro 24h': ['Abertura de portas', 'Troca de fechadura', 'Chave codificada', 'Abertura de cofre', 'Cópia de chaves', 'Instalação de tetra chave'],
@@ -873,111 +914,5 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
     comments: 4,
     imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop',
     storeId: 'f-1'
-  }
-];
-
-export const MOCK_HAPPENING_NOW: HappeningNowPost[] = [
-  {
-    id: 'h1',
-    title: 'Show de MPB na Praça da Freguesia',
-    type: 'event',
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(), // 4h
-    authorId: 'u1',
-    authorName: 'Assoc. Moradores',
-    status: 'active',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253361-bee23e63d890?q=80&w=400'
-  },
-  {
-    id: 'h2',
-    title: 'Pizza de Calabresa 30% OFF - Só hoje!',
-    type: 'promo',
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(), // 2h
-    authorId: 'f-5',
-    authorName: 'Pizzaria do Zé',
-    status: 'active',
-    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400'
-  },
-  {
-    id: 'h3',
-    title: 'Trânsito intenso na Geremário Dantas',
-    type: 'notice',
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 1).toISOString(), // 1h
-    authorId: 'u2',
-    authorName: 'Carlos Silva',
-    status: 'active'
-  }
-];
-
-export const MOCK_TALENTS: NeighborhoodTalent[] = [
-  {
-    id: 't1',
-    name: 'Bolos da Tia Juju',
-    description: 'Bolos caseiros de cenoura e laranja.',
-    distance: 'a 300m de você',
-    imageUrl: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=400',
-    whatsapp: '5521999999999',
-    availability: 'Fornada de hoje'
-  },
-  {
-    id: 't2',
-    name: 'Marido de Aluguel (Beto)',
-    description: 'Pequenos reparos e instalações.',
-    distance: 'na rua de trás',
-    imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400',
-    whatsapp: '5521988888888',
-    availability: 'Agenda aberta'
-  },
-  {
-    id: 't3',
-    name: 'Salgados da Cleide',
-    description: 'Coxinhas e rissoles fresquinhos.',
-    distance: 'a 500m',
-    imageUrl: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?q=80&w=400',
-    whatsapp: '5521977777777',
-    availability: 'Disponível hoje'
-  },
-  {
-    id: 't4',
-    name: 'Ateliê Costura Fina',
-    description: 'Ajustes, bainhas e roupas sob medida.',
-    distance: 'a 800m',
-    imageUrl: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=400',
-    whatsapp: '5521966666666'
-  },
-  {
-    id: 't5',
-    name: 'Marmitas da Vovó',
-    description: 'Comida caseira congelada ou quentinha.',
-    distance: 'a 200m',
-    imageUrl: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=400',
-    whatsapp: '5521955555555',
-    availability: 'Almoço pronto'
-  }
-];
-
-export const MOCK_LOST_FOUND: LostFoundItem[] = [
-   {
-    id: 'lf1',
-    type: 'lost_pet',
-    title: 'Cachorro Golden Retriever',
-    location: 'Perto da Praça da Freguesia',
-    imageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=400',
-    postedAt: 'Há 2h',
-    contactPhone: '5521999999999',
-    description: 'Atende por Bob. Sumiu hoje cedo. É dócil.',
-    status: 'active',
-    timestamp: 'Há 2h'
-  },
-  {
-    id: 'lf2',
-    type: 'found_item',
-    title: 'Chave de carro Honda',
-    location: 'Rua Tirol',
-    imageUrl: 'https://images.unsplash.com/photo-1583574932306-6967520448a3?q=80&w=400',
-    postedAt: 'Há 4h',
-    contactPhone: '5521988888888',
-    description: 'Encontrada na calçada em frente à farmácia.',
-    status: 'active',
-    timestamp: 'Há 4h'
   }
 ];
