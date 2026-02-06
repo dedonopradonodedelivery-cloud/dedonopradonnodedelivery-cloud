@@ -20,7 +20,7 @@ import {
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor, BannerPreview } from '@/components/StoreBannerEditor';
 import { supabase } from '@/lib/supabaseClient';
-import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
+import { MandatoryVideoLock } from './MandatoryVideoLock';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
@@ -209,14 +209,17 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
                   Seu concorrente já pode estar aqui. Você vai ficar de fora?
                 </h2>
                 <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-[340px]">
-                  Destaque sua loja exatamente para quem está perto de você.
+                  Destaque sua loja exatamente para quem está perto de você. Enquanto alguns aparecem primeiro, outros são ignorados. Esta é uma oportunidade estratégica de visibilidade com um valor especial que não vai se repetir.
                 </p>
                 <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 p-6 rounded-[2.5rem] flex flex-col items-center gap-4 shadow-2xl relative overflow-hidden w-full text-center">
-                    <div className="p-4 bg-blue-500/10 rounded-2xl text-blue-400 shrink-0"><Gem size={28} /></div>
+                    <div className="p-4 bg-blue-50/10 rounded-2xl text-blue-400 shrink-0"><Gem size={28} /></div>
                     <div className="relative z-10">
                         <h4 className="font-black text-white text-base uppercase tracking-tighter flex items-center justify-center gap-2">💎 FUNDADOR APOIADOR</h4>
+                        <p className="text-yellow-400 text-[10px] font-black uppercase tracking-widest mt-1">CONDIÇÃO ESPECIAL DE LANÇAMENTO</p>
                         <p className="text-[10px] text-slate-300 mt-4 leading-relaxed px-2">
-                          Durante este período, apenas alguns lojistas terão acesso a um <span className="text-yellow-400">VALOR REDUZIDO</span>.
+                          Durante este período, apenas alguns lojistas terão acesso a um <span className="text-yellow-400">VALOR REDUZIDO</span>, disponível por tempo limitado.
+                          <br /><br />
+                          Além do preço diferenciado, quem entra agora recebe um <span className="text-yellow-400">SELO EXCLUSIVO DE FUNDADOR APOIADOR</span>, visível no perfil da loja, garantindo mais destaque, autoridade e prioridade na plataforma.
                         </p>
                     </div>
                 </div>
