@@ -37,6 +37,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { InstitutionalSponsorBanner } from '@/components/InstitutionalSponsorBanner';
+import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -110,184 +111,189 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
 
   return (
-    <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-40">
-      
-      {/* HEADER DE PERFIL */}
-      <div className="bg-white dark:bg-gray-950 px-6 pt-12 pb-8 border-b border-blue-100 dark:border-gray-800 shadow-sm mb-6">
-        <div className="flex items-center gap-5">
-          <div className="w-20 h-20 rounded-[2rem] border-4 border-[#F4F7FF] dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
-            <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
-              {storeName}
-            </h1>
-            <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg font-black uppercase tracking-widest border border-blue-100">Painel do Parceiro</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+    <MandatoryVideoLock 
+      videoUrl="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
+      storageKey="merchant_panel"
+    >
+      <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-40">
+        
+        {/* HEADER DE PERFIL */}
+        <div className="bg-white dark:bg-gray-950 px-6 pt-12 pb-8 border-b border-blue-100 dark:border-gray-800 shadow-sm mb-6">
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-[2rem] border-4 border-[#F4F7FF] dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
+              <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-black text-gray-900 dark:text-white truncate leading-tight uppercase tracking-tighter">
+                {storeName}
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg font-black uppercase tracking-widest border border-blue-100">Painel do Parceiro</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="px-5">
-        
-        {/* 1. MINHA LOJA - CENTRALIZADO */}
-        <section>
-          <SectionHeader title="Minha Loja" icon={Building} />
-          <NavCard 
-            icon={StoreIcon} 
-            label="Perfil Público da Loja" 
-            description="Informações visíveis, busca e dados para emissão de nota"
-            onClick={() => onNavigate('store_profile')} 
-          />
-        </section>
+        <div className="px-5">
+          
+          {/* 1. MINHA LOJA - CENTRALIZADO */}
+          <section>
+            <SectionHeader title="Minha Loja" icon={Building} />
+            <NavCard 
+              icon={StoreIcon} 
+              label="Perfil Público da Loja" 
+              description="Informações visíveis, busca e dados para emissão de nota"
+              onClick={() => onNavigate('store_profile')} 
+            />
+          </section>
 
-        {/* 2. CRESCIMENTO E ANÚNCIOS - ORDEM REORGANIZADA */}
-        <section>
-          <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />
-          <NavCard 
-            icon={TrendingUp} 
-            label="Patrocinados" 
-            description="Suba para o topo por R$ 0,90/dia"
-            onClick={() => onNavigate('store_sponsored')}
-            colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
-          />
-          <NavCard 
-            icon={LayoutGrid} 
-            label="Banners em Destaque" 
-            description="Sua loja nas áreas nobres do bairro"
-            onClick={() => onNavigate('store_ads_module')}
-            colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
-          />
-          <NavCard 
-            icon={Crown} 
-            label="Patrocinador Master" 
-            description="Visibilidade em 90% do app"
-            onClick={() => onNavigate('sponsor_info')}
-            colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
-          />
-          <NavCard 
-            icon={Handshake} 
-            label="JPA Connect" 
-            description="Conectando lojistas do bairro"
-            onClick={() => onNavigate('jpa_connect')}
-            colorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
-            rightElement={<span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-widest">Em breve</span>}
-          />
-        </section>
+          {/* 2. PROMOÇÕES E VENDAS - MOVIDO PARA CIMA */}
+          <section>
+            <SectionHeader title="Promoções e Vendas" icon={Tag} />
+            <NavCard 
+              icon={Ticket} 
+              label="Cupons de Desconto" 
+              description="Crie e gerencie seus cupons"
+              onClick={() => onNavigate('merchant_coupons')}
+              colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
+            />
+            <NavCard 
+              icon={Zap} 
+              label="Promoções Ativas" 
+              description="Vitrine de ofertas especiais"
+              onClick={() => onNavigate('merchant_promotions')} 
+            />
+          </section>
 
-        {/* 3. RELACIONAMENTO COM CLIENTES */}
-        <section>
-          <SectionHeader title="Relacionamento" icon={Users} />
-          <NavCard 
-            icon={Star} 
-            label="Avaliações de Clientes" 
-            description="Responda o que dizem sobre você"
-            badge={3} 
-            onClick={() => onNavigate('merchant_reviews')} 
-          />
-          <NavCard 
-            icon={MessageSquare} 
-            label="Mensagens / Chat" 
-            description="Fale com interessados em serviços"
-            onClick={() => onNavigate('merchant_leads')} 
-          />
-        </section>
+          {/* 3. CRESCIMENTO E ANÚNCIOS */}
+          <section>
+            <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />
+            <NavCard 
+              icon={TrendingUp} 
+              label="Patrocinados" 
+              description="Suba para o topo por R$ 0,90/dia"
+              onClick={() => onNavigate('store_sponsored')}
+              colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
+            />
+            <NavCard 
+              icon={LayoutGrid} 
+              label="Banners em Destaque" 
+              description="Sua loja nas áreas nobres do bairro"
+              onClick={() => onNavigate('store_ads_module')}
+              colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+            />
+            <NavCard 
+              icon={Crown} 
+              label="Patrocinador Master" 
+              description="Visibilidade em 90% do app"
+              onClick={() => onNavigate('sponsor_info')}
+              colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
+            />
+            <NavCard 
+              icon={Handshake} 
+              label="JPA Connect" 
+              description="Conectando lojistas do bairro"
+              onClick={() => onNavigate('jpa_connect')}
+              colorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
+              rightElement={<span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-widest">Em breve</span>}
+            />
+          </section>
 
-        {/* 4. PROMOÇÕES E VENDAS */}
-        <section>
-          <SectionHeader title="Promoções e Vendas" icon={Tag} />
-          <NavCard 
-            icon={Ticket} 
-            label="Cupons de Desconto" 
-            description="Crie e gerencie seus cupons"
-            onClick={() => onNavigate('merchant_coupons')}
-            colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
-          />
-          <NavCard 
-            icon={Zap} 
-            label="Promoções Ativas" 
-            description="Vitrine de ofertas especiais"
-            onClick={() => onNavigate('merchant_promotions')} 
-          />
-        </section>
+          {/* 4. RELACIONAMENTO COM CLIENTES */}
+          <section>
+            <SectionHeader title="Relacionamento" icon={Users} />
+            <NavCard 
+              icon={Star} 
+              label="Avaliações de Clientes" 
+              description="Responda o que dizem sobre você"
+              badge={3} 
+              onClick={() => onNavigate('merchant_reviews')} 
+            />
+            <NavCard 
+              icon={MessageSquare} 
+              label="Mensagens / Chat" 
+              description="Fale com interessados em serviços"
+              onClick={() => onNavigate('merchant_leads')} 
+            />
+          </section>
 
-        {/* 5. CONTEÚDO E MARCA */}
-        <section>
-          <SectionHeader title="Conteúdo e Marca" icon={ImageIcon} />
-          <NavCard 
-            icon={LayoutGrid} 
-            label="Feed da Loja" 
-            description="Publique fotos no seu perfil"
-            onClick={() => onNavigate('neighborhood_posts')} 
-          />
-          <NavCard 
-            icon={Video} 
-            label="Vídeos Explicativos" 
-            description="Envie até 2 vídeos da sua loja"
-            onClick={() => onNavigate('store_profile')} 
-          />
-        </section>
+          {/* 5. CONTEÚDO E MARCA */}
+          <section>
+            <SectionHeader title="Conteúdo e Marca" icon={ImageIcon} />
+            <NavCard 
+              icon={LayoutGrid} 
+              label="Feed da Loja" 
+              description="Publique fotos no seu perfil"
+              onClick={() => onNavigate('neighborhood_posts')} 
+            />
+            <NavCard 
+              icon={Video} 
+              label="Vídeos Explicativos" 
+              description="Envie até 2 vídeos da sua loja"
+              onClick={() => onNavigate('store_profile')} 
+            />
+          </section>
 
-        {/* 6. PERFORMANCE E FINANCEIRO */}
-        <section>
-          <SectionHeader title="Resultados" icon={BarChart3} />
-          <NavCard 
-            icon={PieChart} 
-            label="Minha Performance" 
-            description="Cliques, visualizações e alcance"
-            onClick={() => onNavigate('merchant_performance')} 
-          />
-          <NavCard 
-            icon={CreditCard} 
-            label="Pagamentos e Faturas" 
-            description="Extratos e planos ativos"
-            onClick={() => onNavigate('store_finance')} 
-          />
-        </section>
+          {/* 6. PERFORMANCE E FINANCEIRO */}
+          <section>
+            <SectionHeader title="Resultados" icon={BarChart3} />
+            <NavCard 
+              icon={PieChart} 
+              label="Minha Performance" 
+              description="Cliques, visualizações e alcance"
+              onClick={() => onNavigate('merchant_performance')} 
+            />
+            <NavCard 
+              icon={CreditCard} 
+              label="Pagamentos e Faturas" 
+              description="Extratos e planos ativos"
+              onClick={() => onNavigate('store_finance')} 
+            />
+          </section>
 
-        {/* 7. SUPORTE */}
-        <section>
-          <SectionHeader title="Suporte" icon={LifeBuoy} />
-          <NavCard 
-            icon={HelpCircle} 
-            label="Central de Ajuda" 
-            description="Dúvidas e orientações ao lojista"
-            onClick={() => onNavigate('store_support')} 
-          />
-        </section>
+          {/* 7. SUPORTE */}
+          <section>
+            <SectionHeader title="Suporte" icon={LifeBuoy} />
+            <NavCard 
+              icon={HelpCircle} 
+              label="Central de Ajuda" 
+              description="Dúvidas e orientações ao lojista"
+              onClick={() => onNavigate('store_support')} 
+            />
+          </section>
 
-        {/* 8. PREFERÊNCIAS */}
-        <section>
-          <SectionHeader title="Preferências" icon={Settings} />
-          <NavCard 
-            icon={theme === 'dark' ? Moon : Sun} 
-            label="Modo Noite" 
-            description={theme === 'dark' ? "Ativado" : "Desativado"}
-            onClick={toggleTheme}
-            rightElement={
-              <div className={`w-10 h-5 rounded-full p-1 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#1E5BFF]' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                <div className={`w-3 h-3 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-5' : 'translate-x-0'}`} />
-              </div>
-            }
-          />
-          <NavCard 
-            icon={LogOut} 
-            label="Sair da Conta" 
-            isDestructive
-            onClick={handleLogout} 
-          />
-        </section>
+          {/* 8. PREFERÊNCIAS */}
+          <section>
+            <SectionHeader title="Preferências" icon={Settings} />
+            <NavCard 
+              icon={theme === 'dark' ? Moon : Sun} 
+              label="Modo Noite" 
+              description={theme === 'dark' ? "Ativado" : "Desativado"}
+              onClick={toggleTheme}
+              rightElement={
+                <div className={`w-10 h-5 rounded-full p-1 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#1E5BFF]' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                  <div className={`w-3 h-3 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-5' : 'translate-x-0'}`} />
+                </div>
+              }
+            />
+            <NavCard 
+              icon={LogOut} 
+              label="Sair da Conta" 
+              isDestructive
+              onClick={handleLogout} 
+            />
+          </section>
 
-        <InstitutionalSponsorBanner type="merchant" className="mt-12" />
+          <InstitutionalSponsorBanner type="merchant" className="mt-12" />
 
-        <div className="mt-16 text-center opacity-30 pb-12">
-          <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] leading-relaxed">
-            Localizei JPA Parceiros <br/> Central de Gestão v2.0
-          </p>
+          <div className="mt-16 text-center opacity-30 pb-12">
+            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] leading-relaxed">
+              Localizei JPA Parceiros <br/> Central de Gestão v2.0
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </MandatoryVideoLock>
   );
 };
