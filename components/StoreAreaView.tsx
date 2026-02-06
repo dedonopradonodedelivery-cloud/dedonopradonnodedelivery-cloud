@@ -148,7 +148,25 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
           </section>
 
-          {/* 2. CRESCIMENTO E ANÚNCIOS - ORDEM REORGANIZADA */}
+          {/* 2. PROMOÇÕES E VENDAS - MOVIDO PARA CIMA */}
+          <section>
+            <SectionHeader title="Promoções e Vendas" icon={Tag} />
+            <NavCard 
+              icon={Ticket} 
+              label="Cupons de Desconto" 
+              description="Crie e gerencie seus cupons"
+              onClick={() => onNavigate('merchant_coupons')}
+              colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
+            />
+            <NavCard 
+              icon={Zap} 
+              label="Promoções Ativas" 
+              description="Vitrine de ofertas especiais"
+              onClick={() => onNavigate('merchant_promotions')} 
+            />
+          </section>
+
+          {/* 3. CRESCIMENTO E ANÚNCIOS */}
           <section>
             <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />
             <NavCard 
@@ -182,7 +200,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
           </section>
 
-          {/* 3. RELACIONAMENTO COM CLIENTES */}
+          {/* 4. RELACIONAMENTO COM CLIENTES */}
           <section>
             <SectionHeader title="Relacionamento" icon={Users} />
             <NavCard 
@@ -197,24 +215,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               label="Mensagens / Chat" 
               description="Fale com interessados em serviços"
               onClick={() => onNavigate('merchant_leads')} 
-            />
-          </section>
-
-          {/* 4. PROMOÇÕES E VENDAS */}
-          <section>
-            <SectionHeader title="Promoções e Vendas" icon={Tag} />
-            <NavCard 
-              icon={Ticket} 
-              label="Cupons de Desconto" 
-              description="Crie e gerencie seus cupons"
-              onClick={() => onNavigate('merchant_coupons')}
-              colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
-            />
-            <NavCard 
-              icon={Zap} 
-              label="Promoções Ativas" 
-              description="Vitrine de ofertas especiais"
-              onClick={() => onNavigate('merchant_promotions')} 
             />
           </section>
 
