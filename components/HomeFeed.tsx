@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
@@ -7,10 +6,13 @@ import {
   ArrowRight, 
   Ticket,
   CheckCircle2, 
+  Lock, 
   Zap, 
   Loader2, 
   Hammer, 
   Plus, 
+  Heart, 
+  Bookmark, 
   Home as HomeIcon,
   MessageSquare, 
   MapPin, 
@@ -18,6 +20,9 @@ import {
   X, 
   Send, 
   ChevronRight,
+  Wrench,
+  ShoppingBag,
+  Package
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -26,7 +31,7 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
-import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
+import { useFeatures } from '@/contexts/FeatureContext';
 
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
@@ -47,6 +52,63 @@ const getFallbackImage = (id: string) => {
     }
     return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
 };
+
+const QuickActionBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => (
+  <section className="px-5 mb-8">
+    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="mb-6">
+        <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-1">
+          Precisa resolver algo agora no seu bairro?
+        </h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Encontre ajuda, serviços ou ofertas perto de você.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <button 
+          onClick={() => onNavigate('services_landing')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] mb-2 group-hover:scale-110 transition-transform">
+            <Wrench size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Pedir orçamento</span>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('coupon_landing')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 mb-2 group-hover:scale-110 transition-transform">
+            <ShoppingBag size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Ver ofertas</span>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('explore')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-orange-600 mb-2 group-hover:scale-110 transition-transform">
+            <MapPin size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Encontrar perto de mim</span>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('classifieds')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 mb-2 group-hover:scale-110 transition-transform">
+            <Package size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Ver classificados</span>
+        </button>
+      </div>
+    </div>
+  </section>
+);
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
@@ -122,254 +184,127 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   onNavigate, 
   onSelectCategory, 
   onStoreClick, 
-  stores,
-  user,
-  userRole
+  stores, 
+  user, 
+  userRole 
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
-  const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
+  const { isFeatureActive } = useFeatures();
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
+  const itemsPerPage = 8; 
 
-  // 1️⃣ ORDEM DAS CATEGORIAS (8 POR TELA)
-  const categoryPages = useMemo(() => {
-    const page1Ids = [
-      'cat-saude',     // Saúde
-      'cat-fashion',   // Moda
-      'cat-pets',      // Pets
-      'cat-pro',       // Profissionais
-      'cat-beauty',    // Beleza
-      'cat-autos',     // Autos
-      'cat-sports',    // Esportes
-      'cat-edu'        // Educação
-    ];
-
-    const p1 = page1Ids.map(id => CATEGORIES.find(c => c.id === id)).filter(Boolean) as Category[];
-    const remaining = CATEGORIES.filter(c => !page1Ids.includes(c.id));
-    
-    // Página 2 (7 categorias + Botão Mais)
-    return [p1, remaining.slice(0, 7)];
+  const orderedCategories = useMemo(() => {
+    const firstPageIds = ['cat-saude', 'cat-fashion', 'cat-pets', 'cat-pro', 'cat-beauty', 'cat-autos', 'cat-sports', 'cat-edu'];
+    const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
+    const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
+    return [...firstPage, ...remaining];
   }, []);
 
-  const handleCategoryScroll = () => {
-    if (!categoryScrollRef.current) return;
-    const scrollLeft = categoryScrollRef.current.scrollLeft;
-    const width = categoryScrollRef.current.clientWidth;
-    const page = Math.round(scrollLeft / width);
-    if (page !== currentCategoryPage) setCurrentCategoryPage(page);
-  };
+  const categoryPages = useMemo(() => {
+    const pages = [];
+    for (let i = 0; i < orderedCategories.length; i += itemsPerPage) { pages.push(orderedCategories.slice(i, i + itemsPerPage)); }
+    return pages;
+  }, [orderedCategories]);
 
   const [wizardStep, setWizardStep] = useState(0);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
-  const [images, setImages] = useState<string[]>([]);
-  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
-  const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && images.length < 3) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setImages(prev => [...prev, reader.result as string]);
-        };
-        reader.readAsDataURL(file);
-    }
-  };
-
-  const handleWizardSubmit = () => {
-    if (!user) {
-        localStorage.setItem('pending_wizard_state', JSON.stringify({ selectedService, selectedUrgency, description, images }));
-        onNavigate('profile');
-        return;
-    }
-    setIsSubmittingLead(true);
-    const requestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newLead: ServiceRequest = {
-        id: requestId,
-        userId: user.id,
-        userName: user.user_metadata?.full_name || 'Morador Local',
-        serviceType: selectedService || 'Geral',
-        description,
-        neighborhood: currentNeighborhood,
-        urgency: (selectedUrgency as ServiceUrgency) || 'Não tenho pressa',
-        images,
-        status: 'open',
-        createdAt: new Date().toISOString()
-    };
-    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
-    localStorage.setItem('service_requests_mock', JSON.stringify([newLead, ...existing]));
-    setLastCreatedRequestId(requestId);
-    setTimeout(() => {
-      setIsSubmittingLead(false);
-      setWizardStep(4);
-    }, 1500);
-  };
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+      {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
-      {userRole === 'lojista' && (
-        <section className="px-4 py-4 bg-white dark:bg-gray-950">
-           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
+      {isFeatureActive('explore_guide') && (
+        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
+            <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={() => { if (categoryScrollRef.current) setCurrentCategoryPage(Math.round(categoryScrollRef.current.scrollLeft / categoryScrollRef.current.clientWidth)); }}>
+            {categoryPages.map((pageCategories, pageIndex) => (
+                <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
+                <div className="grid grid-cols-4 gap-1.5">
+                    {pageCategories.map((cat, index) => (
+                    <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
+                          <div className="flex-1 flex items-center justify-center w-full mb-1">
+                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                          </div>
+                          <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
+                            {cat.name}
+                          </span>
+                        </div>
+                    </button>
+                    ))}
+                </div>
+                </div>
+            ))}
+            </div>
+            <div className="flex justify-center gap-1.5 pb-6 pt-2">
+            {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
+            </div>
         </section>
       )}
 
-      {/* 2️⃣ CATEGORIAS (Grid 4x2 com Swipe - PADRÃO IMAGEM 2) */}
-      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 relative z-10">
-        <div 
-          ref={categoryScrollRef}
-          onScroll={handleCategoryScroll}
-          className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
-        >
-          {categoryPages.map((page, pageIdx) => (
-            <div key={pageIdx} className="min-w-full px-4 grid grid-cols-4 gap-x-2 gap-y-4 snap-center pb-2">
-              {page.map((cat) => (
-                <button 
-                  key={cat.id} 
-                  onClick={() => onSelectCategory(cat)}
-                  className={`flex flex-col items-center justify-between p-2 rounded-[25px] border border-white/20 shadow-sm active:scale-95 transition-all w-full aspect-square ${cat.color}`}
-                >
-                  <div className="flex-1 flex items-center justify-center">
-                    {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white", strokeWidth: 3 })}
-                  </div>
-                  <span className="w-full text-[8px] font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate">
-                    {cat.name}
-                  </span>
-                </button>
-              ))}
+      {/* NOVO BLOCO DE AÇÃO RÁPIDA "RESOLVA AGORA" */}
+      <QuickActionBlock onNavigate={onNavigate} />
 
-              {/* Inserção do Botão "Mais" se for a última página */}
-              {pageIdx === categoryPages.length - 1 && (
-                <button 
-                  onClick={() => setIsMoreModalOpen(true)}
-                  className="flex flex-col items-center justify-between p-2 rounded-[25px] border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 shadow-sm active:scale-95 transition-all w-full aspect-square"
-                >
-                  <div className="flex-1 flex items-center justify-center">
-                    <Plus size={24} className="text-gray-600 dark:text-gray-400" strokeWidth={4} />
-                  </div>
-                  <span className="w-full text-[8px] font-black text-gray-600 dark:text-gray-400 text-center uppercase tracking-tighter leading-tight pb-1">
-                    Mais
-                  </span>
-                </button>
-              )}
+      {isFeatureActive('banner_highlights') && (
+        <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
+      )}
+
+      {isFeatureActive('community_feed') && (
+        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+            <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
+            <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
+        </section>
+      )}
+
+      {isFeatureActive('service_chat') && (
+        <section className="px-5 mb-8 bg-white dark:bg-gray-950"><FifaBanner onClick={() => setWizardStep(1)} /></section>
+      )}
+
+      {isFeatureActive('explore_guide') && (
+        <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
+            <div className="px-5">
+            <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
+            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
+                {['all', 'top_rated'].map((f) => <button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : 'Top'}</button>)}
             </div>
-          ))}
+            <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
+            </div>
         </div>
-
-        {/* Indicadores de Página (Dots) */}
-        <div className="flex justify-center gap-1.5 mt-4 mb-6">
-          {categoryPages.map((_, idx) => (
-            <div 
-              key={idx} 
-              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-gray-300'}`} 
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* 3️⃣ CARROSSEL PRINCIPAL */}
-      <section className="bg-white dark:bg-gray-950 w-full">
-        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
-      </section>
-
-      {/* 4️⃣ JPA CONVERSA */}
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
-        <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                JPA Conversa
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            </h2>
-            <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-        </div>
-        <div className="relative group">
-            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
-                {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                    <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
+      )}
+      
+      {wizardStep > 0 && (
+        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 -mt-4 mx-5 mb-10 animate-in slide-in-from-bottom duration-500 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden z-50">
+          <button onClick={() => setWizardStep(0)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-50 dark:bg-slate-800 rounded-full"><X size={20} /></button>
+          {wizardStep === 1 && (
+            <div className="text-center animate-in fade-in zoom-in-95 duration-300">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">Que tipo de serviço?</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[{l: 'Obras', i: Hammer}, {l: 'Reparos', i: Zap}, {l: 'Casa', i: HomeIcon}, {l: 'Outros', i: Sparkles}].map(s => (
+                  <button key={s.l} onClick={() => setWizardStep(2)} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600"><s.i size={24} /></div>
+                    <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter">{s.l}</p>
+                  </button>
                 ))}
+              </div>
             </div>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full flex items-center justify-end bg-gradient-to-l from-white/90 dark:from-gray-950/90 to-transparent w-12 pointer-events-none">
-                <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 opacity-80" />
+          )}
+          {wizardStep === 4 && (
+            <div className="text-center py-8 animate-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-xl"><CheckCircle2 size={40} /></div>
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto!</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais notificados.</p>
+                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Ver propostas</button>
             </div>
-        </div>
-      </section>
-
-      {/* 5️⃣ CUPONS */}
-      <section className="px-5 mb-6">
-        <button 
-          onClick={() => onNavigate('weekly_reward_page')}
-          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10"
-        >
-           <div className="flex items-center gap-3">
-               <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                 <Ticket className="text-white" size={20} />
-               </div>
-               <div className="text-left">
-                 <p className="text-white font-black text-sm uppercase tracking-wide">Cupons Disponíveis</p>
-                 <p className="text-emerald-100 text-[10px] font-medium opacity-90">Resgate descontos exclusivos no bairro</p>
-               </div>
-           </div>
-           <ChevronRight className="text-white" size={16} />
-        </button>
-      </section>
-
-      {/* 6️⃣ SERVIÇOS */}
-      <section className="px-5 mb-8 bg-white dark:bg-gray-950">
-        <FifaBanner onClick={() => setWizardStep(1)} />
-      </section>
-
-      {/* 7️⃣ CLASSIFICADOS */}
-      <section className="bg-white dark:bg-gray-950 pb-8">
-        <div className="px-5">
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Classificados</h2>
-                <button onClick={() => onNavigate('classifieds')} className="text-xs font-bold text-blue-500">Ver todos</button>
-            </div>
-        </div>
-        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-3.5 px-3.5">
-            {MOCK_CLASSIFIEDS.slice(0, 5).map((item) => (
-                <MiniClassifiedCard key={item.id} item={item} onNavigate={onNavigate} />
-            ))}
-        </div>
-      </section>
-
-      {/* 8️⃣ EXPLORAR BAIRRO */}
-      <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
-        <div className="px-5">
-          <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
-            {['all', 'top_rated'].map((f) => (
-              <button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>
-                {f === 'all' ? 'Tudo' : 'Top'}
-              </button>
-            ))}
-          </div>
-          <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
-        </div>
-      </div>
-
-      <MoreCategoriesModal 
-        isOpen={isMoreModalOpen}
-        onClose={() => setIsMoreModalOpen(false)}
-        onSelectCategory={onSelectCategory}
-      />
+          )}
+        </section>
+      )}
     </div>
   );
 };
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
   <div className="flex items-center justify-between mb-3">
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-        <Icon size={18} strokeWidth={2.5} />
-      </div>
-      <div>
-        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-      </div>
-    </div>
-    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+    <div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm"><Icon size={18} strokeWidth={2.5} /></div><div><h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2><p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p></div></div>
+    <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
 );
