@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronLeft, Zap, Calendar, Megaphone, Clock, CheckCircle2, Loader2, Camera, X } from 'lucide-react';
 import { HappeningType } from '../types';
@@ -112,7 +111,7 @@ export const HappeningNowForm: React.FC<HappeningNowFormProps> = ({ onBack, user
                             <button onClick={() => setImage(null)} className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full"><X size={16}/></button>
                         </div>
                     ) : (
-                        <label className="w-full aspect-video rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                        <label className="w-full aspect-video rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                             <Camera size={32} className="text-gray-300" />
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Adicionar Foto</span>
                             <input type="file" className="hidden" accept="image/*" onChange={handleImage} />
@@ -121,7 +120,7 @@ export const HappeningNowForm: React.FC<HappeningNowFormProps> = ({ onBack, user
                 </div>
             </div>
 
-            <button type="submit" disabled={isSubmitting || !title} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50">
+            <button type="submit" disabled={isSubmitting || !title} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-50">
                 {isSubmitting ? <Loader2 className="animate-spin" /> : 'Publicar Agora'}
             </button>
         </form>

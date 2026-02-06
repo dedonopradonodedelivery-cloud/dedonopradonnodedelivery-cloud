@@ -8,7 +8,7 @@ import {
   Ticket
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { MandatoryVideoLock } from './MandatoryVideoLock';
+import { MandatoryVideoLock } from './components/MandatoryVideoLock';
 import { useFeatures } from '../contexts/FeatureContext';
 
 // Fixed: Defined StoreAreaViewProps

@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -81,6 +82,7 @@ export interface Store {
   cnpj?: string;
   email_fiscal?: string;
   whatsapp_financeiro?: string;
+  telefone_fixo_publico?: string;
   telefone_fixo_fiscal?: string;
   inscricao_municipal?: string;
   inscricao_estadual?: string;
@@ -372,32 +374,6 @@ export interface StorePromotion {
 export type PromotionType = 'Dia' | 'Semana' | 'Mês' | 'Sazonal';
 export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'paused';
 
-export interface AppSuggestion {
-    id: string;
-    userId: string;
-    userName: string;
-    timestamp: string;
-    subject: string;
-    message: string;
-    category: 'bug' | 'idea' | 'improve' | 'other';
-    contactConsent: boolean;
-    status: 'new' | 'analyzing' | 'responded';
-}
-
-export interface CategoryBannerSlot {
-  uniqueKey: string;
-  bairroSlug: string;
-  categoriaSlug: string;
-  slotNumber: 1 | 2;
-  status: 'available' | 'reserved' | 'sold';
-  merchantId?: string;
-  merchantName?: string;
-  expiresAt?: string;
-  image?: string;
-  title?: string;
-  subtitle?: string;
-}
-
 export type HappeningType = 'promo' | 'event' | 'notice';
 
 export interface HappeningNowPost {
@@ -413,3 +389,31 @@ export interface HappeningNowPost {
 }
 
 export type PlanType = 'free' | 'professional' | 'enterprise' | 'master' | 'founder';
+
+// Added missing interface for app suggestions
+export interface AppSuggestion {
+    id: string;
+    userId: string;
+    userName: string;
+    timestamp: string;
+    subject: string;
+    message: string;
+    category: 'bug' | 'idea' | 'improve' | 'other';
+    contactConsent: boolean;
+    status: 'new' | 'analyzing' | 'responded';
+}
+
+// Added missing interface for category banner slots
+export interface CategoryBannerSlot {
+  uniqueKey: string;
+  bairroSlug: string;
+  categoriaSlug: string;
+  slotNumber: 1 | 2;
+  status: 'available' | 'reserved' | 'sold';
+  merchantId?: string;
+  merchantName?: string;
+  expiresAt?: string;
+  image?: string;
+  title?: string;
+  subtitle?: string;
+}

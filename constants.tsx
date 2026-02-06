@@ -115,7 +115,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Auto Elétrica', icon: <Zap /> },
     { name: 'Pneus & Alinhamento', icon: <Settings /> },
     { name: 'Funilaria & Pintura', icon: <PaintRoller /> },
-    { name: 'Peças & Acessórios', icon: <Package /> },
+    { name: 'Peças & Accessories', icon: <Package /> },
     { name: 'Vistoria & Documentação', icon: <FileText /> },
     { name: 'Serviços Rápidos Auto', icon: <Zap /> },
   ],

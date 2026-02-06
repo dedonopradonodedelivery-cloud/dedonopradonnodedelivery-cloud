@@ -23,7 +23,6 @@ import {
   Clock,
   Megaphone,
   Calendar,
-  // Added Tag icon from lucide-react
   Tag
 } from 'lucide-react';
 import { LojasEServicosList } from './LojasEServicosList';
@@ -33,68 +32,6 @@ import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from './LaunchOfferBanner';
 import { HomeBannerCarousel } from './HomeBannerCarousel';
 import { FifaBanner } from './FifaBanner';
-
-// Fixed: Defined HomeFeedProps
-interface HomeFeedProps {
-  onNavigate: (view: string, data?: any) => void;
-  onSelectCategory: (category: Category) => void;
-  onStoreClick: (store: Store) => void;
-  stores: Store[];
-  user: User | null;
-  userRole: 'cliente' | 'lojista' | null;
-}
-
-// Fixed: Defined MiniPostCard
-const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  return (
-    <div className="flex-shrink-0 w-28 snap-center p-1">
-      <div 
-        onClick={() => onNavigate('neighborhood_posts')}
-        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
-      >
-        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
-          <img src={post.imageUrl || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800"} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          <div className="absolute bottom-1 left-1.5 right-1">
-            <p className="text-[9px] font-bold text-white drop-shadow-md truncate">{post.userName}</p>
-          </div>
-        </div>
-        <div className="p-2 pt-1.5 flex-1">
-            <p className="text-[9px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2 font-medium">
-                {post.content}
-            </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Fixed: Defined MiniClassifiedCard
-const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
-  return (
-    <div className="flex-shrink-0 w-40 snap-center p-1.5">
-      <div 
-        onClick={() => onNavigate('classifieds')}
-        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
-      >
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-          <img src={item.imageUrl || "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600"} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          {item.price && (
-             <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-sm">
-                {item.price}
-             </div>
-          )}
-        </div>
-        <div className="p-3 flex flex-col flex-1 justify-between">
-            <h3 className="text-xs font-bold text-gray-800 dark:text-white leading-tight line-clamp-2 mb-1">
-                {item.title}
-            </h3>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const HappeningNowCard: React.FC<{ item: HappeningNowPost; onNavigate: (v: string) => void }> = ({ item, onNavigate }) => {
   const [timeLeft, setTimeLeft] = useState('');
@@ -146,6 +83,65 @@ const HappeningNowCard: React.FC<{ item: HappeningNowPost; onNavigate: (v: strin
               Conferir <ChevronRight size={10} strokeWidth={3} />
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface HomeFeedProps {
+  onNavigate: (view: string, data?: any) => void;
+  onSelectCategory: (category: Category) => void;
+  onStoreClick: (store: Store) => void;
+  stores: Store[];
+  user: User | null;
+  userRole: 'cliente' | 'lojista' | null;
+}
+
+const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
+  return (
+    <div className="flex-shrink-0 w-28 snap-center p-1">
+      <div 
+        onClick={() => onNavigate('neighborhood_posts')}
+        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
+      >
+        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+          <img src={post.imageUrl || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800"} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          <div className="absolute bottom-1 left-1.5 right-1">
+            <p className="text-[9px] font-bold text-white drop-shadow-md truncate">{post.userName}</p>
+          </div>
+        </div>
+        <div className="p-2 pt-1.5 flex-1">
+            <p className="text-[9px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2 font-medium">
+                {post.content}
+            </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
+  return (
+    <div className="flex-shrink-0 w-40 snap-center p-1.5">
+      <div 
+        onClick={() => onNavigate('classifieds')}
+        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
+      >
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+          <img src={item.imageUrl || "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=600"} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          {item.price && (
+             <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-sm">
+                {item.price}
+             </div>
+          )}
+        </div>
+        <div className="p-3 flex flex-col flex-1 justify-between">
+            <h3 className="text-xs font-bold text-gray-800 dark:text-white leading-tight line-clamp-2 mb-1">
+                {item.title}
+            </h3>
         </div>
       </div>
     </div>
@@ -233,6 +229,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
+      {/* BLOCO: ACONTECENDO AGORA */}
       {activeHappenings.length > 0 && (
         <section className="bg-white dark:bg-gray-950 pt-2 pb-8 relative px-5 animate-in slide-in-from-bottom duration-700">
           <div className="flex items-center justify-between mb-4">
