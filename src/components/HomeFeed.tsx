@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, NeighborhoodTalent, HappeningNowPost } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -21,10 +21,15 @@ import {
   X, 
   Send, 
   ChevronRight,
+  MessageCircle,
+  Clock,
+  Megaphone,
+  Calendar,
+  Tag
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS, MOCK_TALENTS, MOCK_HAPPENING_NOW } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
@@ -48,6 +53,99 @@ const getFallbackImage = (id: string) => {
         hash = id.charCodeAt(i) + ((hash << 5) - hash);
     }
     return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
+};
+
+const HappeningNowCard: React.FC<{ item: HappeningNowPost; onNavigate: (v: string) => void }> = ({ item, onNavigate }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const update = () => {
+      const diff = new Date(item.expiresAt).getTime() - Date.now();
+      if (diff <= 0) return setTimeLeft('Expirado');
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      setTimeLeft(`ativo por mais ${hours > 0 ? `${hours}h ` : ''}${mins}min`);
+    };
+    update();
+    const timer = setInterval(update, 60000);
+    return () => clearInterval(timer);
+  }, [item.expiresAt]);
+
+  const typeConfig = {
+    promo: { label: 'Promoção', icon: Tag, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    event: { label: 'Evento', icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    notice: { label: 'Aviso', icon: Megaphone, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' }
+  };
+
+  const config = typeConfig[item.type];
+  const Icon = config.icon;
+
+  return (
+    <div className="flex-shrink-0 w-64 snap-center p-1.5">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col h-full active:scale-[0.98] transition-transform">
+        {item.imageUrl && (
+          <div className="h-24 w-full overflow-hidden">
+            <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="p-4 flex flex-col flex-1">
+          <div className={`w-fit px-2 py-0.5 rounded-lg ${config.bg} flex items-center gap-1 mb-2`}>
+            <Icon size={10} className={config.color} />
+            <span className={`text-[8px] font-black uppercase tracking-widest ${config.color}`}>{config.label}</span>
+          </div>
+          <h3 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-2 flex-1">
+            {item.title}
+          </h3>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50 dark:border-gray-700">
+            <div className="flex items-center gap-1 text-[8px] font-bold text-gray-400 uppercase tracking-tighter">
+              <Clock size={10} />
+              {timeLeft}
+            </div>
+            <button className="text-[9px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+              Conferir <ChevronRight size={10} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TalentCard: React.FC<{ talent: NeighborhoodTalent }> = ({ talent }) => {
+  const handleContact = () => {
+    const message = encodeURIComponent("Oi, vi seu anúncio no app do bairro e fiquei interessado 😊");
+    window.open(`https://wa.me/${talent.whatsapp}?text=${message}`, '_blank');
+  };
+
+  return (
+    <div className="flex-shrink-0 w-64 bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden snap-center flex flex-col group active:scale-[0.98] transition-transform">
+      <div className="relative h-32 bg-gray-100 dark:bg-gray-700">
+        <img src={talent.imageUrl} alt={talent.name} className="w-full h-full object-cover" />
+        {talent.availability && (
+            <div className="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shadow-sm border border-white/20">
+                {talent.availability}
+            </div>
+        )}
+      </div>
+      <div className="p-4 flex-1 flex flex-col">
+        <h3 className="font-bold text-gray-900 dark:text-white text-sm truncate">{talent.name}</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-tight">{talent.description}</p>
+        
+        <div className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wide">
+            <MapPin size={10} />
+            {talent.distance}
+        </div>
+
+        <button 
+            onClick={handleContact}
+            className="mt-4 w-full py-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+        >
+            <MessageCircle size={14} />
+            Chamar no WhatsApp
+        </button>
+      </div>
+    </div>
+  );
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
@@ -94,17 +192,11 @@ const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string
                 {item.price}
              </div>
           )}
-          <div className="absolute top-2 left-2">
-             <span className="text-[8px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">{item.category.split(' ')[0]}</span>
-          </div>
         </div>
         <div className="p-3 flex flex-col flex-1 justify-between">
             <h3 className="text-xs font-bold text-gray-800 dark:text-white leading-tight line-clamp-2 mb-1">
                 {item.title}
             </h3>
-            <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wide truncate flex items-center gap-1">
-                <MapPin size={8} /> {item.neighborhood}
-            </p>
         </div>
       </div>
     </div>
@@ -135,8 +227,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
 
+  // States for Wizard
+  const [wizardStep, setWizardStep] = useState(0);
+  const [selectedService, setSelectedService] = useState<string>('');
+  const [selectedUrgency, setSelectedUrgency] = useState<string>('');
+  const [description, setDescription] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
+
   // Pagination Configuration
-  // Adjust to 8 items per page (4 columns x 2 rows)
   const itemsPerPage = 8; 
   
   // Reorder categories as requested
@@ -162,15 +262,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   const allCategories = orderedCategories; 
-  const totalPages = Math.ceil(allCategories.length / itemsPerPage);
-
-  const [wizardStep, setWizardStep] = useState(0);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
-  const [images, setImages] = useState<string[]>([]);
-  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
-  const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
+  
+  // Lógica de filtragem para Acontecendo Agora (Expiração)
+  const activeHappenings = useMemo(() => {
+    return MOCK_HAPPENING_NOW.filter(h => new Date(h.expiresAt).getTime() > Date.now() && h.status === 'active');
+  }, []);
 
   const handleScroll = () => {
     if (!categoryScrollRef.current) return;
@@ -184,45 +280,47 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && images.length < 3) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setImages(prev => [...prev, reader.result as string]);
-        };
-        reader.readAsDataURL(file);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImages(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleWizardSubmit = () => {
-    if (!user) {
-        localStorage.setItem('pending_wizard_state', JSON.stringify({ selectedService, selectedUrgency, description, images }));
-        onNavigate('profile');
-        return;
-    }
-
+    if (!description.trim()) return;
     setIsSubmittingLead(true);
     
-    const requestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newLead: ServiceRequest = {
-        id: requestId,
-        userId: user.id,
-        userName: user.user_metadata?.full_name || 'Morador Local',
-        serviceType: selectedService || 'Geral',
-        description,
-        neighborhood: currentNeighborhood,
-        urgency: (selectedUrgency as ServiceUrgency) || 'Não tenho pressa',
-        images,
-        status: 'open',
-        createdAt: new Date().toISOString()
-    };
-
-    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
-    localStorage.setItem('service_requests_mock', JSON.stringify([newLead, ...existing]));
-    setLastCreatedRequestId(requestId);
-
+    // Simulação de envio
     setTimeout(() => {
-      setIsSubmittingLead(false);
-      setWizardStep(4);
+        const requestId = `REQ-${Math.floor(Math.random() * 10000)}`;
+        
+        // Salvar no mock local para persistência na sessão
+        const newRequest = {
+            id: requestId,
+            userId: user?.id || 'anon',
+            userName: user?.user_metadata?.full_name || 'Morador',
+            serviceType: selectedService,
+            description: description,
+            neighborhood: currentNeighborhood,
+            urgency: selectedUrgency,
+            images: images,
+            status: 'open',
+            createdAt: new Date().toISOString()
+        };
+        
+        const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
+        localStorage.setItem('service_requests_mock', JSON.stringify([newRequest, ...existing]));
+        
+        setLastCreatedRequestId(requestId);
+        setIsSubmittingLead(false);
+        setWizardStep(4);
+        
+        // Reset form
+        setDescription('');
+        setImages([]);
     }, 1500);
   };
 
@@ -297,7 +395,52 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* 3. ONDE O BAIRRO CONVERSA (Compacto) */}
+      {/* 3. ACONTECENDO AGORA (NOVO BLOCO) */}
+      {activeHappenings.length > 0 && (
+        <section className="bg-white dark:bg-gray-950 pt-2 pb-8 relative px-5 animate-in slide-in-from-bottom duration-700">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 leading-tight">
+                Acontecendo agora
+                <div className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </div>
+              </h2>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Promoções e eventos em tempo real</p>
+            </div>
+            <button 
+              onClick={() => onNavigate('happening_now_form')}
+              className="p-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-blue-600 active:scale-90 transition-all"
+            >
+              <Plus size={18} strokeWidth={3} />
+            </button>
+          </div>
+          <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1.5">
+            {activeHappenings.map(item => (
+              <HappeningNowCard key={item.id} item={item} onNavigate={onNavigate} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 4. TALENTOS DO BAIRRO (NOVO) */}
+      <section className="bg-white dark:bg-gray-950 pt-6 pb-6 relative px-5">
+        <div className="mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                Talentos do Bairro <Heart size={16} className="text-rose-500 fill-rose-500" />
+            </h2>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Gente do bairro criando e fazendo perto de você.</p>
+        </div>
+        
+        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-2">
+            {MOCK_TALENTS.map(talent => (
+                <TalentCard key={talent.id} talent={talent} />
+            ))}
+        </div>
+      </section>
+
+      {/* 5. ONDE O BAIRRO CONVERSA (Compacto) */}
       <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
         <div className="">
             <div className="flex items-center justify-between mb-3">
@@ -325,7 +468,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 4. MICRO-GANCHO DE CUPOM (Discreto) */}
+      {/* 6. MICRO-GANCHO DE CUPOM (Discreto) */}
       <section className="px-5 mb-6">
         <button 
           onClick={() => onNavigate('weekly_reward_page')}
@@ -346,12 +489,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </button>
       </section>
 
-      {/* 5. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
+      {/* 7. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
       <section className="px-5 mb-8 bg-white dark:bg-gray-950">
         <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
-      {/* 6. CLASSIFICADOS (Resumo) */}
+      {/* 8. CLASSIFICADOS (Resumo) */}
       <section className="bg-white dark:bg-gray-950 pb-8">
         <div className="px-5">
             <div className="flex items-center justify-between mb-4">
@@ -521,10 +664,4 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
     </div>
     <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
-);
-
-const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m6 9 6 6 6-6"/>
-  </svg>
 );

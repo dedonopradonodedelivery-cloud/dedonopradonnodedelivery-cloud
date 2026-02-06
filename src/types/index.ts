@@ -460,3 +460,28 @@ export interface CategoryBannerSlot {
   title?: string;
   subtitle?: string;
 }
+
+export type HappeningType = 'promo' | 'event' | 'notice';
+
+export interface HappeningNowPost {
+  id: string;
+  title: string;
+  type: HappeningType;
+  expiresAt: string; // ISO String
+  imageUrl?: string;
+  authorId: string;
+  authorName: string;
+  status: 'active' | 'pending';
+  link?: string;
+}
+
+export interface NeighborhoodTalent {
+  id: string;
+  name: string;
+  description: string;
+  distance: string;
+  imageUrl: string;
+  whatsapp: string;
+  availability?: string;
+  category?: string;
+}
