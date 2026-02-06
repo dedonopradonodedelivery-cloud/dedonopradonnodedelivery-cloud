@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
@@ -20,11 +20,9 @@ import {
   X, 
   Send, 
   ChevronRight,
-  ChevronLeft,
   Wrench,
   ShoppingBag,
-  Package,
-  Tag
+  Package
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -56,133 +54,49 @@ const getFallbackImage = (id: string) => {
     return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
 };
 
-const SUGGESTIONS = [
-  {
-    id: 'services',
-    title: 'Precisa de um profissional agora?',
-    subtitle: 'Especialistas verificados no seu bairro.',
-    cta: 'Pedir orçamento',
-    icon: <Wrench size={18} />,
-    image: 'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-    destination: 'services_landing'
-  },
-  {
-    id: 'coupons',
-    title: 'Ofertas ativas perto de você',
-    subtitle: 'Economize no que você já consome.',
-    cta: 'Ver cupons',
-    icon: <Tag size={18} />,
-    image: 'https://images.unsplash.com/photo-1556742502-ec7c0f9f34b1?q=80&w=800',
-    destination: 'coupon_landing'
-  },
-  {
-    id: 'explore',
-    title: 'Encontre o que precisa no bairro',
-    subtitle: 'Comércios, serviços e locais próximos.',
-    cta: 'Explorar agora',
-    icon: <MapPin size={18} />,
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
-    destination: 'explore'
-  },
-  {
-    id: 'classifieds',
-    title: 'Oportunidades locais em destaque',
-    subtitle: 'Vagas, imóveis, doações e mais.',
-    cta: 'Ver classificados',
-    icon: <Package size={18} />,
-    image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
-    destination: 'classifieds'
-  }
-];
-
-const SuggestionCarousel: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  const handleNext = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => (prev + 1) % SUGGESTIONS.length);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  const handlePrev = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => (prev - 1 + SUGGESTIONS.length) % SUGGESTIONS.length);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  useEffect(() => {
-    const timer = setInterval(handleNext, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const active = SUGGESTIONS[currentIndex];
-
-  return (
-    <section className="px-5 mb-10 relative overflow-hidden">
-      <div className="relative group h-60 w-full rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-500">
-        
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            key={active.id}
-            src={active.image} 
-            alt="" 
-            className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-950 via-white/80 dark:via-gray-950/80 to-transparent"></div>
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 h-full p-8 flex flex-col justify-center max-w-[70%]">
-          <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-2 font-display">
-            {active.title}
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6 leading-relaxed">
-            {active.subtitle}
-          </p>
-          <button 
-            onClick={() => onNavigate(active.destination)}
-            className="w-fit bg-[#1E5BFF] hover:bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
-          >
-            {active.icon}
-            {active.cta}
-          </button>
-        </div>
-
-        {/* Navigation Arrows */}
-        <div className="absolute inset-y-0 right-4 flex flex-col justify-center gap-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button 
-            onClick={handlePrev}
-            className="p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-lg text-gray-900 dark:text-white active:scale-90 transition-all"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button 
-            onClick={handleNext}
-            className="p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-lg text-gray-900 dark:text-white active:scale-90 transition-all"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
-
-        {/* Progress Indicators */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
-          {SUGGESTIONS.map((_, idx) => (
-            <div 
-              key={idx}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'w-6 bg-[#1E5BFF]' : 'w-1.5 bg-gray-300 dark:bg-gray-700'
-              }`}
-            />
-          ))}
-        </div>
+const QuickActionBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => (
+  <section className="px-5 mb-10">
+    <div className="bg-white dark:bg-gray-900 rounded-[3rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+      <div className="mb-8">
+        <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-2">
+          Resolve isso agora, sem complicação.
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed max-w-[280px] mx-auto">
+          Serviços, ofertas e oportunidades do seu bairro — do jeito mais rápido.
+        </p>
       </div>
-    </section>
-  );
-};
+
+      <button 
+        onClick={() => onNavigate('services_landing')}
+        className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all mb-10"
+      >
+        <Wrench size={20} strokeWidth={3} />
+        Pedir orçamento agora
+      </button>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        <button 
+          onClick={() => onNavigate('coupon_landing')}
+          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
+        >
+          Ver ofertas
+        </button>
+        <button 
+          onClick={() => onNavigate('classifieds')}
+          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
+        >
+          Ver classificados
+        </button>
+        <button 
+          onClick={() => onNavigate('explore')}
+          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
+        >
+          Encontrar perto de mim
+        </button>
+      </div>
+    </div>
+  </section>
+);
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
@@ -237,6 +151,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const itemsPerPage = 8;
   const categoryPages = useMemo(() => {
     const pages = [];
+    // Exibimos 15 categorias + 1 botão "+" totalizando 2 páginas de 8
     const displayList = CATEGORIES.slice(0, 15);
     for (let i = 0; i < displayList.length; i += itemsPerPage) {
       pages.push(displayList.slice(i, i + itemsPerPage));
@@ -280,6 +195,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                 </button>
                             ))}
                             
+                            {/* BOTÃO MAIS (+) - Aparece apenas no final da última página */}
                             {pageIndex === categoryPages.length - 1 && (
                                 <button 
                                   onClick={() => setIsMoreCategoriesOpen(true)}
@@ -300,6 +216,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 ))}
             </div>
             
+            {/* Indicadores de Página (Dots) */}
             <div className="flex justify-center gap-1.5 pb-6 pt-2">
                 {categoryPages.map((_, idx) => (
                     <div 
@@ -315,8 +232,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* NOVO CARROSSEL DE SUGESTÕES INTELIGENTES */}
-      <SuggestionCarousel onNavigate={onNavigate} />
+      {/* BLOCO DE AÇÃO IMEDIATA REFORMULADO */}
+      <QuickActionBlock onNavigate={onNavigate} />
 
       {isFeatureActive('banner_highlights') && (
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
@@ -366,7 +283,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-xl"><CheckCircle2 size={40} /></div>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto!</h3>
                 <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais notificados.</p>
-                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Ver propostas</button>
+                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-[0.98] transition-all">Ver propostas</button>
             </div>
           )}
         </section>
