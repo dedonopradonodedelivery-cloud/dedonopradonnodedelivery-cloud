@@ -20,6 +20,9 @@ import {
   X, 
   Send, 
   ChevronRight,
+  Wrench,
+  ShoppingBag,
+  Package
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -49,6 +52,63 @@ const getFallbackImage = (id: string) => {
     }
     return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
 };
+
+const QuickActionBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => (
+  <section className="px-5 mb-8">
+    <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="mb-6">
+        <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-1">
+          Precisa resolver algo agora no seu bairro?
+        </h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Encontre ajuda, serviços ou ofertas perto de você.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <button 
+          onClick={() => onNavigate('services_landing')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#1E5BFF] mb-2 group-hover:scale-110 transition-transform">
+            <Wrench size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Pedir orçamento</span>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('coupon_landing')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 mb-2 group-hover:scale-110 transition-transform">
+            <ShoppingBag size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Ver ofertas</span>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('explore')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-orange-600 mb-2 group-hover:scale-110 transition-transform">
+            <MapPin size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Encontrar perto de mim</span>
+        </button>
+
+        <button 
+          onClick={() => onNavigate('classifieds')}
+          className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl border border-transparent hover:border-blue-500/30 transition-all active:scale-95 group h-28 text-center"
+        >
+          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 mb-2 group-hover:scale-110 transition-transform">
+            <Package size={20} />
+          </div>
+          <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight leading-tight">Ver classificados</span>
+        </button>
+      </div>
+    </div>
+  </section>
+);
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
@@ -181,6 +241,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
         </section>
       )}
+
+      {/* NOVO BLOCO DE AÇÃO RÁPIDA "RESOLVA AGORA" */}
+      <QuickActionBlock onNavigate={onNavigate} />
 
       {isFeatureActive('banner_highlights') && (
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
