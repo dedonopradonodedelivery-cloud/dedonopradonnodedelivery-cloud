@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
@@ -20,9 +20,11 @@ import {
   X, 
   Send, 
   ChevronRight,
+  ChevronLeft,
   Wrench,
   ShoppingBag,
-  Package
+  Package,
+  Tag
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -54,49 +56,133 @@ const getFallbackImage = (id: string) => {
     return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
 };
 
-const QuickActionBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => (
-  <section className="px-5 mb-10">
-    <div className="bg-white dark:bg-gray-900 rounded-[3rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
-      <div className="mb-8">
-        <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-2">
-          Resolve isso agora, sem complicação.
-        </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed max-w-[280px] mx-auto">
-          Serviços, ofertas e oportunidades do seu bairro — do jeito mais rápido.
-        </p>
-      </div>
+const SUGGESTIONS = [
+  {
+    id: 'services',
+    title: 'Precisa de um profissional agora?',
+    subtitle: 'Especialistas verificados no seu bairro.',
+    cta: 'Pedir orçamento',
+    icon: <Wrench size={18} />,
+    image: 'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+    destination: 'services_landing'
+  },
+  {
+    id: 'coupons',
+    title: 'Ofertas ativas perto de você',
+    subtitle: 'Economize no que você já consome.',
+    cta: 'Ver cupons',
+    icon: <Tag size={18} />,
+    image: 'https://images.unsplash.com/photo-1556742502-ec7c0f9f34b1?q=80&w=800',
+    destination: 'coupon_landing'
+  },
+  {
+    id: 'explore',
+    title: 'Encontre o que precisa no bairro',
+    subtitle: 'Comércios, serviços e locais próximos.',
+    cta: 'Explorar agora',
+    icon: <MapPin size={18} />,
+    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
+    destination: 'explore'
+  },
+  {
+    id: 'classifieds',
+    title: 'Oportunidades locais em destaque',
+    subtitle: 'Vagas, imóveis, doações e mais.',
+    cta: 'Ver classificados',
+    icon: <Package size={18} />,
+    image: 'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
+    destination: 'classifieds'
+  }
+];
 
-      <button 
-        onClick={() => onNavigate('services_landing')}
-        className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all mb-10"
-      >
-        <Wrench size={20} strokeWidth={3} />
-        Pedir orçamento agora
-      </button>
+const SuggestionCarousel: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-      <div className="flex flex-wrap justify-center gap-2">
-        <button 
-          onClick={() => onNavigate('coupon_landing')}
-          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
-        >
-          Ver ofertas
-        </button>
-        <button 
-          onClick={() => onNavigate('classifieds')}
-          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
-        >
-          Ver classificados
-        </button>
-        <button 
-          onClick={() => onNavigate('explore')}
-          className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-[#1E5BFF] dark:hover:text-white transition-colors border border-transparent hover:border-blue-500/10"
-        >
-          Encontrar perto de mim
-        </button>
+  const handleNext = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => (prev + 1) % SUGGESTIONS.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  };
+
+  const handlePrev = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => (prev - 1 + SUGGESTIONS.length) % SUGGESTIONS.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(handleNext, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const active = SUGGESTIONS[currentIndex];
+
+  return (
+    <section className="px-5 mb-10 relative overflow-hidden">
+      <div className="relative group h-60 w-full rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-500">
+        
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            key={active.id}
+            src={active.image} 
+            alt="" 
+            className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-950 via-white/80 dark:via-gray-950/80 to-transparent"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 h-full p-8 flex flex-col justify-center max-w-[70%]">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight mb-2 font-display">
+            {active.title}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6 leading-relaxed">
+            {active.subtitle}
+          </p>
+          <button 
+            onClick={() => onNavigate(active.destination)}
+            className="w-fit bg-[#1E5BFF] hover:bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+          >
+            {active.icon}
+            {active.cta}
+          </button>
+        </div>
+
+        {/* Navigation Arrows */}
+        <div className="absolute inset-y-0 right-4 flex flex-col justify-center gap-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button 
+            onClick={handlePrev}
+            className="p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-lg text-gray-900 dark:text-white active:scale-90 transition-all"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button 
+            onClick={handleNext}
+            className="p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-full shadow-lg text-gray-900 dark:text-white active:scale-90 transition-all"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+
+        {/* Progress Indicators */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
+          {SUGGESTIONS.map((_, idx) => (
+            <div 
+              key={idx}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? 'w-6 bg-[#1E5BFF]' : 'w-1.5 bg-gray-300 dark:bg-gray-700'
+              }`}
+            />
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
@@ -124,40 +210,6 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   );
 };
 
-const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
-  const itemImage = item.imageUrl || getFallbackImage(item.id);
-
-  return (
-    <div className="flex-shrink-0 w-40 snap-center p-1.5">
-      <div 
-        onClick={() => onNavigate('classifieds')}
-        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
-      >
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-          <img src={itemImage} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          {item.price && (
-             <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-sm">
-                {item.price}
-             </div>
-          )}
-          <div className="absolute top-2 left-2">
-             <span className="text-[8px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">{item.category.split(' ')[0]}</span>
-          </div>
-        </div>
-        <div className="p-3 flex flex-col flex-1 justify-between">
-            <h3 className="text-xs font-bold text-gray-800 dark:text-white leading-tight line-clamp-2 mb-1">
-                {item.title}
-            </h3>
-            <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wide truncate flex items-center gap-1">
-                <MapPin size={8} /> {item.neighborhood}
-            </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
   onSelectCategory: (category: Category) => void;
@@ -178,70 +230,93 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
 
-  // Lógica de Categorias Fixas
-  const block1Categories = useMemo(() => CATEGORIES.slice(0, 8), []);
-  const block2Categories = useMemo(() => CATEGORIES.slice(8, 15), []);
+  // Lógica de Categorias Paginadas (2 linhas de 4 itens = 8 por página)
+  const itemsPerPage = 8;
+  const categoryPages = useMemo(() => {
+    const pages = [];
+    const displayList = CATEGORIES.slice(0, 15);
+    for (let i = 0; i < displayList.length; i += itemsPerPage) {
+      pages.push(displayList.slice(i, i + itemsPerPage));
+    }
+    return pages;
+  }, []);
 
   const [wizardStep, setWizardStep] = useState(0);
+
+  const handleCategoryScroll = () => {
+    if (categoryScrollRef.current) {
+      const { scrollLeft, clientWidth } = categoryScrollRef.current;
+      setCurrentCategoryPage(Math.round(scrollLeft / clientWidth));
+    }
+  };
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
       {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-6 px-4 flex flex-col gap-1.5 relative z-10">
-            {/* BLOCO 1 - 8 CATEGORIAS PRINCIPAIS */}
-            <div className="grid grid-cols-4 gap-1.5">
-                {block1Categories.map((cat) => (
-                    <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
-                          <div className="flex-1 flex items-center justify-center w-full mb-1">
-                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                          </div>
-                          <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
-                            {cat.name}
-                          </span>
+        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
+            <div 
+              ref={categoryScrollRef}
+              onScroll={handleCategoryScroll}
+              className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
+            >
+                {categoryPages.map((pageCategories, pageIndex) => (
+                    <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
+                        <div className="grid grid-cols-4 grid-rows-2 gap-1.5">
+                            {pageCategories.map((cat) => (
+                                <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                                    <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
+                                      <div className="flex-1 flex items-center justify-center w-full mb-1">
+                                        {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                                      </div>
+                                      <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
+                                        {cat.name}
+                                      </span>
+                                    </div>
+                                </button>
+                            ))}
+                            
+                            {pageIndex === categoryPages.length - 1 && (
+                                <button 
+                                  onClick={() => setIsMoreCategoriesOpen(true)}
+                                  className="flex flex-col items-center group active:scale-95 transition-all w-full"
+                                >
+                                    <div className="w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                                      <div className="flex-1 flex items-center justify-center w-full mb-1">
+                                        <Plus className="w-9 h-9 text-gray-400 group-hover:text-blue-600 transition-colors" strokeWidth={3} />
+                                      </div>
+                                      <span className="block w-full text-[8.5px] font-black text-gray-400 dark:text-gray-500 text-center uppercase tracking-tighter leading-none truncate">
+                                        Mais
+                                      </span>
+                                    </div>
+                                </button>
+                            )}
                         </div>
-                    </button>
+                    </div>
                 ))}
             </div>
-
-            {/* BLOCO 2 - 7 CATEGORIAS + BOTÃO MAIS */}
-            <div className="grid grid-cols-4 gap-1.5">
-                {block2Categories.map((cat) => (
-                    <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
-                          <div className="flex-1 flex items-center justify-center w-full mb-1">
-                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                          </div>
-                          <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
-                            {cat.name}
-                          </span>
-                        </div>
-                    </button>
+            
+            <div className="flex justify-center gap-1.5 pb-6 pt-2">
+                {categoryPages.map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`rounded-full transition-all duration-300 ${
+                        idx === currentCategoryPage 
+                          ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' 
+                          : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'
+                      }`} 
+                    />
                 ))}
-                
-                {/* BOTÃO MAIS (+) */}
-                <button 
-                  onClick={() => setIsMoreCategoriesOpen(true)}
-                  className="flex flex-col items-center group active:scale-95 transition-all w-full"
-                >
-                    <div className="w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                      <div className="flex-1 flex items-center justify-center w-full mb-1">
-                        <Plus className="w-9 h-9 text-gray-400 group-hover:text-blue-600 transition-colors" strokeWidth={3} />
-                      </div>
-                      <span className="block w-full text-[8.5px] font-black text-gray-400 dark:text-gray-500 text-center uppercase tracking-tighter leading-none truncate">
-                        Mais
-                      </span>
-                    </div>
-                </button>
             </div>
         </section>
       )}
 
-      {/* BLOCO DE AÇÃO IMEDIATA REFORMULADO */}
-      <QuickActionBlock onNavigate={onNavigate} />
+      {/* NOVO CARROSSEL DE SUGESTÕES INTELIGENTES */}
+      <SuggestionCarousel onNavigate={onNavigate} />
 
       {isFeatureActive('banner_highlights') && (
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
