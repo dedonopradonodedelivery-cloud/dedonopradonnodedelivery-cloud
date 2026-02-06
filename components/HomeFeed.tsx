@@ -32,17 +32,18 @@ import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
+import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
 
-// Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
+// Imagens de fallback realistas e variadas
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
 ];
 
 const getFallbackImage = (id: string) => {
@@ -111,7 +112,6 @@ const QuickActionBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ on
 );
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
   return (
@@ -189,24 +189,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   userRole 
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const { currentNeighborhood } = useNeighborhood();
   const { isFeatureActive } = useFeatures();
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
-  const itemsPerPage = 8; 
+  const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
-  const orderedCategories = useMemo(() => {
-    const firstPageIds = ['cat-saude', 'cat-fashion', 'cat-pets', 'cat-pro', 'cat-beauty', 'cat-autos', 'cat-sports', 'cat-edu'];
-    const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
-    const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
-    return [...firstPage, ...remaining];
-  }, []);
-
-  const categoryPages = useMemo(() => {
-    const pages = [];
-    for (let i = 0; i < orderedCategories.length; i += itemsPerPage) { pages.push(orderedCategories.slice(i, i + itemsPerPage)); }
-    return pages;
-  }, [orderedCategories]);
+  // Lógica de Categorias Fixas
+  // Bloco 1: 8 primeiras categorias
+  // Bloco 2: 7 categorias seguintes + Botão "+"
+  const block1Categories = useMemo(() => CATEGORIES.slice(0, 8), []);
+  const block2Categories = useMemo(() => CATEGORIES.slice(8, 15), []);
 
   const [wizardStep, setWizardStep] = useState(0);
 
@@ -215,13 +205,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
       {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
-            <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={() => { if (categoryScrollRef.current) setCurrentCategoryPage(Math.round(categoryScrollRef.current.scrollLeft / categoryScrollRef.current.clientWidth)); }}>
-            {categoryPages.map((pageCategories, pageIndex) => (
-                <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-                <div className="grid grid-cols-4 gap-1.5">
-                    {pageCategories.map((cat, index) => (
-                    <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-6 px-4 flex flex-col gap-1.5 relative z-10">
+            {/* BLOCO 1 - 8 CATEGORIAS PRINCIPAIS */}
+            <div className="grid grid-cols-4 gap-1.5">
+                {block1Categories.map((cat) => (
+                    <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
                         <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
                           <div className="flex-1 flex items-center justify-center w-full mb-1">
                             {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
@@ -231,18 +219,43 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                           </span>
                         </div>
                     </button>
-                    ))}
-                </div>
-                </div>
-            ))}
+                ))}
             </div>
-            <div className="flex justify-center gap-1.5 pb-6 pt-2">
-            {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
+
+            {/* BLOCO 2 - 7 CATEGORIAS + BOTÃO MAIS */}
+            <div className="grid grid-cols-4 gap-1.5">
+                {block2Categories.map((cat) => (
+                    <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
+                          <div className="flex-1 flex items-center justify-center w-full mb-1">
+                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                          </div>
+                          <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
+                            {cat.name}
+                          </span>
+                        </div>
+                    </button>
+                ))}
+                
+                {/* BOTÃO MAIS (+) */}
+                <button 
+                  onClick={() => setIsMoreCategoriesOpen(true)}
+                  className="flex flex-col items-center group active:scale-95 transition-all w-full"
+                >
+                    <div className="w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                      <div className="flex-1 flex items-center justify-center w-full mb-1">
+                        <Plus className="w-9 h-9 text-gray-400 group-hover:text-blue-600 transition-colors" strokeWidth={3} />
+                      </div>
+                      <span className="block w-full text-[8.5px] font-black text-gray-400 dark:text-gray-500 text-center uppercase tracking-tighter leading-none truncate">
+                        Mais
+                      </span>
+                    </div>
+                </button>
             </div>
         </section>
       )}
 
-      {/* NOVO BLOCO DE AÇÃO RÁPIDA "RESOLVA AGORA" */}
+      {/* BLOCO DE AÇÃO RÁPIDA "RESOLVA AGORA" */}
       <QuickActionBlock onNavigate={onNavigate} />
 
       {isFeatureActive('banner_highlights') && (
@@ -298,6 +311,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           )}
         </section>
       )}
+
+      {/* MODAL DE MAIS CATEGORIAS */}
+      <MoreCategoriesModal 
+        isOpen={isMoreCategoriesOpen} 
+        onClose={() => setIsMoreCategoriesOpen(false)} 
+        onSelectCategory={(cat) => {
+            onSelectCategory(cat);
+            setIsMoreCategoriesOpen(false);
+        }} 
+      />
     </div>
   );
 };

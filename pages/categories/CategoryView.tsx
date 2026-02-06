@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
+/* Added CheckCircle2 to the imports from lucide-react */
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, Plus, CheckCircle2 } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
@@ -12,7 +12,7 @@ const FALLBACK_STORE_IMAGES = [
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
   'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
+  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800',
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
 ];
 
@@ -87,7 +87,6 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
         </div>
     );
 };
-// --- End Banner Rendering Components ---
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -143,6 +142,42 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
   );
 };
 
+const AllSubcategoriesModal: React.FC<{ 
+    isOpen: boolean; 
+    onClose: () => void; 
+    categoryName: string;
+    subcategories: { name: string; icon: React.ReactNode }[];
+    onSelect: (name: string) => void;
+    selected: string | null;
+}> = ({ isOpen, onClose, categoryName, subcategories, onSelect, selected }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm flex items-end justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300 max-h-[85vh]" onClick={e => e.stopPropagation()}>
+                <div className="p-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                    <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Subcategorias: {categoryName}</h2>
+                </div>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-2">
+                    {subcategories.map((sub, i) => (
+                        <button 
+                            key={i} 
+                            onClick={() => { onSelect(sub.name); onClose(); }}
+                            className={`w-full p-4 flex items-center justify-between rounded-2xl border transition-all ${selected === sub.name ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}
+                        >
+                            <div className="flex items-center gap-3">
+                                {React.cloneElement(sub.icon as any, { size: 18, className: selected === sub.name ? 'text-blue-600' : 'text-gray-400' })}
+                                <span className={`font-bold text-sm ${selected === sub.name ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>{sub.name}</span>
+                            </div>
+                            {selected === sub.name && <CheckCircle2 size={18} className="text-blue-600" />}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 interface CategoryViewProps {
   category: Category;
   onBack: () => void;
@@ -167,11 +202,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
+  const [isAllSubsModalOpen, setIsAllSubsModalOpen] = useState(false);
 
   const subcategories = useMemo(() => SUBCATEGORIES[category.name] || [], [category.name]);
-  const MAX_VISIBLE_SUBCATEGORIES = 8;
-  const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
-  const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
+  
+  // REGRA: Exibir até 7 e o 8º ser "+" se houver mais de 8
+  const showPlusSub = subcategories.length > 8;
+  const visibleSubcategories = showPlusSub ? subcategories.slice(0, 7) : subcategories;
 
   useEffect(() => {
     const fetchCategoryBanner = async () => {
@@ -275,7 +312,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* BANNER FIXO INSTITUCIONAL (Altura Reduzida 16/6) */}
       <div className="mt-4 px-5">
         <div 
           onClick={() => onNavigate('explore')}
@@ -310,13 +346,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                     categoryColor={category.color}
                   />
               ))}
-              {shouldShowMore && (
+              {showPlusSub && (
                   <BigSurCard 
-                      icon={<Grid />} 
-                      name="Ver Todas" 
+                      icon={<Plus />} 
+                      name="Mais" 
                       isSelected={false} 
                       isMoreButton 
-                      onClick={() => alert('Mostrar todas as subcategorias')} 
+                      onClick={() => setIsAllSubsModalOpen(true)} 
                   />
               )}
             </div>
@@ -345,6 +381,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
+
+      <AllSubcategoriesModal 
+        isOpen={isAllSubsModalOpen}
+        onClose={() => setIsAllSubsModalOpen(false)}
+        categoryName={category.name}
+        subcategories={subcategories}
+        onSelect={handleSubcategoryClick}
+        selected={selectedSubcategory}
+      />
     </div>
   );
 };
@@ -352,12 +397,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
 // Re-using the StoreCard internal to list for CategoryView
 const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
-
   return (
     <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
       <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
+        <img src={store.logoUrl || store.image || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
