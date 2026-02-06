@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
@@ -160,12 +159,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={() => { if (categoryScrollRef.current) setCurrentCategoryPage(Math.round(categoryScrollRef.current.scrollLeft / categoryScrollRef.current.clientWidth)); }}>
             {categoryPages.map((pageCategories, pageIndex) => (
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-                <div className="grid grid-cols-4 gap-x-1.5 gap-y-3">
-                    {pageCategories.map((cat) => (
-                    <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                        <div className="w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-blue-600 border border-white/20">
+                <div className="grid grid-cols-4 gap-1.5">
+                    {pageCategories.map((cat, index) => (
+                    <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
                           <div className="flex-1 flex items-center justify-center w-full mb-1">
-                            {React.cloneElement(cat.icon as any, { className: "w-8 h-8 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
                           </div>
                           <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
                             {cat.name}
@@ -178,7 +177,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             ))}
             </div>
             <div className="flex justify-center gap-1.5 pb-6 pt-2">
-            {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-blue-600 w-4 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
+            {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
             </div>
         </section>
       )}
