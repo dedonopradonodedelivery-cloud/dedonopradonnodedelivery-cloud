@@ -1,5 +1,5 @@
 {
-  "name": "V2 - Localizei JPA",
+  "name": "V3 - Localizei JPA",
   "description": "Onde o bairro conversa. O super-app de Jacarepaguá para conectar moradores, comércios e serviços locais.",
   "requestFramePermissions": [
     "geolocation",

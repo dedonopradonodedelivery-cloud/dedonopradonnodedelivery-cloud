@@ -20,6 +20,10 @@ import {
   X, 
   Send, 
   ChevronRight,
+  Clock,
+  AlertTriangle,
+  Megaphone,
+  Calendar
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -40,6 +44,41 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
   'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
+];
+
+const HAPPENING_NOW_MOCK = [
+  {
+    id: 'hn-1',
+    type: 'promotion',
+    title: 'Rodízio de Pizza',
+    subtitle: 'Pizzaria do Zé',
+    timeRemaining: 'Até as 23h',
+    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200&auto=format&fit=crop'
+  },
+  {
+    id: 'hn-2',
+    type: 'event',
+    title: 'Feira Orgânica',
+    subtitle: 'Praça da Freguesia',
+    timeRemaining: 'Termina em 1h',
+    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=200&auto=format&fit=crop'
+  },
+  {
+    id: 'hn-3',
+    type: 'alert',
+    title: 'Trânsito Intenso',
+    subtitle: 'Est. Três Rios',
+    timeRemaining: 'Reportado agora',
+    image: null
+  },
+  {
+    id: 'hn-4',
+    type: 'promotion',
+    title: 'Happy Hour 50%',
+    subtitle: 'Bar do Zé',
+    timeRemaining: 'Inicia às 18h',
+    image: 'https://images.unsplash.com/photo-1514362545857-3bc16549766b?q=80&w=200&auto=format&fit=crop'
+  }
 ];
 
 const getFallbackImage = (id: string) => {
@@ -109,6 +148,66 @@ const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string
       </div>
     </div>
   );
+};
+
+const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  return (
+    <div className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <div>
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
+            Acontecendo Agora 
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            </h2>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Tempo real no bairro</p>
+        </div>
+        <button 
+          onClick={() => alert("Funcionalidade de alerta rápido em breve!")}
+          className="flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 hover:text-blue-500 transition-colors"
+        >
+            <Plus size={16} />
+        </button>
+      </div>
+      
+      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+        {HAPPENING_NOW_MOCK.map((item) => (
+            <div key={item.id} className="snap-center flex-shrink-0 w-64 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-3 flex gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
+                <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
+                    {item.image ? (
+                        <img src={item.image} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                        <div className="text-amber-500">
+                             {item.type === 'alert' ? <AlertTriangle size={24} /> : <Zap size={24} />}
+                        </div>
+                    )}
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
+                            item.type === 'promotion' ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
+                            item.type === 'event' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' :
+                            'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
+                        }`}>
+                            {item.type === 'promotion' && <Megaphone size={8} />}
+                            {item.type === 'event' && <Calendar size={8} />}
+                            {item.type === 'alert' && <AlertTriangle size={8} />}
+                            {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : 'Aviso'}
+                        </span>
+                    </div>
+                    <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate mb-1">{item.subtitle}</p>
+                    <div className="flex items-center gap-1 text-[9px] text-blue-600 dark:text-blue-400 font-bold">
+                        <Clock size={10} /> {item.timeRemaining}
+                    </div>
+                </div>
+            </div>
+        ))}
+      </div>
+    </div>
+  )
 };
 
 interface HomeFeedProps {
@@ -185,6 +284,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {isFeatureActive('banner_highlights') && (
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
+
+      {/* ACONTECENDO AGORA BLOCK */}
+      <HappeningNowSection onNavigate={onNavigate} />
 
       {isFeatureActive('community_feed') && (
         <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
