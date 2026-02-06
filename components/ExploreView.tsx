@@ -1,6 +1,6 @@
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from "../types";
+import { Store } from "@/types";
 import {
   MapPin,
   Filter,
@@ -13,9 +13,26 @@ import {
   TrendingUp,
   ArrowRight
 } from "lucide-react";
-import { useUserLocation } from "../hooks/useUserLocation";
-import { useMediaQuery } from "../hooks/useMediaQuery";
-import { quickFilters } from "../constants";
+import { useUserLocation } from "@/hooks/useUserLocation";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { quickFilters } from "@/constants";
+
+const FALLBACK_STORE_IMAGES = [
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
+  'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
+  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
+];
+
+const getFallbackStoreImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_STORE_IMAGES[Math.abs(hash) % FALLBACK_STORE_IMAGES.length];
+};
 
 type ExploreViewProps = {
   stores: Store[];
@@ -55,7 +72,7 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
 );
 
 const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-    const newArrivals = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
+    const newArrivals = useMemo(() => stores.filter(s => ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
     if (newArrivals.length === 0) return null;
     return (
       <div className="bg-white dark:bg-gray-950 pt-2 mb-6">
@@ -63,7 +80,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
         <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
           {newArrivals.map((store) => (
             <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
-              <img src={store.image || store.logoUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
+              <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
               <div className="absolute inset-0 p-4 flex flex-col justify-end text-left">
                 <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 shadow-lg">Novo</span>
@@ -78,7 +95,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
 };
 
 const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const suggestions = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
+  const suggestions = useMemo(() => stores.filter(s => ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
   if (suggestions.length === 0) return null;
   return (
     <div className="bg-white dark:bg-gray-950 py-4 mb-6">
@@ -87,7 +104,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
         {suggestions.map((store) => (
           <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left">
             <div className="relative h-32 overflow-hidden">
-              <img src={store.image || store.logoUrl} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+              <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
             </div>
             <div className="p-5">
               <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">{store.category}</span>
@@ -105,7 +122,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
 };
 
 const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const trending = useMemo(() => stores.filter(s => (s.image || s.logoUrl) && ['f-1', 'f-2'].includes(s.id)), [stores]);
+  const trending = useMemo(() => stores.filter(s => ['f-1', 'f-2'].includes(s.id)), [stores]);
   if (trending.length < 2) return null;
   return (
     <div className="bg-white dark:bg-gray-950 py-4 mb-8">
@@ -114,7 +131,7 @@ const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) 
         {trending.map((store, idx) => (
           <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-[0.98] shadow-sm ${idx === 0 ? 'bg-rose-50/70 dark:bg-rose-900/20' : 'bg-blue-50/70 dark:bg-blue-900/20'}`}>
             <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
-              <img src={store.logoUrl || store.image} alt="" className="w-full h-full object-cover" />
+              <img src={store.logoUrl || store.image || getFallbackStoreImage(store.id)} alt="" className="w-full h-full object-cover" />
             </div>
             <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
             <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">{store.category}</p>
@@ -176,7 +193,7 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
         {stores.map((store) => (
           <button key={store.id} onClick={() => onStoreClick(store)} className="min-w-[250px] max-w-[260px] bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden text-left hover:-translate-y-0.5 transition-all duration-200">
             <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
-              <img src={store.image} alt={store.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+              <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt={store.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">

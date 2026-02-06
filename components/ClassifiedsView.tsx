@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -26,7 +25,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { Classified, AdType, Store } from '../types';
+import { Classified, AdType, Store, ServiceUrgency } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
@@ -50,23 +49,29 @@ const getFallbackImage = (id: string) => {
 };
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue' },
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue' },
-  { id: 'adocao', name: 'Adoção', slug: 'adoption', icon: <PawPrint />, color: 'bg-brand-blue' },
-  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue' },
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue', bentoClass: 'col-span-3 aspect-[3/0.95]' }, // Mais largo
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue', bentoClass: 'col-span-1 row-span-2 h-full' }, // Mais alto
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.9]' }, // Quase quadrado
+  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.7]' }, // Mais compacto
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[0.8/1]' }, // Mais estreito
 ];
 
 const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
-  <button onClick={onClick} className="flex flex-col items-center group active:scale-95 transition-all">
-    <div className={`w-full aspect-square rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${category.color} border border-white/20`}>
-      <div className="flex-1 flex items-center justify-center w-full">
-        {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white drop-shadow-md", strokeWidth: 2.5 })}
+  <button 
+    onClick={onClick}
+    className={`flex flex-col items-center group active:scale-95 transition-all w-full h-full ${category.bentoClass}`}
+  >
+    <div className={`w-full h-full rounded-[22px] border border-white/20 shadow-sm flex flex-col items-center justify-between p-2 ${category.color}`}>
+      <div className="flex-1 flex items-center justify-center">
+        {React.cloneElement(category.icon as any, { 
+            className: "text-white drop-shadow-md", 
+            size: category.id === 'servicos' ? 28 : (category.id === 'imoveis' ? 32 : 22),
+            strokeWidth: 3 
+        })}
       </div>
-      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2">
-        <span className="block w-full text-[10px] font-black text-white text-center uppercase tracking-tight leading-tight">{category.name}</span>
-      </div>
+      <span className="text-[7.5px] w-full font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate">
+        {category.name}
+      </span>
     </div>
   </button>
 );
@@ -76,7 +81,7 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     const isAdoption = item.category === 'Adoção de pets';
     const isJob = item.category === 'Empregos';
     const isService = item.category === 'Orçamento de Serviços';
-    const hasPrice = !!item.price && !isDonation && !isAdoption && !isJob && !isService;
+    const hasPrice = !!item.price && !isDonation && !isAdoption && item.category !== 'Empregos' && item.category !== 'Orçamento de Serviços';
 
     // Garante uma imagem mesmo se o item não tiver
     const displayImage = item.imageUrl || getFallbackImage(item.id);
@@ -93,14 +98,9 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
-                    {isDonation && (
+                    {(isDonation || isAdoption) && (
                         <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white shadow-lg border border-white/20">
                             DOAÇÃO
-                        </span>
-                    )}
-                    {isAdoption && (
-                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white shadow-lg border border-white/20">
-                            ADOÇÃO
                         </span>
                     )}
                     {isJob && (
@@ -210,8 +210,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   const services = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Orçamento de Serviços').slice(0, 5), []);
   const realEstate = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Imóveis Comerciais').slice(0, 5), []);
   const jobs = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Empregos').slice(0, 5), []);
-  const adoption = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Adoção de pets').slice(0, 5), []);
-  const donations = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Doações em geral').slice(0, 5), []);
+  const donations = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Doações em geral' || item.category === 'Adoção de pets').slice(0, 8), []);
   const desapega = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Desapega JPA').slice(0, 5), []);
 
   const handleAnunciarHeader = () => {
@@ -233,7 +232,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 py-6 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center justify-between gap-3 mb-6">
           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 transition-colors active:scale-90 shadow-sm shrink-0">
             <ChevronLeft size={20} />
@@ -241,13 +240,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           
           <div className="flex-1 min-w-0">
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Classificados</h1>
-            <p className="text-[10px] text-blue-50 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={handleAnunciarHeader}
-              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/20 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
               <Plus size={12} strokeWidth={4} />
               Anunciar
@@ -277,18 +276,19 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                     <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Classificados</span>
                 </div>
             </div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest ml-1 opacity-70">
-                Busca dentro dos Classificados do bairro
-            </p>
         </div>
       </header>
 
       <main className="p-5 space-y-4">
         
-        {/* BOTÕES DE CATEGORIA RÁPIDOS */}
-        <div className="grid grid-cols-3 gap-4 mb-8 mt-2">
+        {/* BENTO GRID DE CATEGORIAS ORGÂNICO E ASSIMÉTRICO */}
+        <div className="grid grid-cols-4 gap-3 mb-8 mt-2">
             {CLASSIFIED_CATEGORIES.map(cat => (
-                <ClassifiedCategoryButton key={cat.id} category={cat} onClick={() => onNavigate(cat.slug)} />
+                <ClassifiedCategoryButton 
+                    key={cat.id} 
+                    category={cat} 
+                    onClick={() => onNavigate(cat.slug)} 
+                />
             ))}
         </div>
 
@@ -297,62 +297,53 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             items={services} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('services_landing')}
-            onViewAll={() => onNavigate('services_landing')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Pedir Orçamento Grátis"
             subtitle="Profissionais verificados do bairro"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[1]} 
+            // FIX: Corrected line 307 to remove the reference to undefined 'categoryName'.
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'imoveis')!} 
             items={realEstate} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('real_estate_wizard')}
-            onViewAll={() => onNavigate('real_estate')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Anunciar Ponto Comercial"
             subtitle="Oportunidades imobiliárias"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[2]} 
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'emprego')!} 
             items={jobs} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('job_wizard')}
-            onViewAll={() => onNavigate('jobs')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Divulgar Vaga no Bairro"
             subtitle="Encontre talentos locais"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[3]} 
-            items={adoption} 
-            onItemClick={handleItemClick}
-            onAnunciar={(name) => onNavigate('adoption')}
-            onViewAll={() => onNavigate('adoption')}
-            ctaLabel="Divulgar Adoção"
-            subtitle="Ajude um amigo a encontrar um lar"
-        />
-
-        <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[4]} 
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'doacoes')!} 
             items={donations} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('donations')}
-            onViewAll={() => onNavigate('donations')}
-            ctaLabel="Divulgar Doação"
-            subtitle="Fazer o bem circula no bairro"
+            onViewAll={(slug) => onNavigate(slug)}
+            ctaLabel="Divulgar Doação ou Adoção"
+            subtitle="Ações sociais e pets no bairro"
         />
 
         <CategoryBlock 
-            category={CLASSIFIED_CATEGORIES[5]} 
+            category={CLASSIFIED_CATEGORIES.find(c => c.id === 'desapega')!} 
             items={desapega} 
             onItemClick={handleItemClick}
             onAnunciar={(name) => onNavigate('desapega')}
-            onViewAll={() => onNavigate('desapega')}
+            onViewAll={(slug) => onNavigate(slug)}
             ctaLabel="Anunciar Desapego"
             subtitle="Venda o que você não usa mais"
         />
 
-        {/* BANNER PATROCINADOR MASTER FINAL - ÚLTIMO ELEMENTO DA PÁGINA CONFORME REGRA */}
+        {/* BANNER PATROCINADOR MASTER FINAL */}
         <section className="mt-8">
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
         </section>
