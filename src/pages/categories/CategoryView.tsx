@@ -172,7 +172,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   stores, 
   userRole, 
   onAdvertiseInCategory, 
-  onNavigate,
+  onNavigate, 
   onSubcategoryClick
 }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
@@ -212,8 +212,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         if (autosGroup === 'moto') {
              return allSubs.filter(s => [
                 'Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 
-                'Troca de óleo', 'Suspensão e freios', 'Injeção eletrônica', 
-                'Peças e acessórios', 'Guincho para motos'
+                'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos'
              ].includes(s.name));
         }
     }
