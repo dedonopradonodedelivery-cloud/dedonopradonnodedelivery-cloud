@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Wrench, Check, ChevronRight, Zap, Key, Hammer, Sparkles, Laptop } from 'lucide-react';
 
@@ -19,7 +20,7 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
       {/* Main Banner */}
       <div 
         onClick={onClick}
-        className="relative w-full overflow-hidden rounded-[1.75rem] bg-[#020617] p-5 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/5"
+        className="relative w-full overflow-hidden rounded-[1.75rem] bg-[#020617] py-10 px-6 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/5"
       >
         {/* Background - Preserved */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1E5BFF] opacity-90"></div>
