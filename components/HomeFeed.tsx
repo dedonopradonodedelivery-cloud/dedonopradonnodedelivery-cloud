@@ -24,7 +24,10 @@ import {
   AlertTriangle,
   Megaphone,
   Calendar,
-  MessageCircle
+  MessageCircle,
+  Dog,
+  Key,
+  Phone
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -118,6 +121,39 @@ const TALENTS_MOCK = [
     image: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea92d5?q=80&w=400&auto=format&fit=crop',
     whatsapp: '5521999999999',
     badge: null
+  }
+];
+
+const LOST_AND_FOUND_MOCK = [
+  {
+    id: 'lf1',
+    type: 'lost_pet',
+    title: 'Cachorro Pinscher - Totó',
+    description: 'Fugiu perto da Praça Seca. Coleira azul. Dócil mas assustado. Atende pelo nome de Totó.',
+    location: 'Praça Seca',
+    time: 'Há 2h',
+    image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?q=80&w=600&auto=format&fit=crop',
+    contact: '5521999999999'
+  },
+  {
+    id: 'lf2',
+    type: 'found_item',
+    title: 'Chaves de Carro',
+    description: 'Encontradas na calçada da Padaria Imperial. Chaveiro do Flamengo. Deixei no balcão da padaria.',
+    location: 'Freguesia',
+    time: 'Há 5h',
+    image: 'https://images.unsplash.com/photo-1583574883377-2f3b9220556b?q=80&w=600&auto=format&fit=crop',
+    contact: '5521999999999'
+  },
+  {
+    id: 'lf3',
+    type: 'lost_pet',
+    title: 'Gato Siamês - Mimi',
+    description: 'Visto pela última vez no telhado do vizinho na Rua Araguaia. Tem uma mancha branca no nariz.',
+    location: 'Freguesia',
+    time: 'Ontem',
+    image: 'https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=600&auto=format&fit=crop',
+    contact: '5521999999999'
   }
 ];
 
@@ -245,6 +281,101 @@ const TalentsSection: React.FC = () => {
     );
 };
 
+const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | null, onClose: () => void }> = ({ item, onClose }) => {
+    if (!item) return null;
+
+    const isLost = item.type === 'lost_pet';
+    
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 bg-black/20 text-white rounded-full backdrop-blur-md">
+                    <X size={20} />
+                </button>
+                <div className="relative aspect-square w-full">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isLost ? 'bg-orange-500' : 'bg-emerald-500'}`}>
+                            {isLost ? 'Perdido' : 'Encontrado'}
+                        </span>
+                        <h2 className="text-2xl font-bold leading-tight">{item.title}</h2>
+                    </div>
+                </div>
+                <div className="p-6">
+                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        <div className="flex items-center gap-1.5">
+                            <MapPin size={16} className="text-[#1E5BFF]" />
+                            {item.location}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Clock size={16} className="text-[#1E5BFF]" />
+                            {item.time}
+                        </div>
+                    </div>
+                    
+                    <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-medium mb-8">
+                        {item.description}
+                    </p>
+
+                    <button 
+                        onClick={() => window.open(`https://wa.me/${item.contact}`, '_blank')}
+                        className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all ${isLost ? 'bg-orange-500 shadow-orange-500/30' : 'bg-emerald-500 shadow-emerald-500/30'}`}
+                    >
+                        <Phone size={16} /> Entrar em Contato
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
+    return (
+        <section className="py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
+            <div className="px-5 mb-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Achados e Perdidos</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Animais e itens que alguém do bairro está procurando.</p>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+                {LOST_AND_FOUND_MOCK.map((item) => {
+                    const isLost = item.type === 'lost_pet';
+                    const Icon = isLost ? Dog : Key;
+                    
+                    return (
+                        <div 
+                            key={item.id}
+                            onClick={() => onItemClick(item)}
+                            className="flex-shrink-0 w-64 bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 cursor-pointer active:scale-95 transition-all group snap-center"
+                        >
+                            <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden relative shrink-0">
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white ${isLost ? 'bg-orange-500' : 'bg-emerald-500'}`}>
+                                    {isLost ? 'Perdido' : 'Achado'}
+                                </div>
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center min-w-0">
+                                <div className="flex items-center gap-1.5 mb-1 text-gray-400">
+                                    <Icon size={12} />
+                                    <span className="text-[10px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
+                                </div>
+                                <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate mb-1">{item.title}</h3>
+                                <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
+                                    <span className="flex items-center gap-0.5 truncate max-w-[80px]"><MapPin size={10} /> {item.location}</span>
+                                    <span>•</span>
+                                    <span>{item.time}</span>
+                                </div>
+                                <span className="text-[10px] font-bold text-[#1E5BFF] mt-2 block group-hover:underline">Ver detalhes</span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+};
+
 const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   return (
     <div className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950">
@@ -327,6 +458,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { isFeatureActive } = useFeatures();
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
+  const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
   const itemsPerPage = 8; 
 
   const orderedCategories = useMemo(() => {
@@ -386,6 +518,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* TALENTOS DO BAIRRO BLOCK */}
       <TalentsSection />
 
+      {/* ACHADOS E PERDIDOS BLOCK */}
+      <LostAndFoundSection onItemClick={setSelectedLostItem} />
+
       {isFeatureActive('community_feed') && (
         <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
             <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
@@ -435,6 +570,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           )}
         </section>
       )}
+
+      {/* Modal para detalhes de Achados e Perdidos */}
+      <LostAndFoundDetailModal 
+          item={selectedLostItem} 
+          onClose={() => setSelectedLostItem(null)} 
+      />
     </div>
   );
 };
