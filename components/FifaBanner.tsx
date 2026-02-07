@@ -17,51 +17,48 @@ const QUICK_SERVICES = [
 export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
   return (
     <div className="flex flex-col gap-5">
-      {/* Main Banner */}
+      {/* Main Banner - Altura aumentada e visual suavizado */}
       <div 
         onClick={onClick}
-        className="relative w-full overflow-hidden rounded-[1.75rem] bg-[#020617] py-10 px-6 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/5"
+        className="relative w-full overflow-hidden rounded-[2.5rem] bg-blue-600 py-16 px-8 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
       >
-        {/* Background - Preserved */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1E5BFF] opacity-90"></div>
+        {/* Background - Gradiente mais leve e azulado */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"></div>
         
-        {/* Decorative Lines/Patterns */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'linear-gradient(135deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-[100px]"></div>
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-600 rounded-full blur-[100px]"></div>
+        {/* Decorative Lines/Patterns - Suavizados */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'linear-gradient(135deg, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-[80px]"></div>
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-400/20 rounded-full blur-[80px]"></div>
         </div>
 
-        {/* Dynamic Glow Effect */}
-        <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/5 to-transparent rotate-45 animate-[slow-shimmer_6s_infinite_linear] pointer-events-none"></div>
+        {/* Dynamic Glow Effect - Sutil */}
+        <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-45 animate-[slow-shimmer_8s_infinite_linear] pointer-events-none"></div>
 
-        <div className="relative z-10 flex items-center gap-4">
-          {/* Left Icon (New) */}
-          <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10 shadow-lg">
-            <Wrench size={20} className="text-white" />
+        <div className="relative z-10 flex items-center gap-6">
+          {/* Left Icon - Aumentado e clareado */}
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-lg">
+            <Wrench size={28} className="text-white" />
           </div>
 
           {/* Text Section */}
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-black text-white leading-none uppercase tracking-tighter mb-1.5">
+            <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight mb-2">
               Precisando de um profissional?
             </h2>
-            <p className="text-[10px] text-slate-300 font-medium leading-tight opacity-90 pr-2">
+            <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-90 pr-2">
               Especialistas verificados, orçamentos rápidos e atendimento perto de você!
             </p>
           </div>
 
-          {/* Right Icon (New) */}
-          <div className="shrink-0 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all">
-             <ChevronRight size={20} />
+          {/* Right Icon */}
+          <div className="shrink-0 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all">
+             <ChevronRight size={24} />
           </div>
         </div>
-
-        {/* Subtle Bottom Border Accent */}
-        <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent w-full opacity-50"></div>
       </div>
 
-      {/* Mini Services List (New) */}
+      {/* Mini Services List */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2">
         {QUICK_SERVICES.map((s, i) => (
           <button 
