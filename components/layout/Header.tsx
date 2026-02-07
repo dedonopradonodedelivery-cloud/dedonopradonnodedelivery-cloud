@@ -30,7 +30,15 @@ const NeighborhoodSelectorModal: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                        <MapPin className="w-5 h-5 text-[#1E5BFF]" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none">Localização</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">Filtrar conteúdo por bairro</p>
+                    </div>
+                </div>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
                     <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
@@ -190,16 +198,17 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="w-full z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md relative">
             <div className="max-w-md mx-auto flex flex-col relative">
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
-                    <button onClick={toggleSelector} className="flex items-center gap-1.5 active:scale-95">
-                        <div className="p-1.5 bg-[#1E5BFF]/10 rounded-full"><MapPin className="w-3.5 h-3.5 text-[#1E5BFF]" fill="currentColor" /></div>
-                        <div className="text-left flex flex-col">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase leading-none">Local</span>
-                            <div className="flex items-center gap-1">
-                                <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate max-w-[120px]">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
-                                <ChevronDown className="w-3 h-3 text-gray-400" />
-                            </div>
+                    
+                    {/* Identidade do App (Logo/Texto) */}
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-[#1E5BFF] rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                             <MapPin size={18} fill="currentColor" />
                         </div>
-                    </button>
+                        <span className="font-display font-black text-lg text-slate-800 dark:text-white tracking-tight">
+                            Localizei JPA
+                        </span>
+                    </div>
+
                     <div className="flex items-center gap-2">
                         {isAdmin && (
                             <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
