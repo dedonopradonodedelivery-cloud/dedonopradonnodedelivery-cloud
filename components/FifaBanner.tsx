@@ -17,10 +17,10 @@ const QUICK_SERVICES = [
 export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
   return (
     <div className="flex flex-col gap-5">
-      {/* Main Banner - Altura aumentada e visual suavizado */}
+      {/* Main Banner - Altura reduzida (py-10) */}
       <div 
         onClick={onClick}
-        className="relative w-full overflow-hidden rounded-[2.5rem] bg-blue-600 py-16 px-8 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
+        className="relative w-full overflow-hidden rounded-[2.5rem] bg-blue-600 py-10 px-8 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
       >
         {/* Background - Gradiente mais leve e azulado */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"></div>
@@ -43,7 +43,7 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
 
           {/* Text Section */}
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight mb-2">
+            <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight mb-1">
               Precisando de um profissional?
             </h2>
             <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-90 pr-2">

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -841,4 +842,150 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
   ...MOCK_USER_COMMUNITIES
 ];
 
-export const MOCK_COMMUNITY_POSTS:
+export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
+  {
+    id: 'post-1',
+    userId: 'u1',
+    userName: 'Taty Oliveira',
+    userAvatar: 'https://i.pravatar.cc/100?u=taty',
+    authorRole: 'resident',
+    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '2h',
+    likes: 8,
+    comments: 16
+  },
+  {
+    id: 'post-2',
+    userId: 'u2',
+    userName: 'Tiago Santos',
+    userAvatar: 'https://i.pravatar.cc/100?u=tiago',
+    authorRole: 'resident',
+    content: 'Olha esse hambúrguer top na casa de carnes aqui do bairro! 🍔🔥 Quem já experimentou?',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Anil',
+    timestamp: '3h',
+    likes: 45,
+    comments: 8,
+    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-3',
+    userId: 'u3',
+    userName: 'Bruno Rocha',
+    userAvatar: 'https://i.pravatar.cc/100?u=bruno',
+    authorRole: 'resident',
+    content: 'Alguém sabe se a feira de domingo vai acontecer amanhã mesmo com a chuva?',
+    type: 'event',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '4h',
+    likes: 12,
+    comments: 4
+  },
+  {
+    id: 'post-4',
+    userId: 'u4',
+    userName: 'Mariana Luz',
+    userAvatar: 'https://i.pravatar.cc/100?u=mari',
+    authorRole: 'resident',
+    content: 'Vaga aberta para recepcionista em clínica odontológica na Taquara. Interessados, inbox!',
+    type: 'recommendation',
+    communityId: 'comm-jobs',
+    neighborhood: 'Taquara',
+    timestamp: '5h',
+    likes: 24,
+    comments: 12
+  },
+  {
+    id: 'post-5',
+    userId: 'u5',
+    userName: 'Ricardo Souza',
+    userAvatar: 'https://i.pravatar.cc/100?u=ricardo',
+    authorRole: 'resident',
+    content: 'Cuidado pessoal: semáforo da Geremário Dantas com problema, tá um caos o trânsito agora.',
+    type: 'alert',
+    communityId: 'comm-residents',
+    neighborhood: 'Freguesia',
+    timestamp: '6h',
+    likes: 38,
+    comments: 14
+  },
+  {
+    id: 'post-6',
+    userId: 'u6',
+    userName: 'Luciana Melo',
+    userAvatar: 'https://i.pravatar.cc/100?u=luciana',
+    authorRole: 'resident',
+    content: 'Estou desapegando dessa fritadeira elétrica, funcionando perfeitamente! R$ 150,00 para retirar no Anil.',
+    type: 'recommendation',
+    communityId: 'comm-desapega',
+    neighborhood: 'Anil',
+    timestamp: '8h',
+    likes: 24,
+    comments: 31,
+    imageUrl: 'https://images.unsplash.com/photo-1585659722982-789600c7690a?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 'post-7',
+    userId: 'u7',
+    userName: 'Felipe Costa',
+    userAvatar: 'https://i.pravatar.cc/100?u=felipe',
+    authorRole: 'merchant',
+    content: 'Pessoal, abri uma vaga de emprego na minha loja de tintas no Tanque. Interessados, inbox!',
+    type: 'event',
+    communityId: 'comm-jobs',
+    neighborhood: 'Tanque',
+    timestamp: '12h',
+    likes: 15,
+    comments: 22,
+    storeId: 'grupo-esquematiza'
+  },
+  {
+    id: 'post-8',
+    userId: 'u8',
+    userName: 'Amanda Silva',
+    userAvatar: 'https://i.pravatar.cc/100?u=amanda',
+    authorRole: 'resident',
+    content: 'Apartamento disponível para aluguel na Freguesia, 2 quartos, direto com proprietário.',
+    type: 'recommendation',
+    communityId: 'comm-real-estate',
+    neighborhood: 'Freguesia',
+    timestamp: '14h',
+    likes: 18,
+    comments: 45
+  },
+  {
+    id: 'post-9',
+    userId: 'u9',
+    userName: 'Rafael Lima',
+    userAvatar: 'https://i.pravatar.cc/100?u=rafael',
+    authorRole: 'resident',
+    content: 'Alguém para dividir frete de mudança saindo da Freguesia para o Recreio este mês?',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '1d',
+    likes: 5,
+    comments: 7
+  },
+  {
+    id: 'post-10',
+    userId: 'm-padaria',
+    userName: 'Padaria Imperial',
+    userAvatar: 'https://i.pravatar.cc/100?u=padaria',
+    authorRole: 'merchant',
+    content: 'Pão quentinho saindo agora! Venham aproveitar nossa fornada especial de brioche.',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '10 min',
+    likes: 32,
+    comments: 4,
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop',
+    storeId: 'f-1'
+  }
+];
