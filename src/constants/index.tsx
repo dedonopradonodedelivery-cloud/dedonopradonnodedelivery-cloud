@@ -1,5 +1,6 @@
 
-import React, { 
+import React from 'react';
+import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
   Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, 
   Store as StoreIcon,
