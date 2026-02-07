@@ -44,6 +44,7 @@ import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
+import { MoreCategoriesModal } from './MoreCategoriesModal';
 
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
@@ -701,6 +702,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
   const itemsPerPage = 8; 
+  
+  // State for the "More" modal
+  const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
   const orderedCategories = useMemo(() => {
     // Definindo as 8 categorias principais para a primeira página
@@ -721,8 +725,42 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   const categoryPages = useMemo(() => {
-    const pages = [];
-    for (let i = 0; i < orderedCategories.length; i += itemsPerPage) { pages.push(orderedCategories.slice(i, i + itemsPerPage)); }
+    // We want the first page to have 7 real categories + 1 "More" button
+    const firstPageItems = orderedCategories.slice(0, 7);
+    
+    // Create a dummy "More" category item
+    const moreItem: Category = { 
+        id: 'more-trigger', 
+        name: 'Mais', 
+        slug: 'more', 
+        icon: <Plus />, 
+        color: 'bg-gray-100 dark:bg-gray-800' 
+    };
+    
+    // The first page array
+    const page1 = [...firstPageItems, moreItem];
+    
+    // If there are more items (which there are), we can paginate normally from index 7 onwards
+    // BUT since we are using a modal for "More", we might only want to show the first page in the carousel for simplicity,
+    // OR we can continue the carousel.
+    // The requirement says "Appear alongside Home categories" and "Clicking + Mais opens a modal".
+    // It doesn't explicitly forbid the carousel swiping, but usually "More" replaces pagination.
+    // Let's keep the carousel logic but ensure Page 0 has the "More" button.
+    
+    const pages = [page1];
+    
+    // If we want to allow swiping to see the rest WITHOUT the modal, we would add more pages here.
+    // But since "More" opens a modal with ALL categories, having a swipeable carousel might be redundant or confusing.
+    // Let's stick to a single page view for now, as it's cleaner and fits the "More" pattern better.
+    // If we wanted pagination, we would slice the rest of `orderedCategories` into chunks.
+    
+    // UNCOMMENT TO ENABLE PAGINATION + MORE BUTTON
+    /*
+    for (let i = 7; i < orderedCategories.length; i += itemsPerPage) {
+        pages.push(orderedCategories.slice(i, i + itemsPerPage));
+    }
+    */
+
     return pages;
   }, [orderedCategories]);
 
@@ -739,25 +777,53 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {categoryPages.map((pageCategories, pageIndex) => (
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
                 <div className="grid grid-cols-4 gap-1.5">
-                    {pageCategories.map((cat, index) => (
-                    <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
-                          <div className="flex-1 flex items-center justify-center w-full mb-1">
-                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                          </div>
-                          <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
-                            {cat.name}
-                          </span>
-                        </div>
-                    </button>
-                    ))}
+                    {pageCategories.map((cat, index) => {
+                        // RENDERIZAÇÃO ESPECIAL PARA O BOTÃO "MAIS"
+                        if (cat.id === 'more-trigger') {
+                            return (
+                                <button 
+                                   key={cat.id} 
+                                   onClick={() => setIsMoreCategoriesOpen(true)}
+                                   className="flex flex-col items-center group active:scale-95 transition-all w-full"
+                                >
+                                    <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
+                                       {/* Styling to look like "Add/More" */}
+                                       <div className="flex-1 flex items-center justify-center w-full mb-1">
+                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
+                                       </div>
+                                       <span className="block w-full text-[8.5px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-none truncate">
+                                         Mais
+                                       </span>
+                                    </div>
+                                </button>
+                            );
+                        }
+
+                        // RENDERIZAÇÃO PADRÃO DE CATEGORIA
+                        return (
+                        <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                            <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
+                              <div className="flex-1 flex items-center justify-center w-full mb-1">
+                                {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                              </div>
+                              <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
+                                {cat.name}
+                              </span>
+                            </div>
+                        </button>
+                        );
+                    })}
                 </div>
                 </div>
             ))}
             </div>
-            <div className="flex justify-center gap-1.5 pb-6 pt-2">
+            {/* 
+               Se tivermos apenas 1 página (devido ao botão Mais), não precisamos dos dots.
+               Se reativarmos a paginação, descomente abaixo.
+            */}
+            {/* <div className="flex justify-center gap-1.5 pb-6 pt-2">
             {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
-            </div>
+            </div> */}
         </section>
       )}
 
@@ -844,6 +910,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       <LostAndFoundDetailModal 
           item={selectedLostItem} 
           onClose={() => setSelectedLostItem(null)} 
+      />
+
+      {/* Modal de Mais Categorias */}
+      <MoreCategoriesModal 
+          isOpen={isMoreCategoriesOpen}
+          onClose={() => setIsMoreCategoriesOpen(false)}
+          onSelectCategory={(category) => {
+              setIsMoreCategoriesOpen(false);
+              onSelectCategory(category);
+          }}
       />
     </div>
   );
