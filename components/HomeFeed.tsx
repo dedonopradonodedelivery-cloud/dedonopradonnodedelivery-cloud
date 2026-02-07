@@ -725,10 +725,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   const categoryPages = useMemo(() => {
-    // Pegar as 7 primeiras categorias reais
-    const firstPageItems = orderedCategories.slice(0, 7);
+    // Configurar para 2 páginas: 15 categorias + botão Mais (total 16 itens, 8 por página)
+    const visibleCategories = orderedCategories.slice(0, 15);
     
-    // Adicionar o botão "Mais" como um item fake
+    // Adicionar o botão "Mais" como último item
     const moreItem: Category = { 
         id: 'more-trigger', 
         name: 'Mais', 
@@ -737,9 +737,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         color: 'bg-gray-100 dark:bg-gray-800' 
     };
     
-    // Retornar apenas uma "página" contendo os 8 itens (7 reais + 1 botão)
-    // Isso garante que não haverá swipe/paginação na UI, apenas uma grade fixa.
-    return [[...firstPageItems, moreItem]];
+    const allItems = [...visibleCategories, moreItem];
+    
+    const pages = [];
+    for (let i = 0; i < allItems.length; i += itemsPerPage) {
+        pages.push(allItems.slice(i, i + itemsPerPage));
+    }
+    
+    return pages;
   }, [orderedCategories]);
 
   const [wizardStep, setWizardStep] = useState(0);
@@ -795,13 +800,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 </div>
             ))}
             </div>
-            {/* 
-               Se tivermos apenas 1 página (devido ao botão Mais), não precisamos dos dots.
-               Se reativarmos a paginação, descomente abaixo.
-            */}
-            {/* <div className="flex justify-center gap-1.5 pb-6 pt-2">
+            
+            <div className="flex justify-center gap-1.5 pb-6 pt-2">
             {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
-            </div> */}
+            </div>
         </section>
       )}
 
