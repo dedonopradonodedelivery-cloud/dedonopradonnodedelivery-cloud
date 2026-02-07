@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, Check, ArrowRight } from 'lucide-react';
+import { Wrench, Check } from 'lucide-react';
 
 interface FifaBannerProps {
   onClick: () => void;
@@ -25,20 +25,14 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
       <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/5 to-transparent rotate-45 animate-[slow-shimmer_6s_infinite_linear] pointer-events-none"></div>
 
       <div className="relative z-10 flex items-center justify-between gap-4">
-        {/* Text & CTA Section */}
+        {/* Text Section */}
         <div className="flex-1 min-w-0">
           <h2 className="text-base font-black text-white leading-none uppercase tracking-tighter mb-1.5">
             Precisando de um profissional?
           </h2>
-          <p className="text-[10px] text-slate-300 font-medium leading-tight mb-3 opacity-90 pr-2">
+          <p className="text-[10px] text-slate-300 font-medium leading-tight opacity-90 pr-2">
             Especialistas verificados, orçamentos rápidos e atendimento perto de você!
           </p>
-
-          {/* Compact CTA */}
-          <div className="inline-flex items-center gap-2 bg-white text-[#020617] font-black py-2 px-3 rounded-xl shadow-[0_0_15px_rgba(30,91,255,0.4)] transition-all group-hover:gap-3">
-            <span className="text-[9px] uppercase tracking-widest">Solicitar Orçamento Grátis</span>
-            <ArrowRight size={12} strokeWidth={3} />
-          </div>
         </div>
 
         {/* Icon Section - Compact */}
