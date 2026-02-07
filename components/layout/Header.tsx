@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu, User } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -241,12 +241,18 @@ export const Header: React.FC<HeaderProps> = ({
                             )}
                         </button>
 
-                        {/* Botão de Menu (Hambúrguer) */}
+                        {/* Botão de Menu (Avatar) - Substitui o Menu Hambúrguer */}
                         <button 
                             onClick={() => onNavigate('profile')}
-                            className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
+                            className="relative w-11 h-11 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden flex items-center justify-center active:scale-90 transition-all shadow-sm"
                         >
-                            <Menu size={22} />
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="Menu" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="flex items-center justify-center w-full h-full text-gray-400 dark:text-gray-500">
+                                     <User size={20} />
+                                </div>
+                            )}
                         </button>
                     </div>
                 </div>
