@@ -725,10 +725,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, []);
 
   const categoryPages = useMemo(() => {
-    // We want the first page to have 7 real categories + 1 "More" button
+    // Pegar as 7 primeiras categorias reais
     const firstPageItems = orderedCategories.slice(0, 7);
     
-    // Create a dummy "More" category item
+    // Adicionar o botão "Mais" como um item fake
     const moreItem: Category = { 
         id: 'more-trigger', 
         name: 'Mais', 
@@ -737,31 +737,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         color: 'bg-gray-100 dark:bg-gray-800' 
     };
     
-    // The first page array
-    const page1 = [...firstPageItems, moreItem];
-    
-    // If there are more items (which there are), we can paginate normally from index 7 onwards
-    // BUT since we are using a modal for "More", we might only want to show the first page in the carousel for simplicity,
-    // OR we can continue the carousel.
-    // The requirement says "Appear alongside Home categories" and "Clicking + Mais opens a modal".
-    // It doesn't explicitly forbid the carousel swiping, but usually "More" replaces pagination.
-    // Let's keep the carousel logic but ensure Page 0 has the "More" button.
-    
-    const pages = [page1];
-    
-    // If we want to allow swiping to see the rest WITHOUT the modal, we would add more pages here.
-    // But since "More" opens a modal with ALL categories, having a swipeable carousel might be redundant or confusing.
-    // Let's stick to a single page view for now, as it's cleaner and fits the "More" pattern better.
-    // If we wanted pagination, we would slice the rest of `orderedCategories` into chunks.
-    
-    // UNCOMMENT TO ENABLE PAGINATION + MORE BUTTON
-    /*
-    for (let i = 7; i < orderedCategories.length; i += itemsPerPage) {
-        pages.push(orderedCategories.slice(i, i + itemsPerPage));
-    }
-    */
-
-    return pages;
+    // Retornar apenas uma "página" contendo os 8 itens (7 reais + 1 botão)
+    // Isso garante que não haverá swipe/paginação na UI, apenas uma grade fixa.
+    return [[...firstPageItems, moreItem]];
   }, [orderedCategories]);
 
   const [wizardStep, setWizardStep] = useState(0);
