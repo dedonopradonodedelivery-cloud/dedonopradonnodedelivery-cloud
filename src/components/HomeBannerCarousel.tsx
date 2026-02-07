@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Store, AdType } from '@/types';
 import { STORES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BannerData {
   id: string;
