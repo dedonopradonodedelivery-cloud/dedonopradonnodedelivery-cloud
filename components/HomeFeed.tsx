@@ -464,7 +464,7 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
         <>
             <div className="py-6 border-b border-gray-100 dark:border-gray-800">
                 <div className="px-5 mb-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Guias do Bairro</h2>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Dicas pro Bairro</h2>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Dicas rápidas para usar melhor o app</p>
                 </div>
                 <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
@@ -727,19 +727,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* ACONTECENDO AGORA BLOCK */}
       <HappeningNowSection onNavigate={onNavigate} />
 
-      {/* TALENTOS DO BAIRRO BLOCK */}
-      <TalentsSection />
-
-      {/* ACHADOS E PERDIDOS BLOCK */}
-      <LostAndFoundSection onItemClick={setSelectedLostItem} />
-
-      {isFeatureActive('community_feed') && (
-        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
-            <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
-            <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
-        </section>
-      )}
-
+      {/* NOVO POSICIONAMENTO: BLOCO DE ORÇAMENTOS */}
       {isFeatureActive('service_chat') && (
         <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="px-5 mb-4">
@@ -750,10 +738,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         </section>
       )}
-      
-      {/* NOVO BLOCO: GUIAS DO BAIRRO */}
+
+      {/* NOVO POSICIONAMENTO: GUIAS DO BAIRRO */}
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
+      {/* NOVO POSICIONAMENTO: EXPLORAR BAIRRO */}
       {isFeatureActive('explore_guide') && (
         <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
             <div className="px-5">
@@ -764,6 +753,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
             </div>
         </div>
+      )}
+
+      {/* TALENTOS DO BAIRRO BLOCK (MOVIDO PARA O FINAL) */}
+      <TalentsSection />
+
+      {/* ACHADOS E PERDIDOS BLOCK (MOVIDO PARA O FINAL) */}
+      <LostAndFoundSection onItemClick={setSelectedLostItem} />
+
+      {/* JPA CONVERSA (MOVIDO PARA O FINAL) */}
+      {isFeatureActive('community_feed') && (
+        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+            <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
+            <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
+        </section>
       )}
       
       {wizardStep > 0 && (
