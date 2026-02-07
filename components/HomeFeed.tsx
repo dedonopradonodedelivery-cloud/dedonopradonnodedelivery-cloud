@@ -458,7 +458,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { isFeatureActive } = useFeatures();
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
-  const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
   const itemsPerPage = 8; 
 
   const orderedCategories = useMemo(() => {
@@ -475,6 +474,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   }, [orderedCategories]);
 
   const [wizardStep, setWizardStep] = useState(0);
+  const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
@@ -529,7 +529,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       )}
 
       {isFeatureActive('service_chat') && (
-        <section className="px-5 mb-8 bg-white dark:bg-gray-950"><FifaBanner onClick={() => setWizardStep(1)} /></section>
+        <section className="py-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+          <div className="px-5 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none">Receba até 5 orçamentos gratuitos</h2>
+          </div>
+          <div className="px-5">
+            <FifaBanner onClick={() => setWizardStep(1)} />
+          </div>
+        </section>
       )}
 
       {isFeatureActive('explore_guide') && (
