@@ -1,25 +1,17 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import { Store, Category, CommunityPost } from '@/types';
 import { 
   Compass, 
   Sparkles, 
   ArrowRight, 
-  Ticket,
   CheckCircle2, 
   Lock, 
   Zap, 
-  Loader2, 
   Hammer, 
   Plus, 
-  Heart, 
-  Bookmark, 
   Home as HomeIcon,
-  MessageSquare, 
   MapPin, 
-  Camera, 
   X, 
-  Send, 
-  ChevronRight,
   Clock,
   AlertTriangle,
   Megaphone,
@@ -31,23 +23,23 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 
-// Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
+// Imagens de fallback
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', 
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', 
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
 ];
 
 const HAPPENING_NOW_MOCK = [
@@ -85,7 +77,17 @@ const HAPPENING_NOW_MOCK = [
   }
 ];
 
-const TALENTS_MOCK = [
+interface Talent {
+    id: string;
+    name: string;
+    description: string;
+    distance: string;
+    image: string;
+    whatsapp: string;
+    badge: string | null;
+}
+
+const TALENTS_MOCK: Talent[] = [
   {
     id: 't1',
     name: 'Dona Cida',
@@ -166,7 +168,6 @@ const getFallbackImage = (id: string) => {
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
   return (
@@ -192,41 +193,7 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   );
 };
 
-const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
-  const itemImage = item.imageUrl || getFallbackImage(item.id);
-
-  return (
-    <div className="flex-shrink-0 w-40 snap-center p-1.5">
-      <div 
-        onClick={() => onNavigate('classifieds')}
-        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
-      >
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-          <img src={itemImage} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          {item.price && (
-             <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-sm">
-                {item.price}
-             </div>
-          )}
-          <div className="absolute top-2 left-2">
-             <span className="text-[8px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">{item.category.split(' ')[0]}</span>
-          </div>
-        </div>
-        <div className="p-3 flex flex-col flex-1 justify-between">
-            <h3 className="text-xs font-bold text-gray-800 dark:text-white leading-tight line-clamp-2 mb-1">
-                {item.title}
-            </h3>
-            <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wide truncate flex items-center gap-1">
-                <MapPin size={8} /> {item.neighborhood}
-            </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const TalentCard: React.FC<{ talent: typeof TALENTS_MOCK[0] }> = ({ talent }) => {
+const TalentCard: React.FC<{ talent: Talent }> = ({ talent }) => {
     const handleWhatsapp = () => {
         const text = encodeURIComponent("Oi, vi seu anúncio no app do bairro e fiquei interessado 😊");
         window.open(`https://wa.me/${talent.whatsapp}?text=${text}`, '_blank');
@@ -283,9 +250,7 @@ const TalentsSection: React.FC = () => {
 
 const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | null, onClose: () => void }> = ({ item, onClose }) => {
     if (!item) return null;
-
     const isLost = item.type === 'lost_pet';
-    
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
@@ -313,11 +278,9 @@ const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | 
                             {item.time}
                         </div>
                     </div>
-                    
                     <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-medium mb-8">
                         {item.description}
                     </p>
-
                     <button 
                         onClick={() => window.open(`https://wa.me/${item.contact}`, '_blank')}
                         className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all ${isLost ? 'bg-orange-500 shadow-orange-500/30' : 'bg-emerald-500 shadow-emerald-500/30'}`}
@@ -337,12 +300,10 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Achados e Perdidos</h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Animais e itens que alguém do bairro está procurando.</p>
             </div>
-            
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {LOST_AND_FOUND_MOCK.map((item) => {
                     const isLost = item.type === 'lost_pet';
                     const Icon = isLost ? Dog : Key;
-                    
                     return (
                         <div 
                             key={item.id}
