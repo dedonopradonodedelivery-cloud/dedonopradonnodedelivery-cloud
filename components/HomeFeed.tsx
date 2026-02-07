@@ -547,8 +547,8 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
 
 const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   return (
-    <div className="py-4">
-       <div className="flex items-center justify-between mb-3 px-5">
+    <div className="py-2"> {/* Reduced vertical padding on main wrapper */}
+       <div className="flex items-center justify-between mb-1 px-5"> {/* Tightened margin */}
          <div>
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
@@ -556,33 +556,44 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
          <button onClick={() => onNavigate('coupon_landing')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+       {/* Increased top padding to accommodate floating logo */}
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={() => onNavigate('coupon_landing')}
-              className="relative flex-shrink-0 w-36 h-48 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center snap-center active:scale-95 transition-transform cursor-pointer overflow-hidden group"
+              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
             >
-               {/* Recortes laterais (Holes) */}
-               {/* Eles usam a cor do fundo da página (bg-white ou dark:bg-gray-950) para parecer um furo */}
-               <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10 box-content"></div>
-               <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10 box-content"></div>
-
-               {/* Linha pontilhada no meio */}
-               <div className="absolute top-1/2 left-2 right-2 border-t-2 border-dashed border-gray-300 dark:border-gray-600 z-0 opacity-50"></div>
-
-               <div className="w-full h-1/2 flex flex-col items-center justify-end pb-3 z-10 px-2 text-center">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-700 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-600 mb-2">
-                     <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full object-cover" />
+               {/* Floating Logo - Half in / Half out */}
+               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
+                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
-                  <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 truncate w-full">{coupon.storeName}</span>
                </div>
-               
-               <div className="w-full h-1/2 flex flex-col items-center justify-start pt-3 z-10 px-2">
-                  <h3 className="text-base font-black text-gray-900 dark:text-white leading-none mb-3 text-center">{coupon.discount}</h3>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm shadow-blue-500/20 group-active:scale-95 transition-all">
-                     Pegar
-                  </button>
+
+               {/* Card Body - More Square-ish */}
+               <div className="w-full h-40 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+                  
+                  {/* Side Holes */}
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10"></div>
+
+                  {/* Content */}
+                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cupom</span>
+                      <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
+                         {coupon.discount}
+                      </span>
+                  </div>
+
+                  {/* CTA - Special Style (Folded Corner Effect via rounded-tl-none) */}
+                  <div className="w-full z-10">
+                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden">
+                         {/* Dotted decorative line on the left */}
+                         <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-white/20"></div>
+                         Pegar cupom
+                     </button>
+                  </div>
                </div>
             </div>
           ))}
