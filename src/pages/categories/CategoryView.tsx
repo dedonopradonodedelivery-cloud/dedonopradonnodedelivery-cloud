@@ -97,17 +97,19 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
-  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
-  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
-  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
+  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
+  const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
+  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white";
+  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
+  
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
+      <div className="flex-1 flex items-center justify-center">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-gray-400' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
       </div>
-      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
+      <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight pb-1 truncate w-full text-center ${textClass}`}>
+        {name}
+      </span>
     </button>
   );
 };
@@ -186,13 +188,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     // Filtra subcategorias se for a categoria Saúde e um grupo estiver selecionado
     if (category.slug === 'saude' && healthGroup) {
         if (healthGroup === 'mulher') {
-            return allSubs.filter(s => ['Ginecologia', 'Nutrição', 'Psicologia', 'Exames e Diagnósticos', 'Saúde Preventiva', 'Clínicas', 'Terapias Alternativas'].includes(s.name));
+            return allSubs.filter(s => ['Ginecologia', 'Obstetrícia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'].includes(s.name));
         }
         if (healthGroup === 'homem') {
-            return allSubs.filter(s => ['Urologia', 'Fisioterapia', 'Exames e Diagnósticos', 'Saúde Preventiva', 'Clínicas', 'Dentistas'].includes(s.name));
+            return allSubs.filter(s => ['Urologia', 'Cardiologia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'].includes(s.name));
         }
         if (healthGroup === 'pediatria') {
-             return allSubs.filter(s => ['Pediatria', 'Vacinação', 'Nutrição', 'Psicologia', 'Dentistas', 'Clínicas'].includes(s.name));
+             return allSubs.filter(s => ['Pediatria', 'Psicologia infantil', 'Fonoaudiologia', 'Nutrição infantil', 'Fisioterapia pediátrica', 'Odontopediatria', 'Neuropediatria', 'Clínica infantil'].includes(s.name));
         }
     }
     
