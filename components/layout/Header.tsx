@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -219,6 +219,7 @@ export const Header: React.FC<HeaderProps> = ({
                             )}
                         </button>
 
+                        {/* Botão de Notificações (Sino) */}
                         <button 
                             onClick={onNotificationClick}
                             className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
@@ -229,6 +230,14 @@ export const Header: React.FC<HeaderProps> = ({
                                     <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
+                        </button>
+
+                        {/* Botão de Menu (Hambúrguer) */}
+                        <button 
+                            onClick={() => onNavigate('profile')}
+                            className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
+                        >
+                            <Menu size={22} />
                         </button>
                     </div>
                 </div>

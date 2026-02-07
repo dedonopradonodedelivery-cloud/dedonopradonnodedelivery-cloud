@@ -1,5 +1,6 @@
+
 import React, { useMemo } from 'react';
-import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket, Compass } from 'lucide-react';
+import { Home, Newspaper, MessageSquare, Ticket, Compass } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFeatures, FeatureKey } from '../../contexts/FeatureContext';
 
@@ -33,19 +34,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   }, [user, userRole]);
 
   // Lista completa de abas possíveis com seus respectivos mapeamentos de FeatureKey do ADM
+  // Item "Menu" (profile) removido conforme solicitado para ir para o Header
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
     { id: 'explore', icon: Compass, label: 'Guia', featureKey: 'explore_guide' },
     { id: 'cupom_trigger', icon: Ticket, label: 'Cupons', featureKey: 'coupons', badge: userRole !== 'lojista' ? hasActiveCoupons : false },
     { id: 'classifieds', icon: Newspaper, label: 'Classificados', featureKey: 'classifieds' },
     { id: 'neighborhood_posts', icon: MessageSquare, label: 'Conversa', featureKey: 'community_feed' },
-    { id: 'profile', icon: UserIcon, label: 'Menu' }, // Menu sempre visível
   ];
 
   // FILTRAGEM REAL: Só renderiza se a funcionalidade estiver ON no ADM
   const activeNavItems = useMemo(() => {
     return allNavItems.filter(item => {
-      // Se não tem featureKey (ex: aba Menu), é sempre visível
+      // Se não tem featureKey (ex: itens fixos), é sempre visível
       if (!item.featureKey) return true;
       // Consulta o estado do toggle no ADM via FeatureContext
       return isFeatureActive(item.featureKey);
@@ -65,27 +66,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean, isSpecial: boolean) => {
-    if (item.id === 'profile' && user) {
-      const userInitial = user.email?.charAt(0).toUpperCase() || user.user_metadata?.full_name?.charAt(0).toUpperCase() || 'U';
-      const photoUrl = user.user_metadata?.avatar_url;
-
-      return (
-        <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
-          isActive ? 'border-white scale-110 shadow-lg' : 'border-white/20'
-        }`}>
-          {photoUrl ? (
-            <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
-          ) : (
-            <div className={`w-full h-full flex items-center justify-center text-[10px] font-black ${
-              isActive ? 'bg-white text-blue-600' : 'bg-white/20 text-white/80'
-            }`}>
-              {userInitial}
-            </div>
-          )}
-        </div>
-      );
-    }
-
     const Icon = item.icon;
     return (
       <div className="relative">
@@ -111,12 +91,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
         style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
       >
         {activeNavItems.map((item) => {
-          const isProfileGroup = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'user_profile_full', 'edit_profile_view'].includes(activeTab);
           const isCouponGroup = ['merchant_coupons', 'user_coupons', 'coupon_landing'].includes(activeTab);
           
           const isActive = 
             activeTab === item.id || 
-            (item.id === 'profile' && isProfileGroup) ||
             (item.id === 'cupom_trigger' && isCouponGroup);
 
           // IDENTIFICAÇÃO DE ABAS ESPECIAIS (CUPOM E CLASSIFICADOS)
