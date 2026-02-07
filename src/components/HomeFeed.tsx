@@ -52,9 +52,11 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
   'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
   'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
+  'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800', // Parque/Verde
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Moda/Cotidiano
+  'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', // Escritório/Pro
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Interior/Casa
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800', // Prédio
 ];
 
 const getFallbackImage = (id: string) => {
@@ -550,7 +552,16 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
     );
 };
 
-const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | null; userRole: string | null }> = ({ onNavigate, user, userRole }) => {
+  
+  const handleCouponClick = () => {
+    if (user) {
+        onNavigate(userRole === 'lojista' ? 'merchant_coupons' : 'user_coupons');
+    } else {
+        onNavigate('coupon_landing');
+    }
+  };
+
   return (
     <div className="py-2"> {/* Reduced vertical padding on main wrapper */}
        <div className="flex items-center justify-between mb-1 px-5"> {/* Tightened margin */}
@@ -558,7 +569,7 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
          </div>
-         <button onClick={() => onNavigate('coupon_landing')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
+         <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
        {/* Increased top padding to accommodate floating logo */}
@@ -566,7 +577,7 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
-              onClick={() => onNavigate('coupon_landing')}
+              onClick={handleCouponClick}
               className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
             >
                {/* Floating Logo - Half in / Half out */}
@@ -755,7 +766,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       )}
       
       {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
-      <CouponsBlock onNavigate={onNavigate} />
+      <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
 
       {/* ACONTECENDO AGORA BLOCK */}
       <HappeningNowSection onNavigate={onNavigate} />
