@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
   Compass, 
   Sparkles, 
@@ -20,6 +21,7 @@ import {
   X, 
   Send, 
   ChevronRight,
+  ChevronLeft,
   Clock,
   AlertTriangle,
   Megaphone,
@@ -27,7 +29,11 @@ import {
   MessageCircle,
   Dog,
   Key,
-  Phone
+  Phone,
+  Star,
+  Scissors,
+  BookOpen,
+  Lightbulb
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -48,6 +54,82 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
   'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
+];
+
+const getFallbackImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
+};
+
+const GUIDES_MOCK = [
+  {
+    id: 'g1',
+    title: 'Como pedir orçamento sem dor de cabeça no bairro',
+    image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=400&auto=format&fit=crop',
+    content: [
+      'Descreva o problema com detalhes e fotos.',
+      'Solicite pelo menos 3 orçamentos para comparar.',
+      'Pergunte sobre garantias e prazos antes de fechar.',
+      'Use o chat do app para manter o registro da conversa.'
+    ],
+    ctaLabel: 'Pedir Orçamento',
+    ctaAction: 'services_landing'
+  },
+  {
+    id: 'g2',
+    title: 'Como escolher um profissional verificado',
+    image: 'https://images.unsplash.com/photo-1581578731117-10d52b4d8051?q=80&w=400&auto=format&fit=crop',
+    content: [
+      'Procure pelo selo azul de verificado no perfil.',
+      'Leia as avaliações de outros vizinhos.',
+      'Verifique se o perfil tem fotos de trabalhos anteriores.',
+      'Dê preferência a quem responde rápido no chat.'
+    ],
+    ctaLabel: 'Ver Profissionais',
+    ctaAction: 'explore'
+  },
+  {
+    id: 'g3',
+    title: 'Quando vale a pena usar cupons no bairro',
+    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=400&auto=format&fit=crop',
+    content: [
+      'Ideal para experimentar novos lugares.',
+      'Ótimo para dias de semana com movimento menor.',
+      'Verifique sempre a validade e as regras de uso.',
+      'Use o cupom para apoiar o comércio local.'
+    ],
+    ctaLabel: 'Ver Cupons',
+    ctaAction: 'coupon_landing'
+  },
+  {
+    id: 'g4',
+    title: 'Diferença entre anúncios, cupons e classificados',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=400&auto=format&fit=crop',
+    content: [
+      'Anúncios (Home): Destaques de lojas patrocinadas.',
+      'Cupons: Descontos diretos para usar no caixa.',
+      'Classificados: Vendas, trocas e vagas entre moradores.',
+      'Perfil da Loja: Informações fixas e catálogo.'
+    ],
+    ctaLabel: 'Explorar Tudo',
+    ctaAction: 'explore'
+  },
+  {
+    id: 'g5',
+    title: 'Como economizar no seu bairro todos os meses',
+    image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=400&auto=format&fit=crop',
+    content: [
+      'Acompanhe a aba "Cupons" semanalmente.',
+      'Participe do "Desapega" para comprar itens usados.',
+      'Prefira serviços locais para evitar taxas de deslocamento.',
+      'Ative notificações para ofertas relâmpago.'
+    ],
+    ctaLabel: 'Ver Ofertas',
+    ctaAction: 'coupon_landing'
+  }
 ];
 
 const HAPPENING_NOW_MOCK = [
@@ -85,17 +167,45 @@ const HAPPENING_NOW_MOCK = [
   }
 ];
 
-interface Talent {
-    id: string;
-    name: string;
-    description: string;
-    distance: string;
-    image: string;
-    whatsapp: string;
-    badge: string | null;
-}
+const COUPONS_MOCK = [
+  {
+    id: 'cp-1',
+    storeName: 'Bibi Lanches',
+    logo: 'https://ui-avatars.com/api/?name=Bibi+Lanches&background=FF6B00&color=fff',
+    discount: '15% OFF',
+    storeId: 'f-1'
+  },
+  {
+    id: 'cp-2',
+    storeName: 'Studio Hair',
+    logo: 'https://ui-avatars.com/api/?name=Studio+Hair&background=BC1F66&color=fff',
+    discount: 'R$ 20,00',
+    storeId: 'f-2'
+  },
+  {
+    id: 'cp-3',
+    storeName: 'Pizzaria do Zé',
+    logo: 'https://ui-avatars.com/api/?name=Pizzaria+Ze&background=22C55E&color=fff',
+    discount: 'Entrega Grátis',
+    storeId: 'f-5'
+  },
+  {
+    id: 'cp-4',
+    storeName: 'Pet Shop Alegria',
+    logo: 'https://ui-avatars.com/api/?name=Pet+Alegria&background=0EA5E9&color=fff',
+    discount: '10% OFF',
+    storeId: 'f-3'
+  },
+  {
+    id: 'cp-5',
+    storeName: 'Academia Fit',
+    logo: 'https://ui-avatars.com/api/?name=Academia+Fit&background=4F46E5&color=fff',
+    discount: '1ª Mês Grátis',
+    storeId: 'f-8'
+  }
+];
 
-const TALENTS_MOCK: Talent[] = [
+const TALENTS_MOCK = [
   {
     id: 't1',
     name: 'Dona Cida',
@@ -167,13 +277,15 @@ const LOST_AND_FOUND_MOCK = [
   }
 ];
 
-const getFallbackImage = (id: string) => {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-        hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
-};
+interface Talent {
+    id: string;
+    name: string;
+    description: string;
+    distance: string;
+    image: string;
+    whatsapp: string;
+    badge: string | null;
+}
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
@@ -301,6 +413,86 @@ const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | 
     );
 };
 
+const GuideDetailModal: React.FC<{ guide: any, onClose: () => void, onNavigate: (view: string) => void }> = ({ guide, onClose, onNavigate }) => {
+    if (!guide) return null;
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 bg-black/20 text-white rounded-full backdrop-blur-md">
+                    <X size={20} />
+                </button>
+                <div className="relative aspect-video w-full">
+                    <img src={guide.image} alt={guide.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                             <div className="bg-white/20 backdrop-blur-md p-1.5 rounded-lg">
+                                <BookOpen size={14} className="text-white" />
+                             </div>
+                             <span className="text-[10px] font-bold uppercase tracking-widest text-white/90">Guia Prático</span>
+                        </div>
+                        <h2 className="text-xl font-bold leading-tight">{guide.title}</h2>
+                    </div>
+                </div>
+                <div className="p-6">
+                    <ul className="space-y-4 mb-8">
+                        {guide.content.map((point: string, i: number) => (
+                            <li key={i} className="flex gap-3 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                                <div className="w-5 h-5 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0 mt-0.5">
+                                    <span className="text-[10px] font-black text-blue-600 dark:text-blue-400">{i + 1}</span>
+                                </div>
+                                {point}
+                            </li>
+                        ))}
+                    </ul>
+                    <button 
+                        onClick={() => { onClose(); onNavigate(guide.ctaAction); }}
+                        className="w-full py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold rounded-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs transition-colors"
+                    >
+                        {guide.ctaLabel} <ChevronRight size={14} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+    const [selectedGuide, setSelectedGuide] = useState<any>(null);
+
+    return (
+        <>
+            <div className="py-6 border-b border-gray-100 dark:border-gray-800">
+                <div className="px-5 mb-4">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Guias do Bairro</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Dicas rápidas para usar melhor o app</p>
+                </div>
+                <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+                    {GUIDES_MOCK.map((guide) => (
+                        <div 
+                            key={guide.id} 
+                            onClick={() => setSelectedGuide(guide)}
+                            className="flex-shrink-0 w-48 aspect-[4/3] bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden cursor-pointer relative group snap-center active:scale-95 transition-transform"
+                        >
+                            <img src={guide.image} alt={guide.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                            <div className="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 className="text-xs font-bold text-white leading-tight line-clamp-2 drop-shadow-md">
+                                    {guide.title}
+                                </h3>
+                                <div className="flex items-center gap-1 mt-2 text-[9px] font-bold text-white/80 uppercase tracking-wide">
+                                    <Lightbulb size={10} className="text-yellow-400" /> Dica rápida
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <GuideDetailModal guide={selectedGuide} onClose={() => setSelectedGuide(null)} onNavigate={onNavigate} />
+        </>
+    );
+};
+
 const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
     return (
         <section className="py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
@@ -308,10 +500,12 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Achados e Perdidos</h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Animais e itens que alguém do bairro está procurando.</p>
             </div>
+            
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {LOST_AND_FOUND_MOCK.map((item) => {
                     const isLost = item.type === 'lost_pet';
                     const Icon = isLost ? Dog : Key;
+                    
                     return (
                         <div 
                             key={item.id}
@@ -343,6 +537,52 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
             </div>
         </section>
     );
+};
+
+const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  return (
+    <div className="py-4">
+       <div className="flex items-center justify-between mb-3 px-5">
+         <div>
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
+         </div>
+         <button onClick={() => onNavigate('coupon_landing')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
+       </div>
+       
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+          {COUPONS_MOCK.map((coupon) => (
+            <div 
+              key={coupon.id} 
+              onClick={() => onNavigate('coupon_landing')}
+              className="relative flex-shrink-0 w-36 h-48 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center snap-center active:scale-95 transition-transform cursor-pointer overflow-hidden group"
+            >
+               {/* Recortes laterais (Holes) */}
+               {/* Eles usam a cor do fundo da página (bg-white ou dark:bg-gray-950) para parecer um furo */}
+               <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10 box-content"></div>
+               <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10 box-content"></div>
+
+               {/* Linha pontilhada no meio */}
+               <div className="absolute top-1/2 left-2 right-2 border-t-2 border-dashed border-gray-100 dark:border-gray-700 z-0"></div>
+
+               <div className="w-full h-1/2 flex flex-col items-center justify-end pb-3 z-10 px-2 text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-600 mb-2">
+                     <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 truncate w-full">{coupon.storeName}</span>
+               </div>
+               
+               <div className="w-full h-1/2 flex flex-col items-center justify-start pt-3 z-10 px-2 bg-gray-50/50 dark:bg-gray-800/50">
+                  <h3 className="text-base font-black text-gray-900 dark:text-white leading-none mb-3 text-center">{coupon.discount}</h3>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm shadow-blue-500/20 group-active:scale-95 transition-all">
+                     Pegar
+                  </button>
+               </div>
+            </div>
+          ))}
+       </div>
+    </div>
+  );
 };
 
 const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
@@ -480,6 +720,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {isFeatureActive('banner_highlights') && (
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
+      
+      {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
+      <CouponsBlock onNavigate={onNavigate} />
 
       {/* ACONTECENDO AGORA BLOCK */}
       <HappeningNowSection onNavigate={onNavigate} />
@@ -507,6 +750,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         </section>
       )}
+      
+      {/* NOVO BLOCO: GUIAS DO BAIRRO */}
+      <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
       {isFeatureActive('explore_guide') && (
         <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
