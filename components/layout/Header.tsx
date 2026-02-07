@@ -65,6 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const [isListening, setIsListening] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
   
   // Monitorar notificações não lidas
   useEffect(() => {
@@ -185,7 +186,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-transparent dark:border-transparent">
+        <div className="w-full z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-transparent dark:border-transparent relative">
         <div className="max-w-md mx-auto flex flex-col relative">
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
                 <button onClick={toggleSelector} className="flex items-center gap-1.5 active:scale-95">
@@ -219,7 +220,9 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                 </div>
             </div>
-            <div className="flex items-center gap-3 px-4 pt-2 pb-3">
+            
+            {/* STICKY SEARCH BAR */}
+            <div className="sticky top-0 z-50 flex items-center gap-3 px-4 pt-2 pb-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm">
                 <div className="relative flex-1 group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 
@@ -288,6 +291,13 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                 </div>
             </div>
+
+            {showNeighborhoodFilter && (
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
+                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
+                </div>
+            )}
         </div>
         </div>
         <NeighborhoodSelectorModal />
