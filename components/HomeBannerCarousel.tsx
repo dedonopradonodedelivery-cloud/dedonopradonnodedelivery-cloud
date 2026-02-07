@@ -1,8 +1,9 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Store, AdType } from '../types';
-import { STORES } from '../constants';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Store, AdType } from '@/types';
+import { STORES } from '@/constants';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BannerData {
   id: string;
@@ -75,38 +76,120 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentNeighborhood } = useNeighborhood();
   const isCategoryView = !!categoryName;
+  
+  // Controle de Autoplay e Interação Manual
+  const [isPaused, setIsPaused] = useState(false);
+  const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  // Controle de Swipe/Drag
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const minSwipeDistance = 50;
 
   const bannerCount = useMemo(() => {
     return isCategoryView ? 2 : 4;
   }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
-    // Se estiver em uma categoria, tenta filtrar banners daquela categoria primeiro
     if (isCategoryView) {
       const catPool = MOCK_BANNERS.filter(b => b.category === categoryName);
       if (catPool.length > 0) return catPool.slice(0, bannerCount);
     }
-    
-    // Na Home, mostra os 4 banners fixos solicitados
-    // A estrutura já permite filtrar por bairro futuramente
     const pool = MOCK_BANNERS.filter(b => b.neighborhood === 'Jacarepaguá (todos)' || b.neighborhood === currentNeighborhood);
     return pool.slice(0, bannerCount);
   }, [currentNeighborhood, categoryName, subcategoryName, bannerCount, isCategoryView]);
 
+  // Autoplay Logic
   useEffect(() => {
-    if (activeBanners.length <= 1) return;
+    if (activeBanners.length <= 1 || isPaused) return;
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
     }, 5000);
+    
     return () => clearInterval(interval);
-  }, [activeBanners.length]);
+  }, [activeBanners.length, isPaused]);
 
+  // Reset index on filter change
   useEffect(() => {
     setCurrentIndex(0);
   }, [categoryName, subcategoryName, currentNeighborhood]);
 
+  // Pause Autoplay on Interaction
+  const resetAutoplayTimer = () => {
+    setIsPaused(true);
+    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
+    pauseTimeoutRef.current = setTimeout(() => {
+      setIsPaused(false);
+    }, 5000); // Retoma após 5s
+  };
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+    resetAutoplayTimer();
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
+    resetAutoplayTimer();
+  };
+
+  // Handlers de Toque (Mobile)
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = null; // Reset end
+    resetAutoplayTimer();
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const distance = touchStartX.current - touchEndX.current;
+    
+    if (Math.abs(distance) > minSwipeDistance) {
+      setIsSwiping(true); // Marca como swipe para evitar clique
+      if (distance > 0) {
+        // Swipe Left -> Next
+        setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+      } else {
+        // Swipe Right -> Prev
+        setCurrentIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
+      }
+      setTimeout(() => setIsSwiping(false), 200); // Reseta flag após breve delay
+    }
+    resetAutoplayTimer();
+  };
+
+  // Handlers de Mouse (Desktop Drag)
+  const onMouseDown = (e: React.MouseEvent) => {
+    touchStartX.current = e.clientX;
+    resetAutoplayTimer();
+  };
+
+  const onMouseUp = (e: React.MouseEvent) => {
+    if (touchStartX.current === null) return;
+    const distance = touchStartX.current - e.clientX;
+    
+    if (Math.abs(distance) > minSwipeDistance) {
+      setIsSwiping(true);
+      if (distance > 0) {
+        setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+      } else {
+        setCurrentIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
+      }
+      setTimeout(() => setIsSwiping(false), 200);
+    }
+    touchStartX.current = null;
+    resetAutoplayTimer();
+  };
+
   const handleBannerClick = (banner: BannerData) => {
-    // Busca a loja real ou cria o mock placeholder baseado no segmento
+    if (isSwiping) return; // Evita clique se foi um arrasto
+
     const store = STORES.find(s => s.id === banner.storeId) || {
       id: banner.storeId,
       name: banner.title,
@@ -133,14 +216,21 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   return (
     <div className="px-5 mb-6 bg-white dark:bg-gray-950">
       <div 
-        onClick={() => handleBannerClick(currentBanner)}
         className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onMouseLeave={() => { touchStartX.current = null; }}
+        onClick={() => handleBannerClick(currentBanner)}
       >
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative select-none">
           <img 
             src={currentBanner.image} 
             alt={currentBanner.title} 
-            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none select-none" 
+            draggable={false}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none"></div>
           
@@ -156,21 +246,38 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
               {currentBanner.subtitle}
             </p>
-            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit">
+            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit shadow-lg">
                <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
             </div>
           </div>
         </div>
 
         {activeBanners.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
-            {activeBanners.map((_, idx) => (
-              <div 
-                key={idx} 
-                className={`h-1 rounded-full transition-all duration-300 pointer-events-auto ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
-              />
-            ))}
-          </div>
+          <>
+            {/* Setas de Navegação (Discretas) */}
+            <button 
+                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
+            >
+                <ChevronLeft size={20} strokeWidth={3} />
+            </button>
+            <button 
+                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
+            >
+                <ChevronRight size={20} strokeWidth={3} />
+            </button>
+
+            {/* Indicadores de Posição */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
+              {activeBanners.map((_, idx) => (
+                <div 
+                  key={idx} 
+                  className={`h-1 rounded-full transition-all duration-300 pointer-events-auto ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
