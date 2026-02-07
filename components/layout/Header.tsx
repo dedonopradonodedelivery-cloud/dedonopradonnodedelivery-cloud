@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -208,6 +208,17 @@ export const Header: React.FC<HeaderProps> = ({
                             </button>
                         )}
                         
+                        {/* Botão de Filtro de Bairro (+) */}
+                        <button 
+                            onClick={toggleSelector}
+                            className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
+                        >
+                            <Plus size={22} />
+                            {currentNeighborhood !== "Jacarepaguá (todos)" && (
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-[#1E5BFF] rounded-full border border-white dark:border-gray-900"></span>
+                            )}
+                        </button>
+
                         <button 
                             onClick={onNotificationClick}
                             className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
@@ -298,18 +309,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
             </div>
         </div>
-
-        {/* PARTE 3: FILTROS (Scrollável) - Rola com a página */}
-        {showNeighborhoodFilter && (
-            <div className="w-full z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
-                <div className="max-w-md mx-auto">
-                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
-                        <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
-                        {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
-                    </div>
-                </div>
-            </div>
-        )}
 
         <NeighborhoodSelectorModal />
         
