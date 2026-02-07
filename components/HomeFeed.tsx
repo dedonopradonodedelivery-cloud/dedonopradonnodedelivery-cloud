@@ -1,17 +1,25 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost } from '@/types';
+import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
   Sparkles, 
   ArrowRight, 
+  Ticket,
   CheckCircle2, 
   Lock, 
   Zap, 
+  Loader2, 
   Hammer, 
   Plus, 
+  Heart, 
+  Bookmark, 
   Home as HomeIcon,
+  MessageSquare, 
   MapPin, 
+  Camera, 
   X, 
+  Send, 
+  ChevronRight,
   Clock,
   AlertTriangle,
   Megaphone,
@@ -23,23 +31,23 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 
-// Imagens de fallback
+// Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', 
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', 
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
 ];
 
 const HAPPENING_NOW_MOCK = [
@@ -359,9 +367,9 @@ const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({
         </button>
       </div>
       
-      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {HAPPENING_NOW_MOCK.map((item) => (
-            <div key={item.id} className="snap-center flex-shrink-0 w-64 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-3 flex gap-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
+            <div key={item.id} className="snap-center flex-shrink-0 w-44 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
                 <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
                     {item.image ? (
                         <img src={item.image} className="w-full h-full object-cover" alt="" />
