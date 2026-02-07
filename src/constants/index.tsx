@@ -18,7 +18,8 @@ import {
   Landmark, Tent, TicketPercent, Percent, Newspaper,
   Palette, Printer, Book, Lightbulb, Bike, Sofa, Smartphone, Headphones,
   Wifi, MapPin, Trash2, ShieldAlert, Megaphone, ShieldCheck,
-  Circle, Flower, Swords, Gamepad, Gamepad2, Church, Film, Mic, Bus
+  Circle, Flower, Swords, Gamepad, Gamepad2, Church, Film, Mic, Bus,
+  Lock
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
