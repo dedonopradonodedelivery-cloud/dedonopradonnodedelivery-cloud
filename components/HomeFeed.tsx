@@ -501,13 +501,15 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
 
 const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
     return (
-        <section className="py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
-            <div className="px-5 mb-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Achados e Perdidos</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Animais e itens que alguém do bairro está procurando.</p>
+        <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+            <div className="px-5 mb-3 flex items-center justify-between">
+               <div>
+                  <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Pets e objetos que o bairro procura</p>
+               </div>
             </div>
             
-            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {LOST_AND_FOUND_MOCK.map((item) => {
                     const isLost = item.type === 'lost_pet';
                     const Icon = isLost ? Dog : Key;
@@ -516,26 +518,29 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
                         <div 
                             key={item.id}
                             onClick={() => onItemClick(item)}
-                            className="flex-shrink-0 w-64 bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 cursor-pointer active:scale-95 transition-all group snap-center"
+                            className="flex-shrink-0 w-40 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm"
                         >
-                            <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden relative shrink-0">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white ${isLost ? 'bg-orange-500' : 'bg-emerald-500'}`}>
+                            <div className="h-28 bg-gray-100 dark:bg-gray-800 relative">
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
                                     {isLost ? 'Perdido' : 'Achado'}
                                 </div>
                             </div>
-                            <div className="flex-1 flex flex-col justify-center min-w-0">
-                                <div className="flex items-center gap-1.5 mb-1 text-gray-400">
-                                    <Icon size={12} />
-                                    <span className="text-[10px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
+                            <div className="p-3 flex flex-col gap-1">
+                                <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+                                    <Icon size={10} />
+                                    <span className="text-[8px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
                                 </div>
-                                <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate mb-1">{item.title}</h3>
-                                <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
-                                    <span className="flex items-center gap-0.5 truncate max-w-[80px]"><MapPin size={10} /> {item.location}</span>
-                                    <span>•</span>
-                                    <span>{item.time}</span>
+                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
+                                <div className="flex flex-col gap-0.5 mt-0.5">
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                                        <MapPin size={9} className="shrink-0" /> {item.location}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium">
+                                        <Clock size={9} className="shrink-0" /> {item.time}
+                                    </div>
                                 </div>
-                                <span className="text-[10px] font-bold text-[#1E5BFF] mt-2 block group-hover:underline">Ver detalhes</span>
+                                <span className="text-[9px] font-bold text-[#1E5BFF] mt-1.5 group-hover:underline">Ver detalhes</span>
                             </div>
                         </div>
                     );
@@ -756,6 +761,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
+      {/* NOVO POSICIONAMENTO: ACHADOS E PERDIDOS */}
+      <LostAndFoundSection onItemClick={setSelectedLostItem} />
+
       {/* NOVO POSICIONAMENTO: GUIAS DO BAIRRO */}
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
@@ -774,9 +782,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       {/* TALENTOS DO BAIRRO BLOCK (MOVIDO PARA O FINAL) */}
       <TalentsSection />
-
-      {/* ACHADOS E PERDIDOS BLOCK (MOVIDO PARA O FINAL) */}
-      <LostAndFoundSection onItemClick={setSelectedLostItem} />
 
       {/* JPA CONVERSA (MOVIDO PARA O FINAL) */}
       {isFeatureActive('community_feed') && (
