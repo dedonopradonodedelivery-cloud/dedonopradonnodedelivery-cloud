@@ -561,7 +561,7 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
             <div 
               key={coupon.id} 
               onClick={() => onNavigate('coupon_landing')}
-              className="relative flex-shrink-0 w-36 h-48 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center snap-center active:scale-95 transition-transform cursor-pointer overflow-hidden group"
+              className="relative flex-shrink-0 w-36 h-48 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center snap-center active:scale-95 transition-transform cursor-pointer overflow-hidden group"
             >
                {/* Recortes laterais (Holes) */}
                {/* Eles usam a cor do fundo da página (bg-white ou dark:bg-gray-950) para parecer um furo */}
@@ -569,16 +569,16 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
                <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10 box-content"></div>
 
                {/* Linha pontilhada no meio */}
-               <div className="absolute top-1/2 left-2 right-2 border-t-2 border-dashed border-gray-100 dark:border-gray-700 z-0"></div>
+               <div className="absolute top-1/2 left-2 right-2 border-t-2 border-dashed border-gray-300 dark:border-gray-600 z-0 opacity-50"></div>
 
                <div className="w-full h-1/2 flex flex-col items-center justify-end pb-3 z-10 px-2 text-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-600 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-700 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-600 mb-2">
                      <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full object-cover" />
                   </div>
                   <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 truncate w-full">{coupon.storeName}</span>
                </div>
                
-               <div className="w-full h-1/2 flex flex-col items-center justify-start pt-3 z-10 px-2 bg-gray-50/50 dark:bg-gray-800/50">
+               <div className="w-full h-1/2 flex flex-col items-center justify-start pt-3 z-10 px-2">
                   <h3 className="text-base font-black text-gray-900 dark:text-white leading-none mb-3 text-center">{coupon.discount}</h3>
                   <button className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm shadow-blue-500/20 group-active:scale-95 transition-all">
                      Pegar
