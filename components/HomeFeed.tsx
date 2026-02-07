@@ -33,7 +33,8 @@ import {
   Star,
   Scissors,
   BookOpen,
-  Lightbulb
+  Lightbulb,
+  User as UserIcon
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -205,42 +206,52 @@ const COUPONS_MOCK = [
   }
 ];
 
-const TALENTS_MOCK = [
+interface Talent {
+    id: string;
+    title: string;
+    image: string;
+    neighborName: string;
+    neighborAvatar: string;
+    whatsapp: string;
+    category: string;
+}
+
+const TALENTS_MOCK: Talent[] = [
   {
     id: 't1',
-    name: 'Dona Cida',
-    description: 'Bolos de pote e caseiros',
-    distance: 'a 200m de você',
+    title: 'Bolos da Dona Cida',
     image: 'https://images.unsplash.com/photo-1563729768601-d6fa48b04873?q=80&w=400&auto=format&fit=crop',
+    neighborName: 'Maria Aparecida',
+    neighborAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    badge: 'Fornada de hoje'
+    category: 'Doces Caseiros'
   },
   {
     id: 't2',
-    name: 'Jorge Eletricista',
-    description: 'Reparos rápidos em tomadas',
-    distance: 'a 450m de você',
+    title: 'Reparos Rápidos do Jorge',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format&fit=crop',
+    neighborName: 'Jorge Silva',
+    neighborAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    badge: 'Disponível hoje'
+    category: 'Marido de Aluguel'
   },
   {
     id: 't3',
-    name: 'Carol Manicure',
-    description: 'Unhas em gel e tradicional',
-    distance: 'a 800m de você',
+    title: 'Unhas da Carol',
     image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=400&auto=format&fit=crop',
+    neighborName: 'Carolina Mendes',
+    neighborAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    badge: 'Agenda aberta'
+    category: 'Manicure'
   },
-   {
+  {
     id: 't4',
-    name: 'Matheus',
-    description: 'Passeio com cães (Dog Walker)',
-    distance: 'a 300m de você',
+    title: 'Passeio com Cães',
     image: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea92d5?q=80&w=400&auto=format&fit=crop',
+    neighborName: 'Matheus Oliveira',
+    neighborAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    badge: null
+    category: 'Dog Walker'
   }
 ];
 
@@ -277,16 +288,6 @@ const LOST_AND_FOUND_MOCK = [
   }
 ];
 
-interface Talent {
-    id: string;
-    name: string;
-    description: string;
-    distance: string;
-    image: string;
-    whatsapp: string;
-    badge: string | null;
-}
-
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
@@ -315,38 +316,43 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
 
 const TalentCard: React.FC<{ talent: Talent }> = ({ talent }) => {
     const handleWhatsapp = () => {
-        const text = encodeURIComponent("Oi, vi seu anúncio no app do bairro e fiquei interessado 😊");
+        const text = encodeURIComponent(`Olá ${talent.neighborName}, vi seu anúncio "${talent.title}" no app do bairro!`);
         window.open(`https://wa.me/${talent.whatsapp}?text=${text}`, '_blank');
     };
 
     return (
-        <div className="flex-shrink-0 w-40 snap-center">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full relative group">
-                <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
-                    <img src={talent.image} alt={talent.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
-                    {talent.badge && (
-                        <div className="absolute top-2 left-2 right-2 text-center">
-                            <span className="text-[8px] font-bold bg-green-500 text-white px-2 py-1 rounded-full uppercase tracking-wide shadow-sm truncate block border border-white/20">
-                                {talent.badge}
-                            </span>
-                        </div>
-                    )}
-                    <div className="absolute bottom-2 left-3 right-2 text-white">
-                        <p className="text-xs font-bold truncate drop-shadow-md">{talent.name}</p>
-                        <p className="text-[9px] font-medium opacity-90 truncate drop-shadow-sm">{talent.distance}</p>
+        <div className="flex-shrink-0 w-56 snap-center">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full group">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                    <img src={talent.image} alt={talent.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        {talent.category}
                     </div>
                 </div>
-                <div className="p-3 flex flex-col gap-3 flex-1 justify-between bg-white dark:bg-gray-900">
-                    <p className="text-[10px] text-gray-600 dark:text-gray-300 leading-tight line-clamp-2 font-medium min-h-[2.5em]">
-                        {talent.description}
-                    </p>
+                
+                <div className="p-3 flex flex-col gap-3 flex-1">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">
+                        {talent.title}
+                    </h3>
+
+                    <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-50 dark:border-gray-800">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm shrink-0">
+                            <img src={talent.neighborAvatar} alt={talent.neighborName} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none">{talent.neighborName}</span>
+                            <span className="text-[9px] text-green-600 dark:text-green-400 font-bold mt-0.5 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Feito pelo vizinho
+                            </span>
+                        </div>
+                    </div>
+
                     <button 
                         onClick={handleWhatsapp}
-                        className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm"
+                        className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm mt-1"
                     >
                         <MessageCircle size={14} className="fill-white" />
-                        <span className="text-[9px] font-black uppercase tracking-wide">WhatsApp</span>
+                        <span className="text-[10px] font-black uppercase tracking-wide">Falar no WhatsApp</span>
                     </button>
                 </div>
             </div>
@@ -359,7 +365,7 @@ const TalentsSection: React.FC = () => {
         <section className="py-6 border-t border-gray-100 dark:border-gray-800">
             <div className="px-5 mb-4">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Talentos do Bairro</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Gente do bairro criando, fazendo e vendendo perto de você.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Feito pelo vizinho</p>
             </div>
             <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {TALENTS_MOCK.map(t => <TalentCard key={t.id} talent={t} />)}
