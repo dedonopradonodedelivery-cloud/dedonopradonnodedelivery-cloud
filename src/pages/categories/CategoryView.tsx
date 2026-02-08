@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
@@ -440,7 +439,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     icon={sub.icon}
                     name={sub.name}
                     isSelected={selectedSubcategory === sub.name}
-                    onClick={() => handleSubcategoryClick(sub.name)}
+                    onClick={() => onSubcategoryClick(sub.name, category)}
                     categoryColor={category.color}
                   />
               ))}

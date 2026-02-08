@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
-import { SUBCATEGORIES } from '@/constants';
+import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
@@ -77,17 +78,19 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
-  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
-  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
-  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
+  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
+  const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
+  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white";
+  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
+  
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
+      <div className="flex-1 flex items-center justify-center">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-gray-400' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
       </div>
-      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
+      <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight pb-1 truncate w-full text-center ${textClass}`}>
+        {name}
+      </span>
     </button>
   );
 };
@@ -126,20 +129,20 @@ interface CategoryViewProps {
   stores: Store[];
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: string, data?: any) => void;
   onSubcategoryClick: (subName: string, parentCat: Category) => void;
 }
 
 const SelectionButton: React.FC<{ label: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick }) => (
-    <button 
+    <button
         onClick={onClick}
-        className={`w-full aspect-[4/3] rounded-[2rem] flex flex-col items-center justify-center gap-4 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
+        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
     >
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-        <div className="relative z-10 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
-            {React.cloneElement(icon as any, { size: 32, strokeWidth: 2 })}
+        <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
+            {React.cloneElement(icon as any, { size: 28, strokeWidth: 2 })}
         </div>
-        <span className="relative z-10 font-black text-lg uppercase tracking-tight">{label}</span>
+        <span className="relative z-10 font-black text-lg uppercase tracking-tight text-center">{label}</span>
     </button>
 );
 
@@ -147,31 +150,38 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
+
+  // States for intermediate selection screens
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
+  const [professionalGroup, setProfessionalGroup] = useState<'manuais' | 'tecnicos' | null>(null);
+  const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | null>(null);
+
 
   useEffect(() => {
       setHealthGroup(null);
+      setProfessionalGroup(null);
+      setAutosGroup(null);
       setSelectedSubcategory(null);
   }, [category.slug]);
 
   const subcategories = useMemo(() => {
     const allSubs = SUBCATEGORIES[category.name] || [];
-    
+
     if (category.slug === 'saude' && healthGroup) {
-        if (healthGroup === 'mulher') {
-            return allSubs.filter(s => ['Ginecologia', 'Obstetrícia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'].includes(s.name));
-        }
-        if (healthGroup === 'homem') {
-            return allSubs.filter(s => ['Urologia', 'Cardiologia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'].includes(s.name));
-        }
-        if (healthGroup === 'pediatria') {
-             return allSubs.filter(s => ['Pediatria', 'Psicologia infantil', 'Fonoaudiologia', 'Nutrição infantil', 'Fisioterapia pediátrica', 'Odontopediatria', 'Neuropediatria', 'Clínica infantil'].includes(s.name));
-        }
+        return allSubs.filter(s => HEALTH_GROUPS[healthGroup].includes(s.name));
     }
     
-    return allSubs;
-  }, [category.name, healthGroup, category.slug]);
+    if (category.slug === 'profissionais' && professionalGroup) {
+        return allSubs.filter(s => PROFESSIONALS_GROUPS[professionalGroup].includes(s.name));
+    }
+    
+    if (category.slug === 'autos' && autosGroup) {
+        return allSubs.filter(s => AUTOS_GROUPS[autosGroup].includes(s.name));
+    }
 
+    return allSubs;
+  }, [category.name, category.slug, healthGroup, professionalGroup, autosGroup]);
+  
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
@@ -193,12 +203,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           .limit(1);
 
         if (error) {
-          // Gracefully handle if the table doesn't exist, e.g., during setup.
-          // The feature will just appear disabled, without throwing a visible error.
           if (error.message.includes('published_banners')) {
             setActiveBanner(null);
           } else {
-            // For other unexpected database errors, throw them to be caught and logged.
             throw error;
           }
         } else {
@@ -272,10 +279,63 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           setSelectedSubcategory(null);
           return;
       }
+      if (category.slug === 'profissionais' && professionalGroup) {
+          setProfessionalGroup(null);
+          setSelectedSubcategory(null);
+          return;
+      }
+      if (category.slug === 'autos' && autosGroup) {
+          setAutosGroup(null);
+          setSelectedSubcategory(null);
+          return;
+      }
       onBack();
   };
 
   if (category.slug === 'saude' && !healthGroup) {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 animate-in slide-in-from-right duration-300">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+                </button>
+                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                </h1>
+            </div>
+
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-2">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
+                </div>
+
+                <div className="grid gap-3">
+                    <SelectionButton
+                        label="Mulher"
+                        icon={<User />}
+                        color="bg-pink-500"
+                        onClick={() => setHealthGroup('mulher')}
+                    />
+                    <SelectionButton
+                        label="Homem"
+                        icon={<User />}
+                        color="bg-blue-600"
+                        onClick={() => setHealthGroup('homem')}
+                    />
+                    <SelectionButton
+                        label="Pediatria"
+                        icon={<Baby />}
+                        color="bg-amber-500"
+                        onClick={() => setHealthGroup('pediatria')}
+                    />
+                </div>
+            </div>
+        </div>
+      );
+  }
+  
+  if (category.slug === 'profissionais' && !professionalGroup) {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
@@ -289,28 +349,59 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
             <div className="p-6 space-y-6">
                 <div className="text-center mb-8 mt-4">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p>
                 </div>
 
-                <div className="grid gap-4">
-                    <SelectionButton 
-                        label="Mulher" 
-                        icon={<User />} 
-                        color="bg-pink-500" 
-                        onClick={() => setHealthGroup('mulher')} 
+                <div className="grid grid-cols-2 gap-4">
+                    <SelectionButton
+                        label="Serviços Manuais"
+                        icon={<Wrench />}
+                        color="bg-sky-600"
+                        onClick={() => setProfessionalGroup('manuais')}
                     />
-                    <SelectionButton 
-                        label="Homem" 
-                        icon={<User />} 
-                        color="bg-blue-600" 
-                        onClick={() => setHealthGroup('homem')} 
+                    <SelectionButton
+                        label="Técnicos / Especializados"
+                        icon={<Briefcase />}
+                        color="bg-slate-600"
+                        onClick={() => setProfessionalGroup('tecnicos')}
                     />
-                    <SelectionButton 
-                        label="Pediatria" 
-                        icon={<Baby />} 
-                        color="bg-amber-500" 
-                        onClick={() => setHealthGroup('pediatria')} 
+                </div>
+            </div>
+        </div>
+      );
+  }
+  
+  if (category.slug === 'autos' && !autosGroup) {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+                </button>
+                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                </h1>
+            </div>
+
+            <div className="p-6 space-y-6">
+                <div className="text-center mb-8 mt-4">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <SelectionButton
+                        label="Carro"
+                        icon={<CarFront />}
+                        color="bg-red-600"
+                        onClick={() => setAutosGroup('carro')}
+                    />
+                    <SelectionButton
+                        label="Moto"
+                        icon={<Bike />}
+                        color="bg-gray-700"
+                        onClick={() => setAutosGroup('moto')}
                     />
                 </div>
             </div>
@@ -328,6 +419,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
             {category.name} 
             {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
+            {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
+            {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
         </h1>
       </div>
       
@@ -346,7 +439,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     icon={sub.icon}
                     name={sub.name}
                     isSelected={selectedSubcategory === sub.name}
-                    onClick={() => handleSubcategoryClick(sub.name)}
+                    onClick={() => onSubcategoryClick(sub.name, category)}
                     categoryColor={category.color}
                   />
               ))}

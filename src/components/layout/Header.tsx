@@ -1,11 +1,11 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu, User } from 'lucide-react';
-import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
-import { Store, Category } from '../../types';
-import { CATEGORIES } from '../../constants';
+import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
+import { Store, Category } from '@/types';
+// FIX: Using @ alias for constants import
+import { CATEGORIES } from '@/constants';
 
-// Added missing HeaderProps interface
 interface HeaderProps {
   onNotificationClick: () => void;
   user: any;
@@ -18,9 +18,6 @@ interface HeaderProps {
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
-  isDarkMode?: boolean;
-  toggleTheme?: () => void;
-  userRole?: string | null;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -75,7 +72,6 @@ export const Header: React.FC<HeaderProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
   
-  // Monitorar notificações não lidas
   useEffect(() => {
     const checkNotifs = () => {
       const saved = localStorage.getItem('app_notifications');
@@ -93,7 +89,6 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, []);
 
-  // Lógica de Pesquisa por Voz
   const startVoiceSearch = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
@@ -131,7 +126,6 @@ export const Header: React.FC<HeaderProps> = ({
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-  // Função auxiliar para remover plural simples (s no final)
   const rootWord = (str: string) => str.endsWith('s') ? str.slice(0, -1) : str;
 
   const searchResults = useMemo(() => {
@@ -161,17 +155,12 @@ export const Header: React.FC<HeaderProps> = ({
             }
         }
 
-        // Prioridade 2: Nome
         if (normName.includes(term)) {
             return { store, matchReason: '', priority: 2 };
         }
-
-        // Prioridade 3: Categoria/Subcategoria
         if (normCat.includes(term) || normSub.includes(term)) {
             return { store, matchReason: '', priority: 3 };
         }
-
-        // Prioridade 4: Descrição
         if (normDesc.includes(term)) {
             return { store, matchReason: '', priority: 4 };
         }
@@ -194,12 +183,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* PARTE 1: TOPO (Scrollável) - Logo, Localização e Ícones */}
         <div className="w-full z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md relative">
             <div className="max-w-md mx-auto flex flex-col relative">
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
-                    
-                    {/* Identidade do App (Logo/Texto) */}
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-[#1E5BFF] rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                              <MapPin size={18} fill="currentColor" />
@@ -217,7 +203,6 @@ export const Header: React.FC<HeaderProps> = ({
                             </button>
                         )}
                         
-                        {/* Botão de Filtro de Bairro (+) */}
                         <button 
                             onClick={toggleSelector}
                             className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
@@ -228,7 +213,6 @@ export const Header: React.FC<HeaderProps> = ({
                             )}
                         </button>
 
-                        {/* Botão de Notificações (Sino) */}
                         <button 
                             onClick={onNotificationClick}
                             className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
@@ -241,7 +225,6 @@ export const Header: React.FC<HeaderProps> = ({
                             )}
                         </button>
 
-                        {/* Botão de Menu (Avatar) - Substitui o Menu Hambúrguer */}
                         <button 
                             onClick={() => onNavigate('profile')}
                             className="relative w-11 h-11 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden flex items-center justify-center active:scale-90 transition-all shadow-sm"
@@ -259,7 +242,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
         </div>
 
-        {/* PARTE 2: BUSCA (Sticky) - Fixa no topo ao rolar */}
         <div className="sticky top-0 z-50 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm">
             <div className="max-w-md mx-auto">
                 <div className="flex items-center gap-3 px-4 pt-2 pb-3">

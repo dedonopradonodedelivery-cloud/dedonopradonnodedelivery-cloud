@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Lock, Play, CheckCircle2, Info } from 'lucide-react';
 
@@ -91,7 +92,7 @@ export const MandatoryVideoLock: React.FC<MandatoryVideoLockProps> = ({ videoUrl
                 >
                   <Play className="w-8 h-8 fill-current ml-1" />
                 </button>
-                <p className="mt-4 text-[9px] font-black text-white/50 uppercase tracking-widest">Toque para iniciar treinamento</p>
+                <p className="mt-4 text-[9px] font-black uppercase tracking-widest text-white/50">Toque para iniciar treinamento</p>
               </div>
             )}
           </div>
@@ -115,7 +116,7 @@ export const MandatoryVideoLock: React.FC<MandatoryVideoLockProps> = ({ videoUrl
       {/* Área de Conteúdo Bloqueável */}
       <div className={`flex-1 transition-all duration-1000 ${
         !isUnlocked 
-          ? 'opacity-20 grayscale blur-sm pointer-events-none select-none h-0 overflow-hidden' 
+          ? 'opacity-20 grayscale blur-sm pointer-events-none h-0 overflow-hidden' 
           : 'opacity-100 blur-0 grayscale-0'
       }`}>
         {children}
