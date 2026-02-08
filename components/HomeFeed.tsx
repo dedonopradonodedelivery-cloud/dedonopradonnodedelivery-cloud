@@ -588,10 +588,10 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                </div>
 
                {/* Card Body */}
-               <div className="relative w-full h-44 bg-[#F2F6FF] dark:bg-slate-800 rounded-3xl shadow-[0_8px_16px_rgba(30,91,255,0.06),_0_2px_4px_rgba(30,91,255,0.05)] transition-transform duration-300 group-active:scale-[0.97]">
+               <div className="relative w-full h-44 bg-[#F2F6FF] dark:bg-slate-800 rounded-3xl shadow-[0_8px_16px_rgba(30,91,255,0.06),_0_2px_4px_rgba(30,91,255,0.05)] transition-transform duration-300 group-active:scale-[0.97] overflow-hidden">
                   {/* Notches for tear-off effect */}
-                  <div className="absolute top-[65%] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950"></div>
-                  <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950"></div>
+                  <div className="absolute top-[65%] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
+                  <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
                   
                   {/* Main Content Area (above the tear line) */}
                   <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-8">
@@ -602,11 +602,11 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   </div>
 
                   {/* Perforated line */}
-                  <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-gray-300/80 dark:border-slate-600/80"></div>
+                  <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-gray-300 dark:border-gray-600 z-10"></div>
                   
                   {/* Bottom part for button alignment */}
-                  <div className="h-[35%] relative flex justify-end items-center pr-3">
-                       <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/30 border border-blue-400 group-hover:scale-105 transition-transform duration-300">
+                  <div className="h-[35%] relative flex justify-center items-center px-3">
+                       <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md border border-blue-500/50 active:shadow-inner active:scale-95 transition-all">
                           Pegar
                       </button>
                   </div>
