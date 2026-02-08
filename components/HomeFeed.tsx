@@ -608,7 +608,7 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                        <button className="relative overflow-hidden px-5 py-2.5 bg-white hover:bg-gray-100 text-brand-blue text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md active:shadow-inner active:scale-95 transition-all">
                           {/* Enhanced Fold effect */}
                           <span className="absolute top-0 right-0 w-0 h-0 border-solid border-b-[16px] border-l-[16px] border-b-gray-200 dark:border-b-gray-600 border-l-transparent"></span>
-                          Pegar
+                          PEGAR CUPOM
                       </button>
                   </div>
                </div>
