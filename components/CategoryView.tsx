@@ -173,20 +173,23 @@ const SelectionButton: React.FC<{
     );
 };
 
-const MoreSubcategoriesModal: React.FC<{
+const SubcategoryFilterPanel: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  options: { name: string; icon: React.ReactNode }[];
-  onSelect: (subName: string) => void;
+  options: { name: string; icon: React.ReactNode }[] | string[];
+  onSelect: (subName: string | null) => void;
   title: string;
 }> = ({ isOpen, onClose, options, onSelect, title }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
-    return options.filter(opt =>
-      opt.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
-    );
+    const isObjArray = options.length > 0 && typeof options[0] === 'object' && options[0] !== null && 'name' in options[0];
+    
+    return options.filter(opt => {
+        const name = isObjArray ? (opt as { name: string }).name : (opt as string);
+        return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    });
   }, [options, searchTerm]);
 
   useEffect(() => {
@@ -214,7 +217,7 @@ const MoreSubcategoriesModal: React.FC<{
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nome..."
-              className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-10 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30 dark:text-white"
+              className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-10 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30 dark:text-white"
               autoFocus
             />
             {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><X size={16}/></button>}
@@ -222,19 +225,23 @@ const MoreSubcategoriesModal: React.FC<{
         </div>
 
         <main className="flex-1 overflow-y-auto no-scrollbar space-y-1 p-4">
-          {filteredOptions.map(opt => (
-            <button
-              key={opt.name}
-              onClick={() => onSelect(opt.name)}
-              className="w-full text-left p-4 rounded-xl font-medium text-sm transition-colors flex justify-between items-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-            >
-              <div className="flex items-center gap-3">
-                {React.cloneElement(opt.icon as any, { size: 20 })}
-                <span>{opt.name}</span>
-              </div>
-              <ChevronRight size={16} className="text-gray-300"/>
-            </button>
-          ))}
+          {filteredOptions.map(opt => {
+              const name = typeof opt === 'string' ? opt : (opt as {name: string}).name;
+              const icon = typeof opt === 'string' ? null : (opt as {icon: React.ReactNode}).icon;
+              return (
+                <button
+                  key={name}
+                  onClick={() => onSelect(name)}
+                  className="w-full text-left p-4 rounded-xl font-medium text-sm transition-colors flex justify-between items-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <div className="flex items-center gap-3">
+                    {icon && React.cloneElement(icon as any, { size: 20 })}
+                    <span>{name}</span>
+                  </div>
+                  <ChevronRight size={16} className="text-gray-300"/>
+                </button>
+              );
+          })}
         </main>
       </div>
     </div>
@@ -448,12 +455,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </div>
             </div>
         </div>
-        <MoreSubcategoriesModal 
+        <SubcategoryFilterPanel 
           isOpen={isFoodFilterOpen}
           onClose={() => setIsFoodFilterOpen(false)}
           options={moreFoodGroups}
           onSelect={(subName) => {
-            onSubcategoryClick(subName, category);
+            if(subName){
+                onSubcategoryClick(subName, category);
+            }
             setIsFoodFilterOpen(false);
           }}
           title="Mais em Alimentação"

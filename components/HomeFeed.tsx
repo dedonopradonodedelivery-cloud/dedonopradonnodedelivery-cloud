@@ -35,7 +35,8 @@ import {
   BookOpen,
   Lightbulb,
   User as UserIcon,
-  Search
+  Search,
+  Wrench
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -43,7 +44,6 @@ import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants'
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
-import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
 
@@ -503,6 +503,57 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
     );
 };
 
+const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
+    return (
+        <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+            <div className="px-5 mb-3 flex items-center justify-between">
+               <div>
+                  <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Pets e objetos que o bairro procura</p>
+               </div>
+            </div>
+            
+            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+                {LOST_AND_FOUND_MOCK.map((item) => {
+                    const isLost = item.type === 'lost_pet';
+                    const Icon = isLost ? Dog : Key;
+                    
+                    return (
+                        <div 
+                            key={item.id}
+                            onClick={() => onItemClick(item)}
+                            className="flex-shrink-0 w-40 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm"
+                        >
+                            <div className="h-28 bg-gray-100 dark:bg-gray-800 relative">
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                                    {isLost ? 'Perdido' : 'Achado'}
+                                </div>
+                            </div>
+                            <div className="p-3 flex flex-col gap-1">
+                                <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+                                    <Icon size={10} />
+                                    <span className="text-[8px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
+                                </div>
+                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
+                                <div className="flex flex-col gap-0.5 mt-0.5">
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                                        <MapPin size={9} className="shrink-0" /> {item.location}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium">
+                                        <Clock size={9} className="shrink-0" /> {item.time}
+                                    </div>
+                                </div>
+                                <span className="text-[9px] font-bold text-[#1E5BFF] mt-1.5 group-hover:underline">Ver detalhes</span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+};
+
 const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | null; userRole: string | null }> = ({ onNavigate, user, userRole }) => {
   
   const handleCouponClick = () => {
@@ -555,9 +606,7 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   
                   {/* Bottom part for button alignment */}
                   <div className="h-[35%] relative flex justify-center items-center px-3">
-                       <button className="relative overflow-hidden px-5 py-2 bg-white hover:bg-gray-100 text-brand-blue text-[10px] font-bold uppercase tracking-widest rounded-xl shadow-md active:shadow-inner active:scale-95 transition-all">
-                          {/* Enhanced Fold effect */}
-                          <span className="absolute top-0 right-0 w-0 h-0 border-solid border-b-[16px] border-l-[16px] border-b-gray-200 dark:border-b-gray-600 border-l-transparent"></span>
+                       <button className="relative overflow-hidden px-5 py-1.5 bg-white hover:bg-gray-100 text-brand-blue text-[10px] font-bold uppercase tracking-widest rounded-xl shadow-md active:shadow-inner active:scale-95 transition-all">
                           PEGAR CUPOM
                       </button>
                   </div>
@@ -677,6 +726,76 @@ const NeighborhoodHub: React.FC<{
       </div>
     </div>
   )
+};
+
+const QUICK_SERVICES = [
+  { name: 'Eletricista', icon: Zap },
+  { name: 'Chaveiro', icon: Key },
+  { name: 'Marido de Aluguel', icon: Hammer },
+  { name: 'Diarista', icon: Sparkles },
+  { name: 'Téc. Informática', icon: Hammer }, // Mock icon, correct would be Laptop
+];
+
+const FifaBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Main Banner - Altura reduzida (py-10) */}
+      <div 
+        onClick={onClick}
+        className="relative w-full overflow-hidden rounded-[2.5rem] bg-blue-600 py-10 px-8 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"></div>
+        
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'linear-gradient(135deg, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-[80px]"></div>
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-400/20 rounded-full blur-[80px]"></div>
+        </div>
+
+        <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-45 animate-[slow-shimmer_8s_infinite_linear] pointer-events-none"></div>
+
+        <div className="relative z-10 flex items-center gap-6">
+          {/* Left Icon - Aumentado e clareado */}
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-lg">
+            <Wrench size={28} className="text-white" />
+          </div>
+
+          {/* Text Section */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight mb-1">
+              Receba até 5 orçamentos gratuitos
+            </h2>
+            <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-90 pr-2">
+              Especialistas verificados, orçamentos rápidos e atendimento perto de você!
+            </p>
+          </div>
+
+          {/* Right Icon */}
+          <div className="shrink-0 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all">
+             <ChevronRight size={24} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mini Services List */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2">
+        {QUICK_SERVICES.map((s, i) => (
+          <button 
+            key={i} 
+            onClick={onClick} 
+            className="flex flex-col items-center gap-2 min-w-[76px] group/item active:scale-95 transition-transform"
+          >
+            <div className="w-12 h-12 rounded-[18px] bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover/item:bg-blue-100 dark:group-hover/item:bg-blue-900/40 transition-all shadow-sm">
+              <s.icon size={20} strokeWidth={1.5} />
+            </div>
+            <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 text-center leading-tight max-w-[70px] truncate transition-colors">
+              {s.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 
