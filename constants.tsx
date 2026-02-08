@@ -16,7 +16,9 @@ import {
   Key, Fan, Truck, Shovel,
   Meh, ThumbsDown, Gift, RefreshCw, Wind, Bike, Cpu,
   // Adicionados novos ícones para a lista de profissionais
-  Wifi, Sun, Tent, Bug, Square
+  Wifi, Sun, Tent, Bug, Square, Phone, Newspaper, ShieldCheck, Lock,
+  // FIX: Added missing icons
+  Megaphone, MapPin
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -122,19 +124,128 @@ const MANUAL_PROFESSIONALS_SUBCATEGORIES = [
 
 const MANUAL_PROFESSIONALS_LIST = MANUAL_PROFESSIONALS_SUBCATEGORIES.map(s => s.name);
 
-const TECHNICIAN_PROFESSIONALS_SUBCATEGORIES = [
+const TECHNICIAN_PROFESSIONALS_SUBCATEGORIES_FULL = [
     { name: 'Advogado', icon: <Scale /> },
+    { name: 'Advogado trabalhista', icon: <Scale /> },
+    { name: 'Advogado civil', icon: <Scale /> },
+    { name: 'Advogado previdenciário', icon: <Scale /> },
+    { name: 'Advogado imobiliário', icon: <Scale /> },
+    { name: 'Advogado empresarial', icon: <Scale /> },
+    { name: 'Advogado de família', icon: <Scale /> },
     { name: 'Contador', icon: <Calculator /> },
+    { name: 'Contador fiscal', icon: <Calculator /> },
+    { name: 'Técnico contábil', icon: <Calculator /> },
+    { name: 'Auditor contábil', icon: <Calculator /> },
+    { name: 'Consultor financeiro', icon: <Briefcase /> },
+    { name: 'Consultor empresarial', icon: <Briefcase /> },
+    { name: 'Consultor tributário', icon: <Briefcase /> },
+    { name: 'Economista', icon: <Briefcase /> },
     { name: 'Despachante', icon: <FileText /> },
+    { name: 'Despachante imobiliário', icon: <FileText /> },
+    { name: 'Despachante veicular', icon: <FileText /> },
     { name: 'Corretor de imóveis', icon: <Key /> },
+    { name: 'Avaliador imobiliário', icon: <Key /> },
+    { name: 'Síndico profissional', icon: <Building2 /> },
+    { name: 'Administrador de condomínios', icon: <Building2 /> },
+    { name: 'Gestor condominial', icon: <Building2 /> },
     { name: 'Professor particular', icon: <User /> },
-    { name: 'Designer', icon: <PenTool /> },
-    { name: 'Técnico em Informática', icon: <Laptop /> },
-    { name: 'Consultor', icon: <Briefcase /> },
-    { name: 'Freelancers em Geral', icon: <Briefcase /> },
+    { name: 'Tutor escolar', icon: <User /> },
+    { name: 'Reforço escolar', icon: <User /> },
+    { name: 'Professor de idiomas', icon: <User /> },
+    { name: 'Professor de informática', icon: <User /> },
+    { name: 'Instrutor de cursos livres', icon: <User /> },
+    { name: 'Designer gráfico', icon: <PenTool /> },
+    { name: 'Designer digital', icon: <PenTool /> },
+    { name: 'Web designer', icon: <PenTool /> },
+    { name: 'UX/UI designer', icon: <PenTool /> },
+    { name: 'Desenvolvedor web', icon: <Laptop /> },
+    { name: 'Programador', icon: <Laptop /> },
+    { name: 'Analista de sistemas', icon: <Laptop /> },
+    { name: 'Técnico em informática', icon: <Laptop /> },
+    { name: 'Técnico em redes', icon: <Laptop /> },
+    { name: 'Técnico em manutenção de computadores', icon: <Laptop /> },
+    { name: 'Técnico em celulares', icon: <Phone /> },
+    { name: 'Técnico em notebooks', icon: <Laptop /> },
+    { name: 'Técnico em impressoras', icon: <FileText /> },
+    { name: 'Técnico em TI residencial', icon: <Laptop /> },
+    { name: 'Consultor de tecnologia', icon: <Laptop /> },
+    { name: 'Especialista em segurança da informação', icon: <Shield /> },
+    { name: 'Analista de dados', icon: <Calculator /> },
+    { name: 'Social media', icon: <Megaphone /> },
+    { name: 'Gestor de tráfego pago', icon: <TrendingUp /> },
+    { name: 'Especialista em marketing digital', icon: <Megaphone /> },
+    { name: 'Copywriter', icon: <Edit3 /> },
+    { name: 'Produtor de conteúdo', icon: <Edit3 /> },
+    { name: 'Fotógrafo', icon: <Camera /> },
+    { name: 'Videomaker', icon: <Camera /> },
+    { name: 'Editor de vídeo', icon: <Camera /> },
+    { name: 'Motion designer', icon: <Camera /> },
+    { name: 'Produtor audiovisual', icon: <Camera /> },
+    { name: 'Jornalista freelancer', icon: <Newspaper /> },
+    { name: 'Redator', icon: <Edit3 /> },
+    { name: 'Revisor de texto', icon: <Edit3 /> },
+    { name: 'Tradutor', icon: <Globe2 /> },
+    { name: 'Intérprete', icon: <Globe2 /> },
+    { name: 'Publicitário', icon: <Megaphone /> },
+    { name: 'Relações públicas', icon: <Megaphone /> },
+    { name: 'Coach', icon: <UserCheck /> },
+    { name: 'Mentor profissional', icon: <UserCheck /> },
+    { name: 'Orientador de carreira', icon: <UserCheck /> },
+    { name: 'Psicopedagogo', icon: <Brain /> },
+    { name: 'Psicólogo organizacional', icon: <Brain /> },
+    { name: 'Terapeuta ocupacional', icon: <Activity /> },
+    { name: 'Fonoaudiólogo', icon: <MessageSquare /> },
+    { name: 'Nutricionista (consultoria)', icon: <Apple /> },
+    { name: 'Personal trainer', icon: <Dumbbell /> },
+    { name: 'Consultor de saúde', icon: <Heart /> },
+    { name: 'Massoterapeuta', icon: <User /> },
+    { name: 'Quiropraxista', icon: <User /> },
+    { name: 'Acupunturista', icon: <User /> },
+    { name: 'Esteticista (técnico)', icon: <Sparkles /> },
+    { name: 'Podólogo', icon: <Sparkles /> },
+    { name: 'Técnico em segurança do trabalho', icon: <Shield /> },
+    { name: 'Engenheiro civil', icon: <Wrench /> },
+    { name: 'Engenheiro eletricista', icon: <Zap /> },
+    { name: 'Engenheiro mecânico', icon: <Wrench /> },
+    { name: 'Arquiteto', icon: <Ruler /> },
+    { name: 'Urbanista', icon: <Ruler /> },
+    { name: 'Topógrafo', icon: <MapPin /> },
+    { name: 'Técnico em edificações', icon: <Wrench /> },
+    { name: 'Técnico em eletrotécnica', icon: <Zap /> },
+    { name: 'Técnico em automação', icon: <Settings /> },
+    { name: 'Perito técnico', icon: <Search /> },
+    { name: 'Perito judicial', icon: <Search /> },
+    { name: 'Avaliador técnico', icon: <Search /> },
+    { name: 'Técnico em laudos e vistorias', icon: <Search /> },
+    { name: 'Técnico em meio ambiente', icon: <Leaf /> },
+    { name: 'Consultor ambiental', icon: <Leaf /> },
+    { name: 'Gestor de projetos', icon: <Briefcase /> },
+    { name: 'Product manager', icon: <Briefcase /> },
+    { name: 'Analista de processos', icon: <Briefcase /> },
+    { name: 'Analista de qualidade', icon: <Briefcase /> },
+    { name: 'Especialista em compliance', icon: <ShieldCheck /> },
+    { name: 'Consultor jurídico', icon: <Scale /> },
+    { name: 'Técnico em licitações', icon: <FileText /> },
+    { name: 'Especialista em contratos', icon: <FileText /> },
+    { name: 'Despachante aduaneiro', icon: <Plane /> },
+    { name: 'Consultor de comércio exterior', icon: <Plane /> },
+    { name: 'Agente de viagens', icon: <Plane /> },
+    { name: 'Consultor de turismo', icon: <Plane /> },
+    { name: 'Planejador financeiro', icon: <Calculator /> },
+    { name: 'Corretor de seguros', icon: <ShieldCheck /> },
+    { name: 'Consultor de seguros', icon: <ShieldCheck /> },
+    { name: 'Atuário', icon: <Calculator /> },
+    { name: 'Especialista em benefícios', icon: <Gift /> },
+    { name: 'Técnico administrativo', icon: <FileText /> },
+    { name: 'Assistente virtual', icon: <FileText /> },
+    { name: 'Secretário(a) remoto(a)', icon: <FileText /> },
+    { name: 'Digitador', icon: <FileText /> },
+    { name: 'Analista de dados administrativos', icon: <FileText /> },
+    { name: 'Especialista em LGPD', icon: <Lock /> },
+    { name: 'Encarregado de dados (DPO)', icon: <Lock /> },
 ];
 
-const TECHNICIAN_PROFESSIONALS_LIST = TECHNICIAN_PROFESSIONALS_SUBCATEGORIES.map(s => s.name);
+const TECHNICIAN_PROFESSIONALS_LIST_FULL = TECHNICIAN_PROFESSIONALS_SUBCATEGORIES_FULL.map(s => s.name);
 // --- FIM DAS NOVAS CONSTANTES ---
 
 
@@ -171,7 +282,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
   'Profissionais': [
     ...MANUAL_PROFESSIONALS_SUBCATEGORIES,
-    ...TECHNICIAN_PROFESSIONALS_SUBCATEGORIES
+    ...TECHNICIAN_PROFESSIONALS_SUBCATEGORIES_FULL
   ],
   'Saúde': [
     // Gerais
@@ -329,7 +440,7 @@ export const HEALTH_GROUPS = {
 
 export const PROFESSIONALS_GROUPS = {
   manuais: MANUAL_PROFESSIONALS_LIST,
-  tecnicos: TECHNICIAN_PROFESSIONALS_LIST,
+  tecnicos: TECHNICIAN_PROFESSIONALS_LIST_FULL,
 };
 
 export const AUTOS_GROUPS = {

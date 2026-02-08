@@ -1,7 +1,9 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, CheckCircle2, Tag, Percent, DollarSign, Check, X, Loader2, Save, Clock, Users, XCircle, Search, Play, Lock, ArrowRight, Info } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+import { AppNotification, CommunityPost } from '../types';
 
 interface WeeklyPromoModuleProps {
   onBack: () => void;
@@ -81,7 +83,7 @@ const TutorialView: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     );
 };
 
-export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, user }) => {
+export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBack, user }) => {
   const tutorialStorageKey = `video_cupons_lojista_assistido_${user?.id}`;
   const [isTutorialCompleted, setIsTutorialCompleted] = useState(() => localStorage.getItem(tutorialStorageKey) === 'true');
 
@@ -92,14 +94,14 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
   const [isParticipating, setIsParticipating] = useState(false);
   const [discountType, setDiscountType] = useState<DiscountType>('percentage');
   const [discountValue, setDiscountValue] = useState('10');
-  const [minValue, setMinValue] = useState('');
-  const [validCategories, setValidCategories] = useState('');
-  const [couponLimit, setCouponLimit] = useState('');
+  const [isCustomValue, setIsCustomValue] = useState(false);
 
-
-  // Validation state
-  const [validationCode, setValidationCode] = useState('');
-  const [validationStatus, setValidationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [rewardData, setRewardData] = useState({
+    title: 'Suco Natural Grátis',
+    description: 'Na compra de qualquer hambúrguer artesanal.',
+    rules: 'Válido apenas para consumo no local. 1 uso por CPF.',
+    expiry: '7 dias após o resgate'
+  });
 
   const handleTutorialComplete = () => {
     localStorage.setItem(tutorialStorageKey, 'true');
@@ -130,156 +132,4 @@ export const WeeklyPromoModule: React.FC<WeeklyPromoModuleProps> = ({ onBack, us
         <div className="flex justify-between items-center bg-slate-800 p-6 rounded-3xl border border-white/10">
             <div>
                 <h3 className="font-bold text-white text-lg">Participar do Desconto da Semana</h3>
-                <p className="text-xs text-slate-400">Ative para sua loja aparecer na lista.</p>
-            </div>
-            <button 
-                onClick={() => setIsParticipating(!isParticipating)}
-                className={`w-14 h-8 rounded-full p-1 transition-colors ${isParticipating ? 'bg-emerald-500' : 'bg-slate-700'}`}
-            >
-                <div className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isParticipating ? 'translate-x-6' : 'translate-x-0'}`}></div>
-            </button>
-        </div>
-
-        <div className={`space-y-6 transition-opacity ${!isParticipating ? 'opacity-30 grayscale pointer-events-none' : ''}`}>
-            <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Tipo de Desconto</label>
-                <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => setDiscountType('percentage')} className={`py-4 rounded-2xl border-2 flex items-center justify-center gap-2 ${discountType === 'percentage' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-                        <Percent size={16} /> <span className="text-sm font-bold">Percentual (%)</span>
-                    </button>
-                    <button onClick={() => setDiscountType('fixed')} className={`py-4 rounded-2xl border-2 flex items-center justify-center gap-2 ${discountType === 'fixed' ? 'bg-blue-600/10 border-blue-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-                        <DollarSign size={16} /> <span className="text-sm font-bold">Valor Fixo (R$)</span>
-                    </button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Até {discountType === 'percentage' ? 'X%' : 'R$ Y'}</label>
-                    <input 
-                        type="number"
-                        value={discountValue}
-                        onChange={(e) => setDiscountValue(e.target.value)}
-                        className="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 outline-none focus:border-blue-500 text-white font-bold"
-                    />
-                </div>
-                 <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Compra Mínima (R$)</label>
-                    <input 
-                        type="number"
-                        value={minValue}
-                        onChange={(e) => setMinValue(e.target.value)}
-                        placeholder="Opcional"
-                        className="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 outline-none focus:border-blue-500 text-white font-bold"
-                    />
-                </div>
-            </div>
-            
-            <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Produtos/Categorias Válidas (Opcional)</label>
-                <input 
-                    type="text"
-                    value={validCategories}
-                    onChange={(e) => setValidCategories(e.target.value)}
-                    placeholder="Ex: Pizzas, Bebidas (separado por vírgula)"
-                    className="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 outline-none focus:border-blue-500 text-white font-bold text-sm"
-                />
-            </div>
-            
-            <div>
-                <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-2 block">Limite de Cupons por Semana (Opcional)</label>
-                <input 
-                    type="number"
-                    value={couponLimit}
-                    onChange={(e) => setCouponLimit(e.target.value)}
-                    placeholder="Ex: 100"
-                    className="w-full p-4 bg-slate-800 rounded-2xl border border-slate-700 outline-none focus:border-blue-500 text-white font-bold text-sm"
-                />
-            </div>
-        </div>
-
-         <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 space-y-3">
-             <h4 className="text-xs font-bold text-amber-400 uppercase flex items-center gap-2"><Info size={14}/> Regras para o cliente:</h4>
-             <ul className="text-xs text-slate-400 list-disc list-inside space-y-1 pl-1">
-                 <li>O usuário precisa acessar o app por 5 dias consecutivos para liberar o desconto.</li>
-                 <li>Após resgatar, o cupom vale por 7 dias.</li>
-                 <li>Cada usuário escolhe 1 único lojista por semana.</li>
-             </ul>
-         </div>
-
-        <button 
-            onClick={handleSave}
-            disabled={isSaving}
-            className="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-            {isSaving ? <Loader2 className="animate-spin" /> : <Save size={18} />} Salvar Configurações
-        </button>
-    </div>
-  );
-
-  const renderValidation = () => (
-    <div className="space-y-8">
-        <div>
-            <h3 className="text-center font-bold text-white mb-2">Validar Cupom do Cliente</h3>
-            <p className="text-center text-xs text-slate-400">Digite o código apresentado pelo cliente no caixa.</p>
-        </div>
-        <div className="space-y-4">
-            <input 
-                value={validationCode}
-                onChange={(e) => { setValidationCode(e.target.value); setValidationStatus('idle'); }}
-                placeholder="CUP-XXXX"
-                className="w-full p-5 bg-slate-800 rounded-2xl border border-slate-700 text-center text-2xl font-black tracking-[0.2em] uppercase outline-none focus:border-blue-500 text-white"
-            />
-             <button 
-                onClick={handleValidate}
-                disabled={validationStatus === 'loading' || !validationCode}
-                className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-                {validationStatus === 'loading' ? <Loader2 className="animate-spin" /> : 'Validar Cupom'}
-            </button>
-        </div>
-
-        {validationStatus === 'success' && <div className="p-4 bg-emerald-500/10 text-emerald-400 rounded-xl text-center font-bold text-sm flex items-center justify-center gap-2"><CheckCircle2 size={16}/> Cupom validado com sucesso!</div>}
-        {validationStatus === 'error' && <div className="p-4 bg-red-500/10 text-red-400 rounded-xl text-center font-bold text-sm flex items-center justify-center gap-2"><XCircle size={16}/> Código inválido ou já utilizado.</div>}
-
-        <div className="pt-8 space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cupons aguardando validação</h3>
-            <div className="bg-slate-800 rounded-2xl border border-slate-700">
-                {MOCK_PENDING_COUPONS.map((c, i) => (
-                    <div key={c.id} className={`p-4 flex justify-between items-center ${i < MOCK_PENDING_COUPONS.length - 1 ? 'border-b border-slate-700' : ''}`}>
-                        <div>
-                            <p className="text-sm font-bold text-white">{c.userName}</p>
-                            <p className="text-xs text-slate-400">Resgatado: {new Date(c.redeemedAt).toLocaleTimeString()}</p>
-                        </div>
-                        <span className="text-xs font-mono bg-slate-700 px-2 py-1 rounded text-slate-300">{c.id}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
-      <header className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-white/10 shrink-0">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-white/10"><ChevronLeft className="w-6 h-6" /></button>
-        <h1 className="font-bold text-lg">Cupons da Semana</h1>
-      </header>
-      
-      {!isTutorialCompleted ? (
-        <TutorialView onComplete={handleTutorialComplete} />
-      ) : (
-        <div className="flex-1 overflow-y-auto p-5">
-            <div className="flex gap-1 bg-slate-800 p-1 rounded-2xl mb-8">
-                <button onClick={() => setView('config')} className={`flex-1 py-3 text-xs font-bold uppercase rounded-xl ${view === 'config' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Configurar</button>
-                <button onClick={() => setView('validation')} className={`flex-1 py-3 text-xs font-bold uppercase rounded-xl ${view === 'validation' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Validar</button>
-                <button onClick={() => setView('history')} className={`flex-1 py-3 text-xs font-bold uppercase rounded-xl ${view === 'history' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Histórico</button>
-            </div>
-            {view === 'config' && renderConfig()}
-            {view === 'validation' && renderValidation()}
-            {view === 'history' && <div className="text-center text-slate-500 py-20">Histórico em breve.</div>}
-        </div>
-      )}
-    </div>
-  );
-};
+                <p className="text-xs text-slate-400">Ative para sua
