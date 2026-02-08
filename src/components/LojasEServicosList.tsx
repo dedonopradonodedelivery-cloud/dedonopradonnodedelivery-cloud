@@ -1,7 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { Store, AdType } from '../types';
-import { STORES } from '../constants';
+// FIX: Using @ alias for constants import
+import { STORES } from '@/constants';
 import { Star, BadgeCheck, ChevronRight, Crown } from 'lucide-react';
 
 interface LojasEServicosListProps {

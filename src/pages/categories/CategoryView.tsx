@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Car, Bike } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
@@ -181,8 +181,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   
   // State for Health Category intermediate screen
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
-  // State for Autos Category intermediate screen
-  const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | null>(null);
 
   const subcategories = useMemo(() => {
     const allSubs = SUBCATEGORIES[category.name] || [];
@@ -199,35 +197,17 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
              return allSubs.filter(s => ['Pediatria', 'Psicologia infantil', 'Fonoaudiologia', 'Nutrição infantil', 'Fisioterapia pediátrica', 'Odontopediatria', 'Neuropediatria', 'Clínica infantil'].includes(s.name));
         }
     }
-
-    // Filtra subcategorias se for a categoria Autos e um grupo estiver selecionado
-    if (category.slug === 'autos' && autosGroup) {
-        if (autosGroup === 'carro') {
-            return allSubs.filter(s => [
-                'Oficina mecânica', 'Auto elétrica', 'Funilaria e pintura', 
-                'Alinhamento e balanceamento', 'Troca de óleo', 'Suspensão e freios', 
-                'Ar-condicionado automotivo', 'Guincho e reboque'
-            ].includes(s.name));
-        }
-        if (autosGroup === 'moto') {
-             return allSubs.filter(s => [
-                'Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 
-                'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos'
-             ].includes(s.name));
-        }
-    }
     
     return allSubs;
-  }, [category.name, healthGroup, autosGroup, category.slug]);
+  }, [category.name, healthGroup, category.slug]);
 
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  // Reset health/autos group when category changes
+  // Reset health group when category changes
   useEffect(() => {
       setHealthGroup(null);
-      setAutosGroup(null);
       setSelectedSubcategory(null);
   }, [category.slug]);
 
@@ -330,11 +310,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           setSelectedSubcategory(null);
           return;
       }
-      if (category.slug === 'autos' && autosGroup) {
-          setAutosGroup(null);
-          setSelectedSubcategory(null);
-          return;
-      }
       onBack();
   };
 
@@ -382,44 +357,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
       );
   }
 
-  // INTERMEDIATE SCREEN FOR AUTOS
-  if (category.slug === 'autos' && !autosGroup) {
-      return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-                </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
-            </div>
-
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual seu veículo?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Encontre o serviço ideal para o seu automóvel.</p>
-                </div>
-
-                <div className="grid gap-4">
-                    <SelectionButton 
-                        label="Carro" 
-                        icon={<Car />} 
-                        color="bg-blue-600" 
-                        onClick={() => setAutosGroup('carro')} 
-                    />
-                    <SelectionButton 
-                        label="Moto" 
-                        icon={<Bike />} 
-                        color="bg-orange-500" 
-                        onClick={() => setAutosGroup('moto')} 
-                    />
-                </div>
-            </div>
-        </div>
-      );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
@@ -430,7 +367,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
             {category.name} 
             {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
-            {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
         </h1>
       </div>
       

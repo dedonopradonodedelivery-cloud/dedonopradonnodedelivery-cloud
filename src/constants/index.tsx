@@ -100,7 +100,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Materiais Médicos', icon: <Stethoscope /> },
   ],
   'Autos': [
-    // Gerais antigos (mantidos para compatibilidade, mas filtrados na view nova)
     { name: 'Carro', icon: <CarFront /> },
     { name: 'Moto', icon: <Bike /> },
     { name: 'Oficinas', icon: <Wrench /> },
@@ -111,21 +110,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Peças', icon: <Settings /> },
     { name: 'Estética', icon: <Sparkles /> },
     { name: 'Acessórios', icon: <Star /> },
-    // Novos Específicos
-    { name: 'Oficina mecânica', icon: <Wrench /> },
-    { name: 'Auto elétrica', icon: <Zap /> },
-    { name: 'Funilaria e pintura', icon: <PaintRoller /> },
-    { name: 'Alinhamento e balanceamento', icon: <Scale /> },
-    { name: 'Troca de óleo', icon: <Droplets /> },
-    { name: 'Suspensão e freios', icon: <Disc /> },
-    { name: 'Ar-condicionado automotivo', icon: <Wind /> },
-    { name: 'Guincho e reboque', icon: <Truck /> },
-    { name: 'Oficina de motos', icon: <Wrench /> },
-    { name: 'Elétrica de motos', icon: <Zap /> },
-    { name: 'Mecânica geral', icon: <Settings /> },
-    { name: 'Injeção eletrônica', icon: <Cpu /> },
-    { name: 'Peças e acessórios', icon: <Package /> },
-    { name: 'Guincho para motos', icon: <Truck /> },
   ],
   'Moda': [
     { name: 'Feminina', icon: <Shirt /> },

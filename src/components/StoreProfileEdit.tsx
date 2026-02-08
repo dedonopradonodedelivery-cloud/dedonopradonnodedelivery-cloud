@@ -37,8 +37,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
-// FIX: Added ALL_TAGS to imports from constants
-import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '../constants';
+// FIX: Added ALL_TAGS to imports from constants and used @ alias
+import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '@/constants';
 import { TaxonomyType, BusinessHour, TaxonomySuggestion } from '../types';
 
 interface StoreProfileEditProps {
