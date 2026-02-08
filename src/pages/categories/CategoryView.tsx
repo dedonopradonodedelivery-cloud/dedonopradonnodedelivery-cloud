@@ -136,11 +136,11 @@ interface CategoryViewProps {
 const SelectionButton: React.FC<{ label: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick }) => (
     <button
         onClick={onClick}
-        className={`w-full aspect-[4/3] rounded-[2rem] flex flex-col items-center justify-center gap-4 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
+        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
     >
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-        <div className="relative z-10 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
-            {React.cloneElement(icon as any, { size: 32, strokeWidth: 2 })}
+        <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
+            {React.cloneElement(icon as any, { size: 28, strokeWidth: 2 })}
         </div>
         <span className="relative z-10 font-black text-lg uppercase tracking-tight text-center">{label}</span>
     </button>
@@ -294,7 +294,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   if (category.slug === 'saude' && !healthGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -304,13 +304,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-2">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                     <SelectionButton
                         label="Mulher"
                         icon={<User />}
