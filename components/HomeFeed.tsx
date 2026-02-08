@@ -573,45 +573,42 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
          <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
+       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-6">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-40 snap-center cursor-pointer group"
             >
                {/* Floating Logo */}
-               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
-                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
+               <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30">
+                  <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 p-1 shadow-lg border-2 border-gray-100 dark:border-gray-700">
+                     <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
 
                {/* Card Body */}
-               <div className="w-full h-40 bg-blue-50 dark:bg-slate-800 rounded-2xl shadow-sm border border-blue-100 dark:border-slate-700 flex flex-col items-center justify-between pt-7 relative overflow-hidden active:scale-95 transition-transform">
-                  {/* Top Content Area */}
-                  <div className="flex-1 flex flex-col items-center justify-center text-center px-3 -mt-3">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cupom</span>
-                      <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
+               <div className="relative w-full h-44 bg-[#F2F6FF] dark:bg-slate-800 rounded-3xl shadow-[0_8px_16px_rgba(30,91,255,0.06),_0_2px_4px_rgba(30,91,255,0.05)] transition-transform duration-300 group-active:scale-[0.97]">
+                  {/* Notches for tear-off effect */}
+                  <div className="absolute top-[65%] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950"></div>
+                  <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950"></div>
+                  
+                  {/* Main Content Area (above the tear line) */}
+                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-8">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight line-clamp-1 mb-1.5">{coupon.storeName}</span>
+                      <span className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
                   </div>
-                  
-                  {/* Separator & Button Area */}
-                  <div className="w-full relative">
-                      {/* Dashed Line */}
-                      <div className="absolute top-0 left-3 right-3 h-px bg-transparent border-t-2 border-dashed border-blue-200/70 dark:border-slate-600/70"></div>
 
-                      {/* Notches */}
-                      <div className="absolute top-0 -translate-y-1/2 -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950"></div>
-                      <div className="absolute top-0 -translate-y-1/2 -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950"></div>
-                      
-                      {/* Button */}
-                      <div className="p-3 pt-4">
-                          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg shadow-lg shadow-blue-500/30 border border-blue-400/50 group-active:opacity-90 transition-all">
-                              Pegar cupom
-                          </button>
-                      </div>
+                  {/* Perforated line */}
+                  <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-gray-300/80 dark:border-slate-600/80"></div>
+                  
+                  {/* Bottom part for button alignment */}
+                  <div className="h-[35%] relative">
+                       <button className="absolute -right-2 -bottom-2 z-10 w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-blue-500/40 border-2 border-white/30 transform -rotate-2 group-hover:rotate-0 group-hover:scale-105 transition-transform duration-300">
+                          Pegar
+                      </button>
                   </div>
                </div>
             </div>
