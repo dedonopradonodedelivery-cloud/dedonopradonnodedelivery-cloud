@@ -643,7 +643,7 @@ const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({
       
       <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
         {HAPPENING_NOW_MOCK.map((item) => (
-            <div key={item.id} className="snap-center flex-shrink-0 w-44 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
+            <div key={item.id} className="snap-center flex-shrink-0 w-52 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
                 <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
                     {item.image ? (
                         <img src={item.image} className="w-full h-full object-cover" alt="" />
