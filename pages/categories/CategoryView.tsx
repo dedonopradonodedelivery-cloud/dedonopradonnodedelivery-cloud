@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, CheckCircle2 } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
@@ -84,6 +83,7 @@ const SubcategoryFilterPanel: React.FC<{
     </div>
   );
 };
+
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -211,18 +211,18 @@ interface CategoryViewProps {
   onSubcategoryClick: (subName: string, parentCat: Category) => void;
 }
 
-const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, subtitle, icon, color, onClick }) => (
+const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick, subtitle }) => (
     <button
         onClick={onClick}
-        className={`w-full py-6 rounded-[1.75rem] flex flex-col items-center justify-center gap-2 ${color} text-white shadow-lg hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-xl transition-all duration-300 relative overflow-hidden group`}
+        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
     >
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-        <div className="relative z-10 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
-            {React.cloneElement(icon as any, { size: 24, strokeWidth: 2.5 })}
+        <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
+            {React.cloneElement(icon as any, { size: 28, strokeWidth: 2 })}
         </div>
         <div className="relative z-10 text-center px-4">
-            <span className="font-black text-base uppercase tracking-tight">{label}</span>
-            {subtitle && <p className="text-xs text-white/80 font-medium mt-0.5 leading-tight">{subtitle}</p>}
+            <span className="font-black text-lg uppercase tracking-tight">{label}</span>
+            {subtitle && <p className="text-xs text-white/80 font-medium mt-1 leading-tight">{subtitle}</p>}
         </div>
     </button>
 );
@@ -233,12 +233,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [loadingBanner, setLoadingBanner] = useState(true);
   const [isSubcategoryFilterOpen, setIsSubcategoryFilterOpen] = useState(false);
   const [isTechnicianFilterOpen, setIsTechnicianFilterOpen] = useState(false);
+  const [isHealthFilterOpen, setIsHealthFilterOpen] = useState(false);
 
   // States for intermediate selection screens
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
   const [professionalGroup, setProfessionalGroup] = useState<'manuais' | 'tecnicos' | null>(null);
   const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | null>(null);
 
+  const isManuals = category.slug === 'profissionais' && professionalGroup === 'manuais';
+  const isTechnicians = category.slug === 'profissionais' && professionalGroup === 'tecnicos';
 
   useEffect(() => {
       setHealthGroup(null);
@@ -326,21 +329,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
-
-    // Apply professional group filter if active
-    if (category.slug === 'profissionais' && professionalGroup) {
-        const groupList = PROFESSIONALS_GROUPS[professionalGroup];
-        categoryStores = categoryStores.filter(s => groupList.includes(s.subcategory));
-    }
-    
-    // Apply subcategory filter if active
     if (selectedSubcategory) {
       return categoryStores.filter(s => s.subcategory === selectedSubcategory);
     }
-
     return categoryStores;
-  }, [stores, category.name, category.slug, selectedSubcategory, professionalGroup]);
-
+  }, [stores, category.name, selectedSubcategory]);
 
   const handleSubcategoryClick = (subName: string) => {
     setSelectedSubcategory(prev => (prev === subName ? null : subName));
@@ -387,7 +380,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   if (category.slug === 'saude' && !healthGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -398,7 +391,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             </div>
 
             <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-2">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
                 </div>
@@ -406,18 +399,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <div className="grid gap-3">
                     <SelectionButton
                         label="Mulher"
+                        subtitle="Especialidades e cuidados para a saúde feminina."
                         icon={<User />}
                         color="bg-pink-500"
                         onClick={() => setHealthGroup('mulher')}
                     />
                     <SelectionButton
                         label="Homem"
+                        subtitle="Check-ups e especialidades para a saúde masculina."
                         icon={<User />}
                         color="bg-blue-600"
                         onClick={() => setHealthGroup('homem')}
                     />
                     <SelectionButton
                         label="Pediatria"
+                        subtitle="Acompanhamento completo para bebês e crianças."
                         icon={<Baby />}
                         color="bg-amber-500"
                         onClick={() => setHealthGroup('pediatria')}
@@ -430,7 +426,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'profissionais' && !professionalGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -440,13 +436,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid gap-3">
                     <SelectionButton
                         label="Serviços Manuais"
                         subtitle="Obras, reparos e serviços práticos"
@@ -458,7 +454,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         label="Técnicos / Especializados"
                         subtitle="Serviços profissionais e especializados"
                         icon={<Briefcase />}
-                        color="bg-slate-600"
+                        color="bg-sky-700"
                         onClick={() => setProfessionalGroup('tecnicos')}
                     />
                 </div>
@@ -469,7 +465,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'autos' && !autosGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -479,23 +475,25 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-3">
                     <SelectionButton
                         label="Carro"
+                        subtitle="Serviços para automóveis"
                         icon={<CarFront />}
                         color="bg-red-600"
                         onClick={() => setAutosGroup('carro')}
                     />
                     <SelectionButton
                         label="Moto"
+                        subtitle="Serviços para motocicletas"
                         icon={<Bike />}
-                        color="bg-gray-700"
+                        color="bg-red-700"
                         onClick={() => setAutosGroup('moto')}
                     />
                 </div>
@@ -503,9 +501,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
         </div>
       );
   }
-
-  const isManuals = category.slug === 'profissionais' && professionalGroup === 'manuais';
-  const isTechnicians = category.slug === 'profissionais' && professionalGroup === 'tecnicos';
 
   return (
     <>
@@ -518,7 +513,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
               {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
               {category.name} 
               {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
-              {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Serviços Manuais' : 'Técnicos'}</span>}
+              {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
               {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
           </h1>
         </div>
@@ -537,7 +532,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                       icon={sub.icon}
                       name={sub.name}
                       isSelected={selectedSubcategory === sub.name}
-                      onClick={() => handleSubcategoryClick(sub.name)}
+                      onClick={() => onSubcategoryClick(sub.name, category)}
                       categoryColor={category.color}
                     />
                 ))}
@@ -548,7 +543,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         isSelected={false} 
                         isMoreButton 
                         onClick={() => {
-                            if (isManuals) {
+                            if (category.slug === 'saude') {
+                                setIsHealthFilterOpen(true);
+                            } else if (isManuals) {
                                 setIsSubcategoryFilterOpen(true);
                             } else if (isTechnicians) {
                                 setIsTechnicianFilterOpen(true);
@@ -618,7 +615,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           </section>
         </div>
       </div>
-      
       {isManuals && (
         <SubcategoryFilterPanel
             isOpen={isSubcategoryFilterOpen}
@@ -645,6 +641,20 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             }}
             title="Filtrar por Especialidade"
         />
+      )}
+
+      {category.slug === 'saude' && healthGroup && (
+          <SubcategoryFilterPanel
+              isOpen={isHealthFilterOpen}
+              onClose={() => setIsHealthFilterOpen(false)}
+              options={subcategories.map(s => s.name)}
+              selected={selectedSubcategory}
+              onSelect={(sub) => {
+                  setSelectedSubcategory(sub);
+                  setIsHealthFilterOpen(false);
+              }}
+              title={`Especialidades (${healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'})`}
+          />
       )}
     </>
   );
