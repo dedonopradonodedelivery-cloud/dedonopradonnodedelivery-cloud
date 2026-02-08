@@ -34,7 +34,8 @@ import {
   Scissors,
   BookOpen,
   Lightbulb,
-  User as UserIcon
+  User as UserIcon,
+  Search
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -502,57 +503,6 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
     );
 };
 
-const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
-    return (
-        <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-            <div className="px-5 mb-3 flex items-center justify-between">
-               <div>
-                  <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Pets e objetos que o bairro procura</p>
-               </div>
-            </div>
-            
-            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
-                {LOST_AND_FOUND_MOCK.map((item) => {
-                    const isLost = item.type === 'lost_pet';
-                    const Icon = isLost ? Dog : Key;
-                    
-                    return (
-                        <div 
-                            key={item.id}
-                            onClick={() => onItemClick(item)}
-                            className="flex-shrink-0 w-40 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm"
-                        >
-                            <div className="h-28 bg-gray-100 dark:bg-gray-800 relative">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                                    {isLost ? 'Perdido' : 'Achado'}
-                                </div>
-                            </div>
-                            <div className="p-3 flex flex-col gap-1">
-                                <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                                    <Icon size={10} />
-                                    <span className="text-[8px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
-                                </div>
-                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                                <div className="flex flex-col gap-0.5 mt-0.5">
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                                        <MapPin size={9} className="shrink-0" /> {item.location}
-                                    </div>
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium">
-                                        <Clock size={9} className="shrink-0" /> {item.time}
-                                    </div>
-                                </div>
-                                <span className="text-[9px] font-bold text-[#1E5BFF] mt-1.5 group-hover:underline">Ver detalhes</span>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </section>
-    );
-};
-
 const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | null; userRole: string | null }> = ({ onNavigate, user, userRole }) => {
   
   const handleCouponClick = () => {
@@ -619,65 +569,116 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
   );
 };
 
-const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+const HUB_ITEMS = [
+  ...HAPPENING_NOW_MOCK.map(item => ({ ...item, dataType: 'happening' as const })),
+  ...LOST_AND_FOUND_MOCK.map(item => ({
+    ...item,
+    type: 'lost_found' as const, // Unify type for filtering
+    subtitle: item.location,
+    timeRemaining: item.time,
+    dataType: 'lost_found' as const,
+  }))
+];
+
+const HUB_FILTERS = [
+    { id: 'all', label: 'Tudo', icon: Sparkles },
+    { id: 'promotion', label: 'Promoções', icon: Megaphone },
+    { id: 'event', label: 'Eventos', icon: Calendar },
+    { id: 'alert', label: 'Avisos', icon: AlertTriangle },
+    { id: 'lost_found', label: 'Achados', icon: Search },
+];
+
+const NeighborhoodHub: React.FC<{ 
+  onNavigate: (view: string) => void,
+  onItemClick: (item: any) => void 
+}> = ({ onNavigate, onItemClick }) => {
+  const [activeFilter, setActiveFilter] = useState('all');
+
+  const filteredItems = useMemo(() => {
+    if (activeFilter === 'all') return HUB_ITEMS;
+    return HUB_ITEMS.filter(item => item.type === activeFilter);
+  }, [activeFilter]);
+  
+  const getBadge = (type: string) => {
+    switch(type) {
+        case 'promotion': return { icon: <Megaphone size={8} />, label: 'Promoção', color: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' };
+        case 'event': return { icon: <Calendar size={8} />, label: 'Evento', color: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' };
+        case 'alert': return { icon: <AlertTriangle size={8} />, label: 'Aviso', color: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' };
+        case 'lost_found': return { icon: <Search size={8} />, label: 'Achados/Perdidos', color: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400' };
+        default: return null;
+    }
+  };
+
   return (
-    <div className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950">
-      <div className="flex items-center justify-between mb-3 px-1">
-        <div>
-            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
-            Acontecendo Agora 
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </span>
-            </h2>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Tempo real no bairro</p>
+    <div className="py-6 bg-white dark:bg-gray-950 border-t border-b border-gray-100 dark:border-gray-800">
+      {/* Top Banner */}
+      <div className="px-5 mb-6">
+        <div className="relative w-full rounded-3xl bg-blue-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden p-6 text-center">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-1">Acompanhe seu bairro em tempo real</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Avisos, eventos, promoções e informações importantes perto de você.</p>
         </div>
-        <button 
-          onClick={() => alert("Funcionalidade de alerta rápido em breve!")}
-          className="flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 hover:text-blue-500 transition-colors"
-        >
-            <Plus size={16} />
-        </button>
+      </div>
+
+      {/* Filter Icons */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-5 mb-6">
+        {HUB_FILTERS.map(filter => (
+            <button 
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+                className={`flex-shrink-0 flex flex-col items-center justify-center gap-1.5 w-20 h-20 rounded-2xl border transition-all duration-200 ${
+                    activeFilter === filter.id 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
+                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:text-blue-500'
+                }`}
+            >
+                <filter.icon size={20} strokeWidth={2.5} />
+                <span className="text-[8px] font-black uppercase tracking-tighter">{filter.label}</span>
+            </button>
+        ))}
       </div>
       
+      {/* Content cards */}
       <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
-        {HAPPENING_NOW_MOCK.map((item) => (
-            <div key={item.id} className="snap-center flex-shrink-0 w-52 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
-                <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
-                    {item.image ? (
-                        <img src={item.image} className="w-full h-full object-cover" alt="" />
-                    ) : (
-                        <div className="text-amber-500">
-                             {item.type === 'alert' ? <AlertTriangle size={24} /> : <Zap size={24} />}
+        {filteredItems.map((item: any) => {
+            const badge = getBadge(item.type);
+            const canClick = item.dataType === 'lost_found';
+            return (
+                <div 
+                    key={item.id} 
+                    onClick={() => canClick && onItemClick(item)}
+                    className={`snap-center flex-shrink-0 w-56 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all ${canClick ? 'cursor-pointer active:scale-95' : 'cursor-default'}`}
+                >
+                    <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
+                        {item.image ? (
+                            <img src={item.image} className="w-full h-full object-cover" alt={item.title} />
+                        ) : (
+                            <div className="text-amber-500">
+                                {item.type === 'alert' ? <AlertTriangle size={24} /> : <Zap size={24} />}
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        {badge && (
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex items-center gap-1 ${badge.color}`}>
+                                    {badge.icon} {badge.label}
+                                </span>
+                            </div>
+                        )}
+                        <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
+                        <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate mb-1">{item.subtitle}</p>
+                        <div className="flex items-center gap-1 text-[9px] text-blue-600 dark:text-blue-400 font-bold">
+                            <Clock size={10} /> {item.timeRemaining}
                         </div>
-                    )}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
-                            item.type === 'promotion' ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
-                            item.type === 'event' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' :
-                            'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
-                        }`}>
-                            {item.type === 'promotion' && <Megaphone size={8} />}
-                            {item.type === 'event' && <Calendar size={8} />}
-                            {item.type === 'alert' && <AlertTriangle size={8} />}
-                            {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : 'Aviso'}
-                        </span>
-                    </div>
-                    <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                    <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate mb-1">{item.subtitle}</p>
-                    <div className="flex items-center gap-1 text-[9px] text-blue-600 dark:text-blue-400 font-bold">
-                        <Clock size={10} /> {item.timeRemaining}
                     </div>
                 </div>
-            </div>
-        ))}
+            )
+        })}
       </div>
     </div>
   )
 };
+
 
 interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
@@ -787,7 +788,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       )}
       
       <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
-      <HappeningNowSection onNavigate={onNavigate} />
+      
+      <NeighborhoodHub onNavigate={onNavigate} onItemClick={setSelectedLostItem} />
 
       {isFeatureActive('service_chat') && (
         <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
@@ -800,7 +802,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      <LostAndFoundSection onItemClick={setSelectedLostItem} />
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
       {isFeatureActive('explore_guide') && (
@@ -832,7 +833,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">Que tipo de serviço?</h3>
               <div className="grid grid-cols-2 gap-4">
                 {[{l: 'Obras', i: Hammer}, {l: 'Reparos', i: Zap}, {l: 'Casa', i: HomeIcon}, {l: 'Outros', i: Sparkles}].map(s => (
-                  <button key={s.l} onClick={() => setWizardStep(2)} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
+                  <button key={s.l} onClick={() => onNavigate('services_landing')} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600"><s.i size={24} /></div>
                     <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter">{s.l}</p>
                   </button>
