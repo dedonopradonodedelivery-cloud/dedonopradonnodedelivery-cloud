@@ -84,70 +84,6 @@ const SubcategoryFilterPanel: React.FC<{
   );
 };
 
-
-// --- Reusable Banner Rendering Components ---
-const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, headline, subheadline, product_image_url } = config;
-    switch (template_id) {
-      case 'oferta_relampago':
-        return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-rose-50 to-red-600 text-white p-6 flex items-center justify-between overflow-hidden relative shadow-lg">
-            <div className="relative z-10">
-              <span className="text-sm font-bold bg-yellow-300 text-red-700 px-3 py-1 rounded-full uppercase shadow-sm">{headline || 'XX% OFF'}</span>
-              <h3 className="text-3xl font-black mt-4 drop-shadow-md max-w-[200px] leading-tight">{subheadline || 'Nome do Produto'}</h3>
-            </div>
-            <div className="relative z-10 w-32 h-32 rounded-full border-4 border-white/50 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-              {product_image_url ? <img src={product_image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-gray-400" />}
-            </div>
-          </div>
-        );
-      case 'lancamento':
-        return (
-          <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
-             <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
-             <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
-                <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
-             </div>
-          </div>
-        );
-      default: return null;
-    }
-};
-
-const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
-    const { template_id, background_color, text_color, font_size, font_family, title, subtitle } = config;
-    
-    const fontSizes = { small: 'text-2xl', medium: 'text-4xl', large: 'text-5xl' };
-    const subFontSizes = { small: 'text-sm', medium: 'text-base', large: 'text-lg' };
-    const headlineFontSize = { small: 'text-4xl', medium: 'text-6xl', large: 'text-7xl' };
-
-    const layoutClasses = {
-      simple_left: 'flex flex-col justify-center items-start text-left',
-      centered: 'flex flex-col justify-center items-center text-center',
-      headline: 'flex flex-col justify-center items-center text-center',
-    };
-
-    type LayoutKey = keyof typeof layoutClasses;
-    type SizeKey = keyof typeof fontSizes;
-    type HeadlineSizeKey = keyof typeof headlineFontSize;
-
-    return (
-        <div 
-            className={`w-full aspect-video rounded-2xl overflow-hidden relative shadow-lg p-8 ${layoutClasses[template_id as LayoutKey] || 'flex flex-col justify-center'}`}
-            style={{ backgroundColor: background_color, color: text_color }}
-        >
-            <h3 className={`${template_id === 'headline' ? headlineFontSize[font_size as HeadlineSizeKey] : fontSizes[font_size as SizeKey]} font-black leading-tight line-clamp-2`} style={{ fontFamily: font_family }}>
-                {title || "Título"}
-            </h3>
-            <p className={`${subFontSizes[font_size as SizeKey]} mt-3 opacity-80 max-w-md line-clamp-3`} style={{ fontFamily: font_family }}>
-                {subtitle || "Subtítulo"}
-            </p>
-        </div>
-    );
-};
-// --- End Banner Rendering Components ---
-
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
   name: string; 
@@ -243,8 +179,6 @@ const SelectionButton: React.FC<{
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  const [activeBanner, setActiveBanner] = useState<any | null>(null);
-  const [loadingBanner, setLoadingBanner] = useState(true);
   const [isSubcategoryFilterOpen, setIsSubcategoryFilterOpen] = useState(false);
   const [isTechnicianFilterOpen, setIsTechnicianFilterOpen] = useState(false);
   const [isHealthFilterOpen, setIsHealthFilterOpen] = useState(false);
@@ -286,61 +220,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  useEffect(() => {
-    const fetchCategoryBanner = async () => {
-      if (!supabase) {
-        setLoadingBanner(false);
-        return;
-      }
-      setLoadingBanner(true);
-      try {
-        const { data, error } = await supabase
-          .from('published_banners')
-          .select('id, config, merchant_id')
-          .eq('target', `category:${category.slug}`)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) {
-          if (error.message.includes('published_banners')) {
-            setActiveBanner(null);
-          } else {
-            throw error;
-          }
-        } else {
-            if (data && data.length > 0) {
-              setActiveBanner(data[0]);
-            } else {
-              setActiveBanner(null);
-            }
-        }
-      } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
-        setActiveBanner(null);
-      } finally {
-        setLoadingBanner(false);
-      }
-    };
-    
-    fetchCategoryBanner();
-
-    const channel = supabase.channel(`category-banner-${category.slug}`)
-      .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'published_banners',
-          filter: `target=eq.category:${category.slug}`
-        },
-        () => fetchCategoryBanner()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [category.slug]);
-
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
     if (selectedSubcategory) {
@@ -348,30 +227,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     }
     return categoryStores;
   }, [stores, category.name, selectedSubcategory]);
-
-  const handleSubcategoryClick = (subName: string) => {
-    setSelectedSubcategory(prev => (prev === subName ? null : subName));
-  };
-
-  const handleAdvertiseClick = () => {
-    if (userRole === 'lojista') {
-      onAdvertiseInCategory(category.name);
-      onNavigate('store_ads_module');
-    } else {
-      alert("Apenas lojistas podem anunciar aqui. Crie ou acesse sua conta de lojista.");
-    }
-  };
-
-  const handleBannerClick = (banner: any) => {
-    if (banner.merchant_id) {
-      const store = stores.find(s => s.id === banner.merchant_id);
-      if (store) {
-        onStoreClick(store);
-        return;
-      }
-    }
-    onNavigate('explore');
-  };
   
   const handleBack = () => {
       if (category.slug === 'saude' && healthGroup) {
@@ -585,39 +440,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           )}
 
           <section>
-            {loadingBanner ? (
-              <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-            ) : activeBanner ? (
-              <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
-                {activeBanner.config.type === 'template' ? (
-                  <TemplateBannerRender config={activeBanner.config} />
-                ) : (
-                  <CustomBannerRender config={activeBanner.config} />
-                )}
-              </div>
-            ) : (
-              <div 
-                onClick={handleAdvertiseClick}
-                className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
-              >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
-                  
-                  <div className="relative z-10 flex flex-col items-center">
-                      <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
-                        <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
-                      </div>
-                      <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
-                      <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
-                          Patrocinar nesta categoria
-                      </div>
-                  </div>
-              </div>
-            )}
-          </section>
-
-          <section>
               <h3 className="font-bold text-gray-900 dark:text-white mb-4">
                   {selectedSubcategory || `Destaques em ${category.name}`}
               </h3>
@@ -647,7 +469,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             options={subcategories.map(s => s.name)}
             selected={selectedSubcategory}
             onSelect={(sub) => {
-                setSelectedSubcategory(sub);
+                onSubcategoryClick(sub as string, category)
                 setIsSubcategoryFilterOpen(false);
             }}
             title="Filtrar Serviços Manuais"
@@ -661,7 +483,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             options={subcategories.map(s => s.name)}
             selected={selectedSubcategory}
             onSelect={(sub) => {
-                setSelectedSubcategory(sub);
+                onSubcategoryClick(sub as string, category)
                 setIsTechnicianFilterOpen(false);
             }}
             title="Filtrar por Especialidade"
@@ -675,7 +497,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
               options={subcategories.map(s => s.name)}
               selected={selectedSubcategory}
               onSelect={(sub) => {
-                  setSelectedSubcategory(sub);
+                  onSubcategoryClick(sub as string, category)
                   setIsHealthFilterOpen(false);
               }}
               title={`Especialidades (${healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'})`}
