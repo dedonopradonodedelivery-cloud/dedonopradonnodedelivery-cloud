@@ -14,8 +14,9 @@ import {
   Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
   Key, Fan, Truck, Shovel,
-  // Added missing icon imports
-  Meh, ThumbsDown, Gift, RefreshCw, Wind, Bike, Cpu
+  Meh, ThumbsDown, Gift, RefreshCw, Wind, Bike, Cpu,
+  // Adicionados novos ícones para a lista de profissionais
+  Wifi, Sun, Tent, Bug, Square
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -38,6 +39,104 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
   { id: 'cat-condominio', name: 'Condomínio', slug: 'condominio', icon: <Building2 />, color: 'bg-brand-blue' },
 ];
+
+// --- NOVAS CONSTANTES PARA PROFISSIONAIS ---
+const MANUAL_PROFESSIONALS_SUBCATEGORIES = [
+    { name: 'Pedreiro', icon: <Hammer /> },
+    { name: 'Eletricista', icon: <Zap /> },
+    { name: 'Encanador', icon: <Droplets /> },
+    { name: 'Bombeiro hidráulico', icon: <Wrench /> },
+    { name: 'Pintor', icon: <PaintRoller /> },
+    { name: 'Gesseiro', icon: <PaintRoller /> },
+    { name: 'Marceneiro', icon: <Hammer /> },
+    { name: 'Carpinteiro', icon: <Hammer /> },
+    { name: 'Serralheiro', icon: <Settings /> },
+    { name: 'Soldador', icon: <Flame /> },
+    { name: 'Azulejista', icon: <Hammer /> },
+    { name: 'Ladrilheiro', icon: <Hammer /> },
+    { name: 'Telhadista', icon: <HomeIcon /> },
+    { name: 'Calheiro', icon: <Droplets /> },
+    { name: 'Vidraceiro', icon: <Square /> },
+    { name: 'Impermeabilizador', icon: <Shield /> },
+    { name: 'Instalador de drywall', icon: <Hammer /> },
+    { name: 'Instalador de forro (gesso / PVC)', icon: <Hammer /> },
+    { name: 'Instalador de pisos', icon: <Ruler /> },
+    { name: 'Instalador de porcelanato', icon: <Ruler /> },
+    { name: 'Instalador de laminado', icon: <Ruler /> },
+    { name: 'Instalador de vinílico', icon: <Ruler /> },
+    { name: 'Instalador de rodapé', icon: <Ruler /> },
+    { name: 'Instalador de revestimentos', icon: <Hammer /> },
+    { name: 'Instalador de box', icon: <Droplets /> },
+    { name: 'Instalador de espelhos', icon: <Square /> },
+    { name: 'Montador de móveis', icon: <Settings /> },
+    { name: 'Desmontador de móveis', icon: <Settings /> },
+    { name: 'Chaveiro', icon: <Key /> },
+    { name: 'Instalador de portões', icon: <Building2 /> },
+    { name: 'Instalador de grades', icon: <LayoutGrid /> },
+    { name: 'Instalador de corrimão', icon: <Settings /> },
+    { name: 'Instalador de cercas', icon: <Settings /> },
+    { name: 'Instalador de cerca elétrica', icon: <Zap /> },
+    { name: 'Instalador de concertina', icon: <Shield /> },
+    { name: 'Instalador de alarmes residenciais', icon: <Bell /> },
+    { name: 'Instalador de câmeras (CFTV)', icon: <Camera /> },
+    { name: 'Técnico em manutenção predial', icon: <Wrench /> },
+    { name: 'Técnico em pequenos reparos', icon: <Wrench /> },
+    { name: 'Técnico de telhados', icon: <HomeIcon /> },
+    { name: 'Técnico de impermeabilização', icon: <Shield /> },
+    { name: 'Técnico em hidráulica', icon: <Droplets /> },
+    { name: 'Técnico em elétrica residencial', icon: <Zap /> },
+    { name: 'Desentupidor', icon: <Shovel /> },
+    { name: 'Limpador de caixa d’água', icon: <Droplets /> },
+    { name: 'Dedetizador', icon: <Bug /> },
+    { name: 'Controlador de pragas', icon: <Bug /> },
+    { name: 'Jardineiro', icon: <Leaf /> },
+    { name: 'Paisagista', icon: <Leaf /> },
+    { name: 'Piscineiro', icon: <Droplets /> },
+    { name: 'Limpador de piscina', icon: <Droplets /> },
+    { name: 'Podador de árvores', icon: <Scissors /> },
+    { name: 'Operador de roçadeira', icon: <Fan /> },
+    { name: 'Caseiro', icon: <HomeIcon /> },
+    { name: 'Zelador', icon: <User /> },
+    { name: 'Auxiliar de obras', icon: <User /> },
+    { name: 'Mestre de obras', icon: <Briefcase /> },
+    { name: 'Servente de obras', icon: <User /> },
+    { name: 'Ajudante de pedreiro', icon: <User /> },
+    { name: 'Instalador de antenas', icon: <Wifi /> },
+    { name: 'Instalador de internet residencial', icon: <Wifi /> },
+    { name: 'Instalador de ar-condicionado', icon: <Wind /> },
+    { name: 'Técnico de refrigeração', icon: <Fan /> },
+    { name: 'Instalador de coifas e exaustores', icon: <Fan /> },
+    { name: 'Instalador de aquecedor a gás', icon: <Flame /> },
+    { name: 'Instalador de energia solar residencial', icon: <Sun /> },
+    { name: 'Instalador de toldos', icon: <Tent /> },
+    { name: 'Instalador de persianas', icon: <LayoutGrid /> },
+    { name: 'Instalador de cortinas', icon: <LayoutGrid /> },
+    { name: 'Instalador de papel de parede', icon: <PaintRoller /> },
+    { name: 'Instalador de papel vinílico', icon: <PaintRoller /> },
+    { name: 'Limpador pós-obra', icon: <Sparkles /> },
+    { name: 'Faxineiro de obra', icon: <Sparkles /> },
+    { name: 'Lavador de fachadas', icon: <Droplets /> },
+    { name: 'Pintor de fachadas', icon: <PaintRoller /> },
+    { name: 'Restaurador de fachadas', icon: <PaintRoller /> },
+];
+
+const MANUAL_PROFESSIONALS_LIST = MANUAL_PROFESSIONALS_SUBCATEGORIES.map(s => s.name);
+
+const TECHNICIAN_PROFESSIONALS_SUBCATEGORIES = [
+    { name: 'Advogado', icon: <Scale /> },
+    { name: 'Contador', icon: <Calculator /> },
+    { name: 'Despachante', icon: <FileText /> },
+    { name: 'Corretor de imóveis', icon: <Key /> },
+    { name: 'Professor particular', icon: <User /> },
+    { name: 'Designer', icon: <PenTool /> },
+    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Consultor', icon: <Briefcase /> },
+    { name: 'Freelancers em Geral', icon: <Briefcase /> },
+];
+
+const TECHNICIAN_PROFESSIONALS_LIST = TECHNICIAN_PROFESSIONALS_SUBCATEGORIES.map(s => s.name);
+// --- FIM DAS NOVAS CONSTANTES ---
+
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
   'Comida': [
@@ -71,27 +170,8 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Pets Exóticos', icon: <Sparkles /> },
   ],
   'Profissionais': [
-    // Manuais
-    { name: 'Pedreiro', icon: <Hammer /> },
-    { name: 'Eletricista', icon: <Zap /> },
-    { name: 'Encanador', icon: <Droplets /> },
-    { name: 'Pintor', icon: <PaintRoller /> },
-    { name: 'Gesseiro', icon: <PaintRoller /> },
-    { name: 'Marceneiro', icon: <Hammer /> },
-    { name: 'Serralheiro', icon: <Settings /> },
-    { name: 'Diarista / Faxineira', icon: <Sparkles /> },
-    { name: 'Montador de Móveis', icon: <Settings /> },
-    { name: 'Marido de Aluguel', icon: <Wrench /> },
-    // Técnicos / Especializados
-    { name: 'Advogado', icon: <Scale /> },
-    { name: 'Contador', icon: <Calculator /> },
-    { name: 'Despachante', icon: <FileText /> },
-    { name: 'Corretor de imóveis', icon: <Key /> },
-    { name: 'Professor particular', icon: <User /> },
-    { name: 'Designer', icon: <PenTool /> },
-    { name: 'Técnico em Informática', icon: <Laptop /> },
-    { name: 'Consultor', icon: <Briefcase /> },
-    { name: 'Freelancers em Geral', icon: <Briefcase /> },
+    ...MANUAL_PROFESSIONALS_SUBCATEGORIES,
+    ...TECHNICIAN_PROFESSIONALS_SUBCATEGORIES
   ],
   'Saúde': [
     // Gerais
@@ -248,8 +328,8 @@ export const HEALTH_GROUPS = {
 };
 
 export const PROFESSIONALS_GROUPS = {
-  manuais: ['Pedreiro', 'Eletricista', 'Encanador', 'Pintor', 'Gesseiro', 'Marceneiro', 'Serralheiro', 'Diarista / Faxineira', 'Montador de Móveis', 'Marido de Aluguel'],
-  tecnicos: ['Advogado', 'Contador', 'Despachante', 'Corretor de imóveis', 'Professor particular', 'Designer', 'Técnico em Informática', 'Consultor', 'Freelancers em Geral'],
+  manuais: MANUAL_PROFESSIONALS_LIST,
+  tecnicos: TECHNICIAN_PROFESSIONALS_LIST,
 };
 
 export const AUTOS_GROUPS = {

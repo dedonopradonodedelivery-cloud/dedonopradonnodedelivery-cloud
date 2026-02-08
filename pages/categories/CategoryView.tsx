@@ -1,11 +1,89 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, CheckCircle2 } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
+
+// --- PAINEL DE FILTRO DE SUBCATEGORIA ---
+const SubcategoryFilterPanel: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  options: string[];
+  selected: string | null;
+  onSelect: (option: string | null) => void;
+  title: string;
+}> = ({ isOpen, onClose, options, selected, onSelect, title }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchTerm) return options;
+    return options.filter(opt =>
+      opt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    );
+  }, [options, searchTerm]);
+
+  useEffect(() => {
+    if (!isOpen) setSearchTerm('');
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[85vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{title}</h2>
+            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400"><X size={20}/></button>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por nome..."
+              className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-10 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30 dark:text-white"
+              autoFocus
+            />
+            {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><X size={16}/></button>}
+          </div>
+        </div>
+
+        <main className="flex-1 overflow-y-auto no-scrollbar space-y-1 p-4">
+          <button
+            onClick={() => onSelect(null)}
+            className={`w-full text-left p-4 rounded-xl font-bold text-sm transition-colors flex justify-between items-center ${
+              selected === null ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
+            Todos
+            {selected === null && <CheckCircle2 size={16} />}
+          </button>
+          {filteredOptions.map(opt => (
+            <button
+              key={opt}
+              onClick={() => onSelect(opt)}
+              className={`w-full text-left p-4 rounded-xl font-medium text-sm transition-colors flex justify-between items-center ${
+                selected === opt ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
+            >
+              {opt}
+              {selected === opt && <CheckCircle2 size={16} />}
+            </button>
+          ))}
+        </main>
+      </div>
+    </div>
+  );
+};
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -153,6 +231,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
+  const [isSubcategoryFilterOpen, setIsSubcategoryFilterOpen] = useState(false);
 
   // States for intermediate selection screens
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
@@ -246,11 +325,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
+
+    // Apply professional group filter if active
+    if (category.slug === 'profissionais' && professionalGroup) {
+        const groupList = PROFESSIONALS_GROUPS[professionalGroup];
+        categoryStores = categoryStores.filter(s => groupList.includes(s.subcategory));
+    }
+    
+    // Apply subcategory filter if active
     if (selectedSubcategory) {
       return categoryStores.filter(s => s.subcategory === selectedSubcategory);
     }
+
     return categoryStores;
-  }, [stores, category.name, selectedSubcategory]);
+  }, [stores, category.name, category.slug, selectedSubcategory, professionalGroup]);
+
 
   const handleSubcategoryClick = (subName: string) => {
     setSelectedSubcategory(prev => (prev === subName ? null : subName));
@@ -340,7 +429,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'profissionais' && !professionalGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -350,13 +439,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-3">
                     <SelectionButton
                         label="Serviços Manuais"
                         subtitle="Obras, reparos e serviços práticos"
@@ -379,7 +468,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'autos' && !autosGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -389,13 +478,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-3">
                     <SelectionButton
                         label="Carro"
                         subtitle="Serviços para automóveis"
@@ -416,108 +505,131 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       );
   }
 
+  const isManuals = category.slug === 'profissionais' && professionalGroup === 'manuais';
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
-      <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
-        <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-            {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
-            {category.name} 
-            {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
-            {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
-            {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
-        </h1>
+    <>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
+          <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+          </button>
+          <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+              {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
+              {category.name} 
+              {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
+              {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Serviços Manuais' : 'Técnicos'}</span>}
+              {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
+          </h1>
+        </div>
+        
+        <div className="mt-4">
+          <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
+        </div>
+
+        <div className="p-5 pt-0 space-y-8">
+          {visibleSubcategories.length > 0 && (
+            <section>
+              <div className="grid grid-cols-4 gap-3">
+                {visibleSubcategories.map((sub, i) => (
+                    <BigSurCard 
+                      key={i} 
+                      icon={sub.icon}
+                      name={sub.name}
+                      isSelected={selectedSubcategory === sub.name}
+                      onClick={() => handleSubcategoryClick(sub.name)}
+                      categoryColor={category.color}
+                    />
+                ))}
+                {shouldShowMore && (
+                    <BigSurCard 
+                        icon={<Grid />} 
+                        name="Ver Todas" 
+                        isSelected={false} 
+                        isMoreButton 
+                        onClick={() => {
+                            if (isManuals) {
+                                setIsSubcategoryFilterOpen(true);
+                            } else {
+                                alert('Mostrar todas as subcategorias');
+                            }
+                        }} 
+                    />
+                )}
+              </div>
+            </section>
+          )}
+
+          <section>
+            {loadingBanner ? (
+              <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
+            ) : activeBanner ? (
+              <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
+                {activeBanner.config.type === 'template' ? (
+                  <TemplateBannerRender config={activeBanner.config} />
+                ) : (
+                  <CustomBannerRender config={activeBanner.config} />
+                )}
+              </div>
+            ) : (
+              <div 
+                onClick={handleAdvertiseClick}
+                className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
+              >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                  
+                  <div className="relative z-10 flex flex-col items-center">
+                      <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
+                        <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
+                      </div>
+                      <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
+                      <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
+                          Patrocinar nesta categoria
+                      </div>
+                  </div>
+              </div>
+            )}
+          </section>
+
+          <section>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4">
+                  {selectedSubcategory || `Destaques em ${category.name}`}
+              </h3>
+              {filteredStores.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                      {filteredStores.map(store => (
+                          <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
+                      ))}
+                  </div>
+              ) : (
+                  <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                      <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                      <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
+                  </div>
+              )}
+          </section>
+
+          <section>
+            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
+          </section>
+        </div>
       </div>
       
-      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
-      <div className="mt-4">
-        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
-      </div>
-
-      <div className="p-5 pt-0 space-y-8">
-        {visibleSubcategories.length > 0 && (
-          <section>
-            <div className="grid grid-cols-4 gap-3">
-              {visibleSubcategories.map((sub, i) => (
-                  <BigSurCard 
-                    key={i} 
-                    icon={sub.icon}
-                    name={sub.name}
-                    isSelected={selectedSubcategory === sub.name}
-                    onClick={() => onSubcategoryClick(sub.name, category)}
-                    categoryColor={category.color}
-                  />
-              ))}
-              {shouldShowMore && (
-                  <BigSurCard 
-                      icon={<Grid />} 
-                      name="Ver Todas" 
-                      isSelected={false} 
-                      isMoreButton 
-                      onClick={() => alert('Mostrar todas as subcategorias')} 
-                  />
-              )}
-            </div>
-          </section>
-        )}
-
-        <section>
-          {loadingBanner ? (
-            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-          ) : activeBanner ? (
-            <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
-              {activeBanner.config.type === 'template' ? (
-                <TemplateBannerRender config={activeBanner.config} />
-              ) : (
-                <CustomBannerRender config={activeBanner.config} />
-              )}
-            </div>
-          ) : (
-            <div 
-              onClick={handleAdvertiseClick}
-              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
-            >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
-                
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
-                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
-                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
-                        Patrocinar nesta categoria
-                    </div>
-                </div>
-            </div>
-          )}
-        </section>
-
-        <section>
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-                {selectedSubcategory || `Destaques em ${category.name}`}
-            </h3>
-            {filteredStores.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                    {filteredStores.map(store => (
-                        <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-                    <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
-                </div>
-            )}
-        </section>
-
-        <section>
-          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
-        </section>
-      </div>
-    </div>
+      {isManuals && (
+        <SubcategoryFilterPanel
+            isOpen={isSubcategoryFilterOpen}
+            onClose={() => setIsSubcategoryFilterOpen(false)}
+            options={subcategories.map(s => s.name)}
+            selected={selectedSubcategory}
+            onSelect={(sub) => {
+                setSelectedSubcategory(sub);
+                setIsSubcategoryFilterOpen(false);
+            }}
+            title="Filtrar Serviços Manuais"
+        />
+      )}
+    </>
   );
 };
