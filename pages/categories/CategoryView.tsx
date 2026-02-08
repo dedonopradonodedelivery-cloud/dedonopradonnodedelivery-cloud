@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, CheckCircle2, Crown } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
@@ -211,21 +211,35 @@ interface CategoryViewProps {
   onSubcategoryClick: (subName: string, parentCat: Category) => void;
 }
 
-const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick, subtitle }) => (
-    <button
-        onClick={onClick}
-        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
-    >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-        <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
-            {React.cloneElement(icon as any, { size: 28, strokeWidth: 2 })}
-        </div>
-        <div className="relative z-10 text-center px-4">
-            <span className="font-black text-lg uppercase tracking-tight">{label}</span>
-            {subtitle && <p className="text-xs text-white/80 font-medium mt-1 leading-tight">{subtitle}</p>}
-        </div>
-    </button>
-);
+const SelectionButton: React.FC<{ 
+    label: string; 
+    subtitle?: string; 
+    icon: React.ReactNode; 
+    color: string; 
+    onClick: () => void;
+    size?: 'large' | 'small';
+}> = ({ label, icon, color, onClick, subtitle, size = 'large' }) => {
+    const paddingClass = size === 'large' ? 'py-8' : 'py-5';
+    const gapClass = size === 'large' ? 'gap-3' : 'gap-2';
+    const iconWrapperClass = size === 'large' ? 'w-14 h-14' : 'w-12 h-12';
+    const iconSize = size === 'large' ? 28 : 24;
+
+    return (
+        <button
+            onClick={onClick}
+            className={`w-full ${paddingClass} rounded-[2rem] flex flex-col items-center justify-center ${gapClass} ${color} text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
+        >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+            <div className={`relative z-10 ${iconWrapperClass} bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20`}>
+                {React.cloneElement(icon as any, { size: iconSize, strokeWidth: 2 })}
+            </div>
+            <div className="relative z-10 text-center px-4">
+                <span className="font-black text-lg uppercase tracking-tight">{label}</span>
+                {subtitle && <p className="text-xs text-white/80 font-medium mt-1 leading-tight">{subtitle}</p>}
+            </div>
+        </button>
+    );
+};
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
@@ -380,7 +394,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   if (category.slug === 'saude' && !healthGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-6 flex flex-col animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -390,8 +404,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-10">
+            <div className="p-6 flex-1 flex flex-col justify-center">
+                <div className="text-center mb-6 mt-4">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
                 </div>
@@ -403,6 +417,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<User />}
                         color="bg-pink-500"
                         onClick={() => setHealthGroup('mulher')}
+                        size="small"
                     />
                     <SelectionButton
                         label="Homem"
@@ -410,6 +425,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<User />}
                         color="bg-blue-600"
                         onClick={() => setHealthGroup('homem')}
+                        size="small"
                     />
                     <SelectionButton
                         label="Pediatria"
@@ -417,7 +433,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<Baby />}
                         color="bg-amber-500"
                         onClick={() => setHealthGroup('pediatria')}
+                        size="small"
                     />
+                </div>
+                
+                <div className="mt-8 flex justify-center">
+                    <div className="inline-flex items-center gap-3 bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 rounded-full px-4 py-2 shadow-sm">
+                        <Crown size={14} className="text-amber-500" />
+                        <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Patrocinador Master:</span>
+                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Grupo Esquematiza</span>
+                    </div>
                 </div>
             </div>
         </div>
