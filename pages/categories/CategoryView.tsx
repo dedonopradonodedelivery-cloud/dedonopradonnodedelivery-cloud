@@ -416,7 +416,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   if (category.slug === 'alimentacao') {
     return (
       <>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -429,13 +429,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </div>
             </div>
 
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-4">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de comida você procura?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para ver as lojas do bairro.</p>
+            <div className="p-5 space-y-3 flex-1 flex flex-col justify-center">
+                <div className="text-center mb-4 mt-2">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">Qual tipo de comida você procura?</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Escolha uma opção para ver as lojas do bairro.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   {visibleFoodGroups.map(group => (
                     <SelectionButton
                         key={group.name}
@@ -443,6 +443,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={group.icon}
                         color="bg-blue-600"
                         onClick={() => onSubcategoryClick(group.name, category)}
+                        size="small"
                     />
                   ))}
                    <SelectionButton
@@ -450,6 +451,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<Plus />}
                         isMore
                         onClick={() => setIsFoodFilterOpen(true)}
+                        size="small"
                     />
                 </div>
             </div>
