@@ -89,18 +89,17 @@ const BigSurCard: React.FC<{
   name: string; 
   isSelected: boolean; 
   onClick: () => void; 
-  isMoreButton?: boolean;
   categoryColor?: string;
-}> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
+}> = ({ icon, name, isSelected, onClick, categoryColor }) => {
   const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
-  const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
-  const textClass = isMoreButton ? "text-brand-blue" : "text-white";
+  const backgroundClass = `${categoryColor || 'bg-brand-blue'} shadow-sm`;
+  const textClass = "text-white";
   const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
   
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
       <div className="flex-1 flex items-center justify-center">
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-brand-blue' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 text-white drop-shadow-md`, strokeWidth: 3 }) : null}
       </div>
       <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight pb-1 truncate w-full text-center ${textClass}`}>
         {name}
@@ -430,25 +429,28 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     />
                 ))}
                 {shouldShowMore && (
-                    <BigSurCard 
-                        icon={<Plus />} 
-                        name="Mais" 
-                        isSelected={false} 
-                        isMoreButton 
-                        onClick={() => {
-                            if (category.slug === 'saude') {
-                                setIsHealthFilterOpen(true);
-                            } else if (isManuals) {
-                                setIsSubcategoryFilterOpen(true);
-                            } else if (isTechnicians) {
-                                setIsTechnicianFilterOpen(true);
-                            } else if (isAutos) {
-                                setIsAutosFilterOpen(true);
-                            } else {
-                                alert('Mostrar todas as subcategorias');
-                            }
-                        }} 
-                    />
+                    <button onClick={() => {
+                        if (category.slug === 'saude') {
+                            setIsHealthFilterOpen(true);
+                        } else if (isManuals) {
+                            setIsSubcategoryFilterOpen(true);
+                        } else if (isTechnicians) {
+                            setIsTechnicianFilterOpen(true);
+                        } else if (isAutos) {
+                            setIsAutosFilterOpen(true);
+                        } else {
+                            alert('Mostrar todas as subcategorias');
+                        }
+                    }} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                        <div className={`w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700`}>
+                            <div className="flex-1 flex items-center justify-center">
+                                <Plus className="w-6 h-6 text-brand-blue" strokeWidth={3} />
+                            </div>
+                            <span className="block w-full text-[8px] font-black text-brand-blue text-center uppercase tracking-tighter leading-tight pb-1 truncate">
+                                Mais
+                            </span>
+                        </div>
+                    </button>
                 )}
               </div>
             </section>

@@ -745,13 +745,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         if (cat.id === 'more-trigger') {
                             return (
                                 <button key={cat.id} onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                                    <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
-                                       <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                         <Plus className="w-9 h-9 text-brand-blue" strokeWidth={2.5} />
-                                       </div>
-                                       <span className="block w-full text-[8.5px] font-black text-brand-blue text-center uppercase tracking-tighter leading-none truncate">
-                                         Mais
-                                       </span>
+                                    <div className={`w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700`}>
+                                        <div className="flex-1 flex items-center justify-center">
+                                            <Plus className="w-6 h-6 text-brand-blue" strokeWidth={3} />
+                                        </div>
+                                        <span className="block w-full text-[8px] font-black text-brand-blue text-center uppercase tracking-tighter leading-tight pb-1 truncate">
+                                            Mais
+                                        </span>
                                     </div>
                                 </button>
                             );
