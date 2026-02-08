@@ -593,8 +593,8 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
                   
                   {/* Main Content Area (above the tear line) */}
-                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-10">
-                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight line-clamp-1 mb-2">{coupon.storeName}</span>
+                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-12">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight line-clamp-1 mb-3">{coupon.storeName}</span>
                       <span className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
@@ -605,7 +605,8 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   
                   {/* Bottom part for button alignment */}
                   <div className="h-[35%] relative flex justify-center items-center px-3">
-                       <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md border border-blue-500/50 active:shadow-inner active:scale-95 transition-all">
+                       <button className="relative overflow-hidden px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md border border-blue-500/50 active:shadow-inner active:scale-95 transition-all">
+                          <span className="absolute top-0 right-0 w-0 h-0 border-solid border-b-8 border-l-8 border-b-blue-400/50 dark:border-b-blue-500/40 border-l-transparent"></span>
                           Pegar
                       </button>
                   </div>
