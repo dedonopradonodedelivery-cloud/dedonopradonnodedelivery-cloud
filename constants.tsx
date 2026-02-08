@@ -401,6 +401,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Injeção eletrônica', icon: <Cpu /> },
     { name: 'Peças e acessórios', icon: <Package /> },
     { name: 'Guincho para motos', icon: <Truck /> },
+    { name: 'Estética de motos', icon: <Sparkles /> },
   ],
   'Mercado': [
     { name: 'Supermercados', icon: <ShoppingCart /> },
@@ -588,7 +589,7 @@ export const PROFESSIONALS_GROUPS = {
 
 export const AUTOS_GROUPS = {
   carro: ['Oficina mecânica', 'Auto elétrica', 'Funilaria e pintura', 'Alinhamento e balanceamento', 'Troca de óleo', 'Suspensão e freios', 'Ar-condicionado automotivo', 'Guincho e reboque', 'Peças e acessórios'],
-  moto: ['Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 'Troca de óleo', 'Suspensão e freios', 'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos'],
+  moto: ['Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 'Troca de óleo', 'Suspensão e freios', 'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos', 'Estética de motos'],
 };
 
 // 🔹 LISTA DE 60 TAGS INICIAIS (OBRIGATÓRIAS)
