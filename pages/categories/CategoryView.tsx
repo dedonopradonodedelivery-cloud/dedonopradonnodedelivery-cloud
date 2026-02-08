@@ -94,13 +94,13 @@ const BigSurCard: React.FC<{
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
   const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
   const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white";
+  const textClass = isMoreButton ? "text-brand-blue" : "text-white";
   const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
   
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
       <div className="flex-1 flex items-center justify-center">
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-gray-400' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-brand-blue' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
       </div>
       <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight pb-1 truncate w-full text-center ${textClass}`}>
         {name}
@@ -487,7 +487,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 onSubcategoryClick(sub as string, category)
                 setIsSubcategoryFilterOpen(false);
             }}
-            title="Filtrar Serviços Manuais"
+            title="Filtrar por subcategoria"
         />
       )}
 
@@ -501,7 +501,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 onSubcategoryClick(sub as string, category)
                 setIsTechnicianFilterOpen(false);
             }}
-            title="Filtrar por Especialidade"
+            title="Filtrar por subcategoria"
         />
       )}
 
@@ -515,7 +515,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                   onSubcategoryClick(sub as string, category)
                   setIsHealthFilterOpen(false);
               }}
-              title={`Especialidades (${healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'})`}
+              title="Filtrar por subcategoria"
           />
       )}
       {isAutos && (
@@ -528,7 +528,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 onSubcategoryClick(sub as string, category)
                 setIsAutosFilterOpen(false);
             }}
-            title={`Serviços (${autosGroup === 'carro' ? 'Carro' : 'Moto'})`}
+            title="Filtrar por subcategoria"
         />
       )}
     </>
