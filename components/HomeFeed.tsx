@@ -792,7 +792,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {isFeatureActive('service_chat') && (
         <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="px-5 mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none">Receba até 5 orçamentos gratuitos</h2>
+            <h2 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Orçamentos Rápidos</h2>
           </div>
           <div className="px-5">
             <FifaBanner onClick={() => onNavigate('services_landing')} />
@@ -832,7 +832,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">Que tipo de serviço?</h3>
               <div className="grid grid-cols-2 gap-4">
                 {[{l: 'Obras', i: Hammer}, {l: 'Reparos', i: Zap}, {l: 'Casa', i: HomeIcon}, {l: 'Outros', i: Sparkles}].map(s => (
-                  <button key={s.l} onClick={() => onNavigate('services_landing')} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
+                  <button key={s.l} onClick={() => setWizardStep(2)} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600"><s.i size={24} /></div>
                     <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter">{s.l}</p>
                   </button>
@@ -869,16 +869,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 };
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-          <Icon size={18} strokeWidth={2.5} />
-        </div>
-        <div>
-          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-        </div>
+  <div className="flex items-center justify-between mb-3">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+        <Icon size={18} strokeWidth={2.5} />
       </div>
-      {onSeeMore && <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>}
+      <div>
+        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+      </div>
     </div>
+    <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+  </div>
 );

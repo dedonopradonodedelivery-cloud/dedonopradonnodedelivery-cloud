@@ -44,7 +44,7 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
           {/* Text Section */}
           <div className="flex-1 min-w-0">
             <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight mb-1">
-              Precisando de um profissional?
+              Receba até 5 orçamentos gratuitos
             </h2>
             <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-90 pr-2">
               Especialistas verificados, orçamentos rápidos e atendimento perto de você!
