@@ -16,9 +16,7 @@ import {
   Key, Fan, Truck, Shovel,
   Meh, ThumbsDown, Gift, RefreshCw, Wind, Bike, Cpu,
   // Adicionados novos ícones para a lista de profissionais
-  Wifi, Sun, Tent, Bug, Square, Phone, Newspaper, ShieldCheck, Lock,
-  // FIX: Added missing icons
-  Megaphone, MapPin
+  Wifi, Sun, Tent, Bug, Square, Phone, Newspaper, ShieldCheck, Lock, MapPin, Megaphone
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';

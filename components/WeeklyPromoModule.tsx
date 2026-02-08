@@ -83,6 +83,13 @@ const TutorialView: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     );
 };
 
+// FIX: Renamed interface to match component usage
+interface MerchantWeeklyRewardProps {
+  onBack: () => void;
+  user: User | null;
+}
+
+
 export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBack, user }) => {
   const tutorialStorageKey = `video_cupons_lojista_assistido_${user?.id}`;
   const [isTutorialCompleted, setIsTutorialCompleted] = useState(() => localStorage.getItem(tutorialStorageKey) === 'true');
@@ -95,6 +102,12 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
   const [discountType, setDiscountType] = useState<DiscountType>('percentage');
   const [discountValue, setDiscountValue] = useState('10');
   const [isCustomValue, setIsCustomValue] = useState(false);
+
+  // FIX: Added missing state for validation logic
+  const [validationCode, setValidationCode] = useState('');
+  const [validationStatus, setValidationStatus] = useState<'success' | 'error' | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
 
   const [rewardData, setRewardData] = useState({
     title: 'Suco Natural Grátis',
@@ -116,11 +129,15 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
     }, 1200);
   };
 
+  // FIX: Implemented handleValidate function with correct state management
   const handleValidate = () => {
-    setValidationStatus('loading');
+    setIsProcessing(true);
+    setValidationStatus(null);
     setTimeout(() => {
+        setIsProcessing(false);
         if (['CUP-ABC1', 'CUP-DEF2'].includes(validationCode.toUpperCase())) {
             setValidationStatus('success');
+            setValidationCode('');
         } else {
             setValidationStatus('error');
         }
@@ -132,4 +149,9 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
         <div className="flex justify-between items-center bg-slate-800 p-6 rounded-3xl border border-white/10">
             <div>
                 <h3 className="font-bold text-white text-lg">Participar do Desconto da Semana</h3>
-                <p className="text-xs text-slate-400">Ative para sua
+                <p className="text-xs text-slate-400">Ative para sua</p>
+            </div>
+        </div>
+    </div>
+  );
+};

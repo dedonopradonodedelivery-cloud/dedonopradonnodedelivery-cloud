@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu, User } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
@@ -40,6 +41,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
                     </div>
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
+                    {/* FIX: Added "Jacarepaguá (todos)" option to the selector modal. */}
                     <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
                         {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
