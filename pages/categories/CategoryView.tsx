@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, CheckCircle2 } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS } from '@/constants';
@@ -211,7 +211,7 @@ interface CategoryViewProps {
   onSubcategoryClick: (subName: string, parentCat: Category) => void;
 }
 
-const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick, subtitle }) => (
+const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, subtitle, icon, color, onClick }) => (
     <button
         onClick={onClick}
         className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
@@ -232,6 +232,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
   const [isSubcategoryFilterOpen, setIsSubcategoryFilterOpen] = useState(false);
+  const [isTechnicianFilterOpen, setIsTechnicianFilterOpen] = useState(false);
 
   // States for intermediate selection screens
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
@@ -429,7 +430,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'profissionais' && !professionalGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -439,13 +440,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-10">
+            <div className="p-6 space-y-6">
+                <div className="text-center mb-8 mt-4">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p>
                 </div>
 
-                <div className="grid gap-3">
+                <div className="grid grid-cols-1 gap-4">
                     <SelectionButton
                         label="Serviços Manuais"
                         subtitle="Obras, reparos e serviços práticos"
@@ -457,7 +458,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         label="Técnicos / Especializados"
                         subtitle="Serviços profissionais e especializados"
                         icon={<Briefcase />}
-                        color="bg-sky-700"
+                        color="bg-slate-600"
                         onClick={() => setProfessionalGroup('tecnicos')}
                     />
                 </div>
@@ -468,7 +469,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'autos' && !autosGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -478,25 +479,23 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 </h1>
             </div>
 
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-10">
+            <div className="p-6 space-y-6">
+                <div className="text-center mb-8 mt-4">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p>
                 </div>
 
-                <div className="grid gap-3">
+                <div className="grid grid-cols-2 gap-4">
                     <SelectionButton
                         label="Carro"
-                        subtitle="Serviços para automóveis"
                         icon={<CarFront />}
                         color="bg-red-600"
                         onClick={() => setAutosGroup('carro')}
                     />
                     <SelectionButton
                         label="Moto"
-                        subtitle="Serviços para motocicletas"
                         icon={<Bike />}
-                        color="bg-red-700"
+                        color="bg-gray-700"
                         onClick={() => setAutosGroup('moto')}
                     />
                 </div>
@@ -506,6 +505,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   }
 
   const isManuals = category.slug === 'profissionais' && professionalGroup === 'manuais';
+  const isTechnicians = category.slug === 'profissionais' && professionalGroup === 'tecnicos';
 
   return (
     <>
@@ -550,6 +550,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         onClick={() => {
                             if (isManuals) {
                                 setIsSubcategoryFilterOpen(true);
+                            } else if (isTechnicians) {
+                                setIsTechnicianFilterOpen(true);
                             } else {
                                 alert('Mostrar todas as subcategorias');
                             }
@@ -628,6 +630,20 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 setIsSubcategoryFilterOpen(false);
             }}
             title="Filtrar Serviços Manuais"
+        />
+      )}
+
+      {isTechnicians && (
+        <SubcategoryFilterPanel
+            isOpen={isTechnicianFilterOpen}
+            onClose={() => setIsTechnicianFilterOpen(false)}
+            options={subcategories.map(s => s.name)}
+            selected={selectedSubcategory}
+            onSelect={(sub) => {
+                setSelectedSubcategory(sub);
+                setIsTechnicianFilterOpen(false);
+            }}
+            title="Filtrar por Especialidade"
         />
       )}
     </>
