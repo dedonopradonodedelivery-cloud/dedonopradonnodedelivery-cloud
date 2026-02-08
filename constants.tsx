@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -82,14 +81,32 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Freelancers em Geral', icon: <Briefcase /> },
   ],
   'Saúde': [
+    // Gerais
     { name: 'Clínicas', icon: <Building2 /> },
     { name: 'Dentistas', icon: <Smile /> },
     { name: 'Psicologia', icon: <Brain /> },
     { name: 'Fisioterapia', icon: <Activity /> },
-    { name: 'Exames & Diagnósticos', icon: <Microscope /> },
+    { name: 'Exames e Diagnósticos', icon: <Microscope /> },
     { name: 'Nutrição', icon: <Apple /> },
     { name: 'Terapias Alternativas', icon: <Sparkles /> },
     { name: 'Saúde Preventiva', icon: <Shield /> },
+    { name: 'Vacinação', icon: <Stethoscope /> },
+    // Específicas Mulher/Homem/Pediatria
+    { name: 'Ginecologia', icon: <User /> },
+    { name: 'Obstetrícia', icon: <Baby /> },
+    { name: 'Dermatologia', icon: <Sparkles /> },
+    { name: 'Endocrinologia', icon: <Activity /> },
+    { name: 'Clínica médica', icon: <Stethoscope /> },
+    { name: 'Urologia', icon: <User /> },
+    { name: 'Cardiologia', icon: <Heart /> },
+    { name: 'Pediatria', icon: <Baby /> },
+    { name: 'Psicologia infantil', icon: <Brain /> },
+    { name: 'Fonoaudiologia', icon: <MessageSquare /> },
+    { name: 'Nutrição infantil', icon: <Apple /> },
+    { name: 'Fisioterapia pediátrica', icon: <Activity /> },
+    { name: 'Odontopediatria', icon: <Smile /> },
+    { name: 'Neuropediatria', icon: <Brain /> },
+    { name: 'Clínica infantil', icon: <Stethoscope /> },
   ],
   'Serviços': [
     { name: 'Limpeza Residencial', icon: <Sparkles /> },
