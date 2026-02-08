@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -588,7 +587,7 @@ export const PROFESSIONALS_GROUPS = {
 };
 
 export const AUTOS_GROUPS = {
-  carro: ['Oficina mecânica', 'Auto elétrica', 'Funilaria e pintura', 'Alinhamento e balanceamento', 'Troca de óleo', 'Suspensão e freios', 'Ar-condicionado automotivo', 'Guincho e reboque'],
+  carro: ['Oficina mecânica', 'Auto elétrica', 'Funilaria e pintura', 'Alinhamento e balanceamento', 'Troca de óleo', 'Suspensão e freios', 'Ar-condicionado automotivo', 'Guincho e reboque', 'Peças e acessórios'],
   moto: ['Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 'Troca de óleo', 'Suspensão e freios', 'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos'],
 };
 

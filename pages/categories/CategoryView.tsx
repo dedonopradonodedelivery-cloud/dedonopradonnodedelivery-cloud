@@ -182,6 +182,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [isSubcategoryFilterOpen, setIsSubcategoryFilterOpen] = useState(false);
   const [isTechnicianFilterOpen, setIsTechnicianFilterOpen] = useState(false);
   const [isHealthFilterOpen, setIsHealthFilterOpen] = useState(false);
+  const [isAutosFilterOpen, setIsAutosFilterOpen] = useState(false);
 
   // States for intermediate selection screens
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
@@ -190,9 +191,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   const isManuals = category.slug === 'profissionais' && professionalGroup === 'manuais';
   const isTechnicians = category.slug === 'profissionais' && professionalGroup === 'tecnicos';
+  const isAutos = category.slug === 'autos' && autosGroup;
 
   const MasterSponsorSignature: React.FC = () => (
-    <div className="mt-0.5 pointer-events-none -mb-1">
+    <div className="pointer-events-none text-right shrink-0 ml-4">
       <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
       <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
     </div>
@@ -261,8 +263,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
                     <MasterSponsorSignature />
@@ -313,8 +315,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
                     <MasterSponsorSignature />
@@ -355,8 +357,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
                     <MasterSponsorSignature />
@@ -397,8 +399,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
-          <div className="flex-1 min-w-0">
-              <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+          <div className="flex-1 min-w-0 flex justify-between items-center">
+              <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                   {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
                   {category.name} 
                   {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
@@ -440,6 +442,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                                 setIsSubcategoryFilterOpen(true);
                             } else if (isTechnicians) {
                                 setIsTechnicianFilterOpen(true);
+                            } else if (isAutos) {
+                                setIsAutosFilterOpen(true);
                             } else {
                                 alert('Mostrar todas as subcategorias');
                             }
@@ -513,6 +517,19 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
               }}
               title={`Especialidades (${healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'})`}
           />
+      )}
+      {isAutos && (
+        <SubcategoryFilterPanel
+            isOpen={isAutosFilterOpen}
+            onClose={() => setIsAutosFilterOpen(false)}
+            options={subcategories.map(s => s.name)}
+            selected={selectedSubcategory}
+            onSelect={(sub) => {
+                onSubcategoryClick(sub as string, category)
+                setIsAutosFilterOpen(false);
+            }}
+            title={`Serviços (${autosGroup === 'carro' ? 'Carro' : 'Moto'})`}
+        />
       )}
     </>
   );
