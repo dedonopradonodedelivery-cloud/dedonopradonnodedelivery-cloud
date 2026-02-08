@@ -605,8 +605,8 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-gray-300/80 dark:border-slate-600/80"></div>
                   
                   {/* Bottom part for button alignment */}
-                  <div className="h-[35%] relative">
-                       <button className="absolute -right-2 -bottom-2 z-10 w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-blue-500/40 border-2 border-white/30 transform -rotate-2 group-hover:rotate-0 group-hover:scale-105 transition-transform duration-300">
+                  <div className="h-[35%] relative flex justify-end items-center pr-3">
+                       <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/30 border border-blue-400 group-hover:scale-105 transition-transform duration-300">
                           Pegar
                       </button>
                   </div>

@@ -133,16 +133,19 @@ interface CategoryViewProps {
   onSubcategoryClick: (subName: string, parentCat: Category) => void;
 }
 
-const SelectionButton: React.FC<{ label: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick }) => (
+const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick, subtitle }) => (
     <button
         onClick={onClick}
-        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
+        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
     >
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
         <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
             {React.cloneElement(icon as any, { size: 28, strokeWidth: 2 })}
         </div>
-        <span className="relative z-10 font-black text-lg uppercase tracking-tight text-center">{label}</span>
+        <div className="relative z-10 text-center px-4">
+            <span className="font-black text-lg uppercase tracking-tight">{label}</span>
+            {subtitle && <p className="text-xs text-white/80 font-medium mt-1 leading-tight">{subtitle}</p>}
+        </div>
     </button>
 );
 
@@ -356,14 +359,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <div className="grid grid-cols-2 gap-4">
                     <SelectionButton
                         label="Serviços Manuais"
+                        subtitle="Obras, reparos e serviços práticos"
                         icon={<Wrench />}
                         color="bg-sky-600"
                         onClick={() => setProfessionalGroup('manuais')}
                     />
                     <SelectionButton
                         label="Técnicos / Especializados"
+                        subtitle="Serviços profissionais e especializados"
                         icon={<Briefcase />}
-                        color="bg-slate-600"
+                        color="bg-sky-700"
                         onClick={() => setProfessionalGroup('tecnicos')}
                     />
                 </div>
@@ -393,14 +398,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <div className="grid grid-cols-2 gap-4">
                     <SelectionButton
                         label="Carro"
+                        subtitle="Serviços para automóveis"
                         icon={<CarFront />}
                         color="bg-red-600"
                         onClick={() => setAutosGroup('carro')}
                     />
                     <SelectionButton
                         label="Moto"
+                        subtitle="Serviços para motocicletas"
                         icon={<Bike />}
-                        color="bg-gray-700"
+                        color="bg-red-700"
                         onClick={() => setAutosGroup('moto')}
                     />
                 </div>
