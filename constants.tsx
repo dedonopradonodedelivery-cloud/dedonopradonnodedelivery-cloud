@@ -246,136 +246,52 @@ const TECHNICIAN_PROFESSIONALS_SUBCATEGORIES_FULL = [
 const TECHNICIAN_PROFESSIONALS_LIST_FULL = TECHNICIAN_PROFESSIONALS_SUBCATEGORIES_FULL.map(s => s.name);
 // --- FIM DAS NOVAS CONSTANTES ---
 
+// --- NOVA ESTRUTURA PARA ALIMENTAÇÃO ---
+// FIX: Export FOOD_GROUPS so it can be imported by CategoryView.tsx.
+export const FOOD_GROUPS = [
+  // 7 principais visíveis na Home
+  { name: 'Restaurantes', icon: <Utensils /> },
+  { name: 'Lanches', icon: <Beef /> },
+  { name: 'Massas', icon: <Pizza /> },
+  { name: 'Brasileira', icon: <Soup /> },
+  { name: 'Culinária Internacional', icon: <Globe /> },
+  { name: 'Cafés', icon: <Coffee /> },
+  { name: 'Doces', icon: <Cake /> },
+  // Restante para o modal "+ Mais"
+  { name: 'Bebidas', icon: <Beer /> },
+  { name: 'Sobremesas', icon: <Cake /> },
+  { name: 'Gelados', icon: <Sparkles /> },
+  { name: 'Saudável', icon: <Leaf /> },
+  { name: 'Marmitas', icon: <Package /> },
+  { name: 'Padaria', icon: <Croissant /> },
+  { name: 'Bares', icon: <Beer /> },
+  { name: 'Eventos', icon: <PartyPopper /> },
+  { name: 'Comida para Nichos', icon: <Target /> },
+];
+
+export const FOOD_SUB_SUB_CATEGORIES: Record<string, string[]> = {
+  'Restaurantes': ['Restaurante tradicional', 'Restaurante executivo', 'Restaurante self-service', 'Restaurante por quilo', 'Restaurante à la carte', 'Restaurante buffet', 'Restaurante familiar', 'Cozinha caseira', 'Cozinha autoral'],
+  'Lanches': ['Lanchonete', 'Hamburgueria', 'Hambúrguer artesanal', 'Hot dog', 'Sanduíches naturais', 'Fast food', 'Food truck'],
+  'Massas': ['Pizzaria', 'Pizzaria artesanal', 'Massas artesanais', 'Cantina italiana', 'Lasanha', 'Nhoque', 'Macarrão'],
+  'Brasileira': ['Comida brasileira', 'Comida nordestina', 'Comida mineira', 'Comida baiana', 'Feijoada', 'Churrasco', 'Espetinho'],
+  'Culinária Internacional': ['Japonesa / Sushi', 'Chinesa', 'Árabe', 'Mexicana', 'Italiana', 'Francesa', 'Portuguesa', 'Peruana'],
+  'Bebidas': ['Sucos naturais', 'Smoothies', 'Vitaminas', 'Bebidas geladas', 'Bebidas naturais'],
+  'Cafés': ['Cafeteria', 'Café gourmet', 'Café colonial', 'Casa de chá'],
+  'Doces': ['Doceria', 'Bolos', 'Bolos caseiros', 'Bolos decorados', 'Brigadeiro gourmet', 'Doces finos'],
+  'Sobremesas': ['Tortas doces', 'Brownies', 'Cupcakes', 'Donuts', 'Churros'],
+  'Gelados': ['Sorveteria', 'Gelateria', 'Açaí', 'Açaíteria', 'Frozen yogurt', 'Milk-shake', 'Picolé artesanal'],
+  'Saudável': ['Comida saudável', 'Fit food', 'Vegano', 'Vegetariano', 'Low carb', 'Sem glúten', 'Sem lactose'],
+  'Marmitas': ['Marmitex', 'Marmita caseira', 'Marmita fitness', 'Marmita congelada', 'Prato feito (PF)', 'Refeições prontas'],
+  'Padaria': ['Padaria tradicional', 'Padaria artesanal', 'Padaria 24h', 'Empório', 'Empório gourmet'],
+  'Bares': ['Bar', 'Barzinho', 'Boteco', 'Petiscos', 'Porções', 'Caldos', 'Sopas', 'Cervejaria artesanal'],
+  'Eventos': ['Buffet', 'Buffet infantil', 'Buffet corporativo', 'Coffee break', 'Catering', 'Chef em domicílio'],
+  'Comida para Nichos': ['Comida infantil', 'Papinhas', 'Comida para idosos', 'Comida para atletas', 'Comida para diabéticos'],
+};
+// --- FIM DA ESTRUTURA DE ALIMENTAÇÃO ---
+
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
-  'Alimentação': [
-    // 7 principais visíveis na Home
-    { name: 'Restaurantes', icon: <Utensils /> },
-    { name: 'Lanches', icon: <Beef /> },
-    { name: 'Massas', icon: <Pizza /> },
-    { name: 'Brasileira', icon: <Soup /> },
-    { name: 'Culinária Internacional', icon: <Globe /> },
-    { name: 'Cafés', icon: <Coffee /> },
-    { name: 'Doces', icon: <Cake /> },
-
-    // Sub-itens de Restaurantes
-    { name: 'Restaurante tradicional', icon: <Utensils /> },
-    { name: 'Restaurante executivo', icon: <Utensils /> },
-    { name: 'Restaurante self-service', icon: <Utensils /> },
-    { name: 'Restaurante por quilo', icon: <Utensils /> },
-    { name: 'Restaurante à la carte', icon: <Utensils /> },
-    { name: 'Restaurante buffet', icon: <Utensils /> },
-    { name: 'Restaurante familiar', icon: <Utensils /> },
-    { name: 'Cozinha caseira', icon: <Utensils /> },
-    { name: 'Cozinha autoral', icon: <Utensils /> },
-    // Sub-itens de Lanches
-    { name: 'Lanchonete', icon: <Beef /> },
-    { name: 'Hamburgueria', icon: <Beef /> },
-    { name: 'Hambúrguer artesanal', icon: <Beef /> },
-    { name: 'Hot dog', icon: <Beef /> },
-    { name: 'Sanduíches naturais', icon: <Beef /> },
-    { name: 'Fast food', icon: <Beef /> },
-    { name: 'Food truck', icon: <Truck /> },
-    // Sub-itens de Massas
-    { name: 'Pizzaria', icon: <Pizza /> },
-    { name: 'Pizzaria artesanal', icon: <Pizza /> },
-    { name: 'Massas artesanais', icon: <Pizza /> },
-    { name: 'Cantina italiana', icon: <Pizza /> },
-    { name: 'Lasanha', icon: <Pizza /> },
-    { name: 'Nhoque', icon: <Pizza /> },
-    { name: 'Macarrão', icon: <Pizza /> },
-    // Sub-itens de Brasileira
-    { name: 'Comida brasileira', icon: <Soup /> },
-    { name: 'Comida nordestina', icon: <Soup /> },
-    { name: 'Comida mineira', icon: <Soup /> },
-    { name: 'Comida baiana', icon: <Soup /> },
-    { name: 'Feijoada', icon: <Soup /> },
-    { name: 'Churrasco', icon: <Flame /> },
-    { name: 'Espetinho', icon: <Flame /> },
-    // Sub-itens de Culinária Internacional
-    { name: 'Japonesa / Sushi', icon: <Globe /> },
-    { name: 'Chinesa', icon: <Globe /> },
-    { name: 'Árabe', icon: <Globe /> },
-    { name: 'Mexicana', icon: <Globe /> },
-    { name: 'Italiana', icon: <Globe /> },
-    { name: 'Francesa', icon: <Globe /> },
-    { name: 'Portuguesa', icon: <Globe /> },
-    { name: 'Peruana', icon: <Globe /> },
-    // Restante da lista principal
-    { name: 'Bebidas', icon: <Beer /> },
-    { name: 'Sucos naturais', icon: <Beer /> },
-    { name: 'Smoothies', icon: <Beer /> },
-    { name: 'Vitaminas', icon: <Beer /> },
-    { name: 'Bebidas geladas', icon: <Beer /> },
-    { name: 'Bebidas naturais', icon: <Beer /> },
-    { name: 'Cafeteria', icon: <Coffee /> },
-    { name: 'Café gourmet', icon: <Coffee /> },
-    { name: 'Café colonial', icon: <Coffee /> },
-    { name: 'Casa de chá', icon: <Coffee /> },
-    { name: 'Doceria', icon: <Cake /> },
-    { name: 'Bolos', icon: <Cake /> },
-    { name: 'Bolos caseiros', icon: <Cake /> },
-    { name: 'Bolos decorados', icon: <Cake /> },
-    { name: 'Brigadeiro gourmet', icon: <Cake /> },
-    { name: 'Doces finos', icon: <Cake /> },
-    { name: 'Sobremesas', icon: <Cake /> },
-    { name: 'Tortas doces', icon: <Cake /> },
-    { name: 'Brownies', icon: <Cake /> },
-    { name: 'Cupcakes', icon: <Cake /> },
-    { name: 'Donuts', icon: <Cake /> },
-    { name: 'Churros', icon: <Cake /> },
-    { name: 'Gelados', icon: <Sparkles /> },
-    { name: 'Sorveteria', icon: <Sparkles /> },
-    { name: 'Gelateria', icon: <Sparkles /> },
-    { name: 'Açaí', icon: <Sparkles /> },
-    { name: 'Açaíteria', icon: <Sparkles /> },
-    { name: 'Frozen yogurt', icon: <Sparkles /> },
-    { name: 'Milk-shake', icon: <Sparkles /> },
-    { name: 'Picolé artesanal', icon: <Sparkles /> },
-    { name: 'Saudável', icon: <Leaf /> },
-    { name: 'Comida saudável', icon: <Leaf /> },
-    { name: 'Fit food', icon: <Leaf /> },
-    { name: 'Vegano', icon: <Leaf /> },
-    { name: 'Vegetariano', icon: <Leaf /> },
-    { name: 'Low carb', icon: <Leaf /> },
-    { name: 'Sem glúten', icon: <Leaf /> },
-    { name: 'Sem lactose', icon: <Leaf /> },
-    { name: 'Marmitas', icon: <Package /> },
-    { name: 'Marmitex', icon: <Package /> },
-    { name: 'Marmita caseira', icon: <Package /> },
-    { name: 'Marmita fitness', icon: <Package /> },
-    { name: 'Marmita congelada', icon: <Package /> },
-    { name: 'Prato feito (PF)', icon: <Package /> },
-    { name: 'Refeições prontas', icon: <Package /> },
-    { name: 'Padaria', icon: <Croissant /> },
-    { name: 'Padaria tradicional', icon: <Croissant /> },
-    { name: 'Padaria artesanal', icon: <Croissant /> },
-    { name: 'Padaria 24h', icon: <Croissant /> },
-    { name: 'Empório', icon: <Croissant /> },
-    { name: 'Empório gourmet', icon: <Croissant /> },
-    { name: 'Bares', icon: <Beer /> },
-    { name: 'Bar', icon: <Beer /> },
-    { name: 'Barzinho', icon: <Beer /> },
-    { name: 'Boteco', icon: <Beer /> },
-    { name: 'Petiscos', icon: <Beer /> },
-    { name: 'Porções', icon: <Beer /> },
-    { name: 'Caldos', icon: <Soup /> },
-    { name: 'Sopas', icon: <Soup /> },
-    { name: 'Cervejaria artesanal', icon: <Beer /> },
-    { name: 'Eventos', icon: <PartyPopper /> },
-    { name: 'Buffet', icon: <PartyPopper /> },
-    { name: 'Buffet infantil', icon: <PartyPopper /> },
-    { name: 'Buffet corporativo', icon: <PartyPopper /> },
-    { name: 'Coffee break', icon: <PartyPopper /> },
-    { name: 'Catering', icon: <PartyPopper /> },
-    { name: 'Chef em domicílio', icon: <PartyPopper /> },
-    { name: 'Comida para Nichos', icon: <Target /> },
-    { name: 'Comida infantil', icon: <Target /> },
-    { name: 'Papinhas', icon: <Target /> },
-    { name: 'Comida para idosos', icon: <Target /> },
-    { name: 'Comida para atletas', icon: <Target /> },
-    { name: 'Comida para diabéticos', icon: <Target /> },
-  ],
+  'Alimentação': FOOD_GROUPS,
   'Eventos': [
     { name: 'Eventos no Bairro', icon: <MapIcon /> },
     { name: 'Festas & Comemorações', icon: <PartyPopper /> },
@@ -786,44 +702,68 @@ const generateFakeStores = () => {
     const modifiers = ["Gourmet", "Express", "da Villa", "Master", "do Bairro", "Central"];
 
     Object.entries(SUBCATEGORIES).forEach(([catName, subs]) => {
-        subs.forEach(sub => {
-            // Gerar 6 lojas por subcategoria
-            for (let i = 1; i <= 6; i++) {
-                const isSponsored = i <= 3; // Primeiras 3 patrocinadas
-                const hood = hoods[i % hoods.length];
-                const rating = 4.2 + (Math.random() * 0.8);
-                const catImages = IMG_IDS[catName] || ['1557804506-669a67965ba0', '1568901346375-23c9450c58cd'];
-                const imgId = catImages[i % catImages.length];
+        if (catName === 'Alimentação') {
+            Object.entries(FOOD_SUB_SUB_CATEGORIES).forEach(([groupName, subSubCats]) => {
+                subSubCats.forEach((subSubCat, i) => {
+                    for (let j = 1; j <= 2; j++) {
+                        const isSponsored = j === 1;
+                        const hood = hoods[(i * 2 + j) % hoods.length];
+                        const rating = 4.2 + (Math.random() * 0.8);
+                        const catImages = IMG_IDS['Alimentação'] || ['1557804506-669a67965ba0', '1568901346375-23c9450c58cd'];
+                        const imgId = catImages[(i * 2 + j) % catImages.length];
 
-                // Lógica de Tags Fakes baseada na categoria
-                let storeTags: string[] = [];
-                if (catName === 'Moda') storeTags = ['camisa', 'calça', 'roupa feminina', 'tênis'].sort(() => 0.5 - Math.random()).slice(0, 3);
-                else if (catName === 'Pets') storeTags = ['ração', 'banho e tosa', 'veterinário'].sort(() => 0.5 - Math.random()).slice(0, 2);
-                else if (catName === 'Beleza') storeTags = ['corte de cabelo', 'manicure', 'maquiagem'].sort(() => 0.5 - Math.random()).slice(0, 2);
-                else if (catName === 'Autos') storeTags = ['troca de óleo', 'lava jato', 'alinhamento'].sort(() => 0.5 - Math.random()).slice(0, 2);
-                else if (catName === 'Saúde') storeTags = ['dentista', 'fisioterapia', 'exames laboratoriais'].sort(() => 0.5 - Math.random()).slice(0, 2);
-                else if (catName === 'Serviços' || catName === 'Profissionais') storeTags = ['eletricista', 'encanador', 'chaveiro'].sort(() => 0.5 - Math.random()).slice(0, 2);
+                        allStores.push({
+                            id: `fake-food-${subSubCat.replace(/\s+/g, '-').toLowerCase()}-${j}`,
+                            name: `${subSubCat} ${modifiers[j - 1]}`,
+                            category: catName,
+                            subcategory: subSubCat,
+                            rating: parseFloat(rating.toFixed(1)),
+                            reviewsCount: Math.floor(Math.random() * 200) + 10,
+                            distance: `${hood} • RJ`,
+                            neighborhood: hood,
+                            adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
+                            isSponsored: isSponsored,
+                            description: `O melhor em ${subSubCat.toLowerCase()} de ${hood}.`,
+                            image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${subSubCat}-${j}`,
+                            verified: Math.random() > 0.4,
+                            isOpenNow: Math.random() > 0.2,
+                            logoUrl: getStoreLogo((i * 2 + j) * 100),
+                            tags: [groupName.toLowerCase(), subSubCat.toLowerCase()]
+                        });
+                    }
+                })
+            });
+        } else {
+            subs.forEach((sub, i) => {
+                for (let j = 1; j <= 6; j++) {
+                    const isSponsored = j <= 3;
+                    const hood = hoods[(i * 6 + j) % hoods.length];
+                    const rating = 4.2 + (Math.random() * 0.8);
+                    const catImages = IMG_IDS[catName] || ['1557804506-669a67965ba0', '1568901346375-23c9450c58cd'];
+                    const imgId = catImages[(i * 6 + j) % catImages.length];
+                    let storeTags: string[] = [];
 
-                allStores.push({
-                    id: `fake-${catName}-${sub.name}-${i}`.replace(/\s+/g, '-').toLowerCase(),
-                    name: `${sub.name} ${modifiers[i-1]}`,
-                    category: catName,
-                    subcategory: sub.name,
-                    rating: parseFloat(rating.toFixed(1)),
-                    reviewsCount: Math.floor(Math.random() * 500) + 20,
-                    distance: `${hood} • RJ`,
-                    neighborhood: hood,
-                    adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
-                    isSponsored: isSponsored,
-                    description: `O melhor em ${sub.name.toLowerCase()} de toda a região de ${hood}. Venha conhecer!`,
-                    image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${sub.name}-${i}`,
-                    verified: Math.random() > 0.4,
-                    isOpenNow: Math.random() > 0.2,
-                    logoUrl: getStoreLogo(i * 100),
-                    tags: storeTags
-                });
-            }
-        });
+                    allStores.push({
+                        id: `fake-${catName}-${sub.name}-${j}`.replace(/\s+/g, '-').toLowerCase(),
+                        name: `${sub.name} ${modifiers[j-1]}`,
+                        category: catName,
+                        subcategory: sub.name,
+                        rating: parseFloat(rating.toFixed(1)),
+                        reviewsCount: Math.floor(Math.random() * 500) + 20,
+                        distance: `${hood} • RJ`,
+                        neighborhood: hood,
+                        adType: isSponsored ? AdType.PREMIUM : AdType.ORGANIC,
+                        isSponsored: isSponsored,
+                        description: `O melhor em ${sub.name.toLowerCase()} de toda a região de ${hood}. Venha conhecer!`,
+                        image: `https://images.unsplash.com/photo-${imgId}?q=80&w=400&auto=format&fit=crop&sig=${sub.name}-${j}`,
+                        verified: Math.random() > 0.4,
+                        isOpenNow: Math.random() > 0.2,
+                        logoUrl: getStoreLogo((i * 6 + j) * 100),
+                        tags: storeTags
+                    });
+                }
+            });
+        }
     });
     return allStores;
 };
@@ -851,12 +791,12 @@ const BASE_STORES: Store[] = [
     isSponsored: true,
     tags: ['segurança', 'limpeza residencial', 'manutenção geral']
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop', tags: [] },
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Alimentação', subcategory: 'Lanches & Hamburguerias', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos e saudáveis.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop', tags: [] },
   { id: 'f-2', name: 'Studio Hair Vip', category: 'Beleza', subcategory: 'Salão de Cabelo', rating: 4.9, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Especialista em loiros e cortes modernos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop', tags: ['corte de cabelo', 'hidratação capilar'] },
   { id: 'f-3', name: 'Pet Shop Alegria', category: 'Pets', subcategory: 'Pet Shop', rating: 4.7, distance: 'Pechincha', adType: AdType.PREMIUM, description: 'O carinho que seu pet merece.', isSponsored: true, image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop', tags: ['ração', 'brinquedo pet'] },
   { id: 'f-4', name: 'Mecânica 24h', category: 'Autos', subcategory: 'Oficinas Mecânicas', rating: 4.5, distance: 'Anil', adType: AdType.PREMIUM, description: 'Socorro mecânico a qualquer hora.', isSponsored: true, image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop', tags: ['troca de óleo', 'balanceamento'] },
-  { id: 'f-5', name: 'Pizzaria do Zé', category: 'Comida', subcategory: 'Pizzarias', rating: 4.6, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Pizza no forno a lenha.', isSponsored: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop', tags: [] },
-  { id: 'f-6', name: 'Açaí da Praça', category: 'Comida', subcategory: 'Doces & Sobremesas', rating: 4.9, distance: 'Tanque', adType: AdType.PREMIUM, description: 'O melhor açaí da região.', isSponsored: true, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600&auto=format&fit=crop', tags: [] },
+  { id: 'f-5', name: 'Pizzaria do Zé', category: 'Alimentação', subcategory: 'Pizzarias', rating: 4.6, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Pizza no forno a lenha.', isSponsored: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop', tags: [] },
+  { id: 'f-6', name: 'Açaí da Praça', category: 'Alimentação', subcategory: 'Doces & Sobremesas', rating: 4.9, distance: 'Tanque', adType: AdType.PREMIUM, description: 'O melhor açaí da região.', isSponsored: true, image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=600&auto=format&fit=crop', tags: [] },
   { id: 'f-7', name: 'Drogaria JPA', category: 'Farmácia', subcategory: 'Medicamentos', rating: 4.4, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Medicamentos e perfumaria.', isSponsored: true, image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?q=80&w=600&auto=format&fit=crop', tags: [] },
   { id: 'f-8', name: 'Academia FitBairro', category: 'Esportes', subcategory: 'Academias', rating: 4.7, distance: 'Taquara', adType: AdType.PREMIUM, description: 'Treine perto de casa.', isSponsored: true, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop', tags: [] },
   { id: 'f-9', name: 'Consultório Dra. Ana', category: 'Saúde', subcategory: 'Dentistas', rating: 5.0, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Cuidado completo com seu sorriso.', isSponsored: true, image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=600&auto=format&fit=crop', tags: ['dentista', 'saúde preventiva'] },

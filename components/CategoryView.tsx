@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, Plus, CheckCircle2, Utensils } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
-import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS } from '@/constants';
+import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS, FOOD_GROUPS, FOOD_SUB_SUB_CATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
@@ -148,6 +148,74 @@ const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.
     </button>
 );
 
+const MoreSubcategoriesModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  options: { name: string; icon: React.ReactNode }[];
+  onSelect: (subName: string) => void;
+  title: string;
+}> = ({ isOpen, onClose, options, onSelect, title }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchTerm) return options;
+    return options.filter(opt =>
+      opt.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    );
+  }, [options, searchTerm]);
+
+  useEffect(() => {
+    if (!isOpen) setSearchTerm('');
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[1100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 max-h-[85vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6 sm:hidden"></div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{title}</h2>
+            <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400"><X size={20}/></button>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por nome..."
+              className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-10 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30 dark:text-white"
+              autoFocus
+            />
+            {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><X size={16}/></button>}
+          </div>
+        </div>
+
+        <main className="flex-1 overflow-y-auto no-scrollbar space-y-1 p-4">
+          {filteredOptions.map(opt => (
+            <button
+              key={opt.name}
+              onClick={() => onSelect(opt.name)}
+              className="w-full text-left p-4 rounded-xl font-medium text-sm transition-colors flex justify-between items-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <div className="flex items-center gap-3">
+                {React.cloneElement(opt.icon as any, { size: 20 })}
+                <span>{opt.name}</span>
+              </div>
+              <ChevronRight size={16} className="text-gray-300"/>
+            </button>
+          ))}
+        </main>
+      </div>
+    </div>
+  );
+};
+
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
@@ -157,7 +225,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
   const [professionalGroup, setProfessionalGroup] = useState<'manuais' | 'tecnicos' | null>(null);
   const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | null>(null);
+  const [isFoodFilterOpen, setIsFoodFilterOpen] = useState(false);
 
+  const visibleFoodGroups = useMemo(() => FOOD_GROUPS.slice(0, 7), []);
+  const moreFoodGroups = useMemo(() => FOOD_GROUPS.slice(7), []);
 
   useEffect(() => {
       setHealthGroup(null);
@@ -179,6 +250,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     
     if (category.slug === 'autos' && autosGroup) {
         return allSubs.filter(s => AUTOS_GROUPS[autosGroup].includes(s.name));
+    }
+    
+    if (category.slug === 'alimentacao') {
+        return SUBCATEGORIES['Alimentação'] || [];
     }
 
     return allSubs;
@@ -294,16 +369,78 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       onBack();
   };
 
-  if (category.slug === 'saude' && !healthGroup) {
-      return (
+  // --- NEW INTERMEDIATE SCREEN FOR 'ALIMENTAÇÃO' ---
+  if (category.slug === 'alimentacao') {
+    return (
+      <>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                  <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                      {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                  </h1>
+                </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+                <div className="text-center mb-6 mt-4">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de comida você procura?</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para ver as lojas do bairro.</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {visibleFoodGroups.map(group => (
+                    <SelectionButton
+                        key={group.name}
+                        label={group.name}
+                        icon={group.icon}
+                        color="bg-blue-600"
+                        onClick={() => onSubcategoryClick(group.name, category)}
+                    />
+                  ))}
+                   <button
+                        onClick={() => setIsFoodFilterOpen(true)}
+                        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 shadow-sm hover:bg-gray-200 active:scale-95 transition-all duration-300 relative overflow-hidden group`}
+                    >
+                       <div className="relative z-10 w-14 h-14 bg-white/80 dark:bg-gray-700 rounded-full flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-600">
+                          <Plus size={28} strokeWidth={3} />
+                       </div>
+                       <span className="relative z-10 font-black text-lg uppercase tracking-tight">
+                          + Mais
+                       </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <MoreSubcategoriesModal 
+          isOpen={isFoodFilterOpen}
+          onClose={() => setIsFoodFilterOpen(false)}
+          options={moreFoodGroups}
+          onSelect={(subName) => {
+            onSubcategoryClick(subName, category);
+            setIsFoodFilterOpen(false);
+          }}
+          title="Mais em Alimentação"
+        />
+      </>
+    );
+  }
+
+  if (category.slug === 'saude' && !healthGroup) {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+                </button>
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                    </h1>
+                </div>
             </div>
 
             <div className="p-6 space-y-4">
@@ -343,13 +480,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   if (category.slug === 'profissionais' && !professionalGroup) {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                    </h1>
+                </div>
             </div>
 
             <div className="p-6 space-y-4">
@@ -382,13 +521,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   if (category.slug === 'autos' && !autosGroup) {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
+                <div className="flex-1 min-w-0 flex justify-between items-center">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
+                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                    </h1>
+                </div>
             </div>
 
             <div className="p-6 space-y-4">
@@ -420,20 +561,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
-      <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
+      <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
         <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-            {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
-            {category.name} 
-            {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
-            {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
-            {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
-        </h1>
+        <div className="flex-1 min-w-0 flex justify-between items-center">
+          <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
+              {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
+              {category.name} 
+              {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
+              {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
+              {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
+          </h1>
+        </div>
       </div>
       
-      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
       <div className="mt-4">
         <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
       </div>

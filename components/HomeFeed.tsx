@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
@@ -706,7 +707,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const orderedCategories = useMemo(() => {
     const firstPageIds = [
-      'cat-servicos', 'cat-alimentacao', 'cat-restaurantes', 'cat-mercados', 
+      'cat-servicos', 'cat-alimentacao', 'cat-mercados', 
       'cat-farmacias', 'cat-autos', 'cat-moda', 'cat-beleza'
     ];
     const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
