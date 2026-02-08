@@ -192,12 +192,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          setActiveBanner(data[0]);
+        if (error) {
+          // Gracefully handle if the table doesn't exist, e.g., during setup.
+          // The feature will just appear disabled, without throwing a visible error.
+          if (error.message.includes('published_banners')) {
+            setActiveBanner(null);
+          } else {
+            // For other unexpected database errors, throw them to be caught and logged.
+            throw error;
+          }
         } else {
-          setActiveBanner(null);
+            if (data && data.length > 0) {
+              setActiveBanner(data[0]);
+            } else {
+              setActiveBanner(null);
+            }
         }
       } catch (e: any) {
         console.error("Failed to fetch category banner from Supabase:", e.message || e);
