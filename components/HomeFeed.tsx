@@ -702,47 +702,29 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
   const itemsPerPage = 8; 
   
-  // State for the "More" modal
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
   const orderedCategories = useMemo(() => {
-    // Definindo as 8 categorias principais para a primeira página
     const firstPageIds = [
-      'cat-servicos', 
-      'cat-alimentacao', 
-      'cat-restaurantes', 
-      'cat-mercados', 
-      'cat-farmacias', 
-      'cat-autos', 
-      'cat-moda', 
-      'cat-beleza'
+      'cat-servicos', 'cat-alimentacao', 'cat-restaurantes', 'cat-mercados', 
+      'cat-farmacias', 'cat-autos', 'cat-moda', 'cat-beleza'
     ];
-    
     const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
     const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
     return [...firstPage, ...remaining];
   }, []);
 
   const categoryPages = useMemo(() => {
-    // Configurar para 2 páginas: 15 categorias + botão Mais (total 16 itens, 8 por página)
     const visibleCategories = orderedCategories.slice(0, 15);
-    
-    // Adicionar o botão "Mais" como último item
     const moreItem: Category = { 
-        id: 'more-trigger', 
-        name: 'Mais', 
-        slug: 'more', 
-        icon: <Plus />, 
-        color: 'bg-gray-100 dark:bg-gray-800' 
+        id: 'more-trigger', name: 'Mais', slug: 'more', 
+        icon: <Plus />, color: 'bg-gray-100 dark:bg-gray-800' 
     };
-    
     const allItems = [...visibleCategories, moreItem];
-    
     const pages = [];
     for (let i = 0; i < allItems.length; i += itemsPerPage) {
         pages.push(allItems.slice(i, i + itemsPerPage));
     }
-    
     return pages;
   }, [orderedCategories]);
 
@@ -760,16 +742,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
                 <div className="grid grid-cols-4 gap-1.5">
                     {pageCategories.map((cat, index) => {
-                        // RENDERIZAÇÃO ESPECIAL PARA O BOTÃO "MAIS"
                         if (cat.id === 'more-trigger') {
                             return (
-                                <button 
-                                   key={cat.id} 
-                                   onClick={() => setIsMoreCategoriesOpen(true)}
-                                   className="flex flex-col items-center group active:scale-95 transition-all w-full"
-                                >
+                                <button key={cat.id} onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
                                     <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
-                                       {/* Styling to look like "Add/More" */}
                                        <div className="flex-1 flex items-center justify-center w-full mb-1">
                                          <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
                                        </div>
@@ -781,7 +757,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             );
                         }
 
-                        // RENDERIZAÇÃO PADRÃO DE CATEGORIA
                         return (
                         <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
                             <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
@@ -810,12 +785,99 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
       
-      {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
       <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
-
-      {/* ACONTECENDO AGORA BLOCK */}
       <HappeningNowSection onNavigate={onNavigate} />
 
-      {/* NOVO POSICIONAMENTO: BLOCO DE ORÇAMENTOS */}
       {isFeatureActive('service_chat') && (
-        <section className="py-6 border
+        <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+          <div className="px-5 mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none">Receba até 5 orçamentos gratuitos</h2>
+          </div>
+          <div className="px-5">
+            <FifaBanner onClick={() => onNavigate('services_landing')} />
+          </div>
+        </section>
+      )}
+
+      <LostAndFoundSection onItemClick={setSelectedLostItem} />
+      <NeighborhoodGuidesBlock onNavigate={onNavigate} />
+
+      {isFeatureActive('explore_guide') && (
+        <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
+            <div className="px-5">
+            <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
+            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
+                {['all', 'top_rated'].map((f) => <button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400'}`}>{f === 'all' ? 'Tudo' : 'Top'}</button>)}
+            </div>
+            <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
+            </div>
+        </div>
+      )}
+
+      <TalentsSection />
+
+      {isFeatureActive('community_feed') && (
+        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+            <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
+            <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
+        </section>
+      )}
+      
+      {wizardStep > 0 && (
+        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 -mt-4 mx-5 mb-10 animate-in slide-in-from-bottom duration-500 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden z-50">
+          <button onClick={() => setWizardStep(0)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-50 dark:bg-slate-800 rounded-full"><X size={20} /></button>
+          {wizardStep === 1 && (
+            <div className="text-center animate-in fade-in zoom-in-95 duration-300">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">Que tipo de serviço?</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[{l: 'Obras', i: Hammer}, {l: 'Reparos', i: Zap}, {l: 'Casa', i: HomeIcon}, {l: 'Outros', i: Sparkles}].map(s => (
+                  <button key={s.l} onClick={() => onNavigate('services_landing')} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600"><s.i size={24} /></div>
+                    <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter">{s.l}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {wizardStep === 4 && (
+            <div className="text-center py-8 animate-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-xl"><CheckCircle2 size={40} /></div>
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto!</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais notificados.</p>
+                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Ver propostas</button>
+            </div>
+          )}
+        </section>
+      )}
+
+      <LostAndFoundDetailModal 
+          item={selectedLostItem} 
+          onClose={() => setSelectedLostItem(null)} 
+      />
+
+      <MoreCategoriesModal 
+          isOpen={isMoreCategoriesOpen}
+          onClose={() => setIsMoreCategoriesOpen(false)}
+          onSelectCategory={(category: Category) => {
+              setIsMoreCategoriesOpen(false);
+              onSelectCategory(category);
+          }}
+      />
+    </div>
+  );
+};
+
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+          <Icon size={18} strokeWidth={2.5} />
+        </div>
+        <div>
+          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+        </div>
+      </div>
+      {onSeeMore && <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>}
+    </div>
+);
