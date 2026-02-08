@@ -254,9 +254,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
+                <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                    </h1>
+                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
+                        • Patrocinador Master: Grupo Esquematiza
+                    </span>
+                </div>
             </div>
 
             <div className="p-6 flex-1 flex flex-col justify-center">
@@ -311,9 +316,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
+                <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                    </h1>
+                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
+                        • Patrocinador Master: Grupo Esquematiza
+                    </span>
+                </div>
             </div>
 
             <div className="p-6 space-y-4">
@@ -350,9 +360,14 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                </h1>
+                <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                    </h1>
+                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
+                        • Patrocinador Master: Grupo Esquematiza
+                    </span>
+                </div>
             </div>
 
             <div className="p-6 space-y-4">
@@ -389,13 +404,18 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
           <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
-          <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-              {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
-              {category.name} 
-              {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
-              {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
-              {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
-          </h1>
+          <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+              <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                  {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
+                  {category.name} 
+                  {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
+                  {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
+                  {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
+              </h1>
+              <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
+                  • Patrocinador Master: Grupo Esquematiza
+              </span>
+          </div>
         </div>
         
         <div className="mt-4">
