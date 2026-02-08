@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, CheckCircle2, Tag, Percent, DollarSign, Check, X, Loader2, Save, Clock, Users, XCircle, Search, Play, Lock, ArrowRight, Info } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
@@ -83,7 +82,6 @@ const TutorialView: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
     );
 };
 
-// FIX: Renamed interface to match component usage
 interface MerchantWeeklyRewardProps {
   onBack: () => void;
   user: User | null;
@@ -103,7 +101,6 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
   const [discountValue, setDiscountValue] = useState('10');
   const [isCustomValue, setIsCustomValue] = useState(false);
 
-  // FIX: Added missing state for validation logic
   const [validationCode, setValidationCode] = useState('');
   const [validationStatus, setValidationStatus] = useState<'success' | 'error' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -129,7 +126,6 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
     }, 1200);
   };
 
-  // FIX: Implemented handleValidate function with correct state management
   const handleValidate = () => {
     setIsProcessing(true);
     setValidationStatus(null);
@@ -149,9 +145,35 @@ export const MerchantWeeklyReward: React.FC<MerchantWeeklyRewardProps> = ({ onBa
         <div className="flex justify-between items-center bg-slate-800 p-6 rounded-3xl border border-white/10">
             <div>
                 <h3 className="font-bold text-white text-lg">Participar do Desconto da Semana</h3>
-                <p className="text-xs text-slate-400">Ative para sua</p>
+                <p className="text-xs text-slate-400">Ative para sua loja aparecer na Home.</p>
             </div>
         </div>
+    </div>
+  );
+
+  if (!isTutorialCompleted) {
+    return <TutorialView onComplete={handleTutorialComplete} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col">
+      <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+              <button onClick={onBack} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
+                  <ChevronLeft size={20} />
+              </button>
+              <div>
+                  <h1 className="font-bold text-lg leading-none">Recompensa Semanal</h1>
+                  <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Fidelização de Clientes</p>
+              </div>
+          </div>
+          <button onClick={handleSave} disabled={isSaving} className="p-2.5 bg-blue-600 text-white rounded-xl shadow-lg active:scale-95 transition-all">
+              {isSaving ? <Loader2 size={20} className="animate-spin"/> : <Save size={20} />}
+          </button>
+      </header>
+      <main className="flex-1 p-6">
+        {view === 'config' && renderConfig()}
+      </main>
     </div>
   );
 };
