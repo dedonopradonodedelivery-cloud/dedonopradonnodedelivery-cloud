@@ -294,7 +294,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
 
         <ClassifiedsFilterModal isOpen={isFilterModalOpen} onClose={() => setFilterModalOpen(false)} onApply={() => {}} />
 
-        <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} type="client" />
+        <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados" />
       </main>
 
       <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
