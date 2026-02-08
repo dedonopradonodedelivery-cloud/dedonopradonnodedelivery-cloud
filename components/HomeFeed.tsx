@@ -1,5 +1,6 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
   Compass, 
@@ -44,6 +45,8 @@ import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants'
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
+// FIX: Import the 'FifaBanner' component to resolve the 'Cannot find name' error.
+import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
 
@@ -642,11 +645,65 @@ const NeighborhoodHub: React.FC<{
   onItemClick: (item: any) => void 
 }> = ({ onNavigate, onItemClick }) => {
   const [activeFilter, setActiveFilter] = useState('all');
+  
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<number | null>(null);
+  const interactionTimeoutRef = useRef<number | null>(null);
+  const [isInteracting, setIsInteracting] = useState(false);
 
   const filteredItems = useMemo(() => {
     if (activeFilter === 'all') return HUB_ITEMS;
     return HUB_ITEMS.filter(item => item.type === activeFilter);
   }, [activeFilter]);
+  
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || isInteracting || filteredItems.length <= 1) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+
+    const startAutoScroll = () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = window.setInterval(() => {
+            if (scrollContainerRef.current) {
+                const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+                const cardWidth = 224; // w-56 is 14rem = 224px
+                const gap = 10; // gap-2.5 is 0.625rem = 10px
+                const scrollAmount = cardWidth + gap;
+                
+                let nextScrollLeft = scrollLeft + scrollAmount;
+                
+                // If next scroll is past the end, loop back to start
+                if (nextScrollLeft >= scrollWidth - clientWidth) {
+                    nextScrollLeft = 0;
+                }
+                
+                scrollContainerRef.current.scrollTo({
+                    left: nextScrollLeft,
+                    behavior: 'smooth'
+                });
+            }
+        }, 2000); // 2 seconds as requested
+    };
+
+    startAutoScroll();
+
+    return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isInteracting, filteredItems.length]);
+
+  const handleManualInteraction = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setIsInteracting(true);
+    
+    if (interactionTimeoutRef.current) clearTimeout(interactionTimeoutRef.current);
+    
+    interactionTimeoutRef.current = window.setTimeout(() => {
+      setIsInteracting(false);
+    }, 5000); // Resume after 5 seconds of inactivity
+  };
   
   const getBadge = (type: string) => {
     switch(type) {
@@ -687,7 +744,13 @@ const NeighborhoodHub: React.FC<{
       </div>
       
       {/* Content cards */}
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+      <div 
+        ref={scrollContainerRef}
+        onScroll={handleManualInteraction}
+        onTouchStart={handleManualInteraction}
+        onMouseDown={handleManualInteraction}
+        className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5"
+      >
         {filteredItems.map((item: any) => {
             const badge = getBadge(item.type);
             const canClick = item.dataType === 'lost_found';
@@ -727,77 +790,6 @@ const NeighborhoodHub: React.FC<{
     </div>
   )
 };
-
-const QUICK_SERVICES = [
-  { name: 'Eletricista', icon: Zap },
-  { name: 'Chaveiro', icon: Key },
-  { name: 'Marido de Aluguel', icon: Hammer },
-  { name: 'Diarista', icon: Sparkles },
-  { name: 'Téc. Informática', icon: Hammer }, // Mock icon, correct would be Laptop
-];
-
-const FifaBanner: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  return (
-    <div className="flex flex-col gap-5">
-      {/* Main Banner - Altura reduzida (py-10) */}
-      <div 
-        onClick={onClick}
-        className="relative w-full overflow-hidden rounded-[2.5rem] bg-blue-600 py-10 px-8 shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600"></div>
-        
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'linear-gradient(135deg, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-[80px]"></div>
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-400/20 rounded-full blur-[80px]"></div>
-        </div>
-
-        <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-45 animate-[slow-shimmer_8s_infinite_linear] pointer-events-none"></div>
-
-        <div className="relative z-10 flex items-center gap-6">
-          {/* Left Icon - Aumentado e clareado */}
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-lg">
-            <Wrench size={28} className="text-white" />
-          </div>
-
-          {/* Text Section */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tight mb-1">
-              Receba até 5 orçamentos gratuitos
-            </h2>
-            <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-90 pr-2">
-              Especialistas verificados, orçamentos rápidos e atendimento perto de você!
-            </p>
-          </div>
-
-          {/* Right Icon */}
-          <div className="shrink-0 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all">
-             <ChevronRight size={24} />
-          </div>
-        </div>
-      </div>
-
-      {/* Mini Services List */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2">
-        {QUICK_SERVICES.map((s, i) => (
-          <button 
-            key={i} 
-            onClick={onClick} 
-            className="flex flex-col items-center gap-2 min-w-[76px] group/item active:scale-95 transition-transform"
-          >
-            <div className="w-12 h-12 rounded-[18px] bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover/item:bg-blue-100 dark:group-hover/item:bg-blue-900/40 transition-all shadow-sm">
-              <s.icon size={20} strokeWidth={1.5} />
-            </div>
-            <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 text-center leading-tight max-w-[70px] truncate transition-colors">
-              {s.name}
-            </span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 
 interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
