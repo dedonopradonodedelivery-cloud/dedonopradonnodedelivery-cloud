@@ -71,13 +71,26 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Pets Exóticos', icon: <Sparkles /> },
   ],
   'Profissionais': [
+    // Manuais
+    { name: 'Pedreiro', icon: <Hammer /> },
     { name: 'Eletricista', icon: <Zap /> },
     { name: 'Encanador', icon: <Droplets /> },
     { name: 'Pintor', icon: <PaintRoller /> },
-    { name: 'Pedreiro', icon: <Hammer /> },
-    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Gesseiro', icon: <PaintRoller /> },
+    { name: 'Marceneiro', icon: <Hammer /> },
+    { name: 'Serralheiro', icon: <Settings /> },
+    { name: 'Diarista / Faxineira', icon: <Sparkles /> },
     { name: 'Montador de Móveis', icon: <Settings /> },
     { name: 'Marido de Aluguel', icon: <Wrench /> },
+    // Técnicos / Especializados
+    { name: 'Advogado', icon: <Scale /> },
+    { name: 'Contador', icon: <Calculator /> },
+    { name: 'Despachante', icon: <FileText /> },
+    { name: 'Corretor de imóveis', icon: <Key /> },
+    { name: 'Professor particular', icon: <User /> },
+    { name: 'Designer', icon: <PenTool /> },
+    { name: 'Técnico em Informática', icon: <Laptop /> },
+    { name: 'Consultor', icon: <Briefcase /> },
     { name: 'Freelancers em Geral', icon: <Briefcase /> },
   ],
   'Saúde': [
@@ -218,6 +231,17 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Eventos do Condomínio', icon: <Calendar /> },
     { name: 'Achados & Perdidos', icon: <Search /> },
   ],
+};
+
+export const HEALTH_GROUPS = {
+  mulher: ['Ginecologia', 'Obstetrícia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'],
+  homem: ['Urologia', 'Cardiologia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'],
+  pediatria: ['Pediatria', 'Psicologia infantil', 'Fonoaudiologia', 'Nutrição infantil', 'Fisioterapia pediátrica', 'Odontopediatria', 'Neuropediatria', 'Clínica infantil'],
+};
+
+export const PROFESSIONALS_GROUPS = {
+  manuais: ['Pedreiro', 'Eletricista', 'Encanador', 'Pintor', 'Gesseiro', 'Marceneiro', 'Serralheiro', 'Diarista / Faxineira', 'Montador de Móveis', 'Marido de Aluguel'],
+  tecnicos: ['Advogado', 'Contador', 'Despachante', 'Corretor de imóveis', 'Professor particular', 'Designer', 'Técnico em Informática', 'Consultor', 'Freelancers em Geral'],
 };
 
 // 🔹 LISTA DE 60 TAGS INICIAIS (OBRIGATÓRIAS)
@@ -495,8 +519,6 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
     ]
   }
 };
-
-// --- FIX: Added missing exported members from constants/index.tsx ---
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
   {
