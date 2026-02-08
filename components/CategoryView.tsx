@@ -340,7 +340,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'profissionais' && !professionalGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -351,7 +351,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             </div>
 
             <div className="p-6 space-y-4">
-                <div className="text-center mb-8 mt-4">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p>
                 </div>
@@ -379,7 +379,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   
   if (category.slug === 'autos' && !autosGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -390,7 +390,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             </div>
 
             <div className="p-6 space-y-4">
-                <div className="text-center mb-8 mt-4">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p>
                 </div>
