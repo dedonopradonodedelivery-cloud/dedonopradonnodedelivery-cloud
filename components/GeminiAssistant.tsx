@@ -1,7 +1,8 @@
 
 
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
+// FIX: Import GenerateContentResponse for proper typing.
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { STORES } from '../constants';
@@ -42,7 +43,8 @@ Sempre seja curto, use emojis e convide o usuário a explorar as seções do app
         ${STORES.slice(0, 5).map(s => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
       `;
 
-      const response = await ai.models.generateContent({
+      // FIX: Add GenerateContentResponse type annotation for better type safety.
+      const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `${promptContext}\n\nPergunta do usuário: ${userMsg}`,
         config: {

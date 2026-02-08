@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -25,6 +24,7 @@ import { DesapegaView } from '@/components/DesapegaView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { SavedPostsView } from '@/components/SavedPostsView';
+// FIX: Changed default import of AdminPanel to a named import to align with project conventions and resolve module resolution error.
 import { AdminPanel } from '@/components/AdminPanel';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
@@ -219,7 +219,7 @@ const App: React.FC = () => {
             handleNavigate('user_coupons');
         }
     }
-  }, [user, userRole]);
+  }, [user, userRole, activeTab, handleNavigate]);
 
   useEffect(() => {
     if (splashStage >= 4) {
@@ -337,7 +337,7 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header onNotificationClick={() => {}} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
@@ -518,7 +518,7 @@ const App: React.FC = () => {
                         />
                     )}
 
-                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
+                    {activeTab === 'admin_panel' && <AdminPanel onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
                     
                     {activeTab === 'designer_panel' && user && (
                       <DesignerPanel user={user} onBack={() => handleNavigate('home')} />

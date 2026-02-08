@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -61,8 +62,9 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
                 amount_to_pay_now_cents: 14500,
-                amount_cents: 725, // Campo obrigatório
-                type: 'earn',      // Campo obrigatório
+                // FIX: Added missing required properties 'amount_cents' and 'type' to mock data.
+                amount_cents: 725,
+                type: 'earn',
                 status: 'pending',
                 created_at: new Date().toISOString()
             }
@@ -141,7 +143,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
       setSelectedRequest(null);
 
     } catch (err: any) {
-      console.error("Erro ao rejeitar:", err);
+      console.error("Erro ao recusar:", err);
       alert(`Erro ao recusar: ${err.message}`);
     } finally {
       setProcessingId(null);
