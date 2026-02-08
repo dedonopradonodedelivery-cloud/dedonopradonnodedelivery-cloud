@@ -191,6 +191,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const isManuals = category.slug === 'profissionais' && professionalGroup === 'manuais';
   const isTechnicians = category.slug === 'profissionais' && professionalGroup === 'tecnicos';
 
+  const MasterSponsorSignature: React.FC = () => (
+    <div className="mt-0.5 pointer-events-none -mb-1">
+      <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
+      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
+    </div>
+  );
+
   useEffect(() => {
       setHealthGroup(null);
       setProfessionalGroup(null);
@@ -250,17 +257,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   if (category.slug === 'saude' && !healthGroup) {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-6 flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                <div className="flex-1 min-w-0">
                     <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
-                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
-                        • Patrocinador Master: Grupo Esquematiza
-                    </span>
+                    <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -296,14 +301,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         size="small"
                     />
                 </div>
-                
-                <div className="mt-8 flex justify-center">
-                    <div className="inline-flex items-center gap-3 bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 rounded-full px-4 py-2 shadow-sm">
-                        <Crown size={14} className="text-amber-500" />
-                        <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Patrocinador Master:</span>
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Grupo Esquematiza</span>
-                    </div>
-                </div>
             </div>
         </div>
       );
@@ -312,17 +309,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   if (category.slug === 'profissionais' && !professionalGroup) {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                <div className="flex-1 min-w-0">
                     <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
-                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
-                        • Patrocinador Master: Grupo Esquematiza
-                    </span>
+                    <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -356,17 +351,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   if (category.slug === 'autos' && !autosGroup) {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
-                <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                <div className="flex-1 min-w-0">
                     <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
-                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
-                        • Patrocinador Master: Grupo Esquematiza
-                    </span>
+                    <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -400,11 +393,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   return (
     <>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
-        <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
+        <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
           <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
-          <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+          <div className="flex-1 min-w-0">
               <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
                   {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
                   {category.name} 
@@ -412,9 +405,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                   {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
                   {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
               </h1>
-              <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pointer-events-none whitespace-nowrap">
-                  • Patrocinador Master: Grupo Esquematiza
-              </span>
+              <MasterSponsorSignature />
           </div>
         </div>
         
