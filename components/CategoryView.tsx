@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
@@ -297,7 +296,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   if (category.slug === 'saude' && !healthGroup) {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 animate-in slide-in-from-right duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
             <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -308,7 +307,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
             </div>
 
             <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-2">
+                <div className="text-center mb-6 mt-10">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
                 </div>
@@ -316,18 +315,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                 <div className="grid gap-3">
                     <SelectionButton
                         label="Mulher"
+                        subtitle="Especialidades e cuidados para a saúde feminina."
                         icon={<User />}
                         color="bg-pink-500"
                         onClick={() => setHealthGroup('mulher')}
                     />
                     <SelectionButton
                         label="Homem"
+                        subtitle="Check-ups e especialidades para a saúde masculina."
                         icon={<User />}
                         color="bg-blue-600"
                         onClick={() => setHealthGroup('homem')}
                     />
                     <SelectionButton
                         label="Pediatria"
+                        subtitle="Acompanhamento completo para bebês e crianças."
                         icon={<Baby />}
                         color="bg-amber-500"
                         onClick={() => setHealthGroup('pediatria')}
