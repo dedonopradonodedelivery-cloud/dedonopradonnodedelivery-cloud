@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, Plus, CheckCircle2, Utensils } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
@@ -132,21 +133,45 @@ interface CategoryViewProps {
   onSubcategoryClick: (subName: string, parentCat: Category) => void;
 }
 
-const SelectionButton: React.FC<{ label: string; subtitle?: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick, subtitle }) => (
-    <button
-        onClick={onClick}
-        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
-    >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-        <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
-            {React.cloneElement(icon as any, { size: 28, strokeWidth: 2 })}
-        </div>
-        <div className="relative z-10 text-center px-4">
-            <span className="font-black text-lg uppercase tracking-tight">{label}</span>
-            {subtitle && <p className="text-xs text-white/80 font-medium mt-1 leading-tight">{subtitle}</p>}
-        </div>
-    </button>
-);
+const SelectionButton: React.FC<{ 
+    label: string; 
+    subtitle?: string; 
+    icon: React.ReactNode; 
+    color?: string; 
+    onClick: () => void;
+    size?: 'large' | 'small';
+    isMore?: boolean;
+}> = ({ label, icon, color, onClick, subtitle, size = 'large', isMore = false }) => {
+    const paddingClass = size === 'large' ? 'py-8' : 'py-5';
+    const gapClass = size === 'large' ? 'gap-3' : 'gap-2';
+    
+    const containerClasses = isMore 
+        ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 shadow-sm hover:bg-gray-200'
+        : `${color} text-white shadow-xl`;
+
+    const iconWrapperClass = size === 'large' ? 'w-14 h-14' : 'w-12 h-12';
+    const finalIconWrapperClass = isMore 
+        ? `relative z-10 ${iconWrapperClass} bg-white/80 dark:bg-gray-700 rounded-full flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-600`
+        : `relative z-10 ${iconWrapperClass} bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20`;
+
+    const iconStrokeWidth = isMore ? 3 : 2;
+
+    return (
+        <button
+            onClick={onClick}
+            className={`w-full ${paddingClass} rounded-[2rem] flex flex-col items-center justify-center ${gapClass} ${containerClasses} active:scale-[0.98] active:brightness-90 active:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
+        >
+            {!isMore && <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>}
+            <div className={finalIconWrapperClass}>
+                {React.cloneElement(icon as any, { size: size === 'large' ? 28 : 24, strokeWidth: iconStrokeWidth })}
+            </div>
+            <div className="relative z-10 text-center px-4">
+                <span className="font-black text-lg uppercase tracking-tight">{label}</span>
+                {subtitle && <p className={`text-xs ${isMore ? 'text-gray-400' : 'text-white/80'} font-medium mt-1 leading-tight`}>{subtitle}</p>}
+            </div>
+        </button>
+    );
+};
 
 const MoreSubcategoriesModal: React.FC<{
   isOpen: boolean;
@@ -215,6 +240,13 @@ const MoreSubcategoriesModal: React.FC<{
     </div>
   );
 };
+
+const MasterSponsorSignature: React.FC = () => (
+    <div className="pointer-events-none text-right shrink-0 ml-4">
+      <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
+      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
+    </div>
+);
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
@@ -321,6 +353,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
     if (selectedSubcategory) {
+      // FIX: Check if selectedSubcategory is a group in FOOD_SUB_SUB_CATEGORIES
+      if (category.name === 'Alimentação' && FOOD_SUB_SUB_CATEGORIES[selectedSubcategory]) {
+          const subSubCats = FOOD_SUB_SUB_CATEGORIES[selectedSubcategory];
+          return categoryStores.filter(s => subSubCats.includes(s.subcategory));
+      }
       return categoryStores.filter(s => s.subcategory === selectedSubcategory);
     }
     return categoryStores;
@@ -382,6 +419,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                   <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                       {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                   </h1>
+                  <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -401,17 +439,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         onClick={() => onSubcategoryClick(group.name, category)}
                     />
                   ))}
-                   <button
+                   <SelectionButton
+                        label="+ Mais"
+                        icon={<Plus />}
+                        isMore
                         onClick={() => setIsFoodFilterOpen(true)}
-                        className={`w-full py-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 shadow-sm hover:bg-gray-200 active:scale-95 transition-all duration-300 relative overflow-hidden group`}
-                    >
-                       <div className="relative z-10 w-14 h-14 bg-white/80 dark:bg-gray-700 rounded-full flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-600">
-                          <Plus size={28} strokeWidth={3} />
-                       </div>
-                       <span className="relative z-10 font-black text-lg uppercase tracking-tight">
-                          + Mais
-                       </span>
-                    </button>
+                    />
                 </div>
             </div>
         </div>
@@ -440,6 +473,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
+                    <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -456,6 +490,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<User />}
                         color="bg-pink-500"
                         onClick={() => setHealthGroup('mulher')}
+                        size="small"
                     />
                     <SelectionButton
                         label="Homem"
@@ -463,6 +498,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<User />}
                         color="bg-blue-600"
                         onClick={() => setHealthGroup('homem')}
+                        size="small"
                     />
                     <SelectionButton
                         label="Pediatria"
@@ -470,6 +506,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                         icon={<Baby />}
                         color="bg-amber-500"
                         onClick={() => setHealthGroup('pediatria')}
+                        size="small"
                     />
                 </div>
             </div>
@@ -488,6 +525,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
+                    <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -529,6 +567,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
                         {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
                     </h1>
+                    <MasterSponsorSignature />
                 </div>
             </div>
 
@@ -573,6 +612,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
               {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
               {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
           </h1>
+          <MasterSponsorSignature />
         </div>
       </div>
       

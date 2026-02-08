@@ -5,6 +5,14 @@ import { Store, AdType } from '../types';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { supabase } from '../lib/supabaseClient';
+import { FOOD_SUB_SUB_CATEGORIES } from '@/constants';
+
+const MasterSponsorSignature: React.FC = () => (
+    <div className="pointer-events-none text-right shrink-0">
+      <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
+      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
+    </div>
+);
 
 interface SubcategoryDetailViewProps {
   subcategoryName: string;
@@ -57,7 +65,7 @@ const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => 
         'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', // Business
         'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800', // Restaurant
         'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800', // Salon
-        'https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800', // Gym
+        'https://images.unsplash.com/photo-1540962351504-03099c5a754b?q=80&w=800', // Gym
         'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Shop
         'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800', // Home
     ];
@@ -92,15 +100,21 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
   }, [subcategoryName, currentNeighborhood]);
 
   const pool = useMemo(() => {
-    let list = stores.filter(s => s.subcategory === subcategoryName);
+    let subSubCats: string[] = [];
+    if (categoryName === 'Alimentação' && FOOD_SUB_SUB_CATEGORIES[subcategoryName]) {
+        subSubCats = FOOD_SUB_SUB_CATEGORIES[subcategoryName];
+    } else {
+        subSubCats = [subcategoryName];
+    }
     
-    // Se "Jacarepaguá (todos)", mostra tudo da subcategoria.
-    // Se for bairro específico, filtra.
+    let list = stores.filter(s => subSubCats.includes(s.subcategory));
+    
     if (currentNeighborhood !== "Jacarepaguá (todos)") {
       list = list.filter(s => s.neighborhood === currentNeighborhood);
     }
     return list;
-  }, [subcategoryName, currentNeighborhood, stores]);
+  }, [subcategoryName, categoryName, currentNeighborhood, stores]);
+
 
   const filteredList = useMemo(() => {
     let list = [...pool];
@@ -135,16 +149,19 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 animate-in slide-in-from-right duration-300">
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <div>
-          <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">{subcategoryName}</h1>
-          <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">
-             {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-          </p>
+      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+          </button>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none truncate">{subcategoryName}</h1>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">
+                {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
+            </p>
+          </div>
         </div>
+        <MasterSponsorSignature />
       </div>
 
       <div className="p-5 space-y-8">
