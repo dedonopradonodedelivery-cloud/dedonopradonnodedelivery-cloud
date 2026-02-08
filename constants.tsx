@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -14,7 +15,7 @@ import {
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
   Key, Fan, Truck, Shovel,
   // Added missing icon imports
-  Meh, ThumbsDown, Gift, RefreshCw
+  Meh, ThumbsDown, Gift, RefreshCw, Wind, Bike, Cpu
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -142,14 +143,22 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Spa & Relaxamento', icon: <Heart /> },
   ],
   'Autos': [
-    { name: 'Oficinas Mecânicas', icon: <Wrench /> },
-    { name: 'Lava-Jato', icon: <Droplets /> },
-    { name: 'Auto Elétrica', icon: <Zap /> },
-    { name: 'Pneus & Alinhamento', icon: <Settings /> },
-    { name: 'Funilaria & Pintura', icon: <PaintRoller /> },
-    { name: 'Peças & Acessórios', icon: <Package /> },
-    { name: 'Vistoria & Documentação', icon: <FileText /> },
-    { name: 'Serviços Rápidos Auto', icon: <Zap /> },
+    // Carro
+    { name: 'Oficina mecânica', icon: <Wrench /> },
+    { name: 'Auto elétrica', icon: <Zap /> },
+    { name: 'Funilaria e pintura', icon: <PaintRoller /> },
+    { name: 'Alinhamento e balanceamento', icon: <Settings /> },
+    { name: 'Troca de óleo', icon: <Droplets /> },
+    { name: 'Suspensão e freios', icon: <CarFront /> },
+    { name: 'Ar-condicionado automotivo', icon: <Wind /> },
+    { name: 'Guincho e reboque', icon: <Truck /> },
+    // Moto
+    { name: 'Oficina de motos', icon: <Bike /> },
+    { name: 'Elétrica de motos', icon: <Zap /> },
+    { name: 'Mecânica geral', icon: <Wrench /> },
+    { name: 'Injeção eletrônica', icon: <Cpu /> },
+    { name: 'Peças e acessórios', icon: <Package /> },
+    { name: 'Guincho para motos', icon: <Truck /> },
   ],
   'Mercado': [
     { name: 'Supermercados', icon: <ShoppingCart /> },
@@ -242,6 +251,11 @@ export const HEALTH_GROUPS = {
 export const PROFESSIONALS_GROUPS = {
   manuais: ['Pedreiro', 'Eletricista', 'Encanador', 'Pintor', 'Gesseiro', 'Marceneiro', 'Serralheiro', 'Diarista / Faxineira', 'Montador de Móveis', 'Marido de Aluguel'],
   tecnicos: ['Advogado', 'Contador', 'Despachante', 'Corretor de imóveis', 'Professor particular', 'Designer', 'Técnico em Informática', 'Consultor', 'Freelancers em Geral'],
+};
+
+export const AUTOS_GROUPS = {
+  carro: ['Oficina mecânica', 'Auto elétrica', 'Funilaria e pintura', 'Alinhamento e balanceamento', 'Troca de óleo', 'Suspensão e freios', 'Ar-condicionado automotivo', 'Guincho e reboque'],
+  moto: ['Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 'Troca de óleo', 'Suspensão e freios', 'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos'],
 };
 
 // 🔹 LISTA DE 60 TAGS INICIAIS (OBRIGATÓRIAS)
