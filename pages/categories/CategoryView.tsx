@@ -195,8 +195,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   const MasterSponsorSignature: React.FC = () => (
     <div className="pointer-events-none text-right shrink-0 ml-4">
-      <p className="text-[9px] font-medium text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
-      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
+      <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
+      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
     </div>
   );
 
