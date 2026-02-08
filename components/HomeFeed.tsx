@@ -593,8 +593,8 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
                   
                   {/* Main Content Area (above the tear line) */}
-                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-8">
-                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight line-clamp-1 mb-1.5">{coupon.storeName}</span>
+                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-10">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight line-clamp-1 mb-2">{coupon.storeName}</span>
                       <span className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
