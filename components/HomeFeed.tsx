@@ -580,34 +580,34 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
               onClick={handleCouponClick}
               className="relative flex-shrink-0 w-40 snap-center cursor-pointer group"
             >
-               {/* Floating Logo */}
-               <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30">
+               {/* Floating Logo - Overlapping */}
+               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
                   <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 p-1 shadow-lg border-2 border-gray-100 dark:border-gray-700">
                      <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
 
                {/* Card Body */}
-               <div className="relative w-full h-44 bg-[#F2F6FF] dark:bg-slate-800 rounded-3xl shadow-[0_8px_16px_rgba(30,91,255,0.06),_0_2px_4px_rgba(30,91,255,0.05)] transition-transform duration-300 group-active:scale-[0.97] overflow-hidden">
+               <div className="relative w-full h-44 bg-brand-blue rounded-3xl shadow-lg shadow-blue-500/10 transition-transform duration-300 group-active:scale-[0.97] overflow-hidden">
                   {/* Notches for tear-off effect */}
                   <div className="absolute top-[65%] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
                   <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
                   
                   {/* Main Content Area (above the tear line) */}
-                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-12">
-                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight line-clamp-1 mb-3">{coupon.storeName}</span>
-                      <span className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
+                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-8">
+                      <span className="text-2xl font-black text-white leading-none tracking-tight drop-shadow-sm">
                          {coupon.discount}
                       </span>
                   </div>
 
                   {/* Perforated line */}
-                  <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-gray-300 dark:border-gray-600 z-10"></div>
+                  <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-white/30 z-10"></div>
                   
                   {/* Bottom part for button alignment */}
                   <div className="h-[35%] relative flex justify-center items-center px-3">
-                       <button className="relative overflow-hidden px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md border border-blue-500/50 active:shadow-inner active:scale-95 transition-all">
-                          <span className="absolute top-0 right-0 w-0 h-0 border-solid border-b-8 border-l-8 border-b-blue-400/50 dark:border-b-blue-500/40 border-l-transparent"></span>
+                       <button className="relative overflow-hidden px-5 py-2.5 bg-white hover:bg-gray-100 text-brand-blue text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md active:shadow-inner active:scale-95 transition-all">
+                          {/* Enhanced Fold effect */}
+                          <span className="absolute top-0 right-0 w-0 h-0 border-solid border-b-[16px] border-l-[16px] border-b-gray-200 dark:border-b-gray-600 border-l-transparent"></span>
                           Pegar
                       </button>
                   </div>
@@ -707,8 +707,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const orderedCategories = useMemo(() => {
     const firstPageIds = [
-      'cat-servicos', 'cat-alimentacao', 'cat-mercados', 
-      'cat-farmacias', 'cat-autos', 'cat-moda', 'cat-beleza'
+      'cat-servicos', 'cat-alimentacao', 'cat-restaurantes', 
+      'cat-mercados', 'cat-farmacias', 'cat-autos', 'cat-moda', 'cat-beleza'
     ];
     const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
     const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
