@@ -3,7 +3,6 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Store, AdType } from '@/types';
 import { STORES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BannerData {
   id: string;
@@ -246,20 +245,6 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
 
         {activeBanners.length > 1 && (
           <>
-            {/* Setas de Navegação (Discretas) */}
-            <button 
-                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
-            >
-                <ChevronLeft size={20} strokeWidth={3} />
-            </button>
-            <button 
-                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
-            >
-                <ChevronRight size={20} strokeWidth={3} />
-            </button>
-
             {/* Indicadores de Posição */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
               {activeBanners.map((_, idx) => (
