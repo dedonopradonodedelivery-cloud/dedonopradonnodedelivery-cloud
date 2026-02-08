@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
@@ -647,7 +645,7 @@ const NeighborhoodHub: React.FC<{
   const [activeFilter, setActiveFilter] = useState('all');
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const interactionTimeoutRef = useRef<number | null>(null);
   const [isInteracting, setIsInteracting] = useState(false);
 
@@ -656,54 +654,57 @@ const NeighborhoodHub: React.FC<{
     return HUB_ITEMS.filter(item => item.type === activeFilter);
   }, [activeFilter]);
   
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer || isInteracting || filteredItems.length <= 1) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-
-    const startAutoScroll = () => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = window.setInterval(() => {
-            if (scrollContainerRef.current) {
-                const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-                const cardWidth = 224; // w-56 is 14rem = 224px
-                const gap = 10; // gap-2.5 is 0.625rem = 10px
-                const scrollAmount = cardWidth + gap;
-                
-                let nextScrollLeft = scrollLeft + scrollAmount;
-                
-                // If next scroll is past the end, loop back to start
-                if (nextScrollLeft >= scrollWidth - clientWidth) {
-                    nextScrollLeft = 0;
-                }
-                
-                scrollContainerRef.current.scrollTo({
-                    left: nextScrollLeft,
-                    behavior: 'smooth'
-                });
-            }
-        }, 2000); // 2 seconds as requested
-    };
-
-    startAutoScroll();
-
-    return () => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isInteracting, filteredItems.length]);
+  const loopedItems = useMemo(() => {
+      if (filteredItems.length <= 1) return filteredItems;
+      return [...filteredItems, ...filteredItems];
+  }, [filteredItems]);
 
   const handleManualInteraction = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
     setIsInteracting(true);
     
-    if (interactionTimeoutRef.current) clearTimeout(interactionTimeoutRef.current);
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current);
+    }
     
     interactionTimeoutRef.current = window.setTimeout(() => {
       setIsInteracting(false);
-    }, 5000); // Resume after 5 seconds of inactivity
+    }, 4000); // Resume after 4 seconds of inactivity
   };
+  
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || isInteracting || loopedItems.length <= filteredItems.length) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+
+    const scrollSpeed = 1.3;
+
+    const animateScroll = () => {
+      if (scrollContainerRef.current && !isInteracting) {
+        scrollContainerRef.current.scrollLeft += scrollSpeed;
+        
+        const { scrollLeft, scrollWidth } = scrollContainerRef.current;
+        if (scrollLeft >= scrollWidth / 2) {
+          scrollContainerRef.current.scrollLeft = 0;
+        }
+        animationFrameRef.current = requestAnimationFrame(animateScroll);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animateScroll);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isInteracting, loopedItems, filteredItems.length]);
   
   const getBadge = (type: string) => {
     switch(type) {
@@ -746,17 +747,17 @@ const NeighborhoodHub: React.FC<{
       {/* Content cards */}
       <div 
         ref={scrollContainerRef}
-        onScroll={handleManualInteraction}
-        onTouchStart={handleManualInteraction}
         onMouseDown={handleManualInteraction}
-        className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5"
+        onTouchStart={handleManualInteraction}
+        onWheel={handleManualInteraction}
+        className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-5 px-5"
       >
-        {filteredItems.map((item: any) => {
+        {loopedItems.map((item: any, index: number) => {
             const badge = getBadge(item.type);
             const canClick = item.dataType === 'lost_found';
             return (
                 <div 
-                    key={item.id} 
+                    key={`${item.id}-${index}`}
                     onClick={() => canClick && onItemClick(item)}
                     className={`snap-center flex-shrink-0 w-56 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all ${canClick ? 'cursor-pointer active:scale-95' : 'cursor-default'}`}
                 >

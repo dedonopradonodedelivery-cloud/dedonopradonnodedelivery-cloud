@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -56,6 +55,13 @@ const CLASSIFIED_CATEGORIES = [
   { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.7]' }, // Mais compacto
   { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[0.8/1]' }, // Mais estreito
 ];
+
+const MasterSponsorSignature: React.FC = () => (
+    <div className="pointer-events-none text-right shrink-0 ml-4">
+      <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
+      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
+    </div>
+);
 
 const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
   <button 
@@ -259,10 +265,22 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
         </button>
-        <div className="flex-1">
-          <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Classificados</h1>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Negócios Locais</p>
+        
+        <div className="flex-1 min-w-0 flex justify-between items-center">
+            <div>
+                <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Classificados</h1>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Negócios Locais</p>
+            </div>
+            <MasterSponsorSignature />
         </div>
+        
+        <button 
+          onClick={() => setSelectionModalOpen(true)}
+          className="px-4 py-2 bg-[#1E5BFF] text-white font-black rounded-full shadow-lg flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-10"
+        >
+          <Plus size={12} strokeWidth={4} />
+          Anunciar
+        </button>
       </header>
 
       <main className="flex-1 p-5 space-y-6">
