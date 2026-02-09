@@ -18,7 +18,7 @@ export interface FeatureState {
   id: FeatureKey;
   label: string;
   active: boolean;
-  category: 'navigation' | 'main' | 'growth' | 'other';
+  category: 'navigation' | 'main' | 'growth' | 'other' | string;
 }
 
 const DEFAULT_FEATURES: FeatureState[] = [
@@ -27,17 +27,10 @@ const DEFAULT_FEATURES: FeatureState[] = [
   { id: 'classifieds', label: 'Aba: Classificados', active: true, category: 'navigation' },
   { id: 'coupons', label: 'Aba: Cupons', active: true, category: 'navigation' },
   { id: 'community_feed', label: 'Aba: JPA Conversa', active: true, category: 'navigation' },
-  { id: 'sponsored_ads', label: 'Patrocinados (Ads)', active: true, category: 'growth' },
-  { id: 'banner_highlights', label: 'Banners em Destaque', active: true, category: 'growth' },
-  { id: 'master_sponsor', label: 'Patrocinador Master', active: true, category: 'growth' },
-  { id: 'customer_reviews', label: 'Avaliações de Clientes', active: true, category: 'other' },
-  { id: 'service_chat', label: 'Mensagens / Chat', active: true, category: 'other' },
-  { id: 'store_feed', label: 'Feed da Loja', active: true, category: 'other' },
-  { id: 'explainer_videos', label: 'Vídeos Explicativos', active: true, category: 'other' },
 ];
 
 interface FeatureContextType {
-  features: Record<FeatureKey, boolean>;
+  features: Record<string, boolean>;
   toggleFeature: (key: FeatureKey) => void;
   isFeatureActive: (key: FeatureKey) => boolean;
   featureList: FeatureState[];
@@ -76,7 +69,7 @@ export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const features = featureSettings.reduce((acc, curr) => {
     acc[curr.id] = curr.active;
     return acc;
-  }, {} as Record<FeatureKey, boolean>);
+  }, {} as Record<string, boolean>);
 
   return (
     <FeatureContext.Provider value={{ features, toggleFeature, isFeatureActive, featureList: featureSettings }}>
