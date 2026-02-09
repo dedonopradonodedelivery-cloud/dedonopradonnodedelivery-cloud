@@ -1,5 +1,4 @@
 
-
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from '../BottomNav';
 
@@ -26,7 +25,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
   return (
     <div
-      // FIX: Use 100dvh for dynamic viewport height on mobile to avoid layout issues with dynamic toolbars.
       className="h-[100dvh] bg-white dark:bg-gray-950 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
     >
       <div

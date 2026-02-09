@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, ArrowLeft, LogOut, Zap, ChevronRight, Info,
   ShieldAlert, Coins, ToggleLeft, ToggleRight
 } from 'lucide-react';
-import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
-import { AdminModerationPanel } from './AdminModerationPanel';
-import { AdminMonetizationView } from './AdminMonetizationView';
-import { useFeatures, FeatureState } from '../contexts/FeatureContext';
+import { fetchAdminMerchants, fetchAdminUsers } from '@/backend/services';
+import { AdminModerationPanel } from '@/components/AdminModerationPanel';
+import { AdminMonetizationView } from '@/components/AdminMonetizationView';
+import { useFeatures, FeatureState } from '@/contexts/FeatureContext';
 
 // --- SUB-COMPONENTS ---
 
