@@ -1,13 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  ShieldCheck, ArrowLeft, LogOut, Zap, ChevronRight, Info,
-  ShieldAlert, Coins, ToggleLeft, ToggleRight
+  ShieldCheck, Users, Store, History, Search, 
+  ArrowLeft, Download, TrendingUp, AlertTriangle, 
+  Clock, DollarSign, Calendar, LayoutDashboard,
+  LogOut, User as UserIcon, Building, MessageSquare, 
+  MessageCircle, Paintbrush, Wrench, CheckCircle2,
+  ArrowUpRight, ArrowDownRight, PieChart, FileText,
+  Zap, ChevronRight, Lightbulb, Bug, Activity,
+  Settings, BarChart3, X, Filter, Newspaper, Crown,
+  UserCheck, ArrowRightLeft, CreditCard,
+  LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
+  ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight,
+  // Added Info import to resolve "Cannot find name 'Info'" error
+  Info
 } from 'lucide-react';
-import { fetchAdminMerchants, fetchAdminUsers } from '@/backend/services';
-import { AdminModerationPanel } from '@/components/AdminModerationPanel';
-import { AdminMonetizationView } from '@/components/AdminMonetizationView';
-import { useFeatures, FeatureState } from '@/contexts/FeatureContext';
+import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
+import { ServiceRequest, AppSuggestion } from '../types';
+import { AdminModerationPanel } from './AdminModerationPanel';
+import { AdminMonetizationView } from './AdminMonetizationView';
+import { useFeatures, FeatureKey } from '../contexts/FeatureContext';
 
 // --- SUB-COMPONENTS ---
 
@@ -23,7 +36,7 @@ const FeatureManagement: React.FC = () => {
     return (
         <div className="space-y-10 animate-in fade-in duration-500">
             {sections.map(section => {
-                const items = featureList.filter((f: FeatureState) => f.category === section.id);
+                const items = featureList.filter(f => f.category === section.id);
                 if (items.length === 0) return null;
 
                 return (
@@ -35,7 +48,7 @@ const FeatureManagement: React.FC = () => {
                             </h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {items.map((feature: FeatureState) => (
+                            {items.map(feature => (
                                 <div key={feature.id} className="bg-slate-900 border border-white/5 p-6 rounded-[2rem] flex items-center justify-between group transition-all hover:border-blue-500/30 shadow-sm">
                                     <div className="space-y-1">
                                         <p className="font-bold text-white text-sm tracking-tight">{feature.label}</p>
@@ -61,6 +74,7 @@ const FeatureManagement: React.FC = () => {
             
             <div className="p-6 bg-blue-900/10 border border-blue-500/20 rounded-[2.5rem] mt-12">
                 <div className="flex gap-4">
+                    {/* Info icon was previously undefined */}
                     <Info className="text-blue-400 shrink-0" size={20} />
                     <p className="text-xs text-blue-200/70 leading-relaxed">
                         <strong>Nota do Sistema:</strong> As alterações nas abas e módulos são aplicadas instantaneamente em todos os dispositivos sem necessidade de atualização da página ou do aplicativo.
@@ -113,15 +127,18 @@ interface AdminPanelProps {
   onLogout: () => void;
   viewMode: string;
   onOpenViewSwitcher: () => void;
-  onNavigateToApp?: (view: string, data?: any) => void;
-  onOpenMonitorChat?: (id: string) => void;
+  onNavigateToApp: (view: string, data?: any) => void;
+  onOpenMonitorChat: (id: string) => void;
   initialTab?: string;
 }
 
+// FIX: Changed AdminPanel to a named export to align with project conventions and resolve module resolution error.
 export const AdminPanel: React.FC<AdminPanelProps> = ({ 
   onLogout, 
   viewMode, 
   onOpenViewSwitcher, 
+  onNavigateToApp,
+  onOpenMonitorChat,
   initialTab
 }) => {
   const [activeTab, setActiveTab] = useState<string>(initialTab || 'hub');

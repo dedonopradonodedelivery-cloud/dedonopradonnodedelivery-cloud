@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+// FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
+import { supabase } from '../lib/supabaseClient';
 import {
   X,
   Mail,
