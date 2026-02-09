@@ -13,7 +13,7 @@ export const fetchAdminMerchants = async (searchTerm: string = ''): Promise<DbMe
     }
     const { data, error } = await query.order('name');
     if (error) throw error;
-    return (data || []) as DbMerchant[];
+    return (data || []) as any[];
   } catch (err) {
     console.error("fetchAdminMerchants error:", err);
     return [];
@@ -57,7 +57,9 @@ export const validateStoreCode = async (code: string) => {
     }
     throw new Error("Código inválido.");
   }
+
   const cleanCode = code.trim().toUpperCase();
+
   const { data, error } = await supabase
     .from('merchants')
     .select(`
@@ -72,37 +74,76 @@ export const validateStoreCode = async (code: string) => {
     `)
     .or(`secure_id.eq.${code},manual_code.eq.${cleanCode}`)
     .maybeSingle();
-  if (error) throw new Error("Erro técnico na validação.");
-  if (!data) throw new Error("Código não reconhecido.");
+
+  if (error) {
+    console.error("Database validation error:", error);
+    throw new Error("Erro técnico na validação. Tente novamente.");
+  }
+
+  if (!data) {
+    throw new Error("Código não reconhecido.");
+  }
+
+  if (!data.is_active) {
+    throw new Error("Este estabelecimento não está aceitando transações no momento.");
+  }
+
   return data;
 };
 
-export const initiateTransaction = async (params: any) => {
+/**
+ * Registra uma intenção de transação no Ledger.
+ */
+export const initiateTransaction = async (params: {
+    userId: string;
+    storeId: string;
+    merchantId: string;
+    amountCents: number;
+    type: 'earn' | 'use';
+    purchaseTotalCents: number;
+}) => {
     if (!supabase) return { id: 'mock-tx-id', status: 'pending' };
+
     const { data, error } = await supabase
         .from('cashback_transactions')
-        .insert(params)
+        .insert({
+            user_id: params.userId,
+            store_id: params.storeId,
+            merchant_id: params.merchantId,
+            purchase_total_cents: params.purchaseTotalCents,
+            amount_cents: params.amountCents,
+            type: params.type,
+            status: 'pending'
+        })
         .select()
         .single();
+
     if (error) throw error;
     return data;
 };
 
+/**
+ * Busca o saldo efetivo de um usuário para uma loja específica.
+ */
 export const getEffectiveBalance = async (userId: string, storeId: string) => {
   if (!supabase) return 0;
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('store_credits')
     .select('balance_cents')
     .eq('user_id', userId)
     .eq('store_id', storeId)
     .maybeSingle();
+  if (error) return 0;
   return data?.balance_cents || 0;
 };
 
+/**
+ * Envia uma solicitação manual de reivindicação de loja.
+ */
 export const submitManualClaim = async (claimData: Partial<StoreClaimRequest>) => {
   if (supabase) {
     const { error } = await supabase.from('store_claims').insert({ ...claimData, status: 'pending' });
     if (error) throw error;
   }
   return true;
-};
+}

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ShieldCheck, LogOut, Zap, ChevronRight, 
-  ArrowLeft, Coins, ToggleLeft, ToggleRight, Info,
-  ShieldAlert
+  ShieldCheck, ArrowLeft, LogOut, Zap, ChevronRight, Info,
+  ShieldAlert, Coins, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
 import { AdminModerationPanel } from './AdminModerationPanel';
@@ -86,7 +85,7 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
   </div>
 );
 
-const AdminHub: React.FC<{ onSelect: (tab: string) => void }> = ({ onSelect }) => (
+const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
   <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
     <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-6 rounded-[2.5rem] border border-blue-500/30 shadow-xl hover:shadow-blue-500/10 transition-all text-left group col-span-2 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
@@ -113,8 +112,8 @@ interface AdminPanelProps {
   onLogout: () => void;
   viewMode: string;
   onOpenViewSwitcher: () => void;
-  onNavigateToApp: (view: string, data?: any) => void;
-  onOpenMonitorChat: (id: string) => void;
+  onNavigateToApp?: (view: string, data?: any) => void;
+  onOpenMonitorChat?: (id: string) => void;
   initialTab?: string;
 }
 
