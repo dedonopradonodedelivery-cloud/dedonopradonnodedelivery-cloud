@@ -1,14 +1,15 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Star, BadgeCheck, ChevronRight, Store as StoreIcon, AlertCircle, ArrowRight, Filter } from 'lucide-react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, Store as StoreIcon, AlertCircle, ArrowRight, Filter, Search } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { supabase } from '../lib/supabaseClient';
-import { FOOD_SUB_SUB_CATEGORIES } from '@/constants';
+// FIX: Added BELEZA_SUB_SUB_CATEGORIES to the import list to resolve a compilation error.
+import { FOOD_SUB_SUB_CATEGORIES, BELEZA_SUB_SUB_CATEGORIES } from '@/constants';
 
 const MasterSponsorSignature: React.FC = () => (
-    <div className="pointer-events-none text-right shrink-0">
+    <div className="pointer-events-none text-right shrink-0 ml-4">
       <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
     </div>
@@ -54,46 +55,21 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolea
 
 // Gerador de Banner Fake Realista baseado no nome da subcategoria
 const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => {
-    // Seed simples baseado no tamanho da string para consistência
     const seed = subcategory.length + neighborhood.length;
-    
-    const backgrounds = [
-        'bg-blue-600', 'bg-emerald-600', 'bg-purple-600', 'bg-rose-600', 'bg-amber-600', 'bg-indigo-600'
-    ];
-    
-    const images = [
-        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', // Business
-        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800', // Restaurant
-        'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800', // Salon
-        'https://images.unsplash.com/photo-1540962351504-03099c5a754b?q=80&w=800', // Gym
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Shop
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800', // Home
-    ];
-
-    const ctas = [
-        'Conhecer Agora', 'Ver Ofertas', 'Agendar Visita', 'Pedir Orçamento', 'Saiba Mais'
-    ];
-    
-    // Seleção determinística
+    const backgrounds = ['bg-blue-600', 'bg-emerald-600', 'bg-purple-600', 'bg-rose-600', 'bg-amber-600', 'bg-indigo-600'];
+    const images = ['https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800', 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800', 'https://images.unsplash.com/photo-1540962351504-03099c5a754b?q=80&w=800', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800'];
+    const ctas = ['Conhecer Agora', 'Ver Ofertas', 'Agendar Visita', 'Pedir Orçamento', 'Saiba Mais'];
     const bg = backgrounds[seed % backgrounds.length];
     const img = images[seed % images.length];
     const cta = ctas[seed % ctas.length];
-    
-    return {
-        title: `Destaque em ${subcategory}`,
-        storeName: `${subcategory} Premium ${neighborhood}`,
-        subtitle: `A melhor opção de ${subcategory.toLowerCase()} em ${neighborhood}.`,
-        cta,
-        bgColor: bg,
-        image: img
-    };
+    return { title: `Destaque em ${subcategory}`, storeName: `${subcategory} Premium ${neighborhood}`, subtitle: `A melhor opção de ${subcategory.toLowerCase()} em ${neighborhood}.`, cta, bgColor: bg, image: img };
 };
 
 export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ subcategoryName, categoryName, onBack, onStoreClick, stores, userRole, onNavigate }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [activeFilter, setActiveFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Gerar dados do banner fixo
   const bannerData = useMemo(() => {
       const hood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
       return getSubcategoryBannerData(subcategoryName, hood);
@@ -103,6 +79,8 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
     let subSubCats: string[] = [];
     if (categoryName === 'Alimentação' && FOOD_SUB_SUB_CATEGORIES[subcategoryName]) {
         subSubCats = FOOD_SUB_SUB_CATEGORIES[subcategoryName];
+    } else if (categoryName === 'Beleza' && BELEZA_SUB_SUB_CATEGORIES[subcategoryName]) {
+        subSubCats = BELEZA_SUB_SUB_CATEGORIES[subcategoryName];
     } else {
         subSubCats = [subcategoryName];
     }
@@ -115,9 +93,19 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
     return list;
   }, [subcategoryName, categoryName, currentNeighborhood, stores]);
 
-
   const filteredList = useMemo(() => {
     let list = [...pool];
+    
+    if (searchTerm.trim()) {
+      const lowercasedTerm = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      list = list.filter(store => 
+        (store.name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm) ||
+        (store.description || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm) ||
+        (store.subcategory || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm) ||
+        (store.tags && store.tags.some(tag => tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm)))
+      );
+    }
+
     if (activeFilter === 'top_rated') list = list.filter(s => (s.rating || 0) >= 4.7);
     if (activeFilter === 'open_now') list = list.filter(s => s.isOpenNow);
 
@@ -125,27 +113,15 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
     const organic = list.filter(s => !s.isSponsored && s.adType !== AdType.PREMIUM);
     
     return [...sponsored, ...organic];
-  }, [pool, activeFilter]);
+  }, [pool, activeFilter, searchTerm]);
 
-  // Handler para clicar no banner (leva para uma loja fake de exemplo ou real se houver)
   const handleBannerClick = () => {
-      // Tenta achar uma loja real compatível para simular clique no banner
-      const targetStore = pool[0] || {
-          id: `banner-${subcategoryName}`,
-          name: bannerData.storeName,
-          category: categoryName,
-          subcategory: subcategoryName,
-          description: bannerData.subtitle,
-          adType: AdType.PREMIUM,
-          rating: 5.0,
-          neighborhood: currentNeighborhood,
-          verified: true,
-          isOpenNow: true,
-          image: bannerData.image,
-          logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(bannerData.storeName)}&background=random&color=fff`
-      };
+      const targetStore = pool[0] || { id: `banner-${subcategoryName}`, name: bannerData.storeName, category: categoryName, subcategory: subcategoryName, description: bannerData.subtitle, adType: AdType.PREMIUM, rating: 5.0, distance: 'Perto de você', neighborhood: currentNeighborhood, verified: true, isOpenNow: true, image: bannerData.image, logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(bannerData.storeName)}&background=random&color=fff` };
       onStoreClick(targetStore as Store);
   };
+
+  const placeholderMap: Record<string, string> = { 'Alimentação': 'Buscar lojas, pratos ou serviços…', 'Pets': 'Buscar serviços para pets…', 'Autos': 'Buscar serviços automotivos…', 'Profissionais': 'Buscar profissionais ou serviços…', 'Saúde': 'Buscar clínicas ou especialidades...', 'Beleza': 'Buscar salões, esmalterias ou serviços...' };
+  const searchPlaceholder = placeholderMap[categoryName] || `Buscar em ${subcategoryName}...`;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 animate-in slide-in-from-right duration-300">
@@ -166,31 +142,16 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
 
       <div className="p-5 space-y-8">
         
-        {/* BANNER FIXO DA SUBCATEGORIA - ESTILO HOME (16/12 ou 16/10) */}
-        <div 
-            onClick={handleBannerClick}
-            className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${bannerData.bgColor} shadow-xl shadow-black/10`}
-        >
+        <div onClick={handleBannerClick} className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${bannerData.bgColor} shadow-xl shadow-black/10`}>
             <div className="w-full h-full relative">
-                <img 
-                    src={bannerData.image} 
-                    alt={bannerData.title} 
-                    className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
-                
-                <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+                <img src={bannerData.image} alt={bannerData.title} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div className="relative h-full flex flex-col justify-end p-8 text-white">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">
-                            Destaque
-                        </span>
+                        <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20"> Destaque </span>
                     </div>
-                    <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
-                        {bannerData.storeName}
-                    </h2>
-                    <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
-                        {bannerData.subtitle}
-                    </p>
+                    <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md"> {bannerData.storeName} </h2>
+                    <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4"> {bannerData.subtitle} </p>
                     <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit">
                         <span className="text-[9px] font-black uppercase tracking-widest">{bannerData.cta}</span>
                         <ArrowRight size={12} strokeWidth={3} />
@@ -198,36 +159,26 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
                 </div>
             </div>
         </div>
-
-        {/* FILTROS */}
+        
+        <section>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder={searchPlaceholder} className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-all shadow-sm dark:text-white" />
+          </div>
+        </section>
+        
         <section>
             <div className="flex items-center gap-2 mb-4 px-1">
                 <Filter size={14} className="text-gray-400" />
                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filtrar Lista</h3>
             </div>
             <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                <button 
-                  onClick={() => setActiveFilter('all')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'all' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
-                >
-                    Tudo
-                </button>
-                <button 
-                  onClick={() => setActiveFilter('top_rated')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'top_rated' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
-                >
-                    Top Avaliados
-                </button>
-                <button 
-                  onClick={() => setActiveFilter('open_now')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'open_now' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
-                >
-                    Aberto Agora
-                </button>
+                <button onClick={() => setActiveFilter('all')} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'all' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}> Tudo </button>
+                <button onClick={() => setActiveFilter('top_rated')} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'top_rated' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}> Top Avaliados </button>
+                <button onClick={() => setActiveFilter('open_now')} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'open_now' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}> Aberto Agora </button>
             </div>
         </section>
 
-        {/* LISTA DE LOJAS */}
         <section>
             <div className="flex flex-col gap-3">
                 {filteredList.map(store => (
@@ -243,10 +194,7 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
             )}
         </section>
 
-        <section>
-          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={subcategoryName} />
-        </section>
-
+        <section> <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={subcategoryName} /> </section>
       </div>
     </div>
   );

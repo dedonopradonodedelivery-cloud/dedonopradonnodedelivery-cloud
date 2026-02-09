@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, Plus, CheckCircle2, Utensils } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Briefcase, Wrench, CarFront, Bike, Plus, CheckCircle2, Utensils, Truck } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
-import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS, FOOD_GROUPS, FOOD_SUB_SUB_CATEGORIES } from '@/constants';
+import { SUBCATEGORIES, HEALTH_GROUPS, PROFESSIONALS_GROUPS, AUTOS_GROUPS, FOOD_GROUPS, FOOD_SUB_SUB_CATEGORIES, PETS_GROUPS, ALL_PETS_GROUPS } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
@@ -178,7 +178,8 @@ const SubcategoryFilterPanel: React.FC<{
   options: { name: string; icon: React.ReactNode }[] | string[];
   onSelect: (subName: string | null) => void;
   title: string;
-}> = ({ isOpen, onClose, options, onSelect, title }) => {
+  placeholder?: string;
+}> = ({ isOpen, onClose, options, onSelect, title, placeholder }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredOptions = useMemo(() => {
@@ -215,7 +216,7 @@ const SubcategoryFilterPanel: React.FC<{
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por nome..."
+              placeholder={placeholder || "Buscar por nome..."}
               className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-10 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/30 dark:text-white"
               autoFocus
             />
@@ -256,14 +257,16 @@ const MasterSponsorSignature: React.FC = () => (
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate, onSubcategoryClick }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
 
   // States for intermediate selection screens
   const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
   const [professionalGroup, setProfessionalGroup] = useState<'manuais' | 'tecnicos' | null>(null);
-  const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | null>(null);
+  const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | 'utilitarios' | 'bicicletas' | null>(null);
   const [isFoodFilterOpen, setIsFoodFilterOpen] = useState(false);
+  const [isPetFilterOpen, setIsPetFilterOpen] = useState(false);
 
   const visibleFoodGroups = useMemo(() => FOOD_GROUPS.slice(0, 7), []);
   const moreFoodGroups = useMemo(() => FOOD_GROUPS.slice(7), []);
@@ -273,27 +276,15 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       setProfessionalGroup(null);
       setAutosGroup(null);
       setSelectedSubcategory(null);
+      setSearchTerm('');
   }, [category.slug]);
 
   const subcategories = useMemo(() => {
     const allSubs = SUBCATEGORIES[category.name] || [];
-
-    if (category.slug === 'saude' && healthGroup) {
-        return allSubs.filter(s => HEALTH_GROUPS[healthGroup].includes(s.name));
-    }
-    
-    if (category.slug === 'profissionais' && professionalGroup) {
-        return allSubs.filter(s => PROFESSIONALS_GROUPS[professionalGroup].includes(s.name));
-    }
-    
-    if (category.slug === 'autos' && autosGroup) {
-        return allSubs.filter(s => AUTOS_GROUPS[autosGroup].includes(s.name));
-    }
-    
-    if (category.slug === 'alimentacao') {
-        return SUBCATEGORIES['Alimentação'] || [];
-    }
-
+    if (category.slug === 'saude' && healthGroup) { return allSubs.filter(s => HEALTH_GROUPS[healthGroup].includes(s.name)); }
+    if (category.slug === 'profissionais' && professionalGroup) { return allSubs.filter(s => (PROFESSIONALS_GROUPS as any)[professionalGroup].includes(s.name)); }
+    if (category.slug === 'autos' && autosGroup) { return allSubs.filter(s => (AUTOS_GROUPS as any)[autosGroup].includes(s.name)); }
+    if (category.slug === 'alimentacao') { return SUBCATEGORIES['Alimentação'] || []; }
     return allSubs;
   }, [category.name, category.slug, healthGroup, professionalGroup, autosGroup]);
   
@@ -303,414 +294,99 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
 
   useEffect(() => {
     const fetchCategoryBanner = async () => {
-      if (!supabase) {
-        setLoadingBanner(false);
-        return;
-      }
+      if (!supabase) { setLoadingBanner(false); return; }
       setLoadingBanner(true);
       try {
-        const { data, error } = await supabase
-          .from('published_banners')
-          .select('id, config, merchant_id')
-          .eq('target', `category:${category.slug}`)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) {
-          if (error.message.includes('published_banners')) {
-            setActiveBanner(null);
-          } else {
-            throw error;
-          }
-        } else {
-            if (data && data.length > 0) {
-              setActiveBanner(data[0]);
-            } else {
-              setActiveBanner(null);
-            }
-        }
-      } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
-        setActiveBanner(null);
-      } finally {
-        setLoadingBanner(false);
-      }
+        const { data, error } = await supabase.from('published_banners').select('id, config, merchant_id').eq('target', `category:${category.slug}`).eq('is_active', true).order('created_at', { ascending: false }).limit(1);
+        if (error) { if (error.message.includes('published_banners')) { setActiveBanner(null); } else { throw error; } } 
+        else { setActiveBanner(data && data.length > 0 ? data[0] : null); }
+      } catch (e: any) { console.error("Failed to fetch category banner:", e.message || e); setActiveBanner(null); } 
+      finally { setLoadingBanner(false); }
     };
-    
     fetchCategoryBanner();
-
-    const channel = supabase.channel(`category-banner-${category.slug}`)
-      .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'published_banners',
-          filter: `target=eq.category:${category.slug}`
-        },
-        () => fetchCategoryBanner()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    const channel = supabase.channel(`category-banner-${category.slug}`).on('postgres_changes', { event: '*', schema: 'public', table: 'published_banners', filter: `target=eq.category:${category.slug}` }, () => fetchCategoryBanner()).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [category.slug]);
 
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
+    
     if (selectedSubcategory) {
-      // FIX: Check if selectedSubcategory is a group in FOOD_SUB_SUB_CATEGORIES
       if (category.name === 'Alimentação' && FOOD_SUB_SUB_CATEGORIES[selectedSubcategory]) {
           const subSubCats = FOOD_SUB_SUB_CATEGORIES[selectedSubcategory];
-          return categoryStores.filter(s => subSubCats.includes(s.subcategory));
+          categoryStores = categoryStores.filter(s => subSubCats.includes(s.subcategory));
+      } else {
+        categoryStores = categoryStores.filter(s => s.subcategory === selectedSubcategory);
       }
-      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
     }
+
+    if (searchTerm.trim()) {
+      const lowercasedTerm = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      categoryStores = categoryStores.filter(store => 
+        (store.name || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm) ||
+        (store.description || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm) ||
+        (store.subcategory || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm) ||
+        (store.tags && store.tags.some(tag => tag.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(lowercasedTerm)))
+      );
+    }
+    
     return categoryStores;
-  }, [stores, category.name, selectedSubcategory]);
+  }, [stores, category.name, selectedSubcategory, searchTerm]);
 
-  const handleSubcategoryClick = (subName: string) => {
-    setSelectedSubcategory(prev => (prev === subName ? null : subName));
-  };
-
-  const handleAdvertiseClick = () => {
-    if (userRole === 'lojista') {
-      onAdvertiseInCategory(category.name);
-      onNavigate('store_ads_module');
-    } else {
-      alert("Apenas lojistas podem anunciar aqui. Crie ou acesse sua conta de lojista.");
-    }
-  };
-
-  const handleBannerClick = (banner: any) => {
-    if (banner.merchant_id) {
-      const store = stores.find(s => s.id === banner.merchant_id);
-      if (store) {
-        onStoreClick(store);
-        return;
-      }
-    }
-    onNavigate('explore');
-  };
+  const handleSubcategoryClick = (subName: string) => { setSelectedSubcategory(prev => (prev === subName ? null : subName)); };
+  const handleAdvertiseClick = () => { if (userRole === 'lojista') { onAdvertiseInCategory(category.name); onNavigate('store_ads_module'); } else { alert("Apenas lojistas podem anunciar aqui."); } };
+  const handleBannerClick = (banner: any) => { if (banner.merchant_id) { const store = stores.find(s => s.id === banner.merchant_id); if (store) { onStoreClick(store); return; } } onNavigate('explore'); };
   
   const handleBack = () => {
-      if (category.slug === 'saude' && healthGroup) {
-          setHealthGroup(null);
-          setSelectedSubcategory(null);
-          return;
-      }
-      if (category.slug === 'profissionais' && professionalGroup) {
-          setProfessionalGroup(null);
-          setSelectedSubcategory(null);
-          return;
-      }
-      if (category.slug === 'autos' && autosGroup) {
-          setAutosGroup(null);
-          setSelectedSubcategory(null);
-          return;
+      if ((category.slug === 'saude' && healthGroup) || (category.slug === 'profissionais' && professionalGroup) || (category.slug === 'autos' && autosGroup)) {
+          setHealthGroup(null); setProfessionalGroup(null); setAutosGroup(null); setSelectedSubcategory(null); setSearchTerm(''); return;
       }
       onBack();
   };
-
-  // --- NEW INTERMEDIATE SCREEN FOR 'ALIMENTAÇÃO' ---
-  if (category.slug === 'alimentacao') {
-    return (
-      <>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-                </button>
-                <div className="flex-1 min-w-0 flex justify-between items-center">
-                  <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                      {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                  </h1>
-                  <MasterSponsorSignature />
-                </div>
-            </div>
-
-            <div className="p-5 space-y-3 flex-1 flex flex-col justify-center">
-                <div className="text-center mb-4 mt-2">
-                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">Qual tipo de comida você procura?</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Escolha uma opção para ver as lojas do bairro.</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {visibleFoodGroups.map(group => (
-                    <SelectionButton
-                        key={group.name}
-                        label={group.name}
-                        icon={group.icon}
-                        color="bg-blue-600"
-                        onClick={() => onSubcategoryClick(group.name, category)}
-                        size="small"
-                    />
-                  ))}
-                   <SelectionButton
-                        label="+ Mais"
-                        icon={<Plus />}
-                        isMore
-                        onClick={() => setIsFoodFilterOpen(true)}
-                        size="small"
-                    />
-                </div>
-            </div>
-        </div>
-        <SubcategoryFilterPanel 
-          isOpen={isFoodFilterOpen}
-          onClose={() => setIsFoodFilterOpen(false)}
-          options={moreFoodGroups.map(g => g.name)}
-          onSelect={(subName) => {
-            if(subName){
-                onSubcategoryClick(subName, category);
-            }
-            setIsFoodFilterOpen(false);
-          }}
-          title="Mais em Alimentação"
-        />
-      </>
-    );
-  }
-
-  if (category.slug === 'saude' && !healthGroup) {
-      return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-                </button>
-                <div className="flex-1 min-w-0 flex justify-between items-center">
-                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                    </h1>
-                    <MasterSponsorSignature />
-                </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-10">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
-                </div>
-
-                <div className="grid gap-3">
-                    <SelectionButton
-                        label="Mulher"
-                        subtitle="Especialidades e cuidados para a saúde feminina."
-                        icon={<User />}
-                        color="bg-pink-500"
-                        onClick={() => setHealthGroup('mulher')}
-                        size="small"
-                    />
-                    <SelectionButton
-                        label="Homem"
-                        subtitle="Check-ups e especialidades para a saúde masculina."
-                        icon={<User />}
-                        color="bg-blue-600"
-                        onClick={() => setHealthGroup('homem')}
-                        size="small"
-                    />
-                    <SelectionButton
-                        label="Pediatria"
-                        subtitle="Acompanhamento completo para bebês e crianças."
-                        icon={<Baby />}
-                        color="bg-amber-500"
-                        onClick={() => setHealthGroup('pediatria')}
-                        size="small"
-                    />
-                </div>
-            </div>
-        </div>
-      );
-  }
   
-  if (category.slug === 'profissionais' && !professionalGroup) {
-      return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-                </button>
-                <div className="flex-1 min-w-0 flex justify-between items-center">
-                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                    </h1>
-                    <MasterSponsorSignature />
-                </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-10">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p>
-                </div>
-
-                <div className="grid gap-3">
-                    <SelectionButton
-                        label="Serviços Manuais"
-                        subtitle="Obras, reparos e serviços práticos"
-                        icon={<Wrench />}
-                        color="bg-sky-600"
-                        onClick={() => setProfessionalGroup('manuais')}
-                    />
-                    <SelectionButton
-                        label="Técnicos / Especializados"
-                        subtitle="Serviços profissionais e especializados"
-                        icon={<Briefcase />}
-                        color="bg-sky-700"
-                        onClick={() => setProfessionalGroup('tecnicos')}
-                    />
-                </div>
-            </div>
-        </div>
-      );
-  }
+  const isIntermediateScreen = (category.slug === 'saude' && !healthGroup) || (category.slug === 'profissionais' && !professionalGroup) || (category.slug === 'autos' && !autosGroup) || category.slug === 'alimentacao' || category.slug === 'pets';
   
-  if (category.slug === 'autos' && !autosGroup) {
-      return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-                </button>
-                <div className="flex-1 min-w-0 flex justify-between items-center">
-                    <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                        {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
-                    </h1>
-                    <MasterSponsorSignature />
-                </div>
-            </div>
+  const placeholderMap: Record<string, string> = { 'Alimentação': 'Buscar lojas, pratos ou serviços…', 'Pets': 'Buscar serviços para pets…', 'Autos': 'Buscar serviços automotivos…', 'Profissionais': 'Buscar profissionais ou serviços…', 'Saúde': 'Buscar clínicas ou especialidades...' };
+  const searchPlaceholder = placeholderMap[category.name] || `Buscar em ${category.name}...`;
 
-            <div className="p-6 space-y-4">
-                <div className="text-center mb-6 mt-10">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p>
-                </div>
-
-                <div className="grid gap-3">
-                    <SelectionButton
-                        label="Carro"
-                        subtitle="Serviços para automóveis"
-                        icon={<CarFront />}
-                        color="bg-red-600"
-                        onClick={() => setAutosGroup('carro')}
-                    />
-                    <SelectionButton
-                        label="Moto"
-                        subtitle="Serviços para motocicletas"
-                        icon={<Bike />}
-                        color="bg-red-700"
-                        onClick={() => setAutosGroup('moto')}
-                    />
-                </div>
-            </div>
-        </div>
-      );
+  if (isIntermediateScreen && category.slug !== 'alimentacao' && category.slug !== 'pets' && !healthGroup && !professionalGroup && !autosGroup) {
+      // Logic for intermediate screens (Saúde, Profissionais, Autos)
+      if (category.slug === 'saude') { /* Render Saúde selection */ return ( <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300"> <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800"> <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"> <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /> </button> <div className="flex-1 min-w-0 flex justify-between items-center"> <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate"> {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name} </h1> <MasterSponsorSignature /> </div> </div> <div className="p-6 space-y-4"> <div className="text-center mb-6 mt-10"> <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2> <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p> </div> <div className="grid gap-3"> <SelectionButton label="Mulher" subtitle="Especialidades e cuidados para a saúde feminina." icon={<User />} color="bg-pink-500" onClick={() => setHealthGroup('mulher')} size="small" /> <SelectionButton label="Homem" subtitle="Check-ups e especialidades para a saúde masculina." icon={<User />} color="bg-blue-600" onClick={() => setHealthGroup('homem')} size="small" /> <SelectionButton label="Pediatria" subtitle="Acompanhamento completo para bebês e crianças." icon={<Baby />} color="bg-amber-500" onClick={() => setHealthGroup('pediatria')} size="small" /> </div> </div> </div> ); }
+      if (category.slug === 'profissionais') { /* Render Profissionais selection */ return ( <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300"> <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800"> <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"> <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /> </button> <div className="flex-1 min-w-0 flex justify-between items-center"> <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate"> {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name} </h1> <MasterSponsorSignature /> </div> </div> <div className="p-6 space-y-4"> <div className="text-center mb-6 mt-10"> <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de serviço?</h2> <p className="text-sm text-gray-500 dark:text-gray-400">Ajude-nos a encontrar o profissional certo para você.</p> </div> <div className="grid gap-3"> <SelectionButton label="Serviços Manuais" subtitle="Obras, reparos e serviços práticos" icon={<Wrench />} color="bg-sky-600" onClick={() => setProfessionalGroup('manuais')} /> <SelectionButton label="Técnicos / Especializados" subtitle="Serviços profissionais e especializados" icon={<Briefcase />} color="bg-sky-700" onClick={() => setProfessionalGroup('tecnicos')} /> </div> </div> </div> ); }
+      if (category.slug === 'autos') { /* Render Autos selection */ return ( <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-10 animate-in slide-in-from-right duration-300"> <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800"> <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"> <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /> </button> <div className="flex-1 min-w-0 flex justify-between items-center"> <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate"> {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name} </h1> <MasterSponsorSignature /> </div> </div> <div className="p-6 space-y-4"> <div className="text-center mb-6 mt-10"> <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual tipo de veículo?</h2> <p className="text-sm text-gray-500 dark:text-gray-400">Escolha para ver os serviços especializados.</p> </div> <div className="grid grid-cols-2 gap-3"> <SelectionButton label="Carro" subtitle="Serviços para automóveis" icon={<CarFront />} color="bg-red-600" onClick={() => setAutosGroup('carro')} size="small" /> <SelectionButton label="Moto" subtitle="Serviços para motocicletas" icon={<Bike />} color="bg-red-700" onClick={() => setAutosGroup('moto')} size="small" /> <SelectionButton label="Utilitários" subtitle="Vans, furgões e caminhões" icon={<Truck />} color="bg-slate-600" onClick={() => setAutosGroup('utilitarios')} size="small" /> <SelectionButton label="Bicicletas" subtitle="Manutenção e peças" icon={<Bike />} color="bg-green-600" onClick={() => setAutosGroup('bicicletas')} size="small" /> </div> </div> </div> ); }
   }
+
+  // Intermediate screens for Alimentação and Pets
+  if (category.slug === 'alimentacao') { return ( <> <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300"> <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800"> <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"> <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /> </button> <div className="flex-1 min-w-0 flex justify-between items-center"> <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate"> {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name} </h1> <MasterSponsorSignature /> </div> </div> <div className="p-5 space-y-3 flex-1 flex flex-col justify-center"> <div className="text-center mb-4 mt-2"> <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">Qual tipo de comida você procura?</h2> <p className="text-xs text-gray-500 dark:text-gray-400">Escolha uma opção para ver as lojas do bairro.</p> </div> <div className="grid grid-cols-2 gap-2"> {visibleFoodGroups.map(group => ( <SelectionButton key={group.name} label={group.name} icon={group.icon} color="bg-blue-600" onClick={() => onSubcategoryClick(group.name, category)} size="small" /> ))} <SelectionButton label="+ Mais" icon={<Plus />} isMore onClick={() => setIsFoodFilterOpen(true)} size="small" /> </div> </div> </div> <SubcategoryFilterPanel isOpen={isFoodFilterOpen} onClose={() => setIsFoodFilterOpen(false)} options={moreFoodGroups.map(g => g.name)} onSelect={(subName) => { if(subName){ onSubcategoryClick(subName, category); } setIsFoodFilterOpen(false); }} title="Mais em Alimentação" /> </> ); }
+  if (category.slug === 'pets') { return ( <> <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300"> <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800"> <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"> <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /> </button> <div className="flex-1 min-w-0 flex justify-between items-center"> <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate"> {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name} </h1> <MasterSponsorSignature /> </div> </div> <div className="p-5 space-y-3 flex-1 flex flex-col justify-center"> <div className="text-center mb-4 mt-2"> <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1">O que seu pet precisa?</h2> <p className="text-xs text-gray-500 dark:text-gray-400">Encontre os melhores serviços e produtos.</p> </div> <div className="grid grid-cols-2 gap-2"> {PETS_GROUPS.map(group => ( <SelectionButton key={group.name} label={group.name} icon={group.icon} color="bg-blue-600" onClick={() => onSubcategoryClick(group.name, category)} size="small" /> ))} <SelectionButton label="+ Mais" icon={<Plus />} isMore onClick={() => setIsPetFilterOpen(true)} size="small" /> </div> </div> </div> <SubcategoryFilterPanel isOpen={isPetFilterOpen} onClose={() => setIsPetFilterOpen(false)} options={ALL_PETS_GROUPS} onSelect={(subName) => { if(subName){ onSubcategoryClick(subName, category); } setIsPetFilterOpen(false); }} title="Serviços para Pets" placeholder="Buscar serviços para pets…" /> </> ); }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
-        <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <div className="flex-1 min-w-0 flex justify-between items-center">
-          <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate">
-              {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
-              {category.name} 
-              {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
-              {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup === 'manuais' ? 'Manuais' : 'Técnicos'}</span>}
-              {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
-          </h1>
-          <MasterSponsorSignature />
-        </div>
+        <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"> <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" /> </button>
+        <div className="flex-1 min-w-0 flex justify-between items-center"> <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 truncate"> {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name} {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup.charAt(0).toUpperCase() + healthGroup.slice(1)}</span>} {professionalGroup && <span className="text-xs font-normal opacity-60">/ {professionalGroup.charAt(0).toUpperCase() + professionalGroup.slice(1)}</span>} {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup.charAt(0).toUpperCase() + autosGroup.slice(1)}</span>} </h1> <MasterSponsorSignature /> </div>
       </div>
       
-      <div className="mt-4">
-        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
-      </div>
+      <div className="mt-4"> <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} /> </div>
 
       <div className="p-5 pt-0 space-y-8">
-        {visibleSubcategories.length > 0 && (
-          <section>
-            <div className="grid grid-cols-4 gap-3">
-              {visibleSubcategories.map((sub, i) => (
-                  <BigSurCard 
-                    key={i} 
-                    icon={sub.icon}
-                    name={sub.name}
-                    isSelected={selectedSubcategory === sub.name}
-                    onClick={() => onSubcategoryClick(sub.name, category)}
-                    categoryColor={category.color}
-                  />
-              ))}
-              {shouldShowMore && (
-                  <BigSurCard 
-                      icon={<Grid />} 
-                      name="Ver Todas" 
-                      isSelected={false} 
-                      isMoreButton 
-                      onClick={() => alert('Mostrar todas as subcategorias')} 
-                  />
-              )}
-            </div>
-          </section>
-        )}
-
-        <section>
-          {loadingBanner ? (
-            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-          ) : activeBanner ? (
-            <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
-              {activeBanner.config.type === 'template' ? (
-                <TemplateBannerRender config={activeBanner.config} />
-              ) : (
-                <CustomBannerRender config={activeBanner.config} />
-              )}
-            </div>
-          ) : (
-            <div 
-              onClick={handleAdvertiseClick}
-              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
-            >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
-                
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
-                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
-                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
-                        Patrocinar nesta categoria
-                    </div>
-                </div>
-            </div>
-          )}
+        <section className="pt-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder={searchPlaceholder} className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:border-blue-500 transition-all shadow-sm dark:text-white" />
+          </div>
         </section>
 
+        {visibleSubcategories.length > 0 && ( <section> <div className="grid grid-cols-4 gap-3"> {visibleSubcategories.map((sub, i) => ( <BigSurCard key={i} icon={sub.icon} name={sub.name} isSelected={selectedSubcategory === sub.name} onClick={() => onSubcategoryClick(sub.name, category)} categoryColor={category.color} /> ))} {shouldShowMore && ( <BigSurCard icon={<Grid />} name="Ver Todas" isSelected={false} isMoreButton onClick={() => alert('Mostrar todas as subcategorias')} /> )} </div> </section> )}
+        
+        <section> {loadingBanner ? ( <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div> ) : activeBanner ? ( <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform"> {activeBanner.config.type === 'template' ? ( <TemplateBannerRender config={activeBanner.config} /> ) : ( <CustomBannerRender config={activeBanner.config} /> )} </div> ) : ( <div onClick={handleAdvertiseClick} className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"> <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div> <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div> <div className="relative z-10 flex flex-col items-center"> <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform"> <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" /> </div> <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3> <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p> <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all"> Patrocinar nesta categoria </div> </div> </div> )} </section>
+        
         <section>
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-                {selectedSubcategory || `Destaques em ${category.name}`}
-            </h3>
-            {filteredStores.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                    {filteredStores.map(store => (
-                        <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-                    <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
-                </div>
-            )}
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4"> {selectedSubcategory || `Destaques em ${category.name}`} </h3>
+            {filteredStores.length > 0 ? ( <div className="flex flex-col gap-2"> {filteredStores.map(store => ( <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} /> ))} </div> ) : ( <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700"> <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" /> <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p> </div> )}
         </section>
-
-        <section>
-          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
-        </section>
+        
+        <section> <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} /> </section>
       </div>
     </div>
   );

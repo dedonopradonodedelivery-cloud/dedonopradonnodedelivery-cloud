@@ -575,41 +575,32 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
          <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-6">
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-40 snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
             >
-               {/* Floating Logo - Overlapping */}
-               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
-                  <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 p-1 shadow-lg border-2 border-gray-100 dark:border-gray-700">
-                     <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full rounded-full object-cover" />
+               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
+                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
-
-               {/* Card Body */}
-               <div className="relative w-full h-44 bg-brand-blue rounded-3xl shadow-lg shadow-blue-500/10 transition-transform duration-300 group-active:scale-[0.97] overflow-hidden">
-                  {/* Notches for tear-off effect */}
-                  <div className="absolute top-[65%] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
-                  <div className="absolute top-[65%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-20"></div>
-                  
-                  {/* Main Content Area (above the tear line) */}
-                  <div className="h-[65%] flex flex-col items-center justify-center text-center px-4 pt-8">
-                      <span className="text-2xl font-black text-white leading-none tracking-tight drop-shadow-sm">
+               <div className="w-full h-40 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10"></div>
+                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cupom</span>
+                      <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
                   </div>
-
-                  {/* Perforated line */}
-                  <div className="absolute top-[65%] left-4 right-4 h-px bg-transparent border-t-2 border-dashed border-white/30 z-10"></div>
-                  
-                  {/* Bottom part for button alignment */}
-                  <div className="h-[35%] relative flex justify-center items-center px-3">
-                       <button className="relative overflow-hidden px-5 py-1.5 bg-white hover:bg-gray-100 text-brand-blue text-[10px] font-bold uppercase tracking-widest rounded-xl shadow-md active:shadow-inner active:scale-95 transition-all">
-                          PEGAR CUPOM
-                      </button>
+                  <div className="w-full z-10">
+                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden">
+                         <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-white/20"></div>
+                         Pegar cupom
+                     </button>
                   </div>
                </div>
             </div>
@@ -619,174 +610,61 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
   );
 };
 
-const HUB_ITEMS = [
-  ...HAPPENING_NOW_MOCK.map(item => ({ ...item, dataType: 'happening' as const })),
-  ...LOST_AND_FOUND_MOCK.map(item => ({
-    ...item,
-    type: 'lost_found' as const, // Unify type for filtering
-    subtitle: item.location,
-    timeRemaining: item.time,
-    dataType: 'lost_found' as const,
-  }))
-];
-
-const HUB_FILTERS = [
-    { id: 'all', label: 'Tudo', icon: Sparkles },
-    { id: 'promotion', label: 'Promoções', icon: Megaphone },
-    { id: 'event', label: 'Eventos', icon: Calendar },
-    { id: 'alert', label: 'Avisos', icon: AlertTriangle },
-    { id: 'lost_found', label: 'Achados', icon: Search },
-];
-
-const NeighborhoodHub: React.FC<{ 
-  onNavigate: (view: string) => void,
-  onItemClick: (item: any) => void 
-}> = ({ onNavigate, onItemClick }) => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const interactionTimeoutRef = useRef<number | null>(null);
-  const [isInteracting, setIsInteracting] = useState(false);
-
-  const filteredItems = useMemo(() => {
-    if (activeFilter === 'all') return HUB_ITEMS;
-    return HUB_ITEMS.filter(item => item.type === activeFilter);
-  }, [activeFilter]);
-  
-  const loopedItems = useMemo(() => {
-      if (filteredItems.length <= 1) return filteredItems;
-      return [...filteredItems, ...filteredItems];
-  }, [filteredItems]);
-
-  const handleManualInteraction = () => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    setIsInteracting(true);
-    
-    if (interactionTimeoutRef.current) {
-      clearTimeout(interactionTimeoutRef.current);
-    }
-    
-    interactionTimeoutRef.current = window.setTimeout(() => {
-      setIsInteracting(false);
-    }, 4000); // Resume after 4 seconds of inactivity
-  };
-  
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer || isInteracting || loopedItems.length <= filteredItems.length) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      return;
-    }
-
-    const scrollSpeed = 1.3;
-
-    const animateScroll = () => {
-      if (scrollContainerRef.current && !isInteracting) {
-        scrollContainerRef.current.scrollLeft += scrollSpeed;
-        
-        const { scrollLeft, scrollWidth } = scrollContainerRef.current;
-        if (scrollLeft >= scrollWidth / 2) {
-          scrollContainerRef.current.scrollLeft = 0;
-        }
-        animationFrameRef.current = requestAnimationFrame(animateScroll);
-      }
-    };
-
-    animationFrameRef.current = requestAnimationFrame(animateScroll);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isInteracting, loopedItems, filteredItems.length]);
-  
-  const getBadge = (type: string) => {
-    switch(type) {
-        case 'promotion': return { icon: <Megaphone size={8} />, label: 'Promoção', color: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' };
-        case 'event': return { icon: <Calendar size={8} />, label: 'Evento', color: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' };
-        case 'alert': return { icon: <AlertTriangle size={8} />, label: 'Aviso', color: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' };
-        case 'lost_found': return { icon: <Search size={8} />, label: 'Achados/Perdidos', color: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400' };
-        default: return null;
-    }
-  };
-
+const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   return (
-    <div className="py-6 bg-white dark:bg-gray-950 border-t border-b border-gray-100 dark:border-gray-800">
-      {/* Top Banner */}
-      <div className="px-5 mb-6">
-        <div className="relative w-full rounded-3xl bg-blue-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden p-6 text-center">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-1">Acompanhe seu bairro em tempo real</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Avisos, eventos, promoções e informações importantes perto de você.</p>
+    <div className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <div>
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
+            Acontecendo Agora 
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            </h2>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Tempo real no bairro</p>
         </div>
-      </div>
-
-      {/* Filter Icons */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-5 mb-6">
-        {HUB_FILTERS.map(filter => (
-            <button 
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`flex-shrink-0 flex flex-col items-center justify-center gap-1.5 w-20 h-20 rounded-2xl border transition-all duration-200 ${
-                    activeFilter === filter.id 
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
-                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:text-blue-500'
-                }`}
-            >
-                <filter.icon size={20} strokeWidth={2.5} />
-                <span className="text-[8px] font-black uppercase tracking-tighter">{filter.label}</span>
-            </button>
-        ))}
+        <button 
+          onClick={() => alert("Funcionalidade de alerta rápido em breve!")}
+          className="flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 hover:text-blue-500 transition-colors"
+        >
+            <Plus size={16} />
+        </button>
       </div>
       
-      {/* Content cards */}
-      <div 
-        ref={scrollContainerRef}
-        onMouseDown={handleManualInteraction}
-        onTouchStart={handleManualInteraction}
-        onWheel={handleManualInteraction}
-        className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-5 px-5"
-      >
-        {loopedItems.map((item: any, index: number) => {
-            const badge = getBadge(item.type);
-            const canClick = item.dataType === 'lost_found';
-            return (
-                <div 
-                    key={`${item.id}-${index}`}
-                    onClick={() => canClick && onItemClick(item)}
-                    className={`snap-center flex-shrink-0 w-56 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all ${canClick ? 'cursor-pointer active:scale-95' : 'cursor-default'}`}
-                >
-                    <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
-                        {item.image ? (
-                            <img src={item.image} className="w-full h-full object-cover" alt={item.title} />
-                        ) : (
-                            <div className="text-amber-500">
-                                {item.type === 'alert' ? <AlertTriangle size={24} /> : <Zap size={24} />}
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-center">
-                        {badge && (
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex items-center gap-1 ${badge.color}`}>
-                                    {badge.icon} {badge.label}
-                                </span>
-                            </div>
-                        )}
-                        <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                        <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate mb-1">{item.subtitle}</p>
-                        <div className="flex items-center gap-1 text-[9px] text-blue-600 dark:text-blue-400 font-bold">
-                            <Clock size={10} /> {item.timeRemaining}
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+        {HAPPENING_NOW_MOCK.map((item) => (
+            <div key={item.id} className="snap-center flex-shrink-0 w-44 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
+                <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
+                    {item.image ? (
+                        <img src={item.image} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                        <div className="text-amber-500">
+                             {item.type === 'alert' ? <AlertTriangle size={24} /> : <Zap size={24} />}
                         </div>
+                    )}
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
+                            item.type === 'promotion' ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
+                            item.type === 'event' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' :
+                            'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
+                        }`}>
+                            {item.type === 'promotion' && <Megaphone size={8} />}
+                            {item.type === 'event' && <Calendar size={8} />}
+                            {item.type === 'alert' && <AlertTriangle size={8} />}
+                            {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : 'Aviso'}
+                        </span>
+                    </div>
+                    <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate mb-1">{item.subtitle}</p>
+                    <div className="flex items-center gap-1 text-[9px] text-blue-600 dark:text-blue-400 font-bold">
+                        <Clock size={10} /> {item.timeRemaining}
                     </div>
                 </div>
-            )
-        })}
+            </div>
+        ))}
       </div>
     </div>
   )
@@ -800,6 +678,21 @@ interface HomeFeedProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
 }
+// FIX: Define SectionHeader component locally to resolve "Cannot find name" error.
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+          <Icon size={18} strokeWidth={2.5} />
+        </div>
+        <div>
+          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+        </div>
+      </div>
+      <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+    </div>
+);
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
@@ -859,13 +752,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         if (cat.id === 'more-trigger') {
                             return (
                                 <button key={cat.id} onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                                    <div className={`w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700`}>
-                                        <div className="flex-1 flex items-center justify-center">
-                                            <Plus className="w-6 h-6 text-brand-blue" strokeWidth={3} />
-                                        </div>
-                                        <span className="block w-full text-[8px] font-black text-brand-blue text-center uppercase tracking-tighter leading-tight pb-1 truncate">
-                                            Mais
-                                        </span>
+                                    <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
+                                       <div className="flex-1 flex items-center justify-center w-full mb-1">
+                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
+                                       </div>
+                                       <span className="block w-full text-[8.5px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-none truncate">
+                                         Mais
+                                       </span>
                                     </div>
                                 </button>
                             );
@@ -901,18 +794,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       
       <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
       
-      <NeighborhoodHub onNavigate={onNavigate} onItemClick={setSelectedLostItem} />
+      <HappeningNowSection onNavigate={onNavigate} />
 
       {isFeatureActive('service_chat') && (
         <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="px-5 mb-4">
-            <h2 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Orçamentos Rápidos</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none">Receba até 5 orçamentos gratuitos</h2>
           </div>
           <div className="px-5">
-            <FifaBanner onClick={() => onNavigate('services_landing')} />
+            <FifaBanner onClick={() => setWizardStep(1)} />
           </div>
         </section>
       )}
+
+      <LostAndFoundSection onItemClick={setSelectedLostItem} />
 
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
@@ -945,7 +840,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">Que tipo de serviço?</h3>
               <div className="grid grid-cols-2 gap-4">
                 {[{l: 'Obras', i: Hammer}, {l: 'Reparos', i: Zap}, {l: 'Casa', i: HomeIcon}, {l: 'Outros', i: Sparkles}].map(s => (
-                  <button key={s.l} onClick={() => onNavigate('services_landing')} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
+                  <button key={s.l} onClick={() => setWizardStep(2)} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600"><s.i size={24} /></div>
                     <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter">{s.l}</p>
                   </button>
@@ -964,11 +859,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
+      {/* Modal para detalhes de Achados e Perdidos */}
       <LostAndFoundDetailModal 
           item={selectedLostItem} 
           onClose={() => setSelectedLostItem(null)} 
       />
 
+      {/* Modal de Mais Categorias */}
       <MoreCategoriesModal 
           isOpen={isMoreCategoriesOpen}
           onClose={() => setIsMoreCategoriesOpen(false)}
@@ -980,18 +877,3 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     </div>
   );
 };
-
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-          <Icon size={18} strokeWidth={2.5} />
-        </div>
-        <div>
-          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-        </div>
-      </div>
-      {onSeeMore && <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>}
-    </div>
-);

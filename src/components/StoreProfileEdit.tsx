@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -10,35 +9,32 @@ import {
   Search, 
   PlusCircle, 
   Pencil, 
-  Trash2, 
   Building2, 
   Check,
-  Hash,
-  Sparkles,
-  CheckCircle2,
-  Send,
-  AlertCircle,
-  MapPin,
   Smartphone,
+  ImageIcon,
+  DollarSign,
+  Video,
+  Plus,
+  Clock,
+  Instagram,
+  CheckCircle2,
+  MapPin,
+  Tag,
+  CreditCard,
+  Phone,
+  AlertCircle,
+  Hash,
+  FileText,
   Mail,
   Info,
-  Globe,
-  ImageIcon,
-  Eye,
-  Clock,
-  CreditCard,
-  ShieldCheck,
-  ExternalLink,
-  Calendar,
-  Lock,
-  Tag,
-  ShoppingBag,
+  // FIX: Imported ListFilter icon from lucide-react.
   ListFilter
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 // FIX: Using relative path for constants to ensure consistency and availability of exported members.
-import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '@/constants';
+import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '../constants';
 import { TaxonomyType, BusinessHour, TaxonomySuggestion } from '../types';
 
 interface StoreProfileEditProps {
@@ -289,8 +285,9 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   
   const logoInputRef = useRef<HTMLInputElement>(null);
 
+  // --- STATE DO FORMULÁRIO UNIFICADO (PÚBLICO + FISCAL) ---
   const [formData, setFormData] = useState({
-    // --- DADOS PÚBLICOS ---
+    // Públicos
     nome_exibido: '',
     category: '', // Categoria Principal (Obrigatória)
     secondary_categories: [] as string[], // Categorias Secundárias (Até 2)
@@ -486,7 +483,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         
         {/* BLOCO 1: INFORMAÇÕES DA LOJA */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja</h2></div>
+          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Perfil Público (Visível)</h2></div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
@@ -614,7 +611,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
 
       {showSuccess && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
-           <CheckCircle2 size={24} className="text-emerald-400" />
+           <CheckCircle2 size={56} className="w-5 h-5 text-emerald-400" />
            <span className="font-black text-xs uppercase tracking-widest">Loja Atualizada!</span>
         </div>
       )}
