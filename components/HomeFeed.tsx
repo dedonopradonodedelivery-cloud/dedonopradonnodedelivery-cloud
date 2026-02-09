@@ -475,7 +475,7 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
         <>
             <div className="py-6 border-b border-gray-100 dark:border-gray-800">
                 <div className="px-5 mb-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Dicas pro Bairro</h2>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Dicas para o bairro</h2>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Dicas rápidas para usar melhor o app</p>
                 </div>
                 <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
