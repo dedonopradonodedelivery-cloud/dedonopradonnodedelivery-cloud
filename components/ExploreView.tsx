@@ -1,260 +1,170 @@
 
-import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Store } from "@/types";
-import {
-  MapPin,
-  Filter,
-  Star,
-  ChevronRight,
-  ChevronLeft,
-  BadgeCheck,
-  Sparkles,
-  Lightbulb,
-  TrendingUp,
-  ArrowRight
+import React, { useMemo, useState } from "react";
+import { 
+  Search, 
+  Sparkles, 
+  Star, 
+  MapPin, 
+  BadgeCheck, 
+  ChevronRight, 
+  Pill, 
+  PawPrint, 
+  Utensils, 
+  Wrench,
+  SearchX
 } from "lucide-react";
-import { useUserLocation } from "@/hooks/useUserLocation";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { quickFilters } from "@/constants";
+import { Store } from "@/types";
+import { STORES } from "@/constants";
 
-const FALLBACK_STORE_IMAGES = [
-  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
-  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
-  'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
-  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
+interface ExploreViewProps {
+  onStoreClick: (store: Store) => void;
+  onNavigate: (view: string, data?: any) => void;
+}
+
+const ESSENTIAL_SERVICES = [
+  { id: 'pharmacy', label: 'Farmácias', icon: Pill, color: 'bg-rose-500', category: 'Farmácia' },
+  { id: 'pets', label: 'Pet Shops', icon: PawPrint, color: 'bg-amber-500', category: 'Pets' },
+  { id: 'food', label: 'Restaurantes', icon: Utensils, color: 'bg-emerald-500', category: 'Alimentação' },
+  { id: 'maintenance', label: 'Manutenção', icon: Wrench, color: 'bg-blue-500', category: 'Serviços' },
 ];
 
-const getFallbackStoreImage = (id: string) => {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-        hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return FALLBACK_STORE_IMAGES[Math.abs(hash) % FALLBACK_STORE_IMAGES.length];
-};
+export const ExploreView: React.FC<ExploreViewProps> = ({ onStoreClick, onNavigate }) => {
+  const [searchTerm, setSearchTerm] = useState("");
 
-type ExploreViewProps = {
-  stores: Store[];
-  searchQuery: string;
-  onStoreClick: (store: Store) => void;
-  onLocationClick: () => void;
-  onFilterClick: () => void;
-  onOpenPlans: () => void;
-  onNavigate: (view: string) => void;
-  onViewAllVerified?: () => void;
-};
+  const novidades = useMemo(() => {
+    // Simulando novidades pegando as últimas lojas do array (que não são o patrocinador master)
+    return STORES.filter(s => s.id !== 'grupo-esquematiza').slice(-6).reverse();
+  }, []);
 
-const CategoryChip: React.FC<{ label: string; active?: boolean; icon?: React.ReactNode; onClick?: () => void; }> = ({ label, active, icon, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all whitespace-nowrap flex-shrink-0
-      ${active ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white border-transparent shadow-sm" : "bg-white/80 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/80"}`}
-  >
-    {icon && <span className="w-3.5 h-3.5 flex items-center justify-center">{icon}</span>}
-    <span>{label}</span>
-  </button>
-);
+  const populares = useMemo(() => {
+    return STORES.filter(s => s.rating >= 4.5 && s.id !== 'grupo-esquematiza').sort((a, b) => b.rating - a.rating);
+  }, []);
 
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-    <div className="flex items-center justify-between mb-3 px-1">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-          <Icon size={18} strokeWidth={2.5} />
-        </div>
-        <div>
-          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-        </div>
-      </div>
-      <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
-    </div>
-);
-
-const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-    const newArrivals = useMemo(() => stores.filter(s => ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
-    if (newArrivals.length === 0) return null;
-    return (
-      <div className="bg-white dark:bg-gray-950 pt-2 mb-6">
-        <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
-        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
-          {newArrivals.map((store) => (
-            <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
-              <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-              <div className="absolute inset-0 p-4 flex flex-col justify-end text-left">
-                <span className="w-fit bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 shadow-lg">Novo</span>
-                <h3 className="text-sm font-black text-white leading-tight mb-0.5 truncate drop-shadow-md">{store.name}</h3>
-                <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest truncate">{store.category}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-};
-
-const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const suggestions = useMemo(() => stores.filter(s => ['f-3', 'f-5', 'f-8', 'f-12', 'f-15'].includes(s.id)), [stores]);
-  if (suggestions.length === 0) return null;
-  return (
-    <div className="bg-white dark:bg-gray-950 py-4 mb-6">
-      <SectionHeader icon={Lightbulb} title="Sugestões" subtitle="Para você" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
-        {suggestions.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left">
-            <div className="relative h-32 overflow-hidden">
-              <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-            </div>
-            <div className="p-5">
-              <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest block mb-1">{store.category}</span>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-2 truncate">{store.name}</h3>
-              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-400 mt-0.5">
-                <MapPin size={12} />
-                <span className="text-[10px] font-bold uppercase tracking-tight">{store.neighborhood || store.distance}</span>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const EmAltaNaCidade: React.FC<{ stores: Store[]; onStoreClick?: (store: Store) => void; onNavigate: (v: string) => void }> = ({ stores, onStoreClick, onNavigate }) => {
-  const trending = useMemo(() => stores.filter(s => ['f-1', 'f-2'].includes(s.id)), [stores]);
-  if (trending.length < 2) return null;
-  return (
-    <div className="bg-white dark:bg-gray-950 py-4 mb-8">
-      <SectionHeader icon={TrendingUp} title="Em alta" subtitle="O bairro ama" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-4">
-        {trending.map((store, idx) => (
-          <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className={`flex-1 rounded-[2.5rem] p-6 flex flex-col items-center text-center transition-all active:scale-[0.98] shadow-sm ${idx === 0 ? 'bg-rose-50/70 dark:bg-rose-900/20' : 'bg-blue-50/70 dark:bg-blue-900/20'}`}>
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-white shadow-xl border-4 border-white mb-5">
-              <img src={store.logoUrl || store.image || getFallbackStoreImage(store.id)} alt="" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight mb-1">{store.name}</h3>
-            <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">{store.category}</p>
-            <div className="mt-auto bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-lg">
-              Explorar <ArrowRight size={10} strokeWidth={4} />
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; stores: Store[]; onStoreClick: (store: Store) => void; }> = ({ title, subtitle, stores, onStoreClick }) => {
-  const isMobile = useMediaQuery("(max-width: 640px)");
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const checkScrollPosition = (container: HTMLDivElement | null) => {
-    if (!container) return;
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 4);
+  const handleCategoryClick = (categoryName: string) => {
+    // Redireciona para a busca geral ou categoria específica
+    onNavigate('all_categories');
   };
 
-  useEffect(() => {
-    const container = document.querySelector(`[data-section="${title}"]`) as HTMLDivElement | null;
-    if (!container) return;
-    checkScrollPosition(container);
-    const handleScroll = () => checkScrollPosition(container);
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [title, stores.length]);
-
-  const scroll = (direction: "left" | "right") => {
-    const container = document.querySelector(`[data-section="${title}"]`) as HTMLDivElement | null;
-    if (!container) return;
-    const scrollAmount = container.clientWidth * 0.7;
-    container.scrollTo({ left: direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount, behavior: "smooth" });
-  };
-
-  if (!stores.length) return null;
-
   return (
-    <section className="mb-6">
-      <div className="flex items-center justify-between mb-2 px-0.5">
-        <div>
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h2>
-          {subtitle && <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{subtitle}</p>}
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500">
+      
+      {/* HEADER BUSCA */}
+      <div className="bg-[#1E5BFF] rounded-b-[3rem] px-6 pt-12 pb-10 shadow-lg">
+        <h2 className="text-white font-black text-2xl uppercase tracking-tighter mb-6 leading-tight">
+          O que você quer <br/>descobrir hoje?
+        </h2>
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={20} />
+          <input 
+            type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar lojas, pratos, serviços..."
+            className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-white/50 outline-none focus:ring-4 focus:ring-white/10 transition-all shadow-xl"
+          />
         </div>
-        {!isMobile && (
-          <div className="flex items-center gap-1">
-            <button onClick={() => scroll("left")} disabled={!canScrollLeft} className={`w-7 h-7 rounded-full border flex items-center justify-center text-gray-400 ${canScrollLeft ? "hover:bg-gray-50 border-gray-200" : "opacity-40 border-gray-100"}`}><ChevronLeft className="w-3.5 h-3.5" /></button>
-            <button onClick={() => scroll("right")} disabled={!canScrollRight} className={`w-7 h-7 rounded-full border flex items-center justify-center text-gray-400 ${canScrollRight ? "hover:bg-gray-50 border-gray-200" : "opacity-40 border-gray-100"}`}><ChevronRight className="w-3.5 h-3.5" /></button>
-          </div>
-        )}
-      </div>
-      <div data-section={title} className="flex gap-3 overflow-x-auto pb-1 no-scrollbar -mx-0.5 px-0.5">
-        {stores.map((store) => (
-          <button key={store.id} onClick={() => onStoreClick(store)} className="min-w-[250px] max-w-[260px] bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden text-left hover:-translate-y-0.5 transition-all duration-200">
-            <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
-              <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt={store.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
-                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  <span className="text-[11px] font-semibold text-white">{store.rating?.toFixed(1) || "Novo"}</span>
-                </div>
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm">
-                  <MapPin className="w-3 h-3 text-white/90" />
-                  <span className="text-[10px] text-white/90">{store.distance || "Perto de você"}</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-3">
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <div className="min-w-0">
-                  <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{store.name}</h3>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{store.category || "Categoria em destaque"}</p>
-                </div>
-                {store.verified && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-[9px] font-semibold text-white shadow-sm"><BadgeCheck className="w-3 h-3" />Localizei</span>}
-              </div>
-              <div className="flex items-center gap-1 mt-1"><span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" /><span className="text-[10px] font-medium text-emerald-600">Aberto agora</span></div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-};
-
-export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, onStoreClick, onFilterClick, onNavigate }) => {
-  const { location } = useUserLocation();
-  const [sortOption, setSortOption] = useState<"nearby" | "topRated" | null>(null);
-
-  const filteredStores = useMemo(() => {
-    let list = [...stores];
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(s => s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q));
-    }
-    if (sortOption === "topRated") list.sort((a, b) => b.rating - a.rating);
-    return list;
-  }, [stores, searchQuery, sortOption]);
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 pb-24">
-      <div className="px-4 py-4 flex gap-2 overflow-x-auto no-scrollbar items-center">
-        <button onClick={onFilterClick} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all whitespace-nowrap flex-shrink-0 shadow-sm"><Filter className="w-3.5 h-3.5" />Filtros</button>
-        {quickFilters.map((f) => (
-          <CategoryChip key={f.id} label={f.label} active={sortOption === f.id} onClick={() => { if (f.id === 'top_rated') setSortOption('topRated'); }} />
-        ))}
       </div>
 
-      <div className="px-4 space-y-6">
-        <NovidadesDaSemana stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      <div className="px-5 mt-8 space-y-10">
         
-        <SugestoesParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+        {/* SEÇÃO 1: NOVIDADES (Carrossel Horizontal) */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600">
+              <Sparkles size={16} fill="currentColor" />
+            </div>
+            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Novidades no Bairro</h3>
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-2">
+            {novidades.map(store => (
+              <button 
+                key={store.id} 
+                onClick={() => onStoreClick(store)}
+                className="flex-shrink-0 w-40 snap-center group"
+              >
+                <div className="aspect-[4/5] bg-gray-100 dark:bg-gray-800 rounded-[2rem] overflow-hidden mb-3 shadow-md relative border border-gray-100 dark:border-gray-800">
+                  <img src={store.image || store.logoUrl} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" alt={store.name} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  <div className="absolute bottom-3 left-3 right-3 text-left">
+                    <p className="text-[10px] font-black text-white uppercase tracking-tighter line-clamp-1">{store.name}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
 
-        <EmAltaNaCidade stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+        {/* SEÇÃO 2: SERVIÇOS ESSENCIAIS (Grid) */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+             <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600">
+              <Star size={16} fill="currentColor" />
+            </div>
+            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Serviços Essenciais</h3>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {ESSENTIAL_SERVICES.map(service => (
+              <button 
+                key={service.id}
+                onClick={() => handleCategoryClick(service.category)}
+                className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 active:scale-95 transition-all group"
+              >
+                <div className={`w-10 h-10 rounded-xl ${service.color} flex items-center justify-center text-white shadow-lg shrink-0`}>
+                  <service.icon size={20} strokeWidth={2.5} />
+                </div>
+                <span className="text-xs font-black text-gray-700 dark:text-gray-200 uppercase tracking-tighter">{service.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
 
-        <HorizontalStoreSection title="Perto de você" stores={filteredStores.slice(0, 5)} onStoreClick={onStoreClick} />
-        <HorizontalStoreSection title="Mais bem avaliados" stores={filteredStores.filter(s => s.rating >= 4.5)} onStoreClick={onStoreClick} />
+        {/* SEÇÃO 3: MAIS POPULARES (Lista Vertical) */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+               <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600">
+                <Star size={16} fill="currentColor" />
+              </div>
+              <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Mais Populares</h3>
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{populares.length} locais</span>
+          </div>
+
+          <div className="space-y-3">
+            {populares.map(store => (
+              <button 
+                key={store.id} 
+                onClick={() => onStoreClick(store)}
+                className="w-full bg-white dark:bg-gray-900 p-4 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 active:scale-[0.98] transition-all group"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700 shadow-inner">
+                  <img src={store.logoUrl || store.image} className="w-full h-full object-cover" alt={store.name} />
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+                    {store.verified && <BadgeCheck size={14} className="text-[#1E5BFF] fill-blue-50 dark:fill-gray-900" />}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-0.5 rounded-lg border border-yellow-100 dark:border-yellow-800/50">
+                      <Star size={10} className="text-yellow-500 fill-yellow-500" />
+                      <span className="text-[10px] font-black text-yellow-700 dark:text-yellow-400">{store.rating}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight truncate">
+                      {store.category} • {store.neighborhood}
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded-full text-gray-200 group-hover:text-[#1E5BFF] transition-colors">
+                  <ChevronRight size={16} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+
       </div>
     </div>
   );
