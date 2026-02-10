@@ -205,6 +205,11 @@ const App: React.FC = () => {
   const handleSelectJob = (job: Job) => { handleNavigate('job_detail', { job }); };
   
   const handleSelectCategory = (category: Category) => {
+    if (category.slug === 'all_categories') {
+      handleNavigate('all_categories');
+      return;
+    }
+
     setSelectedCategory(category);
     
     if (category.id === 'cat-saude') {

@@ -168,8 +168,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               onClick={() => onSelectCategory(cat)}
               className="flex flex-col items-center gap-1.5 flex-shrink-0 snap-start active:scale-95 transition-all"
             >
-              <div className={`w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center ${cat.color} border border-white/20`}>
-                {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white", strokeWidth: 2.5 })}
+              <div className={`w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center ${cat.color} ${cat.id === 'cat-more' ? 'border border-gray-200 dark:border-gray-700' : 'border border-white/20'}`}>
+                {React.cloneElement(cat.icon as any, { 
+                  className: `w-6 h-6 ${cat.id === 'cat-more' ? 'text-gray-500 dark:text-gray-400' : 'text-white'}`, 
+                  strokeWidth: 3 
+                })}
               </div>
               <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
                 {cat.name}
