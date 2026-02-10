@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
 import { 
   Compass, 
@@ -9,7 +9,6 @@ import {
   CheckCircle2, 
   Zap, 
   Loader2, 
-  Hammer, 
   Plus, 
   Home as HomeIcon,
   MessageSquare, 
@@ -26,6 +25,7 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
+import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
 
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
@@ -103,32 +103,10 @@ interface HomeFeedProps {
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory, onStoreClick, stores, user, userRole }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const { currentNeighborhood } = useNeighborhood();
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
+  const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
 
-  const itemsPerPage = 8; 
-  const orderedCategories = useMemo(() => {
-    const firstPageIds = ['cat-saude', 'cat-fashion', 'cat-pets', 'cat-pro', 'cat-beauty', 'cat-autos', 'cat-sports', 'cat-edu'];
-    const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
-    const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
-    return [...firstPage, ...remaining];
-  }, []);
-
-  const handleScroll = () => {
-    if (!categoryScrollRef.current) return;
-    const scrollLeft = categoryScrollRef.current.scrollLeft;
-    const width = categoryScrollRef.current.clientWidth;
-    setCurrentCategoryPage(Math.round(scrollLeft / width));
-  };
-
-  const categoryPages = useMemo(() => {
-    const pages = [];
-    for (let i = 0; i < orderedCategories.length; i += itemsPerPage) {
-      pages.push(orderedCategories.slice(i, i + itemsPerPage));
-    }
-    return pages;
-  }, [orderedCategories]);
+  // Seleciona exatamente as 5 primeiras categorias
+  const topCategories = useMemo(() => CATEGORIES.slice(0, 5), []);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
@@ -139,31 +117,39 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         </section>
       )}
 
-      <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
-        <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={handleScroll}>
-          {categoryPages.map((pageCategories, pageIndex) => (
-            <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-              <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-4">
-                {pageCategories.map((cat, index) => (
-                  <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                    <div className={`w-full max-w-[84px] aspect-square rounded-[25px] shadow-sm flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                      <div className="flex-1 flex items-center justify-center w-full">
-                        {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                      </div>
-                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-0.5 rounded-b-[20px] -mx-2 -mb-2">
-                        <span className="block w-full text-[8px] font-black text-white text-center uppercase tracking-tight leading-none py-0.5 truncate px-1">{cat.name}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+      {/* SEÇÃO DE CATEGORIAS REPROJETADA - LINHA ÚNICA E COMPACTA */}
+      <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-2 relative z-10 px-4">
+        <div className="flex items-center justify-between gap-1">
+          {topCategories.map((cat) => (
+            <button 
+              key={cat.id} 
+              onClick={() => onSelectCategory(cat)} 
+              className="flex flex-col items-center gap-1.5 active:scale-95 transition-all w-[15%]"
+            >
+              <div className={`w-14 h-14 rounded-2xl shadow-sm flex items-center justify-center ${cat.color} border border-white/20 transition-transform`}>
+                {React.cloneElement(cat.icon as any, { 
+                  className: "w-6 h-6 text-white drop-shadow-sm", 
+                  strokeWidth: 2.5 
+                })}
               </div>
+              <span className="text-[9px] font-bold text-gray-600 dark:text-gray-300 text-center uppercase tracking-tighter leading-tight truncate w-full px-0.5">
+                {cat.name}
+              </span>
+            </button>
+          ))}
+
+          {/* BOTÃO FIXO + MAIS */}
+          <button 
+            onClick={() => setIsMoreModalOpen(true)} 
+            className="flex flex-col items-center gap-1.5 active:scale-95 transition-all w-[15%]"
+          >
+            <div className="w-14 h-14 rounded-2xl shadow-sm flex items-center justify-center bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <Plus className="w-6 h-6 text-gray-500 dark:text-gray-400" strokeWidth={3} />
             </div>
-          ))}
-        </div>
-        <div className="flex justify-center gap-1.5 pb-6 pt-2">
-          {categoryPages.map((_, idx) => (
-            <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />
-          ))}
+            <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 text-center uppercase tracking-tighter leading-tight">
+              + Mais
+            </span>
+          </button>
         </div>
       </section>
 
@@ -221,6 +207,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         </div>
         <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
       </div>
+
+      <MoreCategoriesModal 
+        isOpen={isMoreModalOpen} 
+        onClose={() => setIsMoreModalOpen(false)} 
+        onSelectCategory={(cat) => {
+            onSelectCategory(cat);
+            setIsMoreModalOpen(false);
+        }} 
+      />
     </div>
   );
 };
