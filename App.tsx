@@ -336,7 +336,7 @@ const App: React.FC = () => {
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
-                    {activeTab === 'search' && <SearchView onStoreClick={handleSelectStore} onClassifiedClick={(item) => handleNavigate('classified_detail', { item })} />}
+                    {activeTab === 'search' && <SearchView onStoreClick={handleSelectStore} onClassifiedClick={(item) => handleNavigate('classified_detail', { item })} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     {activeTab === 'feature_unavailable' && <FeatureUnavailableView onBack={() => handleNavigate('home')} />}
                     

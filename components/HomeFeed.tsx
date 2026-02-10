@@ -34,9 +34,7 @@ import {
   Scissors,
   BookOpen,
   Lightbulb,
-  User as UserIcon,
-  Search,
-  Wrench
+  User as UserIcon
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -51,10 +49,10 @@ import { MoreCategoriesModal } from './MoreCategoriesModal';
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Rua/Comércio
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas/Comunidade
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado/Loja
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço/Trabalho
   'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800', // Parque/Verde
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Moda/Cotidiano
   'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', // Escritório/Pro
@@ -177,35 +175,38 @@ const COUPONS_MOCK = [
   {
     id: 'cp-1',
     storeName: 'Bibi Lanches',
-    initials: 'BL',
-    badgeColor: 'bg-orange-600',
+    logo: 'https://ui-avatars.com/api/?name=Bibi+Lanches&background=FF6B00&color=fff',
     discount: '15% OFF',
     storeId: 'f-1'
   },
   {
     id: 'cp-2',
     storeName: 'Studio Hair',
-    initials: 'SH',
-    badgeColor: 'bg-pink-600',
+    logo: 'https://ui-avatars.com/api/?name=Studio+Hair&background=BC1F66&color=fff',
     discount: 'R$ 20,00',
     storeId: 'f-2'
   },
   {
     id: 'cp-3',
     storeName: 'Pizzaria do Zé',
-    initials: 'PZ',
-    badgeColor: 'bg-green-600',
+    logo: 'https://ui-avatars.com/api/?name=Pizzaria+Ze&background=22C55E&color=fff',
     discount: 'Entrega Grátis',
     storeId: 'f-5'
   },
   {
     id: 'cp-4',
     storeName: 'Pet Shop Alegria',
-    initials: 'PA',
-    badgeColor: 'bg-blue-500',
+    logo: 'https://ui-avatars.com/api/?name=Pet+Alegria&background=0EA5E9&color=fff',
     discount: '10% OFF',
     storeId: 'f-3'
   },
+  {
+    id: 'cp-5',
+    storeName: 'Academia Fit',
+    logo: 'https://ui-avatars.com/api/?name=Academia+Fit&background=4F46E5&color=fff',
+    discount: '1ª Mês Grátis',
+    storeId: 'f-8'
+  }
 ];
 
 interface Talent {
@@ -563,50 +564,49 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
   };
 
   return (
-    <div className="py-6">
-       <div className="flex items-center justify-between mb-4 px-5">
+    <div className="py-2">
+       <div className="flex items-center justify-between mb-1 px-5">
          <div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">CUPONS</h2>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">PARA VOCÊ ECONOMIZAR</p>
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
          </div>
-         <button onClick={handleCouponClick} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">VER TODOS</button>
+         <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-4">
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-44 snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
             >
-               {/* Floating Badges based on Image */}
-               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
-                  <div className={`w-12 h-12 rounded-full ${coupon.badgeColor} flex items-center justify-center text-white font-black text-sm border-4 border-white dark:border-gray-950 shadow-lg group-hover:scale-110 transition-transform`}>
-                     {coupon.initials}
+               {/* Floating Logo */}
+               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
+                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
 
-               {/* Card Body - Exactly as Image */}
-               <div className="w-full bg-[#1E5BFF] rounded-3xl p-5 pt-10 flex flex-col items-center shadow-xl shadow-blue-500/10 relative active:scale-[0.97] transition-all">
+               {/* Standardized Card Body - Updated Background to Brand Blue */}
+               <div className="w-full h-40 bg-[#1E5BFF] rounded-2xl shadow-sm border border-white/10 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
                   
-                  {/* Left Notch */}
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
-                  {/* Right Notch */}
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                  {/* Side Holes */}
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10"></div>
 
-                  <div className="flex flex-col items-center justify-center text-center space-y-1">
-                      <span className="text-[9px] font-black text-blue-100/60 uppercase tracking-[0.2em]">CUPOM</span>
-                      <span className="text-xl font-black text-white leading-tight">
+                  {/* Content - flex-1 and overflow-hidden ensures it stays within standard dimensions */}
+                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10 overflow-hidden">
+                      <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1 shrink-0">Cupom</span>
+                      <span className="text-lg font-black text-white leading-none tracking-tight line-clamp-2">
                          {coupon.discount}
                       </span>
                   </div>
 
-                  {/* Dashed Line */}
-                  <div className="w-full border-t-2 border-dashed border-white/20 my-4"></div>
-
-                  <div className="w-full">
-                     <button className="w-full bg-white text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm hover:bg-blue-50 transition-colors">
-                         PEGAR CUPOM
+                  {/* CTA - Changed to White Background for contrast */}
+                  <div className="w-full z-10 mt-auto">
+                     <button className="w-full bg-white text-[#1E5BFF] text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden shrink-0">
+                         <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-[#1E5BFF]/20"></div>
+                         Pegar cupom
                      </button>
                   </div>
                </div>
@@ -685,21 +685,6 @@ interface HomeFeedProps {
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
 }
-// FIX: Define SectionHeader component locally to resolve "Cannot find name" error.
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-          <Icon size={18} strokeWidth={2.5} />
-        </div>
-        <div>
-          <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-        </div>
-      </div>
-      <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
-    </div>
-);
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
@@ -716,29 +701,47 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
   const itemsPerPage = 8; 
   
+  // State for the "More" modal
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
   const orderedCategories = useMemo(() => {
+    // Definindo as 8 categorias principais para a primeira página
     const firstPageIds = [
-      'cat-servicos', 'cat-alimentacao', 'cat-restaurantes', 
-      'cat-mercados', 'cat-farmacias', 'cat-autos', 'cat-moda', 'cat-beleza'
+      'cat-servicos', 
+      'cat-alimentacao', 
+      'cat-restaurantes', 
+      'cat-mercados', 
+      'cat-farmacias', 
+      'cat-autos', 
+      'cat-moda', 
+      'cat-beleza'
     ];
+    
     const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
     const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
     return [...firstPage, ...remaining];
   }, []);
 
   const categoryPages = useMemo(() => {
+    // Configurar para 2 páginas: 15 categorias + botão Mais (total 16 itens, 8 por página)
     const visibleCategories = orderedCategories.slice(0, 15);
+    
+    // Adicionar o botão "Mais" como último item
     const moreItem: Category = { 
-        id: 'more-trigger', name: 'Mais', slug: 'more', 
-        icon: <Plus />, color: 'bg-gray-100 dark:bg-gray-800' 
+        id: 'more-trigger', 
+        name: 'Mais', 
+        slug: 'more', 
+        icon: <Plus />, 
+        color: 'bg-gray-100 dark:bg-gray-800' 
     };
+    
     const allItems = [...visibleCategories, moreItem];
+    
     const pages = [];
     for (let i = 0; i < allItems.length; i += itemsPerPage) {
         pages.push(allItems.slice(i, i + itemsPerPage));
     }
+    
     return pages;
   }, [orderedCategories]);
 
@@ -756,12 +759,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
                 <div className="grid grid-cols-4 gap-1.5">
                     {pageCategories.map((cat, index) => {
+                        // RENDERIZAÇÃO ESPECIAL PARA O BOTÃO "MAIS"
                         if (cat.id === 'more-trigger') {
                             return (
-                                <button key={cat.id} onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                                <button 
+                                   key={cat.id} 
+                                   onClick={() => setIsMoreCategoriesOpen(true)}
+                                   className="flex flex-col items-center group active:scale-95 transition-all w-full"
+                                >
                                     <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
+                                       {/* Styling to look like "Add/More" */}
                                        <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
+                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-50" strokeWidth={2.5} />
                                        </div>
                                        <span className="block w-full text-[8.5px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-none truncate">
                                          Mais
@@ -771,6 +780,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             );
                         }
 
+                        // RENDERIZAÇÃO PADRÃO DE CATEGORIA
                         return (
                         <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
                             <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
@@ -799,10 +809,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
       
-      {isFeatureActive('coupons') && <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />}
-      
+      {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
+      <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
+
+      {/* ACONTECENDO AGORA BLOCK */}
       <HappeningNowSection onNavigate={onNavigate} />
 
+      {/* NOVO POSICIONAMENTO: BLOCO DE ORÇAMENTOS */}
       {isFeatureActive('service_chat') && (
         <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="px-5 mb-4">
@@ -814,10 +827,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
+      {/* NOVO POSICIONAMENTO: ACHADOS E PERDIDOS */}
       <LostAndFoundSection onItemClick={setSelectedLostItem} />
 
+      {/* NOVO POSICIONAMENTO: GUIAS DO BAIRRO */}
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
+      {/* NOVO POSICIONAMENTO: EXPLORAR BAIRRO */}
       {isFeatureActive('explore_guide') && (
         <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
             <div className="px-5">
@@ -830,10 +846,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       )}
 
+      {/* TALENTOS DO BAIRRO BLOCK (MOVIDO PARA O FINAL) */}
       <TalentsSection />
 
+      {/* JPA CONVERSA (MOVIDO PARA O FINAL) */}
       {isFeatureActive('community_feed') && (
-        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+        <section className="bg-white dark:bg-gray-900 pt-2 pb-6 relative px-5">
             <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
             <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
         </section>
@@ -884,3 +902,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     </div>
   );
 };
+
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+  <div className="flex items-center justify-between mb-3">
+    <div className="flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm"><Icon size={18} strokeWidth={2.5} /></div><div><h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2><p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p></div></div>
+    <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
+  </div>
+);
