@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, X, Mic, Bell, Plus, LayoutGrid } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
@@ -79,6 +79,26 @@ export const Header: React.FC<HeaderProps> = ({
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isListening, setIsListening] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  // Monitoramento do scroll para colapsar o header
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.overflow-y-auto');
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const scrollY = scrollContainer.scrollTop;
+      if (scrollY > 40) {
+        setIsCollapsed(true);
+      } else {
+        setIsCollapsed(false);
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const checkNotifs = () => {
@@ -130,16 +150,18 @@ export const Header: React.FC<HeaderProps> = ({
   }, [currentNeighborhood]);
 
   const topCategories = useMemo(() => {
-      // Retorna as 5 principais categorias para a faixa
       return CATEGORIES.slice(0, 5);
   }, []);
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[2.5rem] pb-6">
+        <div 
+          ref={headerRef}
+          className={`sticky top-0 z-40 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[2.5rem] transition-all duration-300 ease-in-out ${isCollapsed ? 'pb-2 rounded-b-[1.5rem]' : 'pb-6'}`}
+        >
             <div className="max-w-md mx-auto flex flex-col relative">
-                {/* LINHA 1: TOPBAR */}
-                <div className="flex items-center justify-between px-5 pt-5 pb-2">
+                {/* LINHA 1: TOPBAR (SOME AO SCROLL) */}
+                <div className={`flex items-center justify-between px-5 pt-5 pb-2 transition-all duration-300 overflow-hidden ${isCollapsed ? 'max-h-0 opacity-0 -translate-y-full' : 'max-h-20 opacity-100 translate-y-0'}`}>
                     <button onClick={toggleSelector} className="flex items-center gap-2 active:scale-95 transition-transform">
                         <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md border border-white/10 shadow-sm text-white">
                             <MapPin className="w-4 h-4" fill="currentColor" />
@@ -181,8 +203,8 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* LINHA 2: BUSCA */}
-                <div className="px-5 pt-3 pb-4">
+                {/* LINHA 2: BUSCA (SEMPRE VISÍVEL) */}
+                <div className={`px-5 transition-all duration-300 ${isCollapsed ? 'pt-4 pb-2' : 'pt-3 pb-4'}`}>
                     <div className="relative group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <input 
@@ -190,7 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
                           value={searchTerm} 
                           onChange={(e) => onSearchChange(e.target.value)} 
                           placeholder={dynamicPlaceholder} 
-                          className="block w-full pl-12 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-4 shadow-xl transition-all" 
+                          className={`block w-full pl-12 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-xl transition-all ${isCollapsed ? 'py-3' : 'py-4'}`} 
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                           {searchTerm && (
@@ -245,9 +267,9 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* LINHA 3: CATEGORIAS (HORIZONTAL STRIP) */}
+                {/* LINHA 3: CATEGORIAS (HORIZONTAL STRIP - SOME AO SCROLL) */}
                 {activeTab === 'home' && (
-                    <div className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5 pt-2">
+                    <div className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-5 transition-all duration-300 overflow-hidden ${isCollapsed ? 'max-h-0 opacity-0 translate-y-4' : 'max-h-24 opacity-100 translate-y-0 pt-2'}`}>
                         {topCategories.map((cat) => (
                             <button 
                                 key={cat.id} 

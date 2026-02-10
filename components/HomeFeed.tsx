@@ -78,8 +78,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* CONTEÚDO PRINCIPAL (INICIANDO LOGO APÓS O HEADER FIXO) */}
-      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] rounded-t-[2.5rem] pt-6">
+      {/* CONTEÚDO PRINCIPAL (COM MARGEM PARA O HEADER) */}
+      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] rounded-t-[2.5rem] pt-8 -mt-4">
         
         {/* CARROSSEL UNIFICADO */}
         {isFeatureActive('banner_highlights') && (
