@@ -587,9 +587,9 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                      <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
-               <div className="w-full h-40 bg-brand-blue rounded-2xl shadow-lg shadow-blue-500/30 border border-blue-400 dark:border-blue-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950"></div>
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950"></div>
+               <div className="w-full h-40 bg-brand-blue rounded-2xl shadow-lg shadow-blue-500/30 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950"></div>
                   
                   <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
                       <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Cupom</span>
