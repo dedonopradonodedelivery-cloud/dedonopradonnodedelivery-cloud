@@ -1,6 +1,6 @@
 
-import React, { useMemo } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, X } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, X, Mic, Bell } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Store, Category } from '../types';
 import { CATEGORIES } from '../constants';
@@ -8,11 +8,11 @@ import { CATEGORIES } from '../constants';
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
-  onAuthClick: () => void;
+  onNotificationClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onNavigate: (tab: string) => void;
+  onNavigate: (view: string, data?: any) => void;
   activeTab: string;
   userRole: "cliente" | "lojista" | null;
   onOpenMerchantQr?: () => void; 
@@ -28,16 +28,24 @@ const NeighborhoodSelectorModal: React.FC = () => {
     const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
     if (!isSelectorOpen) return null;
     return (
-        <div className="fixed inset-0 z-[1100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={toggleSelector}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                        <MapPin className="w-5 h-5 text-[#1E5BFF]" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none">Localização</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">Filtrar conteúdo por bairro</p>
+                    </div>
+                </div>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
                         {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
                     </button>
-                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
                     {NEIGHBORHOODS.map(hood => (
                         <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                             <span>{hood}</span>
@@ -51,11 +59,11 @@ const NeighborhoodSelectorModal: React.FC = () => {
 };
 
 export const Header: React.FC<HeaderProps> = ({
-  onAuthClick, 
   user,
   searchTerm,
   onSearchChange,
   onNavigate,
+  onNotificationClick,
   activeTab,
   stores = [],
   onStoreClick,
@@ -63,8 +71,42 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher
 }) => {
+  // FIX: Added setNeighborhood to the destructured properties from useNeighborhood()
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
-  const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isListening, setIsListening] = useState(false);
+
+  useEffect(() => {
+    const checkNotifs = () => {
+      const saved = localStorage.getItem('app_notifications');
+      if (saved) {
+        const notifs = JSON.parse(saved);
+        setUnreadCount(notifs.filter((n: any) => !n.read).length);
+      }
+    };
+    checkNotifs();
+    const interval = setInterval(checkNotifs, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const startVoiceSearch = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta pesquisa por voz.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onSearchChange(transcript);
+      setIsListening(false);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognition.start();
+  }, [onSearchChange]);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -83,6 +125,8 @@ export const Header: React.FC<HeaderProps> = ({
     return `O que você busca em ${currentNeighborhood}?`;
   }, [currentNeighborhood]);
 
+  const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
+
   return (
     <>
         <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[2.5rem] pb-2">
@@ -95,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="text-left flex flex-col">
                             <span className="text-[10px] text-white/60 font-black uppercase leading-none tracking-widest">Localização</span>
                             <div className="flex items-center gap-1">
-                                <span className="text-sm font-black text-white leading-tight truncate max-w-[140px]">
+                                <span className="text-sm font-black text-white leading-tight truncate max-w-[120px]">
                                     {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
                                 </span>
                                 <ChevronDown className="w-3.5 h-3.5 text-white/60" />
@@ -110,7 +154,17 @@ export const Header: React.FC<HeaderProps> = ({
                                 <span className="text-[10px] font-bold uppercase">{viewMode}</span>
                             </button>
                         )}
-                        <button onClick={onAuthClick} className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1 pl-3 rounded-full border border-white/10 shadow-sm active:scale-95 transition-all">
+                        
+                        <button onClick={onNotificationClick} className="relative p-2.5 bg-white/10 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90">
+                            <Bell size={22} />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg animate-in zoom-in duration-300">
+                                    <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                </span>
+                            )}
+                        </button>
+
+                        <button onClick={() => onNavigate('profile')} className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1 pl-3 rounded-full border border-white/10 shadow-sm active:scale-95 transition-all">
                             <span className="text-[10px] font-black text-white uppercase tracking-widest">{user ? 'Perfil' : 'Entrar'}</span>
                             <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-sm border border-white/20">
                                 {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4" />}
@@ -129,14 +183,16 @@ export const Header: React.FC<HeaderProps> = ({
                           placeholder={dynamicPlaceholder} 
                           className="block w-full pl-12 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-4 shadow-xl transition-all" 
                         />
-                        {searchTerm && (
-                            <button 
-                                onClick={() => onSearchChange('')}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                            >
-                                <X size={18} />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                          {searchTerm && (
+                            <button onClick={() => onSearchChange('')} className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors">
+                              <X size={16} />
                             </button>
-                        )}
+                          )}
+                          <button onClick={startVoiceSearch} className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-50 text-white animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF]'}`}>
+                            <Mic size={18} strokeWidth={isListening ? 3 : 2} />
+                          </button>
+                        </div>
 
                         {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
                             <div className="absolute top-[calc(100%+12px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
