@@ -147,8 +147,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="w-full bg-[#1E5BFF] dark:bg-blue-950">
-            <div className="max-w-md mx-auto h-[60px] flex items-center px-4">
+        {/* BLOCO AZUL FIXO UNIFICADO (CAMADA 1 + BUSCA) */}
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#1E5BFF] dark:bg-blue-950 max-w-md mx-auto">
+            {/* Linha 1: Branding e Botões */}
+            <div className="h-[60px] flex items-center px-5">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10 shadow-sm">
                          <MapPin size={18} fill="currentColor" />
@@ -183,11 +185,9 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                 </div>
             </div>
-        </div>
 
-        {/* SOMENTE A BARRA DE BUSCA É STICKY */}
-        <div className="sticky top-0 z-[100] w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md">
-            <div className="max-w-md mx-auto px-4 pb-4 pt-1">
+            {/* Linha 2: Barra de Busca (Mesmo Azul, sem arredondamentos inferiores) */}
+            <div className="px-5 pb-4">
                 <div className="relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 

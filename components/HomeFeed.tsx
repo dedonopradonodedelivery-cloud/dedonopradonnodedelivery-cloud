@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Store, Category } from '@/types';
 import { 
   Compass, 
@@ -89,6 +89,26 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 }) => {
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
+  const [categoryTranslateY, setCategoryTranslateY] = useState(0);
+
+  // Monitoramento de Scroll para Stage A e B
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const triggerThreshold = 50; // Inicia o Estágio B após 50px de scroll (metade das categorias aproximada)
+      
+      if (scrollY > triggerThreshold) {
+        // Estágio B: Categorias começam a subir sincronizadas
+        setCategoryTranslateY(-(scrollY - triggerThreshold));
+      } else {
+        // Estágio A: Categorias ficam paradas
+        setCategoryTranslateY(0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const topCategories = useMemo(() => {
     const statsStr = localStorage.getItem(STATS_KEY);
@@ -119,9 +139,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* CAMADA 2 — CATEGORIAS (VIVA NO AZUL) */}
+      {/* ESPAÇADOR PARA O HEADER FIXO (Topo + Busca = 120px) */}
+      <div className="h-[120px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
+
+      {/* CAMADA 2 — CATEGORIAS (VIVA NO AZUL UNIFICADO) 
+          Aplica transform dinâmico para o Estágio B
+      */}
       {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-2 pb-6 px-5 overflow-hidden">
+        <section 
+            className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-2 pb-8 px-5 overflow-hidden sticky top-[120px] z-10"
+            style={{ transform: `translateY(${categoryTranslateY}px)` }}
+        >
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-nowrap">
                 {topCategories.map((cat) => (
                     <button key={cat.id} onClick={() => trackCategoryClick(cat)} className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all">
@@ -141,8 +169,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (BRANCO ARREDONDADO — SOBE POR CIMA) */}
-      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-15px_35px_rgba(0,0,0,0.15)] rounded-t-[2.5rem]">
+      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (BRANCO ARREDONDADO — PASSA POR CIMA) */}
+      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-15px_35px_rgba(0,0,0,0.15)] rounded-t-[2.5rem] -mt-2">
         
         {/* CARROSSEL UNIFICADO */}
         {isFeatureActive('banner_highlights') && (
