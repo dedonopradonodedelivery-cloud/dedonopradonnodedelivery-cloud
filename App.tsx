@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { MenuView } from '@/components/MenuView';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 import { ServicesView } from '@/components/ServicesView';
-import { StoreAreaView } from '@/components/StoreAreaView';
+import { StoreAreaView } from '@/StoreAreaView';
 import { ClassifiedsView } from '@/components/ClassifiedsView';
 import { ClassifiedSearchResultsView } from '@/components/ClassifiedSearchResultsView';
 import { RealEstateView } from '@/components/RealEstateView';
@@ -20,6 +20,7 @@ import { JobsView } from '@/components/JobsView';
 import { JobDetailView } from '@/components/JobDetailView';
 import { JobWizard } from '@/components/JobWizard';
 import { PlanSelectionView } from '@/components/PlanSelectionView';
+import { AdoptionView } from '@/components/AdoptionView';
 import { DonationsView } from '@/components/DonationsView';
 import { DesapegaView } from '@/components/DesapegaView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
@@ -52,7 +53,7 @@ import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
-import { MapPin, X, Palette, AlertCircle } from 'lucide-react';
+import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -62,30 +63,15 @@ import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhood
 import { MerchantPanel } from '@/components/MerchantPanel';
 import { UserProfileFullView } from '@/components/UserProfileFullView';
 import { EditProfileView } from '@/components/EditProfileView';
-import { useFeatures, FeatureKey } from '@/contexts/FeatureContext';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
-const FeatureUnavailableView: React.FC<{ onBack: () => void }> = ({ onBack }) => (
-    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-6 text-[#1E5BFF]">
-            <AlertCircle size={40} />
-        </div>
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Acesso Restrito</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs leading-relaxed mb-10">
-            Esta funcionalidade não está disponível no momento.
-        </p>
-        <button onClick={onBack} className="w-full max-w-xs bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Voltar ao Início</button>
-    </div>
-);
-
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
-  const { isFeatureActive } = useFeatures();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
   const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
@@ -115,7 +101,7 @@ const App: React.FC = () => {
 
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'Seu bairro na palma da mão. ✋';
+  const fullSlogan = 'Onde o bairro conversa 💬';
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
@@ -141,35 +127,7 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    // MAPEAMENTO DE SEGURANÇA: Aba -> Feature Flag correspondente
-    const routeMapping: Partial<Record<string, FeatureKey>> = {
-        'home': 'home_tab',
-        'explore': 'explore_guide',
-        'classifieds': 'classifieds',
-        'neighborhood_posts': 'community_feed',
-        'coupon_landing': 'coupons',
-        'user_coupons': 'coupons',
-        'merchant_coupons': 'coupons',
-        // Funcionalidades de Crescimento
-        'store_sponsored': 'sponsored_ads',
-        'store_ads_module': 'banner_highlights',
-        'sponsor_info': 'master_sponsor',
-        // Outros
-        'merchant_reviews': 'customer_reviews',
-        'merchant_leads': 'service_chat',
-        'service_messages_list': 'service_chat'
-    };
-
-    const requiredFeature = routeMapping[view];
-    
-    // BLOQUEIO LOGÍCO: Se a aba estiver OFF no ADM, redireciona para Home
-    if (requiredFeature && !isFeatureActive(requiredFeature) && !isAdmin) {
-        console.warn(`Tentativa de acesso a recurso desativado: ${view}`);
-        setActiveTab('home');
-        return;
-    }
-
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'feature_unavailable') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
       setPreviousTab(activeTab);
     }
     
@@ -238,13 +196,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    // Splash permanece visível por 5 segundos antes de iniciar o fade-out (stage 3)
-    const fadeOutTimer = setTimeout(() => setSplashStage(3), 5000);
-    // Completa a transição de fade-out e dissolve aos 5.6 segundos para ser suave
+    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
-    }, 5600);
+    }, 5000);
     return () => {
       clearTimeout(fadeOutTimer);
       clearTimeout(endSplashTimer);
@@ -284,7 +240,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'feature_unavailable'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -334,7 +290,7 @@ const App: React.FC = () => {
             />
           )}
 
-          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
                     <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
@@ -342,7 +298,6 @@ const App: React.FC = () => {
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
-                    {activeTab === 'feature_unavailable' && <FeatureUnavailableView onBack={() => handleNavigate('home')} />}
                     
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}
@@ -535,6 +490,7 @@ const App: React.FC = () => {
                     {activeTab === 'job_wizard' && <JobWizard user={user} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('profile')} onSuccess={handlePlanSuccess} />}
+                    {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
@@ -559,7 +515,7 @@ const App: React.FC = () => {
           </div>
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-700 ease-in-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
               <div className="flex flex-col items-center animate-logo-enter text-center px-4">
                   <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">

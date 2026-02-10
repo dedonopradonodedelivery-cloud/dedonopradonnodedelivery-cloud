@@ -12,7 +12,9 @@ import {
   ChevronRight, 
   Info,
   Package,
-  PawPrint,
+  BookOpen,
+  Shirt,
+  Armchair,
   SlidersHorizontal,
   Check,
   Camera,
@@ -34,7 +36,7 @@ interface DonationsViewProps {
 const FALLBACK_DONATION_IMAGES = [
   'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800',
   'https://images.unsplash.com/photo-1520697830682-bbb7e855d34c?q=80&w=800',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800',
+  'https://images.unsplash.com/photo-1520333789090-1afc82db536a?q=80&w=800',
   'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800'
 ];
 
@@ -48,7 +50,6 @@ const getFallbackDonationImage = (id: string) => {
 
 const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
   const displayImage = item.imageUrl || getFallbackDonationImage(item.id);
-  const isPet = item.category === 'Adoção de pets';
 
   return (
     <div 
@@ -62,8 +63,8 @@ const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />
         <div className="absolute top-4 right-4">
-          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-white shadow-lg border border-white/20 ${isPet ? 'bg-amber-500' : 'bg-emerald-500'}`}>
-            {isPet ? 'ADOÇÃO' : 'DOAÇÃO'}
+          <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] bg-emerald-500 text-white shadow-lg border border-white/20">
+            DOAÇÃO
           </span>
         </div>
       </div>
@@ -94,7 +95,6 @@ const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
 };
 
 export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRequireLogin, onNavigate }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'items' | 'pets'>('items');
   const [viewState, setViewState] = useState<'list' | 'form' | 'success'>('list');
   const [filterHood, setFilterHood] = useState<string | null>(null);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -110,14 +110,13 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
     images: [] as string[]
   });
 
+  const donations = useMemo(() => {
+    return MOCK_CLASSIFIEDS.filter(item => item.category === 'Doações em geral');
+  }, []);
+
   const filteredDonations = useMemo(() => {
-    const targetCategory = activeSubTab === 'items' ? 'Doações em geral' : 'Adoção de pets';
-    let list = MOCK_CLASSIFIEDS.filter(item => item.category === targetCategory);
-    if (filterHood) {
-        list = list.filter(item => item.neighborhood === filterHood);
-    }
-    return list;
-  }, [activeSubTab, filterHood]);
+    return donations.filter(item => !filterHood || item.neighborhood === filterHood);
+  }, [donations, filterHood]);
 
   const handleAnunciar = () => {
     if (!user) {
@@ -182,10 +181,12 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Tipo de Doação*</label>
-                <select value={activeSubTab} onChange={e => setActiveSubTab(e.target.value as any)} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-bold">
-                  <option value="items">Itens (Roupas, móveis...)</option>
-                  <option value="pets">Adoção de Pets</option>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Categoria*</label>
+                <select value={formData.itemCategory} onChange={e => setFormData({...formData, itemCategory: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-bold">
+                  <option value="Roupas">Roupas</option>
+                  <option value="Móveis">Móveis</option>
+                  <option value="Livros">Livros</option>
+                  <option value="Outros">Outros</option>
                 </select>
               </div>
               <div>
@@ -198,13 +199,22 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
             </div>
 
             <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Condição do item*</label>
+              <select value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-bold">
+                <option value="Novo">Novo</option>
+                <option value="Usado - em bom estado">Usado - em bom estado</option>
+                <option value="Usado - marcas de uso">Usado - marcas de uso</option>
+              </select>
+            </div>
+
+            <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">WhatsApp de contato*</label>
               <input value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} placeholder="(21) 99999-9999" className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-bold" />
             </div>
 
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Descrição*</label>
-              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Descreva o que está doando..." rows={4} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-medium resize-none" />
+              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Descreva o item e como será a retirada..." rows={4} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-medium resize-none" />
             </div>
 
             <button type="submit" disabled={isSubmitting || !formData.whatsapp || formData.images.length === 0} className="w-full bg-emerald-600 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50">
@@ -246,7 +256,7 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
           <div className="flex items-center gap-2">
             <button 
               onClick={handleAnunciar}
-              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/20 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
               <Plus size={12} strokeWidth={4} />
               Anunciar
@@ -258,28 +268,6 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
               <SlidersHorizontal size={20} />
             </button>
           </div>
-        </div>
-
-        {/* SUB-TABS UNIFICADAS */}
-        <div className="mt-6 flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl border border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setActiveSubTab('items')}
-            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeSubTab === 'items' ? 'bg-[#1E5BFF] text-white shadow-md' : 'text-gray-400'
-            }`}
-          >
-            <Package size={14} className="inline-block mr-2 mb-0.5" />
-            Itens
-          </button>
-          <button
-            onClick={() => setActiveSubTab('pets')}
-            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeSubTab === 'pets' ? 'bg-[#1E5BFF] text-white shadow-md' : 'text-gray-400'
-            }`}
-          >
-            <PawPrint size={14} className="inline-block mr-2 mb-0.5" />
-            Doações de Pets
-          </button>
         </div>
       </header>
 
@@ -296,7 +284,6 @@ export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRe
               <Search size={32} />
             </div>
             <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Nenhuma doação disponível</h3>
-            <p className="text-sm text-gray-400 mt-2">Seja o primeiro a ajudar nesta categoria!</p>
           </div>
         )}
       </main>
