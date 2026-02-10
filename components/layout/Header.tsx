@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, X, Mic, Bell, Plus, LayoutGrid } from 'lucide-react';
+import { Search, MapPin, Check, ChevronRight, SearchX, ShieldCheck, Tag, X, Mic, Bell, Plus } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -72,8 +72,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenViewSwitcher,
   onSelectCategory,
   onOpenMoreCategories,
-  isDarkMode,
-  toggleTheme,
   userRole
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
@@ -88,11 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
 
     const handleScroll = () => {
       const scrollY = scrollContainer.scrollTop;
-      if (scrollY > 40) {
-        setIsCollapsed(true);
-      } else {
-        setIsCollapsed(false);
-      }
+      setIsCollapsed(scrollY > 40);
     };
 
     scrollContainer.addEventListener('scroll', handleScroll);
@@ -108,22 +102,16 @@ export const Header: React.FC<HeaderProps> = ({
       }
     };
     checkNotifs();
-    const interval = setInterval(checkNotifs, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const startVoiceSearch = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Seu navegador não suporta pesquisa por voz.");
-      return;
-    }
+    if (!SpeechRecognition) return;
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
     recognition.onstart = () => setIsListening(true);
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      onSearchChange(transcript);
+      onSearchChange(event.results[0][0].transcript);
       setIsListening(false);
     };
     recognition.onerror = () => setIsListening(false);
@@ -141,122 +129,104 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
-  const dynamicPlaceholder = useMemo(() => {
-    if (currentNeighborhood === "Jacarepaguá (todos)") {
-      return "O que você busca em JPA?";
-    }
-    return `O que você busca em ${currentNeighborhood}?`;
-  }, [currentNeighborhood]);
-
-  const topCategories = useMemo(() => {
-      return CATEGORIES.slice(0, 5);
-  }, []);
+  const dynamicPlaceholder = currentNeighborhood === "Jacarepaguá (todos)" ? "O que busca em JPA?" : `O que busca em ${currentNeighborhood}?`;
+  const topCategories = CATEGORIES.slice(0, 5);
 
   return (
     <>
         <div 
           ref={headerRef}
-          className={`sticky top-0 z-40 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[2.5rem] transition-all duration-300 ease-in-out ${isCollapsed ? 'pb-2 rounded-b-[1.5rem]' : 'pb-6'}`}
+          className={`sticky top-0 z-40 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[1.5rem] transition-all duration-300 ease-in-out ${isCollapsed ? 'pb-2' : 'pb-6'}`}
         >
-            <div className="max-w-md mx-auto flex flex-col relative">
+            <div className="w-full max-w-md mx-auto flex flex-col relative px-4">
                 {/* LINHA 1: TOPBAR */}
-                <div className={`flex items-center justify-between px-5 pt-5 pb-2 transition-all duration-300 overflow-hidden ${isCollapsed ? 'max-h-0 opacity-0 -translate-y-full' : 'max-h-20 opacity-100 translate-y-0'}`}>
-                    {/* ESQUERDA: LOGO + TEXTO */}
+                <div className={`flex items-center justify-between pt-5 pb-2 transition-all duration-300 ${isCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-20 opacity-100'}`}>
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
-                            <MapPin className="w-6 h-6 text-[#1E5BFF]" fill="currentColor" />
+                        <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-lg transform -rotate-6 shrink-0">
+                            <MapPin className="w-5 h-5 text-[#1E5BFF]" fill="currentColor" />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-lg font-black text-white leading-none tracking-tighter">Localizei JPA</h1>
-                            <span className="text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Jacarepaguá</span>
+                            <h1 className="text-base font-black text-white leading-none tracking-tighter">Localizei JPA</h1>
+                            <span className="text-[7px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Jacarepaguá</span>
                         </div>
                     </div>
 
-                    {/* DIREITA: "+" (Filtro) -> Sino -> Merchant Button */}
                     <div className="flex items-center gap-2">
-                        {/* BOTÃO "+" PARA FILTRO DE BAIRROS */}
-                        <button 
-                            onClick={toggleSelector}
-                            className="p-2.5 bg-white/10 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
-                            title="Filtrar por bairro"
-                        >
-                            <Plus size={22} strokeWidth={3} />
+                        <button onClick={toggleSelector} className="p-2 bg-white/10 rounded-xl text-white active:scale-90 transition-transform">
+                            <Plus size={20} strokeWidth={3} />
                         </button>
 
                         {isAdmin && (
-                            <button onClick={onOpenViewSwitcher} className="bg-amber-400 text-slate-900 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
-                                <ShieldCheck size={14} />
-                                <span className="text-[10px] font-bold uppercase">{viewMode}</span>
+                            <button onClick={onOpenViewSwitcher} className="bg-amber-400 text-slate-900 px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                <ShieldCheck size={12} />
+                                <span className="text-[8px] font-bold uppercase">{viewMode}</span>
                             </button>
                         )}
                         
-                        <button onClick={onNotificationClick} className="relative p-2.5 bg-white/10 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90">
-                            <Bell size={22} />
+                        <button onClick={onNotificationClick} className="relative p-2 bg-white/10 rounded-xl text-white active:scale-90 transition-transform">
+                            <Bell size={20} />
                             {unreadCount > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg animate-in zoom-in duration-300">
-                                    <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-[#1E5BFF] shadow-lg">
+                                    <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
                         </button>
                     </div>
                 </div>
 
-                {/* LINHA 2: BUSCA (SEMPRE VISÍVEL) */}
-                <div className={`px-5 transition-all duration-300 ${isCollapsed ? 'pt-4 pb-2' : 'pt-3 pb-4'}`}>
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                {/* LINHA 2: BUSCA */}
+                <div className={`transition-all duration-300 ${isCollapsed ? 'pt-4 pb-1' : 'pt-3 pb-3'}`}>
+                    <div className="relative w-full">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <input 
                           type="text" 
                           value={searchTerm} 
                           onChange={(e) => onSearchChange(e.target.value)} 
                           placeholder={dynamicPlaceholder} 
-                          className={`block w-full pl-12 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-xl transition-all ${isCollapsed ? 'py-3' : 'py-4'}`} 
+                          className="block w-full pl-10 pr-10 py-3 bg-white border-none rounded-xl text-sm font-semibold text-gray-900 focus:outline-none shadow-lg transition-all" 
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                           {searchTerm && (
-                            <button onClick={() => onSearchChange('')} className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors">
-                              <X size={16} />
+                            <button onClick={() => onSearchChange('')} className="p-1 text-gray-400">
+                              <X size={14} />
                             </button>
                           )}
-                          <button onClick={startVoiceSearch} className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-50 text-white animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF]'}`}>
-                            <Mic size={18} strokeWidth={isListening ? 3 : 2} />
+                          <button onClick={startVoiceSearch} className={`p-1.5 rounded-lg ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400'}`}>
+                            <Mic size={16} />
                           </button>
                         </div>
 
                         {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
-                            <div className="absolute top-[calc(100%+12px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
-                                <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
+                            <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden">
+                                <div className="p-1 max-h-[60vh] overflow-y-auto no-scrollbar">
                                     {(searchResults.stores.length > 0 || searchResults.categories.length > 0) ? (
                                         <div className="flex flex-col">
                                             {searchResults.categories.map(cat => (
-                                                <button key={cat.id} onClick={() => { onNavigate('explore'); onSearchChange(''); }} className="w-full flex items-center gap-3 p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors text-left group">
-                                                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shrink-0 shadow-sm`}>
-                                                        <Tag size={16} />
+                                                <button key={cat.id} onClick={() => { onNavigate('explore'); onSearchChange(''); }} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors text-left">
+                                                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shrink-0`}>
+                                                        <Tag size={14} />
                                                     </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-bold text-gray-900 dark:text-white">{cat.name}</p>
-                                                    </div>
-                                                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">{cat.name}</p>
+                                                    <ChevronRight className="ml-auto w-3 h-3 text-gray-300" />
                                                 </button>
                                             ))}
                                             {searchResults.stores.map(store => (
-                                                <button key={store.id} onClick={() => { onStoreClick?.(store); onSearchChange(''); }} className="flex items-center gap-3 p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl text-left group">
-                                                    <div className="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700 shadow-inner">
+                                                <button key={store.id} onClick={() => { onStoreClick?.(store); onSearchChange(''); }} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl text-left">
+                                                    <div className="w-9 h-9 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
                                                         <img src={store.logoUrl || store.image || "/assets/default-logo.png"} className="w-full h-full object-contain" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{store.name}</p>
-                                                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest truncate mt-0.5">{store.category} • {store.neighborhood}</p>
+                                                        <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{store.name}</p>
+                                                        <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest truncate">{store.neighborhood}</p>
                                                     </div>
-                                                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#1E5BFF]" />
+                                                    <ChevronRight className="w-3 h-3 text-gray-300" />
                                                 </button>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="py-12 px-4 text-center">
-                                            <SearchX className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">Nenhum resultado</p>
-                                            <p className="text-xs text-gray-400 mt-1">Tente buscar por termos genéricos</p>
+                                        <div className="py-8 px-4 text-center">
+                                            <SearchX className="w-6 h-6 text-gray-300 mx-auto mb-2" />
+                                            <p className="text-xs font-bold text-gray-900 dark:text-white">Nenhum resultado</p>
                                         </div>
                                     )}
                                 </div>
@@ -265,29 +235,29 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* LINHA 3: CATEGORIAS (HORIZONTAL STRIP) */}
+                {/* LINHA 3: CATEGORIAS */}
                 {activeTab === 'home' && (
-                    <div className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-5 transition-all duration-300 overflow-hidden ${isCollapsed ? 'max-h-0 opacity-0 translate-y-4' : 'max-h-24 opacity-100 translate-y-0 pt-2'}`}>
+                    <div className={`flex items-center gap-3 overflow-x-auto no-scrollbar transition-all duration-300 ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-24 opacity-100 pt-1'}`}>
                         {topCategories.map((cat) => (
                             <button 
                                 key={cat.id} 
                                 onClick={() => onSelectCategory(cat)} 
-                                className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all"
+                                className="flex flex-col items-center gap-1.5 shrink-0 active:scale-95 transition-transform"
                             >
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20 border border-white/10 shadow-sm group-hover:bg-white/30 transition-colors">
-                                    {React.cloneElement(cat.icon as any, { size: 24, className: "text-white", strokeWidth: 2.5 })}
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-white/20 border border-white/10 shadow-sm">
+                                    {React.cloneElement(cat.icon as any, { size: 20, className: "text-white", strokeWidth: 2.5 })}
                                 </div>
-                                <span className="text-[8px] font-black text-white uppercase tracking-tighter text-center truncate w-14">{cat.name}</span>
+                                <span className="text-[7px] font-black text-white uppercase tracking-tighter text-center truncate w-12">{cat.name}</span>
                             </button>
                         ))}
                         <button 
                             onClick={onOpenMoreCategories} 
-                            className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all"
+                            className="flex flex-col items-center gap-1.5 shrink-0 active:scale-95 transition-transform"
                         >
-                            <div className="w-12 h-12 rounded-2xl bg-white/10 border-2 border-dashed border-white/20 flex items-center justify-center text-white/80 group-hover:bg-white/20 transition-colors">
-                                <Plus size={24} strokeWidth={2.5} />
+                            <div className="w-11 h-11 rounded-xl bg-white/10 border border-dashed border-white/20 flex items-center justify-center text-white/80">
+                                <Plus size={20} strokeWidth={2.5} />
                             </div>
-                            <span className="text-[8px] font-black text-white/80 uppercase tracking-tighter text-center w-14">+ Mais</span>
+                            <span className="text-[7px] font-black text-white/80 uppercase tracking-tighter text-center w-12">+ Mais</span>
                         </button>
                     </div>
                 )}

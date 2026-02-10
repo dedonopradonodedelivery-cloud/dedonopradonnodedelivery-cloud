@@ -17,11 +17,9 @@ interface NavItem {
   featureKey?: FeatureKey;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
-  const { user } = useAuth();
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
   const { isFeatureActive } = useFeatures();
   
-  // 1) Barra de navegação fixa inferior com Início, Buscar, Classificados e Perfil
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
     { id: 'search', icon: Search, label: 'Buscar' }, 
@@ -29,7 +27,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     { id: 'profile', icon: UserIcon, label: 'Perfil' },
   ];
 
-  // Filtra itens baseados nas flags do ADM (exceto Buscar e Perfil que são obrigatórios)
   const activeNavItems = useMemo(() => {
     return allNavItems.filter(item => {
       if (!item.featureKey) return true;
@@ -41,46 +38,31 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     setActiveTab(id);
   };
 
-  const renderIcon = (item: NavItem, isActive: boolean) => {
-    const Icon = item.icon;
-    return (
-      <Icon 
-        size={24}
-        className={`transition-all duration-300 ${isActive ? 'text-[#1E5BFF] scale-110' : 'text-gray-400'}`} 
-        strokeWidth={isActive ? 2.5 : 2} 
-      />
-    );
-  };
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.08)] border-t border-gray-100 dark:border-gray-800 px-2">
-      <div 
-        className="grid w-full h-full"
-        style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
-      >
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[1.5rem] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 dark:border-gray-800">
+      <div className="flex w-full h-full justify-around items-center px-2">
         {activeNavItems.map((item) => {
-          const isProfileGroup = ['profile', 'user_profile_full', 'edit_profile_view', 'user_coupons', 'merchant_coupons', 'store_area', 'store_finance', 'store_support', 'merchant_performance', 'merchant_leads', 'merchant_reviews', 'merchant_promotions', 'jpa_connect'].includes(activeTab);
-          
+          const isProfileGroup = ['profile', 'user_profile_full', 'edit_profile_view', 'user_coupons', 'merchant_coupons', 'store_area', 'store_finance', 'store_support'].includes(activeTab);
           const isActive = activeTab === item.id || (item.id === 'profile' && isProfileGroup);
+          const Icon = item.icon;
 
           return (
             <button 
               key={item.id}
               onClick={() => handleTabClick(item.id)} 
-              className="w-full h-full flex flex-col items-center justify-center outline-none active:scale-95 transition-all" 
+              className="flex flex-col items-center justify-center flex-1 h-full outline-none active:scale-95 transition-all" 
               aria-label={item.label}
             >
-              <div className="mb-1">
-                {renderIcon(item, isActive)}
-              </div>
-              <span className={`font-black uppercase tracking-tighter text-[9px] transition-all ${
+              <Icon 
+                size={22}
+                className={`transition-all duration-300 ${isActive ? 'text-[#1E5BFF]' : 'text-gray-400'}`} 
+                strokeWidth={isActive ? 2.5 : 2} 
+              />
+              <span className={`font-black uppercase tracking-tighter text-[8px] mt-1 transition-all ${
                 isActive ? 'text-[#1E5BFF]' : 'text-gray-400'
               }`}>
                 {item.label}
               </span>
-              {isActive && (
-                <div className="w-1 h-1 bg-[#1E5BFF] rounded-full mt-1"></div>
-              )}
             </button>
           );
         })}
