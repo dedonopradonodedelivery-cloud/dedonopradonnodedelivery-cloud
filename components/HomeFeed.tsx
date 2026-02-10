@@ -98,39 +98,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
-  // Category Scroll Logic
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
-
-  // Pagination Configuration
-  // Adjust to 8 items per page (4 columns x 2 rows)
-  const itemsPerPage = 8; 
-  
-  // Reorder categories as requested
-  const orderedCategories = useMemo(() => {
-    const firstPageIds = [
-      'cat-saude',    // Saúde
-      'cat-fashion',  // Moda
-      'cat-pets',     // Pets
-      'cat-pro',      // Pro
-      'cat-beauty',   // Beleza
-      'cat-autos',    // Autos
-      'cat-sports',   // Esportes
-      'cat-edu'       // Educação
-    ];
-
-    const firstPage = firstPageIds
-      .map(id => CATEGORIES.find(c => c.id === id))
-      .filter((c): c is Category => !!c);
-
-    const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
-
-    return [...firstPage, ...remaining];
-  }, []);
-
-  const allCategories = orderedCategories; 
-  const totalPages = Math.ceil(allCategories.length / itemsPerPage);
-
   const [wizardStep, setWizardStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
@@ -138,16 +105,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [images, setImages] = useState<string[]>([]);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
-
-  const handleScroll = () => {
-    if (!categoryScrollRef.current) return;
-    const scrollLeft = categoryScrollRef.current.scrollLeft;
-    const width = categoryScrollRef.current.clientWidth;
-    const page = Math.round(scrollLeft / width);
-    if (page !== currentCategoryPage) {
-      setCurrentCategoryPage(page);
-    }
-  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && images.length < 3) {
@@ -193,15 +150,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
     }, 1500);
   };
 
-  // Chunk categories into pages
-  const categoryPages = useMemo(() => {
-    const pages = [];
-    for (let i = 0; i < allCategories.length; i += itemsPerPage) {
-      pages.push(allCategories.slice(i, i + itemsPerPage));
-    }
-    return pages;
-  }, [allCategories]);
-
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
@@ -211,50 +159,22 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. CATEGORIAS (Grid 4x2) */}
-      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 pb-0 relative z-10">
-        <div 
-          ref={categoryScrollRef} 
-          className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
-          onScroll={handleScroll}
-        >
-          {categoryPages.map((pageCategories, pageIndex) => (
-            <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-              <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-4">
-                {pageCategories.map((cat, index) => (
-                  <button 
-                    key={`${cat.id}-${pageIndex}-${index}`} 
-                    onClick={() => onSelectCategory(cat)}
-                    className="flex flex-col items-center group active:scale-95 transition-all w-full"
-                  >
-                    <div className={`w-full max-w-[84px] aspect-square rounded-[25px] shadow-sm flex flex-col items-center justify-between p-2 ${cat.color} border border-white/20`}>
-                      <div className="flex-1 flex items-center justify-center w-full">
-                        {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                      </div>
-                      <div className="w-full bg-black/10 backdrop-blur-[2px] py-0.5 rounded-b-[20px] -mx-2 -mb-2">
-                        <span className="block w-full text-[8px] font-black text-white text-center uppercase tracking-tight leading-none py-0.5 truncate px-1">
-                          {cat.name}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+      {/* 1. CATEGORIAS (RESTAURAÇÃO: Linha única horizontal) */}
+      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 py-4 relative z-10 border-b border-gray-50 dark:border-gray-900">
+        <div className="flex overflow-x-auto no-scrollbar snap-x px-4 gap-4">
+          {CATEGORIES.map((cat) => (
+            <button 
+              key={cat.id} 
+              onClick={() => onSelectCategory(cat)}
+              className="flex flex-col items-center gap-1.5 flex-shrink-0 snap-start active:scale-95 transition-all"
+            >
+              <div className={`w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center ${cat.color} border border-white/20`}>
+                {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white", strokeWidth: 2.5 })}
               </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Pagination Dots */}
-        <div className="flex justify-center gap-1.5 pb-6 pt-2">
-          {categoryPages.map((_, idx) => (
-            <div 
-              key={idx} 
-              className={`rounded-full transition-all duration-300 ${
-                idx === currentCategoryPage 
-                  ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' 
-                  : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'
-              }`} 
-            />
+              <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
+                {cat.name}
+              </span>
+            </button>
           ))}
         </div>
       </section>
@@ -264,13 +184,55 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* 3. ONDE O BAIRRO CONVERSA (Compacto) */}
+      {/* 3. MICRO-GANCHO DE CUPOM */}
+      <section className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-500 shadow-sm">
+              <Ticket size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest leading-none">Cupons e Ofertas</h2>
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Exclusivos para o bairro</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => onNavigate('coupon_landing')} 
+            className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest hover:underline"
+          >
+            Ver todos
+          </button>
+        </div>
+
+        <button 
+          onClick={() => onNavigate('weekly_reward_page')}
+          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10"
+        >
+           <div className="flex items-center gap-3">
+               <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm text-white">
+                 <Zap size={20} fill="currentColor" />
+               </div>
+               <div className="text-left">
+                 <p className="text-white font-black text-sm uppercase tracking-wide">Minha Recompensa</p>
+                 <p className="text-emerald-100 text-[10px] font-medium opacity-90">Acesse 5 dias e ganhe 1 cupom de 20%</p>
+               </div>
+           </div>
+           <div className="bg-white/10 p-1.5 rounded-full">
+             <ChevronRight className="text-white" size={16} />
+           </div>
+        </button>
+      </section>
+
+      {/* NOVO BLOCO: ACONTECENDO AGORA (Entre Cupons e JPA Conversa) */}
+      <AcontecendoAgora onNavigate={onNavigate} />
+
+      {/* 4. ONDE O BAIRRO CONVERSA */}
       <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
         <div className="">
             <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 tracking-tighter">
                     JPA Conversa
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                 </h2>
                 <div className="flex items-center gap-2">
                   <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
@@ -291,30 +253,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </div>
         </div>
       </section>
-
-      {/* 4. MICRO-GANCHO DE CUPOM (Discreto) */}
-      <section className="px-5 mb-6">
-        <button 
-          onClick={() => onNavigate('weekly_reward_page')}
-          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10"
-        >
-           <div className="flex items-center gap-3">
-               <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                 <Ticket className="text-white" size={20} />
-               </div>
-               <div className="text-left">
-                 <p className="text-white font-black text-sm uppercase tracking-wide">Cupons Disponíveis</p>
-                 <p className="text-emerald-100 text-[10px] font-medium opacity-90">Resgate descontos exclusivos no bairro</p>
-               </div>
-           </div>
-           <div className="bg-white/10 p-1.5 rounded-full">
-             <ChevronRight className="text-white" size={16} />
-           </div>
-        </button>
-      </section>
-
-      {/* NOVO BLOCO: ACONTECENDO AGORA */}
-      <AcontecendoAgora onNavigate={onNavigate} />
 
       {/* 5. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
       <section className="px-5 mb-8 bg-white dark:bg-gray-950">
