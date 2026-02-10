@@ -46,7 +46,7 @@ const MOCK_BANNERS: BannerData[] = [
     title: 'Boutique Urbana',
     subtitle: 'As tendências da estação chegaram ao bairro.',
     cta: 'Conferir Lookbook',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d1?q=80&w=600&auto=format&fit=crop',
     bgColor: 'bg-rose-700',
     neighborhood: 'Jacarepaguá (todos)',
     category: 'Moda'
@@ -128,6 +128,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
         <div className="w-full h-full relative">
           <img src={currentBanner.image} alt={currentBanner.title} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none"></div>
+          
           <div className="relative h-full flex flex-col justify-end p-6 text-white pointer-events-none">
             <div className="flex items-center gap-2 mb-2">
                <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">{currentBanner.category}</span>
@@ -135,6 +136,14 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">{currentBanner.title}</h2>
             <p className="text-[10px] font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm mb-4">{currentBanner.subtitle}</p>
             <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit"><span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span></div>
+          </div>
+
+          {/* BARRA DE PROGRESSO INTERNA AO BANNER */}
+          <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white/30 z-20">
+            <div 
+              key={currentIndex}
+              className="h-full bg-white animate-progress"
+            ></div>
           </div>
         </div>
       </div>
