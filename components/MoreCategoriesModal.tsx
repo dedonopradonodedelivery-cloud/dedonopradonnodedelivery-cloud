@@ -51,13 +51,13 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Ex: Pizza, Pet, Advogado..."
+              placeholder="Buscar categorias, serviços ou produtos..."
               className="w-full bg-gray-50 dark:bg-gray-800 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white transition-all shadow-inner"
             />
           </div>
         </div>
 
-        {/* Grade de Categorias (4 colunas) */}
+        {/* Grade de Categorias (4 colunas estritamente) */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-6">
           <div className="grid grid-cols-4 gap-y-8 gap-x-3">
             {filteredData.length > 0 ? (
@@ -66,10 +66,11 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                   key={cat.id}
                   onClick={() => {
                     onSelectCategory(cat);
+                    onClose();
                   }}
                   className="flex flex-col items-center gap-2 group active:scale-90 transition-transform"
                 >
-                  <div className={`w-14 h-14 rounded-[1.25rem] ${cat.color || 'bg-blue-600'} flex items-center justify-center text-white shadow-md border border-white/20 group-hover:brightness-110`}>
+                  <div className={`w-14 h-14 rounded-[1.25rem] bg-[#1E5BFF] flex items-center justify-center text-white shadow-md border border-white/20 group-hover:brightness-110`}>
                     {React.cloneElement(cat.icon as any, { size: 28, strokeWidth: 2.5, className: "drop-shadow-sm" })}
                   </div>
                   <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-tighter text-center leading-tight">
@@ -86,7 +87,7 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
           </div>
         </div>
 
-        {/* Footer com contador */}
+        {/* Footer com contador dinâmico */}
         <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 text-center shrink-0">
              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{filteredData.length} categorias em Jacarepaguá</p>
         </div>
