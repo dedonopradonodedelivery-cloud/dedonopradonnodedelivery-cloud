@@ -75,7 +75,10 @@ const App: React.FC = () => {
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
+  // Controle de estado da Splash Screen: true = visível
+  const [isSplashVisible, setIsSplashVisible] = useState(!splashWasShownInSession && !isAuthReturn);
+  // Controle da fase de Fade Out
+  const [isFadingOut, setIsFadingOut] = useState(false);
   
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
@@ -101,15 +104,32 @@ const App: React.FC = () => {
   const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
-  const [sloganText, setSloganText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'O bairro na palma de suas mãos! ✋';
-
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
 
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
+
+  // Lógica principal do Timer da Splash Screen
+  useEffect(() => {
+    if (!isSplashVisible) return;
+
+    // Timer de 5 segundos para exibição total
+    const fadeTimeout = setTimeout(() => {
+      setIsFadingOut(true); // Inicia o fade out de 800ms (via CSS)
+    }, 5000);
+
+    // Timer de 5.8 segundos para remover o componente totalmente
+    const removeTimeout = setTimeout(() => {
+      setIsSplashVisible(false);
+      splashWasShownInSession = true;
+    }, 5800);
+
+    return () => {
+      clearTimeout(fadeTimeout);
+      clearTimeout(removeTimeout);
+    };
+  }, [isSplashVisible]);
 
   useEffect(() => {
     const handleUrlRouting = () => {
@@ -180,34 +200,6 @@ const App: React.FC = () => {
         }
     }
   }, [user, userRole]);
-
-  useEffect(() => {
-    if (splashStage >= 4) {
-      setIsTyping(false);
-      return;
-    }
-    if (sloganText.length === fullSlogan.length) {
-      setIsTyping(false);
-      return;
-    }
-    const typingTimeout = setTimeout(() => {
-      setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 85);
-    return () => clearTimeout(typingTimeout);
-  }, [sloganText, splashStage]);
-
-  useEffect(() => {
-    if (splashStage === 4) return;
-    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
-    const endSplashTimer = setTimeout(() => {
-      setSplashStage(4);
-      splashWasShownInSession = true;
-    }, 5000);
-    return () => {
-      clearTimeout(fadeOutTimer);
-      clearTimeout(endSplashTimer);
-    };
-  }, [splashStage]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
   const handleSelectJob = (job: Job) => { handleNavigate('job_detail', { job }); };
@@ -313,7 +305,8 @@ const App: React.FC = () => {
             />
           )}
 
-          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+          {/* O conteúdo principal do app aparece com fade-in */}
+          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-out ${!isSplashVisible || isFadingOut ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole as any} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
                     <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
@@ -607,19 +600,30 @@ const App: React.FC = () => {
               <RoleSwitcherModal />
           </div>
 
-          {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
-              <div className="flex flex-col items-center animate-logo-enter text-center px-4">
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
+          {/* SPLASH SCREEN PREMIUM */}
+          {isSplashVisible && (
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-800 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+              <div className="flex flex-col items-center text-center px-4">
+                  {/* Logo com animação pop */}
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter">
+                    <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
+                  </div>
+                  
+                  {/* Título Principal */}
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md animate-fade-in" style={{ animationDelay: '0.4s' }}>
                     Localizei JPA
                   </h1>
-                  <p className="text-lg font-semibold text-white/90 mt-2 h-8 flex items-center justify-center font-sans animate-fade-in" style={{ animationDelay: '0.8s' }}>
-                    {sloganText}
-                    {isTyping && <span className="animate-blink ml-1">|</span>}
-                  </p>
+                  
+                  {/* Slogan com animação Slide-up + Fade-in */}
+                  <div className="mt-4 opacity-0 animate-slide-up-fade" style={{ animationDelay: '1s' }}>
+                    <p className="text-lg font-semibold text-white/90">
+                      O bairro na palma de suas mãos! ✋
+                    </p>
+                  </div>
               </div>
-              <div className="text-center">
+              
+              {/* Rodapé institucional */}
+              <div className="text-center animate-fade-in" style={{ animationDelay: '1.2s' }}>
                 <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
                 <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
               </div>

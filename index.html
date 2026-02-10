@@ -40,6 +40,7 @@
               'slow-shimmer': 'slowShimmer 4s linear infinite',
               'subtle-diagonal-scroll': 'subtleDiagonalScroll 25s linear infinite alternate',
               'blink': 'blink 0.7s step-end infinite',
+              'slide-up-fade': 'slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             },
             keyframes: {
               logoPop: {
@@ -49,6 +50,10 @@
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
+              },
+              slideUpFade: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               appExit: {
                 '0%': { opacity: '1' },
