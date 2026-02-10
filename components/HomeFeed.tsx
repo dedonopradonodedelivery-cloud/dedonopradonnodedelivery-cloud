@@ -585,41 +585,36 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
               onClick={handleCouponClick}
               className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
             >
-               {/* Floating Logo - Perfeitamente centralizado no topo */}
+               {/* Floating Logo */}
                <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
                   <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
                      <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
 
-               {/* Card Body - Efeito de serrilha nas laterais e linha centralizada */}
-               <div className="w-full h-40 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+               {/* Card Body - Original Blue Solid Style */}
+               <div className="w-full h-44 bg-[#1E5BFF] rounded-3xl shadow-lg relative overflow-hidden active:scale-95 transition-transform flex flex-col">
                   
-                  {/* Serrilha lateral (Simulada por radial-gradients na máscara ou sobreposição) */}
-                  {/* Bites/Holes Laterais alinhados com a linha pontilhada */}
-                  <div className="absolute top-[63px] -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 z-10"></div>
-                  <div className="absolute top-[63px] -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-700 z-10"></div>
+                  {/* Side Holes aligned with Dotted Line */}
+                  <div className="absolute top-[68px] -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                  <div className="absolute top-[68px] -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10"></div>
 
-                  {/* Pequenas serrilhas decorativas acima e abaixo do furo principal */}
-                  <div className="absolute top-10 -left-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
-                  <div className="absolute top-10 -right-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
-                  <div className="absolute bottom-12 -left-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
-                  <div className="absolute bottom-12 -right-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
-
-                  {/* Top Section - Desconto */}
-                  <div className="flex flex-col items-center justify-center h-[56px] w-full text-center z-10">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Cupom</span>
-                      <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
+                  {/* Top Section - Discount */}
+                  <div className="flex flex-col items-center justify-center h-[70px] pt-4 px-3 text-center">
+                      <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.2em] mb-1">CUPOM</span>
+                      <span className="text-xl font-black text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
                   </div>
 
-                  {/* Linha Pontilhada - Centralizada perfeitamente com os "bites" */}
-                  <div className="w-full h-px border-t border-dashed border-gray-300 dark:border-gray-600 relative z-0"></div>
+                  {/* Dotted Line - Perfect center alignment with side holes */}
+                  <div className="w-full px-2">
+                    <div className="w-full h-px border-t-2 border-dashed border-white/30"></div>
+                  </div>
 
                   {/* Bottom Section - CTA */}
-                  <div className="w-full z-10 mt-2">
-                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden">
+                  <div className="flex-1 flex flex-col justify-end p-3">
+                     <button className="w-full bg-white hover:bg-gray-50 text-[#1E5BFF] text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm transition-colors">
                          Pegar cupom
                      </button>
                   </div>
@@ -823,7 +818,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
       
-      {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
+      {/* CUPONS BLOCK */}
       <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
 
       {/* ACONTECENDO AGORA BLOCK */}
