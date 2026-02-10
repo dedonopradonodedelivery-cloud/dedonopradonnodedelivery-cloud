@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher
 }) => {
-  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
+  const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [isListening, setIsListening] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   
@@ -147,9 +147,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* BLOCO AZUL FIXO UNIFICADO (CAMADA 1 + BUSCA) */}
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#1E5BFF] dark:bg-blue-950 max-w-md mx-auto">
-            {/* Linha 1: Branding e Botões */}
+        {/* CAMADA 1 — BRANDING (FIXO NO TOPO) */}
+        <div className="fixed top-0 left-0 right-0 z-[10] bg-[#1E5BFF] dark:bg-blue-950 max-w-md mx-auto">
             <div className="h-[60px] flex items-center px-5">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10 shadow-sm">
@@ -185,9 +184,11 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                 </div>
             </div>
+        </div>
 
-            {/* Linha 2: Barra de Busca (Mesmo Azul, sem arredondamentos inferiores) */}
-            <div className="px-5 pb-4">
+        {/* CAMADA 1.5 — BARRA DE BUSCA (STICKY QUE SOBREPOE O BRANDING) */}
+        <div className="sticky top-0 z-[30] w-full max-w-md mx-auto mt-[60px]">
+            <div className="bg-[#1E5BFF] dark:bg-blue-950 px-5 pb-4 pt-1 shadow-md">
                 <div className="relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 

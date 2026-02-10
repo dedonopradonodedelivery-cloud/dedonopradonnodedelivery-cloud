@@ -91,21 +91,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   const [categoryTranslateY, setCategoryTranslateY] = useState(0);
 
-  // Monitoramento de Scroll para Stage A e B
+  // Monitoramento de Scroll para Arquitetura de 3 Camadas
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      const triggerThreshold = 50; // Inicia o Estágio B após 50px de scroll (metade das categorias aproximada)
-      
+      const triggerThreshold = 50; 
       if (scrollY > triggerThreshold) {
-        // Estágio B: Categorias começam a subir sincronizadas
         setCategoryTranslateY(-(scrollY - triggerThreshold));
       } else {
-        // Estágio A: Categorias ficam paradas
-        setCategoryTranslateY(0);
+        setCategoryTranslateY(0); 
       }
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -139,15 +135,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* ESPAÇADOR PARA O HEADER FIXO (Topo + Busca = 120px) */}
+      {/* ESPAÇADOR PARA O CABEÇALHO FIXO + BUSCA STICKY (~120px) */}
       <div className="h-[120px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
 
-      {/* CAMADA 2 — CATEGORIAS (VIVA NO AZUL UNIFICADO) 
-          Aplica transform dinâmico para o Estágio B
-      */}
+      {/* CAMADA 2 — CATEGORIAS */}
       {isFeatureActive('explore_guide') && (
         <section 
-            className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-2 pb-8 px-5 overflow-hidden sticky top-[120px] z-10"
+            className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-2 pb-10 px-5 overflow-hidden z-10"
             style={{ transform: `translateY(${categoryTranslateY}px)` }}
         >
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-nowrap">
@@ -169,17 +163,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (BRANCO ARREDONDADO — PASSA POR CIMA) */}
-      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-15px_35px_rgba(0,0,0,0.15)] rounded-t-[2.5rem] -mt-2">
+      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (BRANCO ARREDONDADO) */}
+      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.2)] rounded-t-[2.5rem] -mt-6">
         
         {/* CARROSSEL UNIFICADO */}
         {isFeatureActive('banner_highlights') && (
-            <section className="bg-transparent w-full pt-6">
+            <section className="bg-transparent w-full pt-8">
                <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
             </section>
         )}
 
-        {/* CUPONS */}
+        {/* CUPONS - VISUAL ORIGINAL DE TICKET RESTAURADO */}
         <section className="py-2">
             <div className="flex items-center justify-between mb-1 px-5">
                 <div>
@@ -188,22 +182,38 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 </div>
                 <button onClick={() => onNavigate('coupon_landing')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
             </div>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-4">
                 {COUPONS_MOCK.map((coupon) => (
                     <div key={coupon.id} onClick={() => onNavigate('coupon_landing')} className="relative flex-shrink-0 w-36 snap-center cursor-pointer group">
+                        {/* Logo Flutuante */}
                         <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
-                            <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
+                            <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
                                 <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                             </div>
                         </div>
-                        <div className="w-full h-40 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+
+                        {/* Corpo do Ticket Azul */}
+                        <div className="w-full h-40 bg-[#1E5BFF] dark:bg-blue-800 rounded-2xl shadow-lg border border-white/10 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+                            
+                            {/* Recortes Laterais do Ticket */}
+                            <div className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner"></div>
+                            <div className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner"></div>
+                            
+                            {/* Linha Divisória Pontilhada */}
+                            <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 border-t-2 border-dashed border-white/20 z-0"></div>
+
+                            {/* Conteúdo do Cupom */}
                             <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cupom</span>
-                                <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">{coupon.discount}</span>
+                                <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1">Cupom</span>
+                                <span className="text-xl font-black text-white leading-none tracking-tight">
+                                    {coupon.discount}
+                                </span>
                             </div>
+
+                            {/* Botão com Contraste */}
                             <div className="w-full z-10">
-                                <button className="w-full bg-blue-600 text-white text-[9px] font-black uppercase py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-white/20"></div>
+                                <button className="w-full bg-white text-[#1E5BFF] text-[9px] font-black uppercase py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center relative overflow-hidden">
+                                    <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-blue-500/20"></div>
                                     Pegar cupom
                                 </button>
                             </div>
