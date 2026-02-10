@@ -595,11 +595,11 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                {/* Card Body - Original Blue Solid Style */}
                <div className="w-full h-44 bg-[#1E5BFF] rounded-3xl shadow-lg relative overflow-hidden active:scale-95 transition-transform flex flex-col">
                   
-                  {/* Side Holes aligned with Dotted Line (Center of Holes at 82px) */}
+                  {/* Side Holes aligned with Dotted Line */}
                   <div className="absolute top-[74px] -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10"></div>
                   <div className="absolute top-[74px] -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10"></div>
 
-                  {/* Top Section - Discount (Fixed height to push line to 82px) */}
+                  {/* Top Section - Discount */}
                   <div className="flex flex-col items-center justify-center h-[82px] pt-4 px-3 text-center">
                       <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.2em] mb-1">CUPOM</span>
                       <span className="text-xl font-black text-white leading-none tracking-tight">
@@ -612,8 +612,8 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                     <div className="w-full h-px border-t-2 border-dashed border-white/30"></div>
                   </div>
 
-                  {/* Bottom Section - CTA */}
-                  <div className="flex-1 flex flex-col justify-end p-3 pb-4">
+                  {/* Bottom Section - CTA com alinhamento vertical equilibrado */}
+                  <div className="flex-1 flex flex-col justify-center p-3 pb-6">
                      <button className="w-full bg-white text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest py-3 rounded-xl shadow-sm transition-colors">
                          Pegar cupom
                      </button>
