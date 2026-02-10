@@ -135,8 +135,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* ESPAÇADOR PARA O CABEÇALHO FIXO + BUSCA STICKY (~120px) */}
-      <div className="h-[120px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
+      {/* ESPAÇADOR COMPACTADO PARA O CABEÇALHO FIXO + BUSCA STICKY (~100px) */}
+      <div className="h-[100px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
 
       {/* CAMADA 2 — CATEGORIAS */}
       {isFeatureActive('explore_guide') && (
@@ -173,7 +173,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </section>
         )}
 
-        {/* CUPONS - VISUAL ORIGINAL DE TICKET RESTAURADO */}
+        {/* CUPONS - VISUAL ORIGINAL DE TICKET RESTAURADO COM REFINAMENTO */}
         <section className="py-2">
             <div className="flex items-center justify-between mb-1 px-5">
                 <div>
@@ -193,24 +193,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         </div>
 
                         {/* Corpo do Ticket Azul */}
-                        <div className="w-full h-40 bg-[#1E5BFF] dark:bg-blue-800 rounded-2xl shadow-lg border border-white/10 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+                        <div className="w-full h-40 bg-[#1E5BFF] dark:bg-blue-800 rounded-2xl flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
                             
-                            {/* Recortes Laterais do Ticket */}
-                            <div className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner"></div>
-                            <div className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner"></div>
+                            {/* Recortes Laterais do Ticket (Aumentados e sem bordas) */}
+                            <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                            <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
                             
                             {/* Linha Divisória Pontilhada */}
                             <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 border-t-2 border-dashed border-white/20 z-0"></div>
 
-                            {/* Conteúdo do Cupom */}
-                            <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
+                            {/* Conteúdo do Cupom (Texto acima da linha) */}
+                            <div className="flex flex-col items-center justify-start h-1/2 w-full text-center z-10 pt-4">
                                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1">Cupom</span>
                                 <span className="text-xl font-black text-white leading-none tracking-tight">
                                     {coupon.discount}
                                 </span>
                             </div>
 
-                            {/* Botão com Contraste */}
+                            {/* Botão com Contraste (Sempre na base) */}
                             <div className="w-full z-10">
                                 <button className="w-full bg-white text-[#1E5BFF] text-[9px] font-black uppercase py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center relative overflow-hidden">
                                     <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-blue-500/20"></div>
