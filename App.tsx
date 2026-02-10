@@ -103,7 +103,7 @@ const App: React.FC = () => {
 
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'Onde o bairro conversa 💬';
+  const fullSlogan = 'O bairro na palma de suas mãos! ✋';
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
@@ -192,7 +192,7 @@ const App: React.FC = () => {
     }
     const typingTimeout = setTimeout(() => {
       setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 96);
+    }, 85); // Levemente mais rápido para uma sensação ágil
     return () => clearTimeout(typingTimeout);
   }, [sloganText, splashStage]);
 
@@ -614,7 +614,7 @@ const App: React.FC = () => {
                   <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
                     Localizei JPA
                   </h1>
-                  <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
+                  <p className="text-lg font-semibold text-white/90 mt-2 h-8 flex items-center justify-center font-sans animate-fade-in" style={{ animationDelay: '0.8s' }}>
                     {sloganText}
                     {isTyping && <span className="animate-blink ml-1">|</span>}
                   </p>
