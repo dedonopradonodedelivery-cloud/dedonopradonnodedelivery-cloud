@@ -135,8 +135,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* ESPAÇADOR COMPACTADO PARA O CABEÇALHO FIXO + BUSCA STICKY (~95px) */}
-      <div className="h-[95px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
+      {/* ESPAÇADOR COMPACTADO PARA O CABEÇALHO FIXO + BUSCA STICKY (~62px para máxima proximidade) */}
+      <div className="h-[62px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
 
       {/* CAMADA 2 — CATEGORIAS */}
       {isFeatureActive('explore_guide') && (
