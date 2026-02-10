@@ -147,49 +147,47 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* CAMADA 1 — CABEÇALHO (HEADER FIXO) */}
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#1E5BFF] dark:bg-blue-950 max-w-md mx-auto h-[64px] flex items-center px-4">
-            <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10 shadow-sm">
-                     <MapPin size={18} fill="currentColor" />
+        {/* CAMADA 1 — CABEÇALHO AZUL FIXO (LOGO + BUSCA) */}
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#1E5BFF] dark:bg-blue-950 max-w-md mx-auto shadow-lg">
+            {/* Linha 1: Branding e Botões */}
+            <div className="h-[60px] flex items-center px-4">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10 shadow-sm">
+                         <MapPin size={18} fill="currentColor" />
+                    </div>
+                    <span className="font-display font-black text-lg text-white tracking-tight">
+                        Localizei JPA
+                    </span>
                 </div>
-                <span className="font-display font-black text-lg text-white tracking-tight">
-                    Localizei JPA
-                </span>
-            </div>
 
-            <div className="flex items-center gap-2 ml-auto">
-                {isAdmin && (
-                    <button onClick={onOpenViewSwitcher} className="bg-amber-400 text-slate-900 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
-                        <ShieldCheck size={14} className="text-slate-900" />
-                        <span className="text-[10px] font-bold uppercase">{viewMode}</span>
+                <div className="flex items-center gap-2 ml-auto">
+                    {isAdmin && (
+                        <button onClick={onOpenViewSwitcher} className="bg-amber-400 text-slate-900 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
+                            <ShieldCheck size={14} className="text-slate-900" />
+                            <span className="text-[10px] font-bold uppercase">{viewMode}</span>
+                        </button>
+                    )}
+                    
+                    <button onClick={toggleSelector} className="relative p-2.5 bg-white/10 dark:bg-white/5 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90">
+                        <Plus size={22} />
+                        {currentNeighborhood !== "Jacarepaguá (todos)" && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full border border-[#1E5BFF]"></span>
+                        )}
                     </button>
-                )}
-                
-                <button onClick={toggleSelector} className="relative p-2.5 bg-white/10 dark:bg-white/5 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90">
-                    <Plus size={22} />
-                    {currentNeighborhood !== "Jacarepaguá (todos)" && (
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full border border-[#1E5BFF]"></span>
-                    )}
-                </button>
 
-                <button onClick={onNotificationClick} className="relative p-2.5 bg-white/10 dark:bg-white/5 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90">
-                    <Bell size={22} className={unreadCount > 0 ? 'animate-wiggle' : ''} />
-                    {unreadCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg animate-in zoom-in duration-300">
-                            <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
-                        </span>
-                    )}
-                </button>
+                    <button onClick={onNotificationClick} className="relative p-2.5 bg-white/10 dark:bg-white/5 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90">
+                        <Bell size={22} className={unreadCount > 0 ? 'animate-wiggle' : ''} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg animate-in zoom-in duration-300">
+                                <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                            </span>
+                        )}
+                    </button>
+                </div>
             </div>
-        </div>
 
-        {/* ESPAÇADOR FIXO PARA O HEADER TOP */}
-        <div className="h-[64px] bg-[#1E5BFF] dark:bg-blue-950"></div>
-
-        {/* CAMADA DE BUSCA (STICKY) — Desacopla do conteúdo e fixa no topo abaixo do header top */}
-        <div className="sticky top-[64px] z-[90] w-full bg-[#1E5BFF] dark:bg-blue-950">
-            <div className="max-w-md mx-auto px-4 pb-6 pt-2">
+            {/* Linha 2: Barra de Busca (Fica fixa no topo do azul) */}
+            <div className="px-4 pb-4">
                 <div className="relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 
@@ -197,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
                       placeholder={dynamicPlaceholder} 
-                      className="block w-full pl-10 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-3.5 shadow-xl transition-all duration-300" 
+                      className="block w-full pl-10 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-3 shadow-xl transition-all duration-300" 
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                       {searchTerm && (

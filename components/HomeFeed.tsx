@@ -119,11 +119,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* CAMADA 2 — CATEGORIAS (STICKY COM Z-INDEX BAIXO) */}
+      {/* ESPAÇADOR PARA O HEADER FIXO (Linha 1 + Linha 2 de Busca = ~120px) */}
+      <div className="h-[120px] shrink-0"></div>
+
+      {/* CAMADA 2 — CATEGORIAS (STICKY TRANSITÓRIO) 
+          Fica logo abaixo do header azul. Ao rolar, o conteúdo principal passa por cima.
+      */}
       {isFeatureActive('explore_guide') && (
-        <div className="sticky top-[144px] z-10 w-full h-[100px]">
-            <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-2 border-b border-gray-50 dark:border-gray-900 overflow-hidden rounded-t-[2.5rem]">
-                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5 flex-nowrap">
+        <div className="sticky top-[120px] z-10 w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+            <section className="w-full px-5 py-4 overflow-hidden">
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-nowrap">
                     {topCategories.map((cat) => (
                         <button key={cat.id} onClick={() => trackCategoryClick(cat)} className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all">
                             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${cat.color || 'bg-blue-600'} border border-white/20 shadow-sm group-hover:brightness-110`}>
@@ -143,13 +148,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       )}
 
-      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (Z-INDEX ALTO — PASSA POR CIMA) */}
-      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (Z-INDEX ALTO — PASSA POR CIMA DAS CATEGORIAS) */}
+      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-15px_30px_rgba(0,0,0,0.1)] -mt-1">
         
         {/* CARROSSEL UNIFICADO */}
         {isFeatureActive('banner_highlights') && (
-            <section className="bg-white dark:bg-gray-950 w-full pt-4">
-            <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
+            <section className="bg-white dark:bg-gray-950 w-full pt-6">
+               <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
             </section>
         )}
 
@@ -205,32 +210,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md w-fit ${item.type === 'promotion' ? 'bg-red-50 text-red-600' : 'bg-purple-50 text-purple-600'}`}>{item.type}</span>
                             <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight mt-1">{item.title}</h3>
                             <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </section>
-
-        {/* ACHADOS E PERDIDOS */}
-        <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-            <div className="px-5 mb-3">
-                <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Pets e objetos que o bairro procura</p>
-            </div>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
-                {LOST_AND_FOUND_MOCK.map((item) => (
-                    <div key={item.id} className="flex-shrink-0 w-40 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm">
-                        <div className="h-28 bg-gray-100 dark:bg-gray-800 relative">
-                            <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                            <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${item.type === 'lost_pet' ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                                {item.type === 'lost_pet' ? 'Perdido' : 'Achado'}
-                            </div>
-                        </div>
-                        <div className="p-3 flex flex-col gap-1">
-                            <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                            <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                                <MapPin size={9} className="shrink-0" /> {item.location}
-                            </div>
                         </div>
                     </div>
                 ))}
