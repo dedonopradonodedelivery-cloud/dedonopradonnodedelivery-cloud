@@ -81,14 +81,10 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
-    // Se estiver em uma categoria, tenta filtrar banners daquela categoria primeiro
     if (isCategoryView) {
       const catPool = MOCK_BANNERS.filter(b => b.category === categoryName);
       if (catPool.length > 0) return catPool.slice(0, bannerCount);
     }
-    
-    // Na Home, mostra os 4 banners fixos solicitados
-    // A estrutura já permite filtrar por bairro futuramente
     const pool = MOCK_BANNERS.filter(b => b.neighborhood === 'Jacarepaguá (todos)' || b.neighborhood === currentNeighborhood);
     return pool.slice(0, bannerCount);
   }, [currentNeighborhood, categoryName, subcategoryName, bannerCount, isCategoryView]);
@@ -101,18 +97,13 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     return () => clearInterval(interval);
   }, [activeBanners.length]);
 
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [categoryName, subcategoryName, currentNeighborhood]);
-
   const handleBannerClick = (banner: BannerData) => {
-    // Busca a loja real ou cria o mock placeholder baseado no segmento
     const store = STORES.find(s => s.id === banner.storeId) || {
       id: banner.storeId,
       name: banner.title,
       category: banner.category,
       subcategory: banner.category,
-      description: `O melhor de ${banner.category.toLowerCase()} na região de Jacarepaguá. ${banner.subtitle}`,
+      description: banner.subtitle,
       adType: AdType.PREMIUM,
       rating: 4.9,
       distance: 'Perto de você',
@@ -120,58 +111,32 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
       verified: true,
       isOpenNow: true,
       image: banner.image,
-      logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(banner.title)}&background=random&color=fff`
+      logoUrl: '/assets/default-logo.png'
     };
-
     onStoreClick(store as Store);
   };
 
   if (activeBanners.length === 0) return null;
-
   const currentBanner = activeBanners[currentIndex];
 
   return (
-    <div className="px-5 mb-6 bg-white dark:bg-gray-950">
+    <div className="px-4 mb-6 bg-white dark:bg-gray-950 w-full overflow-hidden">
       <div 
         onClick={() => handleBannerClick(currentBanner)}
-        className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/11] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
         <div className="w-full h-full relative">
-          <img 
-            src={currentBanner.image} 
-            alt={currentBanner.title} 
-            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
-          />
+          <img src={currentBanner.image} alt={currentBanner.title} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none"></div>
-          
-          <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+          <div className="relative h-full flex flex-col justify-end p-6 text-white pointer-events-none">
             <div className="flex items-center gap-2 mb-2">
-               <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">
-                  {currentBanner.category}
-               </span>
+               <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">{currentBanner.category}</span>
             </div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
-              {currentBanner.title}
-            </h2>
-            <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
-              {currentBanner.subtitle}
-            </p>
-            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit">
-               <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
-            </div>
+            <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">{currentBanner.title}</h2>
+            <p className="text-[10px] font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm mb-4">{currentBanner.subtitle}</p>
+            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit"><span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span></div>
           </div>
         </div>
-
-        {activeBanners.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
-            {activeBanners.map((_, idx) => (
-              <div 
-                key={idx} 
-                className={`h-1 rounded-full transition-all duration-300 pointer-events-auto ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
