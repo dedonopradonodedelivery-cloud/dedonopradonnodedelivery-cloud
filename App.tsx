@@ -55,6 +55,7 @@ import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
 import { CategoriesPageView } from '@/components/CategoriesPageView';
 import { HealthPreFilterView } from '@/components/HealthPreFilterView';
+import { HealthSubSpecialtiesView } from '@/components/HealthSubSpecialtiesView';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -130,7 +131,7 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'all_categories' && view !== 'health_pre_filter') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'all_categories' && view !== 'health_pre_filter' && !view.startsWith('health_')) {
       setPreviousTab(activeTab);
     }
     
@@ -230,8 +231,14 @@ const App: React.FC = () => {
   };
 
   const handleHealthPreFilterChoice = (option: string) => {
-      setHealthPreFilter(option);
-      handleNavigate('category_detail');
+      if (option === 'MULHER') handleNavigate('health_woman');
+      else if (option === 'HOMEM') handleNavigate('health_man');
+      else if (option === 'PEDIATRIA') handleNavigate('health_pediatrics');
+      else if (option === 'GERIATRIA') handleNavigate('health_geriatrics');
+      else {
+          setHealthPreFilter(null);
+          handleNavigate('category_detail');
+      }
   };
 
   const handleSelectSubcategory = (subName: string, parentCat: Category) => {
@@ -259,7 +266,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -322,6 +329,50 @@ const App: React.FC = () => {
                         <HealthPreFilterView 
                             onBack={() => handleNavigate('home')} 
                             onSelectOption={handleHealthPreFilterChoice}
+                        />
+                    )}
+
+                    {activeTab === 'health_woman' && (
+                        <HealthSubSpecialtiesView 
+                            title="Saúde da Mulher"
+                            subtitle="Cuidado Feminino"
+                            themeColor="text-pink-500"
+                            specialties={['Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana', 'Fertilidade feminina', 'Planejamento familiar', 'Saúde sexual feminina', 'Saúde íntima feminina', 'Climatério', 'Menopausa', 'Ginecologia oncológica', 'Ginecologia endócrina', 'Uroginecologia', 'Colposcopia', 'Patologia do trato genital inferior', 'Medicina fetal', 'Pré-natal de alto risco', 'Dor pélvica crônica']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                        />
+                    )}
+
+                    {activeTab === 'health_man' && (
+                        <HealthSubSpecialtiesView 
+                            title="Saúde do Homem"
+                            subtitle="Cuidado Masculino"
+                            themeColor="text-blue-500"
+                            specialties={['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina', 'Fertilidade masculina', 'Saúde prostática', 'Distúrbios hormonais masculinos', 'Urologia oncológica', 'Urologia funcional', 'Saúde do envelhecimento masculino', 'Infertilidade masculina', 'Disfunção erétil', 'Ejaculação precoce', 'Hipogonadismo']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                        />
+                    )}
+
+                    {activeTab === 'health_pediatrics' && (
+                        <HealthSubSpecialtiesView 
+                            title="Pediatria"
+                            subtitle="Cuidado Infantil"
+                            themeColor="text-teal-500"
+                            specialties={['Pediatria geral', 'Neonatologia', 'Puericultura', 'Pediatria preventiva', 'Alergologia pediátrica', 'Endocrinologia pediátrica', 'Neuropediatria', 'Gastroenterologia pediátrica', 'Pneumologia pediátrica', 'Cardiologia pediátrica', 'Nefrologia pediátrica', 'Hematologia pediátrica', 'Oncologia pediátrica', 'Infectologia pediátrica', 'Reumatologia pediátrica', 'Genética médica pediátrica', 'Psiquiatria infantil', 'Ortopedia pediátrica', 'Cirurgia pediátrica']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                        />
+                    )}
+
+                    {activeTab === 'health_geriatrics' && (
+                        <HealthSubSpecialtiesView 
+                            title="Geriatria"
+                            subtitle="Melhor Idade"
+                            themeColor="text-amber-500"
+                            specialties={['Geriatria', 'Clínica geriátrica', 'Gerontologia', 'Medicina do envelhecimento', 'Fisioterapia geriátrica', 'Fisioterapia domiciliar', 'Enfermagem domiciliar', 'Home care', 'Cuidados paliativos', 'Cuidados continuados', 'Psicologia geriátrica', 'Psiquiatria geriátrica', 'Terapia ocupacional geriátrica', 'Fonoaudiologia geriátrica', 'Nutrição geriátrica', 'Reabilitação geriátrica', 'Ortopedia geriátrica', 'Cardiologia geriátrica', 'Neurologia geriátrica', 'Avaliação multidisciplinar do idoso']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
                         />
                     )}
 
