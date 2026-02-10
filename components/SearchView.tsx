@@ -32,14 +32,17 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
       const matchCat = normalize(s.category).includes(term);
       const matchSub = s.subcategory ? normalize(s.subcategory).includes(term) : false;
       const matchTags = s.tags?.some(tag => normalize(tag).includes(term));
+      const matchDesc = s.description ? normalize(s.description).includes(term) : false;
+      
       const matchNeighborhood = currentNeighborhood === 'Jacarepaguá (todos)' || s.neighborhood === currentNeighborhood;
-      return (matchName || matchCat || matchSub || matchTags) && matchNeighborhood;
+      return (matchName || matchCat || matchSub || matchTags || matchDesc) && matchNeighborhood;
     });
 
     const filteredClassifieds = MOCK_CLASSIFIEDS.filter(c => {
       const matchTitle = normalize(c.title).includes(term);
       const matchDesc = normalize(c.description).includes(term);
       const matchCat = normalize(c.category).includes(term);
+      
       const matchNeighborhood = currentNeighborhood === 'Jacarepaguá (todos)' || c.neighborhood === currentNeighborhood;
       return (matchTitle || matchDesc || matchCat) && matchNeighborhood;
     });
@@ -59,18 +62,18 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
         <div className="flex flex-col gap-5">
             <div>
                 <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Buscar</h1>
-                <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Busca Global no Bairro</p>
+                <p className="text-[10px] text-[#1E5BFF] font-bold uppercase tracking-widest mt-1">Busca Global no Bairro</p>
             </div>
             
             <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-[#1E5BFF] transition-colors" />
                 <input 
                   ref={inputRef}
                   type="text" 
                   value={searchTerm} 
                   onChange={(e) => setSearchTerm(e.target.value)} 
                   placeholder="Lojas, serviços, produtos, classificados..." 
-                  className="w-full bg-gray-100 dark:bg-gray-800 border-none py-4 pl-12 pr-4 rounded-2xl text-base font-medium text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/30 transition-all shadow-inner" 
+                  className="w-full bg-gray-100 dark:bg-gray-800 border-none py-4 pl-12 pr-4 rounded-2xl text-base font-medium text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner" 
                 />
             </div>
 
@@ -85,7 +88,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                       onClick={() => setActiveType(tab.id as any)}
                       className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
                         activeType === tab.id 
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20' 
+                          ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-md shadow-blue-500/20' 
                           : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-700'
                       }`}
                     >
@@ -103,7 +106,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
             <div className="flex flex-col items-center justify-center pt-20 text-center opacity-40">
                 <Search size={64} className="text-gray-300 mb-6" />
                 <h3 className="text-lg font-bold text-gray-400 uppercase tracking-widest">O que você busca em JPA?</h3>
-                <p className="text-sm text-gray-400 mt-2 max-w-xs mx-auto">Digite acima para encontrar comércios, vagas de emprego, doações, desapegos e muito mais.</p>
+                <p className="text-sm text-gray-400 mt-2 max-w-xs mx-auto">Encontre comércios, vagas de emprego, doações, desapegos e muito mais.</p>
             </div>
         ) : isEmpty ? (
             <div className="flex flex-col items-center justify-center pt-20 text-center animate-in zoom-in duration-300">
@@ -111,8 +114,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                     <SearchX size={32} className="text-gray-300" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tighter">Nenhum resultado</h3>
-                <p className="text-sm text-gray-400 mt-2 max-w-[240px]">Não encontramos nada para "{searchTerm}" em {currentNeighborhood}.</p>
-                <button onClick={() => setSearchTerm('')} className="mt-8 text-blue-600 font-black text-[10px] uppercase tracking-widest border-b border-blue-600 pb-1">Limpar Busca</button>
+                <p className="text-sm text-gray-400 mt-2 max-w-[240px]">Não encontramos nada para "{searchTerm}" em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}.</p>
+                <button onClick={() => setSearchTerm('')} className="mt-8 text-[#1E5BFF] font-black text-[10px] uppercase tracking-widest border-b border-[#1E5BFF] pb-1">Limpar Busca</button>
             </div>
         ) : (
             <div className="space-y-10">
@@ -136,7 +139,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-1.5 mb-1">
                                             <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
-                                            {store.verified && <Tag size={10} className="text-blue-500 fill-blue-500" />}
+                                            {store.verified && <Tag size={10} className="text-[#1E5BFF] fill-[#1E5BFF]" />}
                                         </div>
                                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight truncate">{store.category} • {store.neighborhood}</p>
                                         <div className="flex items-center gap-3 mt-2">
