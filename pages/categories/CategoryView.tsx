@@ -50,13 +50,13 @@ const BigSurCard: React.FC<{
 const ProfileButton: React.FC<{ label: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick }) => (
     <button 
         onClick={onClick}
-        className={`w-full aspect-[4/3] rounded-[2rem] flex flex-col items-center justify-center gap-4 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
+        className={`w-full aspect-[4/3] lg:aspect-square rounded-[1.5rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center gap-2 lg:gap-6 ${color} text-white shadow-xl hover:scale-[1.05] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
     >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-        <div className="relative z-10 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
-            {React.cloneElement(icon as any, { size: 32, strokeWidth: 2 })}
+        <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6"></div>
+        <div className="relative z-10 w-10 h-10 lg:w-20 lg:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
+            {React.cloneElement(icon as any, { className: "w-6 h-6 lg:w-10 lg:h-10", strokeWidth: 2.5 })}
         </div>
-        <span className="relative z-10 font-black text-lg uppercase tracking-tight">{label}</span>
+        <span className="relative z-10 font-black text-sm lg:text-xl uppercase tracking-tighter">{label}</span>
     </button>
 );
 
@@ -176,28 +176,36 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
       onBack();
   };
 
-  // TELA DE SELEÇÃO PARA CATEGORIA SAÚDE
+  // TELA DE SELEÇÃO PARA CATEGORIA SAÚDE (TOTALMENTE RESPONSIVA E FIXA)
   if (category.slug === 'saude') {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
-            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="h-[100dvh] bg-gray-50 dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300 overflow-hidden">
+            {/* Header Fixo */}
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0 z-30">
                 <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
                 </button>
                 <h1 className="font-bold text-lg text-gray-900 dark:text-white">Saúde</h1>
             </div>
 
-            <div className="p-6 space-y-6">
-                <div className="text-center mb-8 mt-4">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para ver o cuidado ideal.</p>
+            {/* Container Centralizado com Altura Dinâmica para caber tudo sem scroll */}
+            <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 max-w-6xl mx-auto w-full pb-[100px] lg:pb-32">
+                <div className="text-center mb-6 lg:mb-16 shrink-0">
+                    <h2 className="text-2xl lg:text-4xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
+                    <p className="text-sm lg:text-lg text-gray-500 dark:text-gray-400 font-medium">Escolha uma opção para ver o cuidado ideal.</p>
                 </div>
 
-                <div className="grid gap-4">
+                {/* Grid Responsivo: 2x2 no mobile, 4 em linha no desktop */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 w-full max-w-4xl">
                     <ProfileButton label="Mulher" icon={<User />} color="bg-pink-500" onClick={() => onSubcategoryClick('Mulher')} />
                     <ProfileButton label="Homem" icon={<User />} color="bg-blue-600" onClick={() => onSubcategoryClick('Homem')} />
                     <ProfileButton label="Pediatria" icon={<Baby />} color="bg-amber-500" onClick={() => onSubcategoryClick('Pediatria')} />
                     <ProfileButton label="Geriatria" icon={<HeartHandshake />} color="bg-emerald-600" onClick={() => onSubcategoryClick('Geriatria')} />
+                </div>
+
+                <div className="mt-8 lg:mt-16 bg-blue-50/50 dark:bg-blue-900/10 p-4 lg:px-8 lg:py-4 rounded-3xl border border-blue-100 dark:border-blue-800/30 flex items-center gap-3 shrink-0">
+                    <ShieldCheck className="w-5 h-5 text-blue-500" />
+                    <p className="text-[10px] lg:text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-widest leading-none">Profissionais verificados por morador</p>
                 </div>
             </div>
         </div>
@@ -212,7 +220,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
               <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
               </button>
-              <h1 className="font-bold text-lg text-gray-900 dark:text-white">Autos</h1>
+              <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                {React.isValidElement(category.icon) ? React.cloneElement(category.icon as React.ReactElement<{ className?: string }>, {className: 'w-5 h-5'}) : null} {category.name}
+              </h1>
           </div>
 
           <div className="p-6 space-y-6">
@@ -221,7 +231,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                   <p className="text-sm text-gray-500 dark:text-gray-400">Encontre o serviço ideal para o seu automóvel.</p>
               </div>
 
-              <div className="grid gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:max-w-3xl lg:mx-auto">
                   <ProfileButton label="Carro" icon={<ImageIcon />} color="bg-blue-600" onClick={() => setAutosProfile('Carro')} />
                   <ProfileButton label="Moto" icon={<ImageIcon />} color="bg-orange-500" onClick={() => setAutosProfile('Moto')} />
               </div>
@@ -247,7 +257,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
       </div>
 
-      <div className="p-5 pt-0 space-y-8">
+      <div className="p-5 pt-0 space-y-8 max-w-4xl mx-auto">
         <section>
             <div className="grid grid-cols-4 gap-3">
               {subcategories.map((sub, i) => (
