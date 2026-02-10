@@ -188,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* CAMADA 1.5 — BARRA DE BUSCA (STICKY QUE SOBREPOE O BRANDING) */}
         <div className="sticky top-0 z-[30] w-full max-w-md mx-auto mt-[60px]">
-            <div className="bg-[#1E5BFF] dark:bg-blue-950 px-5 pb-2 pt-1">
+            <div className="bg-[#1E5BFF] dark:bg-blue-950 px-5 pb-1 pt-1">
                 <div className="relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 

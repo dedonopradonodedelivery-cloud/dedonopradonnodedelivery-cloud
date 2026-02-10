@@ -50,7 +50,7 @@ const COUPONS_MOCK = [
   { id: 'cp-3', storeName: 'Pizzaria do Zé', logo: 'https://ui-avatars.com/api/?name=Pizzaria+Ze&background=22C55E&color=fff', discount: 'Entrega Grátis' }
 ];
 
-const LOST_AND_FOUND_MOCK = [
+const LOOK_AND_FOUND_MOCK = [
   { id: 'lf1', type: 'lost_pet', title: 'Pinscher Totó', location: 'Praça Seca', image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?q=80&w=200&auto=format&fit=crop' },
   { id: 'lf2', type: 'found_item', title: 'Chaves de Carro', location: 'Freguesia', image: 'https://images.unsplash.com/photo-1583574883377-2f3b9220556b?q=80&w=200&auto=format&fit=crop' }
 ];
@@ -135,13 +135,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* ESPAÇADOR COMPACTADO PARA O CABEÇALHO FIXO + BUSCA STICKY (~100px) */}
-      <div className="h-[100px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
+      {/* ESPAÇADOR COMPACTADO PARA O CABEÇALHO FIXO + BUSCA STICKY (~95px) */}
+      <div className="h-[95px] shrink-0 bg-[#1E5BFF] dark:bg-blue-950"></div>
 
       {/* CAMADA 2 — CATEGORIAS */}
       {isFeatureActive('explore_guide') && (
         <section 
-            className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-2 pb-10 px-5 overflow-hidden z-10"
+            className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-0 pb-10 px-5 overflow-hidden z-10"
             style={{ transform: `translateY(${categoryTranslateY}px)` }}
         >
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-nowrap">
