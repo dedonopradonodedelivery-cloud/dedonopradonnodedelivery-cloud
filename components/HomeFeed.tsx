@@ -210,7 +210,7 @@ const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | 
     const isLost = item.type === 'lost_pet';
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-t-[2rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 bg-black/20 text-white rounded-full backdrop-blur-md">
                     <X size={20} />
                 </button>
@@ -513,6 +513,13 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <div className="px-5">
             <FifaBanner onClick={() => setWizardStep(1)} />
           </div>
+        </section>
+      )}
+
+      {/* NOVO POSICIONAMENTO: CARROSSEL DE BANNERS (ABAIXO DE SERVIÇOS) */}
+      {isFeatureActive('banner_highlights') && (
+        <section className="bg-white dark:bg-gray-950 w-full">
+          <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
         </section>
       )}
 

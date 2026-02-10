@@ -87,26 +87,28 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const [isSwiping, setIsSwiping] = useState(false);
   const minSwipeDistance = 50;
 
+  // REGRA: No máximo 3 banners na Home
   const bannerCount = useMemo(() => {
-    return isCategoryView ? 2 : 4;
+    return isCategoryView ? 2 : 3;
   }, [isCategoryView]);
 
   const activeBanners = useMemo(() => {
+    let pool = MOCK_BANNERS;
     if (isCategoryView) {
-      const catPool = MOCK_BANNERS.filter(b => b.category === categoryName);
-      if (catPool.length > 0) return catPool.slice(0, bannerCount);
+      pool = MOCK_BANNERS.filter(b => b.category === categoryName);
+    } else {
+      pool = MOCK_BANNERS.filter(b => b.neighborhood === 'Jacarepaguá (todos)' || b.neighborhood === currentNeighborhood);
     }
-    const pool = MOCK_BANNERS.filter(b => b.neighborhood === 'Jacarepaguá (todos)' || b.neighborhood === currentNeighborhood);
     return pool.slice(0, bannerCount);
   }, [currentNeighborhood, categoryName, subcategoryName, bannerCount, isCategoryView]);
 
-  // Autoplay Logic
+  // Autoplay Logic - Aumentado para 8 segundos (Não rápida)
   useEffect(() => {
     if (activeBanners.length <= 1 || isPaused) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
-    }, 5000);
+    }, 8000);
     
     return () => clearInterval(interval);
   }, [activeBanners.length, isPaused]);
@@ -122,7 +124,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
     pauseTimeoutRef.current = setTimeout(() => {
       setIsPaused(false);
-    }, 5000); // Retoma após 5s
+    }, 8000);
   };
 
   const nextSlide = () => {
@@ -138,7 +140,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   // Handlers de Toque (Mobile)
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.targetTouches[0].clientX;
-    touchEndX.current = null; // Reset end
+    touchEndX.current = null;
     resetAutoplayTimer();
   };
 
@@ -151,15 +153,13 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     const distance = touchStartX.current - touchEndX.current;
     
     if (Math.abs(distance) > minSwipeDistance) {
-      setIsSwiping(true); // Marca como swipe para evitar clique
+      setIsSwiping(true);
       if (distance > 0) {
-        // Swipe Left -> Next
         setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
       } else {
-        // Swipe Right -> Prev
         setCurrentIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
       }
-      setTimeout(() => setIsSwiping(false), 200); // Reseta flag após breve delay
+      setTimeout(() => setIsSwiping(false), 200);
     }
     resetAutoplayTimer();
   };
@@ -188,7 +188,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   };
 
   const handleBannerClick = (banner: BannerData) => {
-    if (isSwiping) return; // Evita clique se foi um arrasto
+    if (isSwiping) return;
 
     const store = STORES.find(s => s.id === banner.storeId) || {
       id: banner.storeId,
@@ -214,7 +214,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const currentBanner = activeBanners[currentIndex];
 
   return (
-    <div className="px-5 mb-6 bg-white dark:bg-gray-950">
+    <div className="px-5 pb-6 pt-2 bg-white dark:bg-gray-950">
       <div 
         className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
         onTouchStart={onTouchStart}
@@ -254,7 +254,6 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
 
         {activeBanners.length > 1 && (
           <>
-            {/* Setas de Navegação (Discretas) */}
             <button 
                 onClick={(e) => { e.stopPropagation(); prevSlide(); }}
                 className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
@@ -268,7 +267,6 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
                 <ChevronRight size={20} strokeWidth={3} />
             </button>
 
-            {/* Indicadores de Posição */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
               {activeBanners.map((_, idx) => (
                 <div 
