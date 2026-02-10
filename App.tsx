@@ -217,7 +217,6 @@ const App: React.FC = () => {
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
     
-    // REFA: Interceptação da categoria Saúde
     if (category.id === 'cat-saude') {
         handleNavigate('health_pre_filter');
         return;
@@ -339,7 +338,7 @@ const App: React.FC = () => {
                             themeColor="text-pink-500"
                             specialties={['Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana', 'Fertilidade feminina', 'Planejamento familiar', 'Saúde sexual feminina', 'Saúde íntima feminina', 'Climatério', 'Menopausa', 'Ginecologia oncológica', 'Ginecologia endócrina', 'Uroginecologia', 'Colposcopia', 'Patologia do trato genital inferior', 'Medicina fetal', 'Pré-natal de alto risco', 'Dor pélvica crônica']}
                             onBack={() => handleNavigate('health_pre_filter')}
-                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                            onSelectStore={handleSelectStore}
                         />
                     )}
 
@@ -350,7 +349,7 @@ const App: React.FC = () => {
                             themeColor="text-blue-500"
                             specialties={['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina', 'Fertilidade masculina', 'Saúde prostática', 'Distúrbios hormonais masculinos', 'Urologia oncológica', 'Urologia funcional', 'Saúde do envelhecimento masculino', 'Infertilidade masculina', 'Disfunção erétil', 'Ejaculação precoce', 'Hipogonadismo']}
                             onBack={() => handleNavigate('health_pre_filter')}
-                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                            onSelectStore={handleSelectStore}
                         />
                     )}
 
@@ -361,7 +360,7 @@ const App: React.FC = () => {
                             themeColor="text-teal-500"
                             specialties={['Pediatria geral', 'Neonatologia', 'Puericultura', 'Pediatria preventiva', 'Alergologia pediátrica', 'Endocrinologia pediátrica', 'Neuropediatria', 'Gastroenterologia pediátrica', 'Pneumologia pediátrica', 'Cardiologia pediátrica', 'Nefrologia pediátrica', 'Hematologia pediátrica', 'Oncologia pediátrica', 'Infectologia pediátrica', 'Reumatologia pediátrica', 'Genética médica pediátrica', 'Psiquiatria infantil', 'Ortopedia pediátrica', 'Cirurgia pediátrica']}
                             onBack={() => handleNavigate('health_pre_filter')}
-                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                            onSelectStore={handleSelectStore}
                         />
                     )}
 
@@ -372,7 +371,7 @@ const App: React.FC = () => {
                             themeColor="text-amber-500"
                             specialties={['Geriatria', 'Clínica geriátrica', 'Gerontologia', 'Medicina do envelhecimento', 'Fisioterapia geriátrica', 'Fisioterapia domiciliar', 'Enfermagem domiciliar', 'Home care', 'Cuidados paliativos', 'Cuidados continuados', 'Psicologia geriátrica', 'Psiquiatria geriátrica', 'Terapia ocupacional geriátrica', 'Fonoaudiologia geriátrica', 'Nutrição geriátrica', 'Reabilitação geriátrica', 'Ortopedia geriátrica', 'Cardiologia geriátrica', 'Neurologia geriátrica', 'Avaliação multidisciplinar do idoso']}
                             onBack={() => handleNavigate('health_pre_filter')}
-                            onSelectOption={(spec) => { setHealthPreFilter(spec); handleNavigate('category_detail'); }}
+                            onSelectStore={handleSelectStore}
                         />
                     )}
 
