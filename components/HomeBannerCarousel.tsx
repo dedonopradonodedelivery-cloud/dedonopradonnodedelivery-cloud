@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Store, AdType } from '../types';
 import { STORES } from '../constants';
@@ -179,4 +178,26 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
           </div>
         )}
 
-        {/* BARRA DE PROGRESSO: TRAÇO E PONTOS (
+        {/* BARRA DE PROGRESSO: TRAÇO E PONTOS CENTRALIZADA */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-2 z-20 pointer-events-none">
+          {activeBanners.map((_, idx) => (
+            <div key={idx} className="relative flex items-center justify-center">
+              {idx === currentIndex ? (
+                /* Traço Ativo com Preenchimento Animado */
+                <div className="w-10 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div 
+                    key={currentIndex} 
+                    className="h-full bg-white animate-progress"
+                  ></div>
+                </div>
+              ) : (
+                /* Ponto Inativo */
+                <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40"></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
