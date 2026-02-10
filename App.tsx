@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/layout/Layout';
+import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
 import { ExploreView } from '@/components/ExploreView';
 import { StoreDetailView } from '@/components/StoreDetailView';
@@ -53,6 +53,7 @@ import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
 import { SearchView } from '@/components/SearchView';
+import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
 import { MapPin, X, Palette, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -106,6 +107,7 @@ const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   
   const [activityType, setActivityType] = useState<string>('');
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
@@ -332,7 +334,24 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header 
+                        isDarkMode={theme === 'dark'} 
+                        toggleTheme={() => {}} 
+                        onNotificationClick={() => handleNavigate('notifications')} 
+                        user={user} 
+                        searchTerm={globalSearch} 
+                        onSearchChange={setGlobalSearch} 
+                        onNavigate={handleNavigate} 
+                        activeTab={activeTab} 
+                        userRole={userRole as any} 
+                        stores={STORES} 
+                        onStoreClick={handleSelectStore} 
+                        isAdmin={isAdmin} 
+                        viewMode={viewMode} 
+                        onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)}
+                        onSelectCategory={handleSelectCategory}
+                        onOpenMoreCategories={() => setIsMoreCategoriesOpen(true)}
+                    />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
@@ -550,6 +569,14 @@ const App: React.FC = () => {
                     {activeTab === 'about_app' && <AboutAppView onBack={() => handleNavigate('profile')} />}
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+                  <MoreCategoriesModal 
+                    isOpen={isMoreCategoriesOpen} 
+                    onClose={() => setIsMoreCategoriesOpen(false)} 
+                    onSelectCategory={(cat) => {
+                        handleSelectCategory(cat);
+                        setIsMoreCategoriesOpen(false);
+                    }} 
+                  />
               </Layout>
               <RoleSwitcherModal />
           </div>
