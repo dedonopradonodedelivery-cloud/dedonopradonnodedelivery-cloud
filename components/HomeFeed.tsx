@@ -36,7 +36,8 @@ import {
   Lightbulb,
   User as UserIcon,
   ShoppingBag,
-  Search
+  Search,
+  Briefcase
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -597,6 +598,30 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
     );
 };
 
+const JobsMiniBanner: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  return (
+    <div className="px-5 mb-6 pt-2">
+      <div 
+        onClick={() => onNavigate('jobs')}
+        className="w-full aspect-[16/2] bg-slate-50 dark:bg-gray-900 rounded-2xl flex items-center px-5 gap-4 border border-gray-100 dark:border-gray-800 cursor-pointer active:scale-[0.99] transition-all shadow-sm group"
+      >
+        <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-[#1E5BFF] shadow-sm shrink-0">
+          <Briefcase size={18} strokeWidth={2.5} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
+            Vagas de emprego no bairro
+          </h3>
+          <p className="text-[9px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest mt-1">
+            Empresas locais e talentos da região
+          </p>
+        </div>
+        <ChevronRight size={14} className="text-gray-300 group-hover:text-[#1E5BFF] transition-colors" />
+      </div>
+    </div>
+  );
+};
+
 const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | null; userRole: string | null }> = ({ onNavigate, user, userRole }) => {
   
   const handleCouponClick = () => {
@@ -689,7 +714,7 @@ const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({
                 className="snap-start shrink-0 w-[90%] md:w-[360px]"
                 onClick={() => alert(`Explorar ${item.title}`)}
             >
-                <div className={`relative aspect-[16/4] w-full rounded-[2rem] overflow-hidden shadow-sm flex items-center p-4 group cursor-pointer bg-gradient-to-r ${item.color}`}>
+                <div className={`relative aspect-[16/4] w-full rounded-[2rem] overflow-hidden shadow-sm flex items-center p-4 group cursor-pointer bg-gradient-to-r ${item.color || 'from-blue-600 to-indigo-700'}`}>
                     {/* Imagem de Fundo (se houver) */}
                     {item.image && (
                         <img 
@@ -882,6 +907,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* NOVO POSICIONAMENTO: ACHADOS E PERDIDOS */}
       <LostAndFoundSection onItemClick={setSelectedLostItem} />
 
+      {/* NOVO MINI-BANNER: VAGAS DE EMPREGO */}
+      <JobsMiniBanner onNavigate={onNavigate} />
+
       {/* NOVO POSICIONAMENTO: GUIAS DO BAIRRO */}
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
@@ -930,7 +958,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-xl"><CheckCircle2 size={40} /></div>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto!</h3>
                 <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais notificados.</p>
-                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Ver propostas</button>
+                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-[0.98] transition-all">Ver propostas</button>
             </div>
           )}
         </section>
