@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
@@ -12,21 +13,36 @@ import { MenuView } from './components/MenuView';
 import { AuthModal } from './components/AuthModal';
 import { GeminiAssistant } from './components/GeminiAssistant';
 import { HealthImmersiveView } from './components/HealthImmersiveView';
+import { SplashScreen } from './components/layout/SplashScreen';
 // Import STORES and CATEGORIES to resolve missing names errors
 import { STORES, CATEGORIES } from './constants';
 import { Store, Category } from './types';
 
-// Complete implementation of App component to fix missing names and lack of default export
 const App: React.FC = () => {
-  const { user, userRole } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
+  const { user, userRole, loading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState('splash');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [healthProfile, setHealthProfile] = useState<'Mulher' | 'Homem' | 'Pediatria' | 'Geriatria' | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
-  // Handle navigation between different views within the app
+  // Lógica de Splash Screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 2500); // 2.5 segundos de tempo mínimo
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Só sai do splash se o tempo mínimo passou E o auth terminou de carregar
+    if (minTimeElapsed && !authLoading && activeTab === 'splash') {
+      setActiveTab('home');
+    }
+  }, [minTimeElapsed, authLoading, activeTab]);
+
   const handleNavigate = (view: string, data?: any) => {
     setActiveTab(view);
     if (view === 'store_detail' && data?.store) {
@@ -34,22 +50,24 @@ const App: React.FC = () => {
     }
   };
 
-  // Handle high-level category selection from Home or Header
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
     setActiveTab('category_detail');
   };
 
-  // Handle specific store selection
   const handleSelectStore = (store: Store) => {
     setSelectedStore(store);
     setActiveTab('store_detail');
   };
 
-  // Logic for selecting subcategories, specifically handling health immersive redirects
   const handleSelectSubcategory = (subName: string, category: Category) => {
       console.log('Subcategory selected:', subName, 'in', category.name);
   };
+
+  // Se estiver no modo Splash, renderiza apenas a Splash Screen
+  if (activeTab === 'splash') {
+    return <SplashScreen />;
+  }
 
   return (
     <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole as any}>
@@ -70,7 +88,6 @@ const App: React.FC = () => {
       />
       
       <main className="flex-1">
-        {/* Conditional rendering of app views based on activeTab state */}
         {activeTab === 'home' && (
           <HomeFeed 
             onNavigate={handleNavigate}
@@ -105,7 +122,6 @@ const App: React.FC = () => {
             onNavigate={handleNavigate}
             onSubcategoryClick={(subName) => {
                if (selectedCategory.slug === 'saude') {
-                  // subName aqui é Mulher | Homem | Pediatria | Geriatria
                   setHealthProfile(subName as any);
                   handleNavigate('health_immersive');
                } else {
@@ -161,10 +177,8 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Gemini Assistant available across the app */}
       <GeminiAssistant />
 
-      {/* Unified authentication modal */}
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
@@ -175,5 +189,4 @@ const App: React.FC = () => {
   );
 };
 
-// Fixed: Added default export for index.tsx
 export default App;
