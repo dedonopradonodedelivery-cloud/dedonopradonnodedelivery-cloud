@@ -20,21 +20,21 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
       {/* Unified Professional Service Central */}
       <div 
         onClick={onClick}
-        className="relative w-full overflow-hidden rounded-[2.5rem] py-7 px-7 shadow-2xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
+        className="relative w-full overflow-hidden rounded-[2.5rem] pt-20 pb-8 px-7 shadow-2xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
       >
         {/* Background Layer - Deep Brand Blue with Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#1248E0] to-[#0A2E99]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1248E0] via-[#1E5BFF] to-[#0A2E99]"></div>
         
         {/* Abstract Background Decoration */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'radial-gradient(circle, #fff 0.5px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-          <div className="absolute -top-20 -right-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px] animate-pulse"></div>
+          <div className="absolute -top-20 -right-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px]"></div>
         </div>
 
         {/* Shimmer Effect for Premium Feeling */}
         <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/5 to-transparent rotate-45 animate-slow-shimmer pointer-events-none"></div>
 
-        <div className="relative z-10 flex flex-col gap-6">
+        <div className="relative z-20 flex flex-col gap-6">
           {/* Header Area */}
           <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/40 shadow-xl">
@@ -48,7 +48,7 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
 
           {/* Text Content */}
           <div className="space-y-1.5">
-            <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter max-w-[280px]">
+            <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter max-w-[280px] drop-shadow-lg">
               Precisa de um <br/> profissional agora?
             </h2>
             <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-80 max-w-[260px]">

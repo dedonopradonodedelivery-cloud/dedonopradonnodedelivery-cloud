@@ -72,7 +72,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
       subtitle: 'Receba propostas de especialistas perto de você em Jacarepaguá.',
       cta: 'Receber orçamentos',
       image: 'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-      bgColor: 'bg-gradient-to-br from-[#1E5BFF] via-[#1248E0] to-[#0A2E99]',
+      bgColor: 'bg-gradient-to-br from-[#1248E0] via-[#1E5BFF] to-[#0A2E99]',
       neighborhood: 'Jacarepaguá (todos)'
     };
 
@@ -185,7 +185,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none"></div>
           
-          <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+          <div className={`relative h-full flex flex-col ${current.type === 'service' ? 'justify-start pt-20' : 'justify-end'} p-8 text-white pointer-events-none z-10`}>
             {current.type === 'service' ? (
               <div className="space-y-4">
                  <div className="flex items-center gap-3">
@@ -198,7 +198,7 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
                     </div>
                  </div>
                  <div className="space-y-1.5">
-                    <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter max-w-[240px]">
+                    <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter max-w-[240px] drop-shadow-lg">
                       Precisa de um <br/> profissional agora?
                     </h2>
                     <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-80 max-w-[240px]">
