@@ -25,7 +25,7 @@ const MOCK_BANNERS: BannerData[] = [
     title: 'PRECISA DE UM PROFISSIONAL NO SEU BAIRRO?',
     subtitle: 'Especialistas verificados, orçamentos rápidos e atendimento perto de você.',
     cta: 'SOLICITAR ORÇAMENTO GRÁTIS',
-    bgColor: 'bg-gradient-to-br from-[#020617] to-[#1E5BFF]',
+    bgColor: 'bg-gradient-to-br from-[#020617] via-[#081431] to-[#1E5BFF]',
     neighborhood: 'Jacarepaguá (todos)',
     category: 'SERVIÇOS VERIFICADOS'
   },
@@ -120,32 +120,31 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
         className={`relative aspect-[16/11] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
         {currentBanner.type === 'services' ? (
-          /* DESIGN CUSTOMIZADO: SERVIÇOS VERIFICADOS */
+          /* DESIGN: SERVIÇOS VERIFICADOS */
           <div className="w-full h-full relative flex flex-col p-8">
             {/* Textura Dot Pattern */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1.5px)', backgroundSize: '20px 20px' }}></div>
+            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1.5px)', backgroundSize: '16px 16px' }}></div>
             
-            {/* Topo: Badge */}
+            {/* Topo: Badge & Ícone Tool */}
             <div className="relative z-10 flex justify-between items-start">
-               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 shadow-xl">
-                 <Sparkles size={12} className="text-blue-400" />
-                 <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">{currentBanner.category}</span>
+               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-xl">
+                 <Sparkles size={14} className="text-blue-400" />
+                 <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{currentBanner.category}</span>
                </div>
                
-               {/* Ícone Lateral Direito */}
                <div className="relative">
-                 <div className="w-12 h-12 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center justify-center shadow-2xl">
-                    <Wrench size={24} className="text-white drop-shadow-lg" />
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-[#020617] shadow-lg">
-                      <Check size={10} className="text-white" strokeWidth={4} />
+                 <div className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-[1.25rem] border border-white/10 flex items-center justify-center shadow-2xl">
+                    <Wrench size={28} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-[#020617] shadow-lg">
+                      <Check size={12} className="text-white" strokeWidth={4} />
                     </div>
                  </div>
                </div>
             </div>
 
-            {/* Centro: Conteúdo */}
-            <div className="flex-1 flex flex-col justify-center relative z-10">
-               <h2 className="text-xl font-black text-white leading-tight uppercase tracking-tighter max-w-[220px] mb-2 drop-shadow-md">
+            {/* Centro: Título e Descrição */}
+            <div className="flex-1 flex flex-col justify-center relative z-10 text-center items-center">
+               <h2 className="text-2xl font-black text-white leading-[1.1] uppercase tracking-tighter max-w-[260px] mb-3 drop-shadow-md">
                  {currentBanner.title}
                </h2>
                <p className="text-[11px] text-blue-100/70 font-medium leading-relaxed max-w-[240px]">
@@ -153,11 +152,11 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
                </p>
             </div>
 
-            {/* Base: Botão de Ação */}
-            <div className="relative z-10 flex justify-center pb-2">
-               <div className="bg-white text-[#020617] font-black py-3.5 px-6 rounded-2xl shadow-2xl flex items-center gap-2 active:scale-95 transition-transform">
-                 <span className="text-[10px] uppercase tracking-widest">{currentBanner.cta}</span>
-                 <ArrowRight size={14} strokeWidth={3} />
+            {/* Base: Botão CTA */}
+            <div className="relative z-10 flex justify-center mb-6">
+               <div className="bg-white text-[#020617] font-black py-4 px-8 rounded-2xl shadow-2xl flex items-center gap-2 active:scale-95 transition-transform">
+                 <span className="text-[11px] uppercase tracking-widest">{currentBanner.cta}</span>
+                 <ArrowRight size={16} strokeWidth={3} />
                </div>
             </div>
           </div>
@@ -167,9 +166,9 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             {currentBanner.image && (
                 <img src={currentBanner.image} alt={currentBanner.title} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 pointer-events-none" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
             
-            <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+            <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none pb-12">
                 <div className="flex items-center gap-2 mb-2">
                 <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">{currentBanner.category}</span>
                 </div>
@@ -180,14 +179,4 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
           </div>
         )}
 
-        {/* BARRA DE PROGRESSO INTERNA COMUM */}
-        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white/30 z-20">
-            <div 
-                key={currentIndex}
-                className="h-full bg-white animate-progress"
-            ></div>
-        </div>
-      </div>
-    </div>
-  );
-};
+        {/* BARRA DE PROGRESSO: TRAÇO E PONTOS (
