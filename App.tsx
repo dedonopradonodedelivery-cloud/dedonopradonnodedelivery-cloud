@@ -30,6 +30,7 @@ import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
 import { CategoryView } from '@/pages/categories/CategoryView';
+import { HealthImmersiveView } from '@/components/HealthImmersiveView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
@@ -71,19 +72,6 @@ const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
-const FeatureUnavailableView: React.FC<{ onBack: () => void }> = ({ onBack }) => (
-    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] flex items-center justify-center mb-6 text-[#1E5BFF]">
-            <AlertCircle size={40} />
-        </div>
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Acesso Restrito</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs leading-relaxed mb-10">
-            Esta funcionalidade não está disponível no momento.
-        </p>
-        <button onClick={onBack} className="w-full max-w-xs bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Voltar ao Início</button>
-    </div>
-);
-
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
@@ -106,6 +94,10 @@ const App: React.FC = () => {
   const [classifiedSearchTerm, setClassifiedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
+  
+  // Health Flow Specific States
+  const [healthProfile, setHealthProfile] = useState<'Mulher' | 'Homem' | 'Pediatria' | 'Geriatria' | null>(null);
+
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   
@@ -168,7 +160,7 @@ const App: React.FC = () => {
         return;
     }
 
-    if (!['sponsor_info', 'notifications', 'patrocinador_master', 'real_estate_detail', 'job_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'coupon_landing', 'feature_unavailable'].includes(view)) {
+    if (!['sponsor_info', 'notifications', 'patrocinador_master', 'real_estate_detail', 'job_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'coupon_landing', 'feature_unavailable', 'health_immersive'].includes(view)) {
       setPreviousTab(activeTab);
     }
     
@@ -271,50 +263,7 @@ const App: React.FC = () => {
     setIsClaimFlowActive(true);
   };
 
-  const handleClaimSuccess = () => {
-    setIsClaimFlowActive(false);
-    handleNavigate('profile');
-  };
-
-  const handlePlanSuccess = (plan: PlanType) => {
-      localStorage.setItem('merchant_plan', plan);
-      handleNavigate('profile');
-  };
-
-  const headerExclusionList = ['search', 'store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'feature_unavailable'];
-  
-  const RoleSwitcherModal: React.FC = () => {
-    if (!isRoleSwitcherOpen) return null;
-    return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
-            <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
-                <div className="flex justify-between items-start mb-8 px-2">
-                    <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
-                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
-                </div>
-                <div className="space-y-3">
-                    {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
-                        <button 
-                          key={role} 
-                          onClick={() => { 
-                            setViewMode(role); 
-                            localStorage.setItem('admin_view_mode', role); 
-                            setIsRoleSwitcherOpen(false); 
-                            if (role === 'Lojista') setActiveTab('profile'); 
-                            else if (role === 'ADM') setActiveTab('admin_panel'); 
-                            else if (role === 'Designer') setActiveTab('designer_panel');
-                            else setActiveTab('home'); 
-                          }} 
-                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
-                        >
-                            <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-  };
+  const headerExclusionList = ['search', 'store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'feature_unavailable', 'health_immersive'];
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
@@ -326,7 +275,7 @@ const App: React.FC = () => {
               store={storeToClaim} 
               userId={user.id} 
               onBack={() => setIsClaimFlowActive(false)} 
-              onSuccess={handleClaimSuccess}
+              onSuccess={() => { setIsClaimFlowActive(false); handleNavigate('profile'); }}
               onNavigate={handleNavigate}
             />
           )}
@@ -357,89 +306,7 @@ const App: React.FC = () => {
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'search' && <SearchView onStoreClick={handleSelectStore} onClassifiedClick={(item) => handleNavigate('classified_detail', { item })} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
-                    {activeTab === 'feature_unavailable' && <FeatureUnavailableView onBack={() => handleNavigate('home')} />}
                     
-                    {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
-                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}
-
-                    {activeTab === 'service_messages_list' && (
-                        <ServiceMessagesListView 
-                            onBack={() => handleNavigate('home')}
-                            onOpenChat={(reqId, proId) => handleNavigate('service_chat', { requestId: reqId, professionalId: proId, role: 'resident' })}
-                        />
-                    )}
-
-                    {activeTab === 'weekly_reward_page' && (
-                        <WeeklyRewardPage 
-                            onBack={() => handleNavigate('home')} 
-                            onNavigate={handleNavigate}
-                        />
-                    )}
-                    
-                    {activeTab === 'coupon_landing' && (
-                        <CouponLandingView 
-                           onBack={() => handleNavigate('home')}
-                           onLogin={() => setIsAuthOpen(true)}
-                        />
-                    )}
-
-                    {activeTab === 'user_coupons' && (
-                        <UserCupomScreen 
-                            onBack={() => handleNavigate('profile')}
-                            onNavigate={handleNavigate}
-                            onStoreClick={handleSelectStore}
-                        />
-                    )}
-
-                    {activeTab === 'user_statement' && (
-                        <UserStatementView 
-                            onBack={() => handleNavigate('profile')}
-                            onExploreStores={() => handleNavigate('explore')}
-                        />
-                    )}
-
-                    {activeTab === 'notifications' && (
-                        <NotificationsView 
-                            onBack={() => handleNavigate('home')}
-                            onNavigate={handleNavigate}
-                            userRole={userRole as any}
-                        />
-                    )}
-
-                    {activeTab === 'banner_sales_wizard' && (
-                        <BannerSalesWizard 
-                            user={user} 
-                            onBack={() => handleNavigate('profile')} 
-                            onNavigate={handleNavigate}
-                        />
-                    )}
-                    
-                    {activeTab === 'store_ads_module' && (
-                        <StoreAdsModule 
-                           onBack={() => handleNavigate('profile')}
-                           onNavigate={handleNavigate}
-                           categoryName={undefined}
-                           user={user}
-                           viewMode={viewMode}
-                           initialView={initialModuleView}
-                        />
-                    )}
-                    
-                    {activeTab === 'store_sponsored' && (
-                        <StoreSponsoredAds 
-                           onBack={() => handleNavigate('profile')}
-                           onNavigate={handleNavigate}
-                        />
-                    )}
-
-                    {activeTab === 'category_banner_sales' && (
-                        <CategoryBannerSalesView 
-                            user={user} 
-                            onBack={() => handleNavigate('profile')} 
-                            onSuccess={() => handleNavigate('profile')}
-                        />
-                    )}
-
                     {activeTab === 'category_detail' && selectedCategory && (
                       <CategoryView 
                         category={selectedCategory} 
@@ -449,15 +316,33 @@ const App: React.FC = () => {
                         userRole={userRole as any} 
                         onAdvertiseInCategory={() => {}} 
                         onNavigate={handleNavigate}
-                        onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
+                        onSubcategoryClick={(subName) => {
+                           if (selectedCategory.slug === 'saude') {
+                              setHealthProfile(subName as any);
+                              handleNavigate('health_immersive');
+                           } else {
+                              handleSelectSubcategory(subName, selectedCategory);
+                           }
+                        }}
                       />
+                    )}
+
+                    {activeTab === 'health_immersive' && healthProfile && (
+                        <HealthImmersiveView 
+                           group={healthProfile}
+                           onBack={() => handleNavigate('category_detail')}
+                           onSelectSpecialty={(spec) => {
+                               setSelectedSubcategoryName(spec);
+                               handleNavigate('subcategory_detail');
+                           }}
+                        />
                     )}
 
                     {activeTab === 'subcategory_detail' && selectedSubcategoryName && selectedCategory && (
                       <SubcategoryDetailView 
                         subcategoryName={selectedSubcategoryName}
                         categoryName={selectedCategory.name}
-                        onBack={() => handleNavigate('category_detail')}
+                        onBack={() => handleNavigate(selectedCategory.slug === 'saude' ? 'health_immersive' : 'category_detail')}
                         onStoreClick={handleSelectStore}
                         stores={STORES}
                         userRole={userRole as any}
@@ -549,7 +434,7 @@ const App: React.FC = () => {
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
                     {activeTab === 'job_wizard' && <JobWizard user={user} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
-                    {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('profile')} onSuccess={handlePlanSuccess} />}
+                    {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('profile')} onSuccess={(p) => { handleNavigate('profile'); }} />}
                     {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
@@ -578,7 +463,37 @@ const App: React.FC = () => {
                     }} 
                   />
               </Layout>
-              <RoleSwitcherModal />
+              
+              {/* Role Switcher Modal */}
+              {isRoleSwitcherOpen && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+                    <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-start mb-8 px-2">
+                            <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
+                            <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                        </div>
+                        <div className="space-y-3">
+                            {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
+                                <button 
+                                  key={role} 
+                                  onClick={() => { 
+                                    setViewMode(role); 
+                                    localStorage.setItem('admin_view_mode', role); 
+                                    setIsRoleSwitcherOpen(false); 
+                                    if (role === 'Lojista') setActiveTab('profile'); 
+                                    else if (role === 'ADM') setActiveTab('admin_panel'); 
+                                    else if (role === 'Designer') setActiveTab('designer_panel');
+                                    else setActiveTab('home'); 
+                                  }} 
+                                  className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                                >
+                                    <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+              )}
           </div>
 
           {splashStage < 4 && (
