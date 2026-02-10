@@ -26,7 +26,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
     const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
     if (!isSelectorOpen) return null;
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
                 <div className="flex items-center gap-3 mb-6">
@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher
 }) => {
-  const { currentNeighborhood, toggleSelector } = useNeighborhood();
+  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const [isListening, setIsListening] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   
@@ -172,43 +172,43 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="w-full z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md relative">
+        <div className="w-full z-40 bg-[#1E5BFF] dark:bg-blue-950 relative">
             <div className="max-w-md mx-auto flex flex-col relative">
-                <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                <div className="flex items-center gap-2 px-4 pt-4 pb-1">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#1E5BFF] rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                        <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10">
                              <MapPin size={18} fill="currentColor" />
                         </div>
-                        <span className="font-display font-black text-lg text-slate-800 dark:text-white tracking-tight">
+                        <span className="font-display font-black text-lg text-white tracking-tight">
                             Localizei JPA
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 ml-auto">
                         {isAdmin && (
-                            <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
-                                <ShieldCheck size={14} className="text-amber-600 dark:text-amber-400" />
-                                <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 uppercase">{viewMode}</span>
+                            <button onClick={onOpenViewSwitcher} className="bg-amber-400 text-slate-900 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
+                                <ShieldCheck size={14} className="text-slate-900" />
+                                <span className="text-[10px] font-bold uppercase">{viewMode}</span>
                             </button>
                         )}
                         
                         <button 
                             onClick={toggleSelector}
-                            className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
+                            className="relative p-2.5 bg-white/10 dark:bg-white/5 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
                         >
                             <Plus size={22} />
                             {currentNeighborhood !== "Jacarepaguá (todos)" && (
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-[#1E5BFF] rounded-full border border-white dark:border-gray-900"></span>
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full border border-[#1E5BFF]"></span>
                             )}
                         </button>
 
                         <button 
                             onClick={onNotificationClick}
-                            className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-[#1E5BFF] transition-all active:scale-90"
+                            className="relative p-2.5 bg-white/10 dark:bg-white/5 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
                         >
                             <Bell size={22} className={unreadCount > 0 ? 'animate-wiggle' : ''} />
                             {unreadCount > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-lg animate-in zoom-in duration-300">
+                                <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg animate-in zoom-in duration-300">
                                     <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
@@ -218,9 +218,9 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
         </div>
 
-        <div className="sticky top-0 z-50 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm">
+        <div className="sticky top-0 z-50 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[2.5rem]">
             <div className="max-w-md mx-auto">
-                <div className="flex items-center gap-3 px-4 pt-2 pb-3">
+                <div className="flex items-center gap-3 px-4 pt-2 pb-5">
                     <div className="relative flex-1 group">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <input 
@@ -228,20 +228,20 @@ export const Header: React.FC<HeaderProps> = ({
                           value={searchTerm} 
                           onChange={(e) => onSearchChange(e.target.value)} 
                           placeholder={dynamicPlaceholder} 
-                          className="block w-full pl-10 pr-12 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
+                          className="block w-full pl-10 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-3.5 shadow-xl" 
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                           {searchTerm && (
                             <button 
                               onClick={() => onSearchChange('')}
-                              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
                             >
                               <X size={16} />
                             </button>
                           )}
                           <button 
                             onClick={startVoiceSearch}
-                            className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF] dark:hover:text-[#1E5BFF]'}`}
+                            className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-[#1E5BFF]'}`}
                           >
                             <Mic size={18} strokeWidth={isListening ? 3 : 2} />
                           </button>
@@ -280,8 +280,8 @@ export const Header: React.FC<HeaderProps> = ({
                                     ) : (
                                         <div className="py-8 px-4 text-center">
                                             <SearchX className="w-6 h-6 text-gray-300 mx-auto mb-3" />
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">Não encontramos lojas com esse termo no bairro.</p>
-                                            <p className="text-xs text-gray-500 mt-1">Tente buscar por loja, categoria ou produto.</p>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">Não encontramos nada com esse termo.</p>
+                                            <p className="text-xs text-gray-500 mt-1">Tente buscar por categoria ou produto.</p>
                                         </div>
                                     )}
                                 </div>

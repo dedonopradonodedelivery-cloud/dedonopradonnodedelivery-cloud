@@ -46,7 +46,7 @@ const HAPPENING_NOW_MOCK = [
 
 const COUPONS_MOCK = [
   { id: 'cp-1', storeName: 'Bibi Lanches', logo: 'https://ui-avatars.com/api/?name=Bibi+Lanches&background=FF6B00&color=fff', discount: '15% OFF' },
-  { id: 'cp-2', storeName: 'Studio Hair', logo: 'https://ui-avatars.com/api/?name=Studio+Hair&background=BC1F66&color=fff', discount: 'R$ 20,00' },
+  { id: 'cp-2', storeName: 'Studio Hair Vip', logo: 'https://ui-avatars.com/api/?name=Studio+Hair&background=BC1F66&color=fff', discount: 'R$ 20,00' },
   { id: 'cp-3', storeName: 'Pizzaria do Zé', logo: 'https://ui-avatars.com/api/?name=Pizzaria+Ze&background=22C55E&color=fff', discount: 'Entrega Grátis' }
 ];
 
@@ -90,32 +90,37 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
-  // Lógica de Categorias Dinâmicas baseada em Score de Cliques
+  // Lógica de Categorias Dinâmicas com Fallback Específico
   const topCategories = useMemo(() => {
     const statsStr = localStorage.getItem(STATS_KEY);
     const stats: Record<string, number> = statsStr ? JSON.parse(statsStr) : {};
     
-    // Fallback inicial se não houver dados
-    const fallbackIds = ['cat-saude', 'cat-autos', 'cat-pets', 'cat-moda', 'cat-beleza'];
+    // Ordem de Fallback solicitada: Saúde, Autos, Pets, Beleza, Moda
+    const fallbackIds = ['cat-saude', 'cat-autos', 'cat-pets', 'cat-beleza', 'cat-moda'];
     
-    // Mapeia todas as categorias com seus scores
+    // Mapeia todas as categorias com seus scores e o índice original de fallback para desempate
     const scoredCategories = CATEGORIES.map(cat => ({
       ...cat,
-      score: stats[cat.id] || 0
+      score: stats[cat.id] || 0,
+      fallbackIndex: fallbackIds.indexOf(cat.id)
     }));
 
-    // Ordena por score decrescente
-    scoredCategories.sort((a, b) => b.score - a.score);
-
-    // Se ninguém tem cliques, retorna o fallback
-    const hasAnyClicks = scoredCategories.some(c => c.score > 0);
-    if (!hasAnyClicks) {
-      return fallbackIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
-    }
+    // Critérios de Ordenação:
+    // 1. Maior score de cliques primeiro
+    // 2. Em caso de empate, priorizar pela ordem do fallback solicitado
+    // 3. Outras categorias ficam por último
+    scoredCategories.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      
+      const idxA = a.fallbackIndex === -1 ? 99 : a.fallbackIndex;
+      const idxB = b.fallbackIndex === -1 ? 99 : b.fallbackIndex;
+      
+      return idxA - idxB;
+    });
 
     // Retorna as 5 principais dinâmicas
     return scoredCategories.slice(0, 5);
-  }, [isMoreCategoriesOpen]); // Recomputa quando o modal fecha, pois pode ter havido novos cliques
+  }, [isMoreCategoriesOpen]);
 
   const trackCategoryClick = (cat: Category) => {
     const statsStr = localStorage.getItem(STATS_KEY);
@@ -128,10 +133,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* 1) LINHA DE CATEGORIAS DINÂMICAS (TOP SHORTCUTS) */}
+      {/* 1) LINHA DE CATEGORIAS DINÂMICAS (TOP SHORTCUTS) - LINHA ÚNICA COM SCROLL */}
       {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-2 border-b border-gray-50 dark:border-gray-900">
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5">
+        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-2 border-b border-gray-50 dark:border-gray-900 overflow-hidden">
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar px-5 flex-nowrap">
                 {topCategories.map((cat) => (
                     <button 
                         key={cat.id} 
@@ -147,7 +152,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     </button>
                 ))}
                 
-                {/* Botão + Mais Fixo */}
+                {/* Botão + Mais Fixo no Final */}
                 <button 
                     onClick={() => setIsMoreCategoriesOpen(true)}
                     className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all"
@@ -175,7 +180,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
             </div>
-            <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
+            <button onClick={() => onNavigate('coupon_landing')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
          </div>
          <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
             {COUPONS_MOCK.map((coupon) => (

@@ -46,14 +46,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     return (
       <Icon 
         size={24}
-        className={`transition-all duration-300 ${isActive ? 'text-white scale-110' : 'text-white/50'}`} 
+        className={`transition-all duration-300 ${isActive ? 'text-[#1E5BFF] scale-110' : 'text-gray-400'}`} 
         strokeWidth={isActive ? 2.5 : 2} 
       />
     );
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.2)] border-t border-white/10 px-2">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.08)] border-t border-gray-100 dark:border-gray-800 px-2">
       <div 
         className="grid w-full h-full"
         style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
@@ -74,10 +74,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                 {renderIcon(item, isActive)}
               </div>
               <span className={`font-black uppercase tracking-tighter text-[9px] transition-all ${
-                isActive ? 'text-white opacity-100' : 'text-white/50'
+                isActive ? 'text-[#1E5BFF]' : 'text-gray-400'
               }`}>
                 {item.label}
               </span>
+              {isActive && (
+                <div className="w-1 h-1 bg-[#1E5BFF] rounded-full mt-1"></div>
+              )}
             </button>
           );
         })}
