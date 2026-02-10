@@ -82,7 +82,6 @@ export const Header: React.FC<HeaderProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
 
-  // Monitoramento do scroll para colapsar o header
   useEffect(() => {
     const scrollContainer = document.querySelector('.overflow-y-auto');
     if (!scrollContainer) return;
@@ -160,24 +159,30 @@ export const Header: React.FC<HeaderProps> = ({
           className={`sticky top-0 z-40 w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md rounded-b-[2.5rem] transition-all duration-300 ease-in-out ${isCollapsed ? 'pb-2 rounded-b-[1.5rem]' : 'pb-6'}`}
         >
             <div className="max-w-md mx-auto flex flex-col relative">
-                {/* LINHA 1: TOPBAR (SOME AO SCROLL) */}
+                {/* LINHA 1: TOPBAR */}
                 <div className={`flex items-center justify-between px-5 pt-5 pb-2 transition-all duration-300 overflow-hidden ${isCollapsed ? 'max-h-0 opacity-0 -translate-y-full' : 'max-h-20 opacity-100 translate-y-0'}`}>
-                    <button onClick={toggleSelector} className="flex items-center gap-2 active:scale-95 transition-transform">
-                        <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md border border-white/10 shadow-sm text-white">
-                            <MapPin className="w-4 h-4" fill="currentColor" />
-                        </div>
-                        <div className="text-left flex flex-col">
-                            <span className="text-[10px] text-white/60 font-black uppercase leading-none tracking-widest">Localização</span>
-                            <div className="flex items-center gap-1">
-                                <span className="text-sm font-black text-white leading-tight truncate max-w-[120px]">
-                                    {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-                                </span>
-                                <ChevronDown className="w-3.5 h-3.5 text-white/60" />
-                            </div>
-                        </div>
-                    </button>
-
+                    {/* ESQUERDA: LOGO + TEXTO */}
                     <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
+                            <MapPin className="w-6 h-6 text-[#1E5BFF]" fill="currentColor" />
+                        </div>
+                        <div className="flex flex-col">
+                            <h1 className="text-lg font-black text-white leading-none tracking-tighter">Localizei JPA</h1>
+                            <span className="text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Jacarepaguá</span>
+                        </div>
+                    </div>
+
+                    {/* DIREITA: "+" (Filtro) -> Sino -> Merchant Button */}
+                    <div className="flex items-center gap-2">
+                        {/* BOTÃO "+" PARA FILTRO DE BAIRROS */}
+                        <button 
+                            onClick={toggleSelector}
+                            className="p-2.5 bg-white/10 rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all active:scale-90"
+                            title="Filtrar por bairro"
+                        >
+                            <Plus size={22} strokeWidth={3} />
+                        </button>
+
                         {isAdmin && (
                             <button onClick={onOpenViewSwitcher} className="bg-amber-400 text-slate-900 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
                                 <ShieldCheck size={14} />
@@ -192,13 +197,6 @@ export const Header: React.FC<HeaderProps> = ({
                                     <span className="text-[9px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
-                        </button>
-
-                        <button onClick={() => onNavigate('profile')} className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1 pl-3 rounded-full border border-white/10 shadow-sm active:scale-95 transition-all">
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">{user ? 'Perfil' : 'Entrar'}</span>
-                            <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-sm border border-white/20">
-                                {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4" />}
-                            </div>
                         </button>
                     </div>
                 </div>
@@ -267,7 +265,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* LINHA 3: CATEGORIAS (HORIZONTAL STRIP - SOME AO SCROLL) */}
+                {/* LINHA 3: CATEGORIAS (HORIZONTAL STRIP) */}
                 {activeTab === 'home' && (
                     <div className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-5 transition-all duration-300 overflow-hidden ${isCollapsed ? 'max-h-0 opacity-0 translate-y-4' : 'max-h-24 opacity-100 translate-y-0 pt-2'}`}>
                         {topCategories.map((cat) => (
