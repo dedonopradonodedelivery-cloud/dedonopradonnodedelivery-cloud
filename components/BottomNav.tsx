@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { Home, User as UserIcon, Newspaper, Search } from 'lucide-react';
+import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFeatures, FeatureKey } from '../contexts/FeatureContext';
 
@@ -21,23 +21,34 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const { user } = useAuth();
   const { isFeatureActive } = useFeatures();
 
-  // 1) Barra de navegação fixa inferior com Início, Buscar, Classificados e Perfil
+  // Lista completa de itens com mapeamento para chaves do ADM
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
-    { id: 'search', icon: Search, label: 'Buscar' }, 
+    { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', featureKey: 'community_feed' },
+    { id: 'coupons_trigger', icon: Ticket, label: 'Cupom', featureKey: 'coupons' }, 
     { id: 'classifieds', icon: Newspaper, label: 'Classificados', featureKey: 'classifieds' },
-    { id: 'profile', icon: UserIcon, label: 'Perfil' },
+    { id: 'profile', icon: UserIcon, label: 'Menu' }, // Menu sempre visível
   ];
 
+  // FILTRAGEM LÓGICA: Fonte de verdade é o ADM (FeatureContext)
+  // A barra é remontada dinamicamente quando o status de uma funcionalidade muda
   const activeNavItems = useMemo(() => {
     return allNavItems.filter(item => {
-      if (!item.featureKey) return true; 
+      if (!item.featureKey) return true; // Itens sem chave (Menu) são obrigatórios
       return isFeatureActive(item.featureKey);
     });
   }, [isFeatureActive]);
 
   const handleTabClick = (id: string) => {
-    setActiveTab(id);
+    if (id === 'coupons_trigger') {
+      if (userRole === 'lojista') {
+        setActiveTab('merchant_coupons');
+      } else {
+        setActiveTab('user_coupons');
+      }
+    } else {
+      setActiveTab(id);
+    }
   };
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
@@ -46,16 +57,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       const photoUrl = user.user_metadata?.avatar_url;
 
       return (
-        <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center transition-all duration-300 border-2 ${
+        <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
           isActive 
-            ? 'border-[#1E5BFF] scale-110 shadow-lg' 
-            : 'border-gray-200 dark:border-gray-700'
+            ? 'border-white scale-110 shadow-lg' 
+            : 'border-white/20 opacity-70'
         }`}>
           {photoUrl ? (
             <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className={`w-full h-full flex items-center justify-center text-[11px] font-black ${
-              isActive ? 'bg-[#1E5BFF] text-white' : 'bg-gray-100 text-gray-400'
+              isActive ? 'bg-white text-[#1E5BFF]' : 'bg-white/20 text-white'
             }`}>
               {userInitial}
             </div>
@@ -67,11 +78,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     const Icon = item.icon;
     return (
       <Icon 
-        size={24}
-        className={`transition-all duration-300 ${
+        className={`w-6 h-6 transition-all duration-300 ${
           isActive 
-            ? 'text-[#1E5BFF] scale-110' 
-            : 'text-gray-400 dark:text-gray-600'
+            ? 'text-white opacity-100 drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]' 
+            : 'text-white opacity-70'
         }`} 
         strokeWidth={isActive ? 2.5 : 2} 
       />
@@ -79,36 +89,35 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[28px] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] border-t border-gray-100 dark:border-gray-800">
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_30px_rgba(0,0,0,0.3)] border-t border-white/10">
       <div 
-        className="grid w-full h-full px-2"
+        className="grid w-full h-full"
         style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
       >
         {activeNavItems.map((item) => {
-          const isProfileTab = (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'user_profile_full', 'edit_profile_view', 'user_coupons', 'merchant_coupons'].includes(activeTab));
-          const isActive = activeTab === item.id || isProfileTab;
+          const isCouponTab = (item.id === 'coupons_trigger' && (activeTab === 'user_coupons' || activeTab === 'merchant_coupons'));
+          const isProfileTab = (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'user_profile_full', 'edit_profile_view'].includes(activeTab));
+          const isActive = activeTab === item.id || isCouponTab || isProfileTab;
 
           return (
-            <button 
-              key={item.id}
-              onClick={() => handleTabClick(item.id)} 
-              className="w-full h-full flex flex-col items-center justify-center gap-1 active:scale-95 transition-all outline-none group" 
-              aria-label={item.label}
-            >
-              <div className="relative flex items-center justify-center h-8">
-                {renderIconOrAvatar(item, isActive)}
-                {isActive && (
-                    <div className="absolute -bottom-1 w-1 h-1 bg-[#1E5BFF] rounded-full"></div>
-                )}
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-widest transition-all ${
-                isActive 
-                  ? 'text-[#1E5BFF] translate-y-0.5' 
-                  : 'text-gray-400 dark:text-gray-600'
-              }`}>
-                {item.label}
-              </span>
-            </button>
+            <div key={item.id} className="flex justify-center items-center h-full">
+               <button 
+                onClick={() => handleTabClick(item.id)} 
+                className="w-full h-full flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform outline-none" 
+                aria-label={item.label}
+              >
+                <div className="flex items-center justify-center h-8">
+                  {renderIconOrAvatar(item, isActive)}
+                </div>
+                <span className={`text-[9px] font-black uppercase tracking-tighter transition-all ${
+                  isActive 
+                    ? 'text-white opacity-100 scale-105' 
+                    : 'text-white opacity-70'
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            </div>
           );
         })}
       </div>

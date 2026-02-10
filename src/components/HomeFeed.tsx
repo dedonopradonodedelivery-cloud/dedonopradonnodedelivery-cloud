@@ -33,8 +33,7 @@ import {
   Star,
   Scissors,
   BookOpen,
-  Lightbulb,
-  User as UserIcon
+  Lightbulb
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -44,7 +43,6 @@ import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
-import { MoreCategoriesModal } from './MoreCategoriesModal';
 
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
@@ -53,11 +51,9 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
   'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
   'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
-  'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800', // Parque/Verde
-  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Moda/Cotidiano
-  'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800', // Escritório/Pro
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Interior/Casa
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800', // Prédio
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
 ];
 
 const getFallbackImage = (id: string) => {
@@ -209,52 +205,42 @@ const COUPONS_MOCK = [
   }
 ];
 
-interface Talent {
-    id: string;
-    title: string;
-    image: string;
-    neighborName: string;
-    neighborAvatar: string;
-    whatsapp: string;
-    category: string;
-}
-
-const TALENTS_MOCK: Talent[] = [
+const TALENTS_MOCK = [
   {
     id: 't1',
-    title: 'Bolos da Dona Cida',
+    name: 'Dona Cida',
+    description: 'Bolos de pote e caseiros',
+    distance: 'a 200m de você',
     image: 'https://images.unsplash.com/photo-1563729768601-d6fa48b04873?q=80&w=400&auto=format&fit=crop',
-    neighborName: 'Maria Aparecida',
-    neighborAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    category: 'Doces Caseiros'
+    badge: 'Fornada de hoje'
   },
   {
     id: 't2',
-    title: 'Reparos Rápidos do Jorge',
+    name: 'Jorge Eletricista',
+    description: 'Reparos rápidos em tomadas',
+    distance: 'a 450m de você',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format&fit=crop',
-    neighborName: 'Jorge Silva',
-    neighborAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    category: 'Marido de Aluguel'
+    badge: 'Disponível hoje'
   },
   {
     id: 't3',
-    title: 'Unhas da Carol',
+    name: 'Carol Manicure',
+    description: 'Unhas em gel e tradicional',
+    distance: 'a 800m de você',
     image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=400&auto=format&fit=crop',
-    neighborName: 'Carolina Mendes',
-    neighborAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    category: 'Manicure'
+    badge: 'Agenda aberta'
   },
-  {
+   {
     id: 't4',
-    title: 'Passeio com Cães',
+    name: 'Matheus',
+    description: 'Passeio com cães (Dog Walker)',
+    distance: 'a 300m de você',
     image: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea92d5?q=80&w=400&auto=format&fit=crop',
-    neighborName: 'Matheus Oliveira',
-    neighborAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
-    category: 'Dog Walker'
+    badge: null
   }
 ];
 
@@ -291,6 +277,16 @@ const LOST_AND_FOUND_MOCK = [
   }
 ];
 
+interface Talent {
+    id: string;
+    name: string;
+    description: string;
+    distance: string;
+    image: string;
+    whatsapp: string;
+    badge: string | null;
+}
+
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
@@ -319,43 +315,38 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
 
 const TalentCard: React.FC<{ talent: Talent }> = ({ talent }) => {
     const handleWhatsapp = () => {
-        const text = encodeURIComponent(`Olá ${talent.neighborName}, vi seu anúncio "${talent.title}" no app do bairro!`);
+        const text = encodeURIComponent("Oi, vi seu anúncio no app do bairro e fiquei interessado 😊");
         window.open(`https://wa.me/${talent.whatsapp}?text=${text}`, '_blank');
     };
 
     return (
-        <div className="flex-shrink-0 w-56 snap-center">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full group">
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-                    <img src={talent.image} alt={talent.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-                        {talent.category}
-                    </div>
-                </div>
-                
-                <div className="p-3 flex flex-col gap-3 flex-1">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">
-                        {talent.title}
-                    </h3>
-
-                    <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-50 dark:border-gray-800">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm shrink-0">
-                            <img src={talent.neighborAvatar} alt={talent.neighborName} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none">{talent.neighborName}</span>
-                            <span className="text-[9px] text-green-600 dark:text-green-400 font-bold mt-0.5 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Feito pelo vizinho
+        <div className="flex-shrink-0 w-40 snap-center">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full relative group">
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
+                    <img src={talent.image} alt={talent.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+                    {talent.badge && (
+                        <div className="absolute top-2 left-2 right-2 text-center">
+                            <span className="text-[8px] font-bold bg-green-500 text-white px-2 py-1 rounded-full uppercase tracking-wide shadow-sm truncate block border border-white/20">
+                                {talent.badge}
                             </span>
                         </div>
+                    )}
+                    <div className="absolute bottom-2 left-3 right-2 text-white">
+                        <p className="text-xs font-bold truncate drop-shadow-md">{talent.name}</p>
+                        <p className="text-[9px] font-medium opacity-90 truncate drop-shadow-sm">{talent.distance}</p>
                     </div>
-
+                </div>
+                <div className="p-3 flex flex-col gap-3 flex-1 justify-between bg-white dark:bg-gray-900">
+                    <p className="text-[10px] text-gray-600 dark:text-gray-300 leading-tight line-clamp-2 font-medium min-h-[2.5em]">
+                        {talent.description}
+                    </p>
                     <button 
                         onClick={handleWhatsapp}
-                        className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm mt-1"
+                        className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm"
                     >
                         <MessageCircle size={14} className="fill-white" />
-                        <span className="text-[10px] font-black uppercase tracking-wide">Falar no WhatsApp</span>
+                        <span className="text-[9px] font-black uppercase tracking-wide">WhatsApp</span>
                     </button>
                 </div>
             </div>
@@ -368,7 +359,7 @@ const TalentsSection: React.FC = () => {
         <section className="py-6 border-t border-gray-100 dark:border-gray-800">
             <div className="px-5 mb-4">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Talentos do Bairro</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Feito pelo vizinho</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Gente do bairro criando, fazendo e vendendo perto de você.</p>
             </div>
             <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {TALENTS_MOCK.map(t => <TalentCard key={t.id} talent={t} />)}
@@ -473,7 +464,7 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
         <>
             <div className="py-6 border-b border-gray-100 dark:border-gray-800">
                 <div className="px-5 mb-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Dicas pro Bairro</h2>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Guias do Bairro</h2>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Dicas rápidas para usar melhor o app</p>
                 </div>
                 <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
@@ -504,15 +495,13 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
 
 const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
     return (
-        <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-            <div className="px-5 mb-3 flex items-center justify-between">
-               <div>
-                  <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Pets e objetos que o bairro procura</p>
-               </div>
+        <section className="py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
+            <div className="px-5 mb-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">Achados e Perdidos</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Animais e itens que alguém do bairro está procurando.</p>
             </div>
             
-            <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {LOST_AND_FOUND_MOCK.map((item) => {
                     const isLost = item.type === 'lost_pet';
                     const Icon = isLost ? Dog : Key;
@@ -521,29 +510,26 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
                         <div 
                             key={item.id}
                             onClick={() => onItemClick(item)}
-                            className="flex-shrink-0 w-40 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm"
+                            className="flex-shrink-0 w-64 bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 cursor-pointer active:scale-95 transition-all group snap-center"
                         >
-                            <div className="h-28 bg-gray-100 dark:bg-gray-800 relative">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                            <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden relative shrink-0">
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white ${isLost ? 'bg-orange-500' : 'bg-emerald-500'}`}>
                                     {isLost ? 'Perdido' : 'Achado'}
                                 </div>
                             </div>
-                            <div className="p-3 flex flex-col gap-1">
-                                <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                                    <Icon size={10} />
-                                    <span className="text-[8px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
+                            <div className="flex-1 flex flex-col justify-center min-w-0">
+                                <div className="flex items-center gap-1.5 mb-1 text-gray-400">
+                                    <Icon size={12} />
+                                    <span className="text-[10px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
                                 </div>
-                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                                <div className="flex flex-col gap-0.5 mt-0.5">
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                                        <MapPin size={9} className="shrink-0" /> {item.location}
-                                    </div>
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium">
-                                        <Clock size={9} className="shrink-0" /> {item.time}
-                                    </div>
+                                <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate mb-1">{item.title}</h3>
+                                <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
+                                    <span className="flex items-center gap-0.5 truncate max-w-[80px]"><MapPin size={10} /> {item.location}</span>
+                                    <span>•</span>
+                                    <span>{item.time}</span>
                                 </div>
-                                <span className="text-[9px] font-bold text-[#1E5BFF] mt-1.5 group-hover:underline">Ver detalhes</span>
+                                <span className="text-[10px] font-bold text-[#1E5BFF] mt-2 block group-hover:underline">Ver detalhes</span>
                             </div>
                         </div>
                     );
@@ -553,64 +539,44 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
     );
 };
 
-const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | null; userRole: string | null }> = ({ onNavigate, user, userRole }) => {
-  
-  const handleCouponClick = () => {
-    if (user) {
-        onNavigate(userRole === 'lojista' ? 'merchant_coupons' : 'user_coupons');
-    } else {
-        onNavigate('coupon_landing');
-    }
-  };
-
+const CouponsBlock: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   return (
-    <div className="py-2"> {/* Reduced vertical padding on main wrapper */}
-       <div className="flex items-center justify-between mb-1 px-5"> {/* Tightened margin */}
+    <div className="py-4">
+       <div className="flex items-center justify-between mb-3 px-5">
          <div>
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
          </div>
-         <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
+         <button onClick={() => onNavigate('coupon_landing')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       {/* Increased top padding to accommodate floating logo */}
-       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
-              onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
+              onClick={() => onNavigate('coupon_landing')}
+              className="relative flex-shrink-0 w-36 h-48 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center snap-center active:scale-95 transition-transform cursor-pointer overflow-hidden group"
             >
-               {/* Floating Logo - Half in / Half out */}
-               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
-                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
+               {/* Recortes laterais (Holes) */}
+               {/* Eles usam a cor do fundo da página (bg-white ou dark:bg-gray-950) para parecer um furo */}
+               <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10 box-content"></div>
+               <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10 box-content"></div>
+
+               {/* Linha pontilhada no meio */}
+               <div className="absolute top-1/2 left-2 right-2 border-t-2 border-dashed border-gray-100 dark:border-gray-700 z-0"></div>
+
+               <div className="w-full h-1/2 flex flex-col items-center justify-end pb-3 z-10 px-2 text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-600 mb-2">
+                     <img src={coupon.logo} alt={coupon.storeName} className="w-full h-full object-cover" />
                   </div>
+                  <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 truncate w-full">{coupon.storeName}</span>
                </div>
-
-               {/* Card Body - More Square-ish */}
-               <div className="w-full h-40 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
-                  
-                  {/* Side Holes */}
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10"></div>
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10"></div>
-
-                  {/* Content */}
-                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cupom</span>
-                      <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
-                         {coupon.discount}
-                      </span>
-                  </div>
-
-                  {/* CTA - Special Style (Folded Corner Effect via rounded-tl-none) */}
-                  <div className="w-full z-10">
-                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden">
-                         {/* Dotted decorative line on the left */}
-                         <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-white/20"></div>
-                         Pegar cupom
-                     </button>
-                  </div>
+               
+               <div className="w-full h-1/2 flex flex-col items-center justify-start pt-3 z-10 px-2 bg-gray-50/50 dark:bg-gray-800/50">
+                  <h3 className="text-base font-black text-gray-900 dark:text-white leading-none mb-3 text-center">{coupon.discount}</h3>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm shadow-blue-500/20 group-active:scale-95 transition-all">
+                     Pegar
+                  </button>
                </div>
             </div>
           ))}
@@ -702,48 +668,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
   const itemsPerPage = 8; 
-  
-  // State for the "More" modal
-  const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
   const orderedCategories = useMemo(() => {
-    // Definindo as 8 categorias principais para a primeira página
-    const firstPageIds = [
-      'cat-servicos', 
-      'cat-alimentacao', 
-      'cat-restaurantes', 
-      'cat-mercados', 
-      'cat-farmacias', 
-      'cat-autos', 
-      'cat-moda', 
-      'cat-beleza'
-    ];
-    
+    const firstPageIds = ['cat-saude', 'cat-fashion', 'cat-pets', 'cat-pro', 'cat-beauty', 'cat-autos', 'cat-sports', 'cat-edu'];
     const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
     const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
     return [...firstPage, ...remaining];
   }, []);
 
   const categoryPages = useMemo(() => {
-    // Configurar para 2 páginas: 15 categorias + botão Mais (total 16 itens, 8 por página)
-    const visibleCategories = orderedCategories.slice(0, 15);
-    
-    // Adicionar o botão "Mais" como último item
-    const moreItem: Category = { 
-        id: 'more-trigger', 
-        name: 'Mais', 
-        slug: 'more', 
-        icon: <Plus />, 
-        color: 'bg-gray-100 dark:bg-gray-800' 
-    };
-    
-    const allItems = [...visibleCategories, moreItem];
-    
     const pages = [];
-    for (let i = 0; i < allItems.length; i += itemsPerPage) {
-        pages.push(allItems.slice(i, i + itemsPerPage));
-    }
-    
+    for (let i = 0; i < orderedCategories.length; i += itemsPerPage) { pages.push(orderedCategories.slice(i, i + itemsPerPage)); }
     return pages;
   }, [orderedCategories]);
 
@@ -760,47 +695,22 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             {categoryPages.map((pageCategories, pageIndex) => (
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
                 <div className="grid grid-cols-4 gap-1.5">
-                    {pageCategories.map((cat, index) => {
-                        // RENDERIZAÇÃO ESPECIAL PARA O BOTÃO "MAIS"
-                        if (cat.id === 'more-trigger') {
-                            return (
-                                <button 
-                                   key={cat.id} 
-                                   onClick={() => setIsMoreCategoriesOpen(true)}
-                                   className="flex flex-col items-center group active:scale-95 transition-all w-full"
-                                >
-                                    <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
-                                       {/* Styling to look like "Add/More" */}
-                                       <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
-                                       </div>
-                                       <span className="block w-full text-[8.5px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-none truncate">
-                                         Mais
-                                       </span>
-                                    </div>
-                                </button>
-                            );
-                        }
-
-                        // RENDERIZAÇÃO PADRÃO DE CATEGORIA
-                        return (
-                        <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                            <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
-                              <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                              </div>
-                              <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
-                                {cat.name}
-                              </span>
-                            </div>
-                        </button>
-                        );
-                    })}
+                    {pageCategories.map((cat, index) => (
+                    <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
+                        <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
+                          <div className="flex-1 flex items-center justify-center w-full mb-1">
+                            {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
+                          </div>
+                          <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
+                            {cat.name}
+                          </span>
+                        </div>
+                    </button>
+                    ))}
                 </div>
                 </div>
             ))}
             </div>
-            
             <div className="flex justify-center gap-1.5 pb-6 pt-2">
             {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
             </div>
@@ -812,12 +722,24 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       )}
       
       {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
-      <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
+      <CouponsBlock onNavigate={onNavigate} />
 
       {/* ACONTECENDO AGORA BLOCK */}
       <HappeningNowSection onNavigate={onNavigate} />
 
-      {/* NOVO POSICIONAMENTO: BLOCO DE ORÇAMENTOS */}
+      {/* TALENTOS DO BAIRRO BLOCK */}
+      <TalentsSection />
+
+      {/* ACHADOS E PERDIDOS BLOCK */}
+      <LostAndFoundSection onItemClick={setSelectedLostItem} />
+
+      {isFeatureActive('community_feed') && (
+        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+            <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
+            <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
+        </section>
+      )}
+
       {isFeatureActive('service_chat') && (
         <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
           <div className="px-5 mb-4">
@@ -828,14 +750,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           </div>
         </section>
       )}
-
-      {/* NOVO POSICIONAMENTO: ACHADOS E PERDIDOS */}
-      <LostAndFoundSection onItemClick={setSelectedLostItem} />
-
-      {/* NOVO POSICIONAMENTO: GUIAS DO BAIRRO */}
+      
+      {/* NOVO BLOCO: GUIAS DO BAIRRO */}
       <NeighborhoodGuidesBlock onNavigate={onNavigate} />
 
-      {/* NOVO POSICIONAMENTO: EXPLORAR BAIRRO */}
       {isFeatureActive('explore_guide') && (
         <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
             <div className="px-5">
@@ -846,17 +764,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
             </div>
         </div>
-      )}
-
-      {/* TALENTOS DO BAIRRO BLOCK (MOVIDO PARA O FINAL) */}
-      <TalentsSection />
-
-      {/* JPA CONVERSA (MOVIDO PARA O FINAL) */}
-      {isFeatureActive('community_feed') && (
-        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
-            <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
-            <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
-        </section>
       )}
       
       {wizardStep > 0 && (
@@ -890,16 +797,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       <LostAndFoundDetailModal 
           item={selectedLostItem} 
           onClose={() => setSelectedLostItem(null)} 
-      />
-
-      {/* Modal de Mais Categorias */}
-      <MoreCategoriesModal 
-          isOpen={isMoreCategoriesOpen}
-          onClose={() => setIsMoreCategoriesOpen(false)}
-          onSelectCategory={(category: Category) => {
-              setIsMoreCategoriesOpen(false);
-              onSelectCategory(category);
-          }}
       />
     </div>
   );

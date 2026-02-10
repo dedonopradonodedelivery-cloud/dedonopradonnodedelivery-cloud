@@ -32,8 +32,7 @@ import {
   Calendar,
   Lock,
   Tag,
-  ShoppingBag,
-  ListFilter
+  ShoppingBag
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
@@ -88,102 +87,89 @@ const FormField: React.FC<{
   </div>
 );
 
-// --- Componente de Multi-Seleção (Chips) ---
-const MultiSelectChips: React.FC<{
-    label: string;
-    options: string[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-    maxSelection: number;
-    placeholder?: string;
-    description?: string;
-}> = ({ label, options, selected, onChange, maxSelection, placeholder, description }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isOpen, setIsOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
+// --- Componente de Classificação ---
+interface TaxonomyFieldProps {
+  label: string;
+  placeholder: string;
+  options: { name: string; icon?: React.ReactNode }[];
+  selected: string;
+  onSelect: (name: string) => void;
+  required?: boolean;
+  allowCreate?: boolean;
+  onCreate?: () => void;
+  disabled?: boolean;
+}
 
-    const filteredOptions = options.filter(opt => opt.toLowerCase().includes(searchTerm.toLowerCase()));
+const TaxonomyField: React.FC<TaxonomyFieldProps> = ({ label, placeholder, options, selected, onSelect, required, allowCreate, onCreate, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const handleSelect = (option: string) => {
-        if (selected.includes(option)) {
-            onChange(selected.filter(item => item !== option));
-        } else {
-            if (selected.length < maxSelection) {
-                onChange([...selected, option]);
-            }
-        }
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    // Fechar ao clicar fora
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+  const filtered = options.filter(opt => opt.name.toLowerCase().includes(search.toLowerCase()));
+  const finalOptions = [...filtered];
 
-    return (
-        <div className="space-y-2" ref={containerRef}>
-            <div className="flex justify-between items-end">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                    {label} <span className="text-blue-500">({selected.length}/{maxSelection})</span>
-                </label>
+  return (
+    <div className="space-y-1.5" ref={dropdownRef}>
+      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <button 
+          type="button"
+          disabled={disabled}
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 flex items-center justify-between text-sm font-bold transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${selected ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+        >
+          {selected || placeholder}
+          <ChevronDown size={18} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-top-2">
+            <div className="p-3 border-b border-gray-50 dark:border-gray-800 flex items-center gap-2 bg-gray-50/50">
+              <Search size={16} className="text-gray-400" />
+              <input 
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar..."
+                className="flex-1 bg-transparent border-none outline-none text-sm dark:text-white"
+              />
             </div>
-            
-            <div className="relative">
-                <div 
-                    className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2 min-h-[56px] flex flex-wrap gap-2 cursor-pointer focus-within:border-[#1E5BFF]"
-                    onClick={() => setIsOpen(true)}
+            <div className="max-h-60 overflow-y-auto no-scrollbar py-2">
+              {finalOptions.map((opt, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { 
+                      onSelect(opt.name); 
+                      setIsOpen(false); 
+                  }}
+                  className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300`}
                 >
-                    {selected.map(item => (
-                        <span key={item} className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 flex items-center gap-1.5 shadow-sm">
-                            {item}
-                            <button 
-                                type="button" 
-                                onClick={(e) => { e.stopPropagation(); handleSelect(item); }} 
-                                className="text-gray-400 hover:text-red-500"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    ))}
-                    <input 
-                        value={searchTerm}
-                        onChange={e => { setSearchTerm(e.target.value); setIsOpen(true); }}
-                        placeholder={selected.length === 0 ? placeholder : ""}
-                        className="flex-1 bg-transparent border-none outline-none text-sm font-medium p-2 min-w-[120px] dark:text-white"
-                        onFocus={() => setIsOpen(true)}
-                    />
-                </div>
-
-                {isOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-200">
-                        {filteredOptions.length > 0 ? filteredOptions.map(opt => (
-                            <button
-                                key={opt}
-                                type="button"
-                                onClick={() => handleSelect(opt)}
-                                className={`w-full text-left px-4 py-3 text-sm font-medium flex justify-between items-center transition-colors ${
-                                    selected.includes(opt) 
-                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                                }`}
-                            >
-                                {opt}
-                                {selected.includes(opt) && <Check size={16} />}
-                            </button>
-                        )) : (
-                            <div className="p-4 text-center text-xs text-gray-400">Nenhuma opção encontrada</div>
-                        )}
-                    </div>
-                )}
+                  <div className="flex items-center gap-3">
+                    {opt.icon && <span className="opacity-70">{opt.icon}</span>}
+                    {opt.name}
+                  </div>
+                  {selected === opt.name && <Check size={16} className="text-[#1E5BFF]" />}
+                </button>
+              ))}
             </div>
-            {description && <p className="text-[9px] text-gray-400 italic ml-1 leading-tight">{description}</p>}
-        </div>
-    );
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 // --- COMPONENTE DE TAGS ---
@@ -201,10 +187,7 @@ const TagSelector: React.FC<{
 
   const handleAddTag = (tag: string) => {
     if (selectedTags.length >= 15) return;
-    const cleanTag = tag.trim().toLowerCase();
-    if (!selectedTags.includes(cleanTag)) {
-        onChange([...selectedTags, cleanTag]);
-    }
+    onChange([...selectedTags, tag]);
     setInput('');
     setShowSuggestions(false);
   };
@@ -216,12 +199,13 @@ const TagSelector: React.FC<{
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (input.trim() && selectedTags.length < 15) {
+      if (input.trim() && !selectedTags.includes(input.trim()) && selectedTags.length < 15) {
         handleAddTag(input.trim());
       }
     }
   };
 
+  // Close suggestions on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -235,14 +219,13 @@ const TagSelector: React.FC<{
   return (
     <div className="space-y-2" ref={containerRef}>
       <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-        Tags do Negócio <span className="text-blue-500">({selectedTags.length}/15)</span>
+        Produtos / Serviços (Tags) <span className="text-red-500">*</span>
       </label>
       
       <div className="relative">
-        <div className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2 flex flex-wrap gap-2 min-h-[56px] focus-within:border-[#1E5BFF]">
+        <div className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2 flex flex-wrap gap-2 min-h-[56px]">
           {selectedTags.map(tag => (
             <span key={tag} className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100 dark:border-gray-700 flex items-center gap-1.5">
-              <Hash size={10} className="text-blue-500"/>
               {tag}
               <button type="button" onClick={() => handleRemoveTag(tag)} className="text-gray-400 hover:text-red-500"><X size={12} /></button>
             </span>
@@ -252,22 +235,21 @@ const TagSelector: React.FC<{
             onChange={e => { setInput(e.target.value); setShowSuggestions(true); }}
             onFocus={() => setShowSuggestions(true)}
             onKeyDown={handleKeyDown}
-            placeholder={selectedTags.length < 15 ? "Digite ou selecione..." : "Limite atingido"}
+            placeholder={selectedTags.length < 15 ? "Adicionar tag..." : "Limite atingido"}
             className="flex-1 bg-transparent border-none outline-none text-sm font-medium p-2 min-w-[120px] dark:text-white"
             disabled={selectedTags.length >= 15}
           />
         </div>
         
         {showSuggestions && input.length > 0 && availableTags.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto no-scrollbar">
             {availableTags.map(tag => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => handleAddTag(tag)}
-                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <Hash size={12} className="text-gray-400" />
                 {tag}
               </button>
             ))}
@@ -275,10 +257,95 @@ const TagSelector: React.FC<{
         )}
       </div>
       <p className="text-[9px] text-gray-400 italic ml-1">
-        Palavras-chave curtas para ajudar na busca (ex: entrega rápida, aceita pix, wifi grátis).
+        {selectedTags.length}/15 tags selecionadas. Digite para buscar ou criar nova.
       </p>
     </div>
   );
+};
+
+// --- MODAL DE CRIAÇÃO DE TAXONOMIA ---
+const CreateTaxonomyModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    type: 'category' | 'subcategory';
+    parentName?: string;
+    storeName: string;
+    onSuccess: () => void;
+    userId: string;
+}> = ({ isOpen, onClose, type, parentName, storeName, onSuccess, userId }) => {
+    const [name, setName] = useState('');
+    const [justification, setJustification] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (!isOpen) return null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+        setIsSubmitting(true);
+
+        try {
+            const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
+            const suggestions: TaxonomySuggestion[] = JSON.parse(saved);
+            const exists = suggestions.find(s => s.type === type && s.name.toLowerCase() === name.toLowerCase());
+
+            if (exists) {
+                alert('Já existe uma solicitação para este nome.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            const newSuggestion: TaxonomySuggestion = {
+                id: `sug-${Date.now()}`,
+                type,
+                name: name.trim(),
+                parentName,
+                justification,
+                status: 'pending',
+                storeName,
+                merchantId: userId,
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('taxonomy_suggestions', JSON.stringify([...suggestions, newSuggestion]));
+            onSuccess();
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-black text-lg text-gray-900 dark:text-white">Nova {type === 'category' ? 'Categoria' : 'Subcategoria'}</h3>
+                    <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {type === 'subcategory' && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Categoria Pai</p>
+                             <p className="font-bold text-gray-900 dark:text-white">{parentName}</p>
+                        </div>
+                    )}
+                    <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nome sugerido</label>
+                        <input value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 font-medium dark:text-white" placeholder={`Ex: ${type === 'category' ? 'Automóveis' : 'Pneus'}`} autoFocus />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Descrição curta (Opcional)</label>
+                        <textarea value={justification} onChange={e => setJustification(e.target.value)} rows={3} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 text-sm dark:text-white resize-none" placeholder="Breve descrição..." />
+                    </div>
+                    <button type="submit" disabled={isSubmitting || !name} className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+                        {isSubmitting ? <Loader2 className="animate-spin" /> : 'Enviar para aprovação'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
@@ -287,16 +354,23 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
+  // Estados de criação de taxonomia
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createType, setCreateType] = useState<'category' | 'subcategory'>('category');
+  const [pendingTaxonomyMsg, setPendingTaxonomyMsg] = useState<string | null>(null);
+
+  // Combinação de constantes e aprovados
+  const [availableCategories, setAvailableCategories] = useState(CATEGORIES.map(c => ({ name: c.name })));
+  const [availableSubcategories, setAvailableSubcategories] = useState<any[]>([]);
+  
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     // --- DADOS PÚBLICOS ---
     nome_exibido: '',
-    category: '', // Categoria Principal (Obrigatória)
-    secondary_categories: [] as string[], // Categorias Secundárias (Até 2)
-    subcategory: '', // Subcategoria Principal (Legado/Display)
-    subcategories: [] as string[], // Lista de Subcategorias (Até 5)
-    
+    category: '',
+    subcategory: '',
     bairro: '',
     description: '',
     whatsapp_publico: '',
@@ -306,7 +380,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     logo_url: '',
     banner_url: '',
     gallery: [] as string[],
-    tags: [] as string[], // Tags (Até 15)
+    tags: [] as string[],
 
     // --- ENDEREÇO UNIDADE ---
     cep: '',
@@ -326,38 +400,71 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       ...acc, 
       [day.key]: { open: true, start: '09:00', end: '18:00' } 
     }), {} as Record<string, BusinessHour>),
-    
+    hours_observations: '',
+
     // --- DADOS FISCAIS ---
     razao_social: '',
+    nome_fantasia_fiscal: '',
     cnpj: '',
     inscricao_estadual: '',
     inscricao_municipal: '',
     tax_regime: 'Simples Nacional',
     fiscal_address: '',
-    email_fiscal: '',
+    billing_email: '',
+    legal_representative: '',
+    legal_rep_cpf: '',
 
     // --- ADMINISTRATIVO ---
-    confirm_correct: false
+    is_active: true,
+    account_type: 'Grátis',
+    registration_date: new Date().toLocaleDateString('pt-BR'),
   });
 
-  // Lista de todas as categorias para seleção
-  const allCategoryNames = useMemo(() => CATEGORIES.map(c => c.name), []);
+  // Carregar taxonomias aprovadas do localStorage e verificar se há pendentes
+  useEffect(() => {
+    const loadTaxonomies = () => {
+        const savedApproved = localStorage.getItem('approved_taxonomy');
+        if (savedApproved) {
+            const approved = JSON.parse(savedApproved);
+            // Mesclar categorias
+            const extraCats = approved.filter((a: any) => a.type === 'category').map((a: any) => ({ name: a.name }));
+            setAvailableCategories([...CATEGORIES.map(c => ({ name: c.name })), ...extraCats]);
+        }
 
-  // Lista de subcategorias disponíveis baseada nas categorias selecionadas (Principal + Secundárias)
-  const availableSubcategoryOptions = useMemo(() => {
-      const selectedCats = [formData.category, ...formData.secondary_categories].filter(Boolean);
-      let options: string[] = [];
-      
-      selectedCats.forEach(cat => {
-          const subs = SUBCATEGORIES[cat];
-          if (subs) {
-              options = [...options, ...subs.map(s => s.name)];
-          }
-      });
-      
-      // Remover duplicatas
-      return Array.from(new Set(options)).sort();
-  }, [formData.category, formData.secondary_categories]);
+        // Verificar sugestões pendentes do usuário atual
+        if (user) {
+            const savedSuggestions = localStorage.getItem('taxonomy_suggestions');
+            if (savedSuggestions) {
+                const suggestions: TaxonomySuggestion[] = JSON.parse(savedSuggestions);
+                const myPending = suggestions.filter(s => s.merchantId === user.id && s.status === 'pending');
+                if (myPending.length > 0) {
+                    setPendingTaxonomyMsg(`Você tem ${myPending.length} sugestão(ões) de categoria aguardando aprovação.`);
+                }
+            }
+        }
+    };
+    loadTaxonomies();
+    window.addEventListener('storage', loadTaxonomies);
+    return () => window.removeEventListener('storage', loadTaxonomies);
+  }, [user]);
+
+  // Atualizar subcategorias ao mudar categoria
+  useEffect(() => {
+    if (!formData.category) {
+        setAvailableSubcategories([]);
+        return;
+    }
+    const constSubs = SUBCATEGORIES[formData.category] || [];
+    const saved = localStorage.getItem('approved_taxonomy');
+    let extraSubs: any[] = [];
+    if (saved) {
+        const approved = JSON.parse(saved);
+        extraSubs = approved
+            .filter((a: any) => a.type === 'subcategory' && a.parentName === formData.category)
+            .map((a: any) => ({ name: a.name }));
+    }
+    setAvailableSubcategories([...constSubs, ...extraSubs]);
+  }, [formData.category]);
 
   useEffect(() => {
     if (!user) return;
@@ -371,9 +478,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             business_hours: data.business_hours || prev.business_hours,
             accepts_online_orders: data.accepts_online_orders ?? false,
             min_order_value: data.min_order_value ? String(data.min_order_value) : '',
-            tags: data.tags || [],
-            secondary_categories: data.secondary_categories || [],
-            subcategories: data.subcategories || (data.subcategory ? [data.subcategory] : [])
+            tags: data.tags || []
           }));
         }
       } catch (e) { console.warn(e); } finally { setIsLoading(false); }
@@ -384,28 +489,18 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   const handleSave = async () => {
     // Validar campos obrigatórios
     if (!formData.nome_exibido) { alert('Informe o nome da loja.'); return; }
+    if (!formData.description) { alert('Informe uma descrição curta.'); return; }
     if (!formData.whatsapp_publico) { alert('Informe o telefone/WhatsApp.'); return; }
     if (!formData.bairro) { alert('Informe o endereço/bairro.'); return; }
-    
-    // Validações de Categorização
-    if (!formData.category) { alert('Selecione a Categoria Principal.'); return; }
-    if (formData.subcategories.length === 0) { alert('Selecione pelo menos 1 subcategoria.'); return; }
-    if (formData.subcategories.length > 5) { alert('Máximo de 5 subcategorias permitidas.'); return; }
-    
-    // Validação de alteração de categoria principal (Simulada visualmente na UI, aqui garantimos consistência)
-    
-    if (!formData.confirm_correct) {
-      alert('Você precisa confirmar que as informações estão corretas.');
-      return;
-    }
+    if (!formData.category) { alert('Selecione uma categoria.'); return; }
+    if (!formData.subcategory) { alert('Selecione uma subcategoria.'); return; }
+    if (!formData.tags || formData.tags.length === 0) { alert('Adicione pelo menos uma tag de produto ou serviço.'); return; }
 
     setIsSaving(true);
     try {
       const { error } = await supabase.from('merchants').upsert({
         owner_id: user?.id,
         ...formData,
-        // Define a primeira subcategoria como a "principal" para compatibilidade
-        subcategory: formData.subcategories[0], 
         min_order_value: formData.min_order_value ? parseFloat(formData.min_order_value) : null,
         updated_at: new Date().toISOString()
       }, { onConflict: 'owner_id' });
@@ -430,53 +525,23 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     reader.readAsDataURL(file);
   };
 
-  // --- Handlers de Categorização ---
-
-  const handleMainCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newMain = e.target.value;
-      
-      // Se a nova principal estava nas secundárias, remove de lá
-      let newSecondaries = formData.secondary_categories.filter(c => c !== newMain);
-      
-      // Limpa subcategorias que não pertencem mais às categorias selecionadas
-      const futureCats = [newMain, ...newSecondaries];
-      const validSubs: string[] = [];
-      
-      futureCats.forEach(cat => {
-          const catSubs = SUBCATEGORIES[cat]?.map(s => s.name) || [];
-          // Mantém subs selecionadas se elas existirem na nova lista de permitidas
-          formData.subcategories.forEach(sub => {
-              if (catSubs.includes(sub) && !validSubs.includes(sub)) {
-                  validSubs.push(sub);
-              }
-          });
-      });
-
-      setFormData(prev => ({
-          ...prev,
-          category: newMain,
-          secondary_categories: newSecondaries,
-          subcategories: validSubs
-      }));
+  const handleCreateTaxonomy = (type: 'category' | 'subcategory') => {
+      setCreateType(type);
+      setShowCreateModal(true);
   };
 
-  const handleSecondaryCategoriesChange = (selected: string[]) => {
-      // Remove a principal da lista se selecionada acidentalmente
-      const filtered = selected.filter(s => s !== formData.category);
-      setFormData(prev => ({ ...prev, secondary_categories: filtered }));
-      
-      // Nota: Poderíamos limpar subcategorias inválidas aqui também, mas 
-      // geralmente é melhor deixar o usuário ver e remover manualmente ou 
-      // limpar apenas ao salvar/mudar a principal.
+  const onSuggestionSuccess = () => {
+      setPendingTaxonomyMsg("Sua sugestão foi enviada e está aguardando aprovação.");
+      setTimeout(() => setPendingTaxonomyMsg(null), 5000);
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       
       {/* HEADER */}
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800">
+      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
@@ -501,15 +566,15 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
-                    <div className="w-28 h-28 rounded-[2rem] bg-blue-50 dark:bg-gray-800 border-2 border-dashed border-blue-100 dark:border-gray-700 flex items-center justify-center overflow-hidden">
-                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-blue-200" size={32} />}
+                    <div className="w-28 h-28 rounded-[2rem] bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                        {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-gray-300" size={32} />}
                     </div>
                     <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
                 </div>
-                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4 text-center leading-tight">Logotipo</p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo</p>
              </div>
 
-             <FormField label="Nome da Loja *" value={formData.nome_exibido} onChange={v => setFormData({...formData, nome_exibido: v})} required placeholder="Ex: Padaria do Bairro" />
+             <FormField label="Nome da Loja *" value={formData.nome_exibido} onChange={v => setFormData({...formData, nome_exibido: v})} required placeholder="Ex: Padaria Central" />
              
              <div className="space-y-1.5">
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Curta *</label>
@@ -524,81 +589,63 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              <FormField label="Telefone / WhatsApp *" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} placeholder="(21) 99999-0000" />
              
              <div className="space-y-1.5">
-                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Bairro *</label>
-                 <select required value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none">
-                    <option value="">Selecione...</option>
-                    {['Freguesia', 'Taquara', 'Anil', 'Pechincha', 'Tanque', 'Curicica'].map(h => <option key={h} value={h}>{h}</option>)}
-                 </select>
+                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço *</label>
+                 <div className="space-y-3">
+                     <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} placeholder="CEP" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                     <div className="grid grid-cols-4 gap-3">
+                        <input value={formData.rua} onChange={e => setFormData({...formData, rua: e.target.value})} placeholder="Rua" className="col-span-3 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                        <input value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} placeholder="Nº" className="col-span-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                     </div>
+                     <input value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} placeholder="Bairro" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
+                 </div>
              </div>
           </div>
         </section>
 
-        {/* BLOCO 2: CATEGORIZAÇÃO (NOVO) */}
+        {/* BLOCO 2: RAMO DO NEGÓCIO */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 px-1">
-            <ListFilter size={16} className="text-blue-500" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Categorização</h2>
+            <Tag size={16} className="text-blue-500" />
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Ramo do Negócio</h2>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
              
-             {/* Categoria Principal */}
-             <div className="space-y-2">
-                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                    Categoria Principal <span className="text-red-500">*</span>
-                 </label>
-                 <select 
-                    value={formData.category} 
-                    onChange={handleMainCategoryChange}
-                    className="w-full bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
-                 >
-                    <option value="">Selecione a principal...</option>
-                    {allCategoryNames.map(c => <option key={c} value={c}>{c}</option>)}
-                 </select>
-                 <p className="text-[9px] text-gray-400 italic ml-1 leading-tight">
-                    Define onde sua loja aparece primeiro. Só pode ser alterada a cada 30 dias.
-                 </p>
-             </div>
+             {pendingTaxonomyMsg && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
+                    <Clock size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700 dark:text-amber-300 font-bold leading-relaxed">{pendingTaxonomyMsg}</p>
+                </div>
+             )}
 
-             {/* Categorias Secundárias (Multi-select) */}
-             <MultiSelectChips 
-                label="Categorias Secundárias (Opcional)"
-                options={allCategoryNames.filter(c => c !== formData.category)}
-                selected={formData.secondary_categories}
-                onChange={handleSecondaryCategoriesChange}
-                maxSelection={2}
-                placeholder="Adicionar categoria extra..."
-                description="Apareça em mais seções do app."
+             <TaxonomyField 
+                label="Categoria Principal *" 
+                placeholder="Selecione..." 
+                options={availableCategories} 
+                selected={formData.category} 
+                onSelect={v => setFormData({...formData, category: v, subcategory: ''})} 
              />
-
-             {/* Subcategorias (Multi-select) */}
-             <div className={`transition-all duration-300 ${!formData.category ? 'opacity-50 pointer-events-none' : ''}`}>
-                 <MultiSelectChips 
-                    label="Subcategorias (O que você faz)"
-                    options={availableSubcategoryOptions}
-                    selected={formData.subcategories}
-                    onChange={(selected) => setFormData(prev => ({ ...prev, subcategories: selected }))}
-                    maxSelection={5}
-                    placeholder={availableSubcategoryOptions.length === 0 ? "Selecione categorias primeiro" : "Adicionar subcategoria..."}
-                    description="Escolha subcategorias que representem exatamente seus serviços."
-                 />
-                 {formData.category && formData.subcategories.length === 0 && (
-                     <p className="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-pulse">Selecione pelo menos uma subcategoria.</p>
-                 )}
-             </div>
+             
+             <TaxonomyField 
+                label="Subcategoria *" 
+                placeholder="Selecione..." 
+                options={availableSubcategories} 
+                selected={formData.subcategory} 
+                onSelect={v => setFormData({...formData, subcategory: v})} 
+                disabled={!formData.category}
+             />
 
              {/* TAGS SELECTOR */}
              <TagSelector 
                 selectedTags={formData.tags || []} 
                 onChange={(tags) => setFormData({...formData, tags})} 
              />
-             
-             <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30 flex gap-3">
-                 <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                 <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
-                    Tags e subcategorias ajudam clientes certos a encontrarem seu negócio na busca e nas recomendações.
-                 </p>
-             </div>
 
+             <button 
+                onClick={() => handleCreateTaxonomy(formData.category ? 'subcategory' : 'category')}
+                className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs uppercase tracking-widest hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-2"
+             >
+                <PlusCircle size={16} /> Não encontrou? Sugerir nova categoria
+             </button>
           </div>
         </section>
 
@@ -606,7 +653,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
         <section className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <ShoppingBag size={16} className="text-emerald-500" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Pedidos & Pagamentos</h2>
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Configurações Adicionais</h2>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 cursor-pointer">
@@ -632,35 +679,30 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           </div>
         </section>
 
-        {/* --- CONFIRMAÇÃO --- */}
-        <section className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm">
-                <label className="flex items-center gap-4 cursor-pointer group">
-                    <div onClick={() => setFormData({...formData, confirm_correct: !formData.confirm_correct})} className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.confirm_correct ? 'bg-[#1E5BFF] border-[#1E5BFF]' : 'border-gray-200 group-hover:border-blue-400'}`}>
-                        {formData.confirm_correct && <Check size={16} className="text-white" strokeWidth={4} />}
-                    </div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 leading-tight">Confirmo que as informações acima estão corretas e atualizadas.</span>
-                </label>
-
-                <button 
-                  onClick={handleSave} 
-                  disabled={isSaving || !formData.confirm_correct}
-                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm mt-8 disabled:opacity-30 disabled:grayscale"
-                >
-                    {isSaving ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={20}/> Salvar Dados da Loja</>}
-                </button>
-            </div>
-        </section>
-
       </div>
-      
-      <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
 
+      {/* INPUTS OCULTOS P/ UPLOAD */}
+      <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
+      <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'banner_url')} />
+
+      {/* FEEDBACK SUCESSO */}
       {showSuccess && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
-           <CheckCircle2 size={24} className="text-emerald-400" />
+           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
            <span className="font-black text-xs uppercase tracking-widest">Loja Atualizada!</span>
         </div>
+      )}
+
+      {showCreateModal && user && (
+          <CreateTaxonomyModal 
+              isOpen={showCreateModal}
+              onClose={() => setShowCreateModal(false)}
+              type={createType}
+              parentName={createType === 'subcategory' ? formData.category : undefined}
+              storeName={formData.nome_exibido || 'Loja'}
+              userId={user.id}
+              onSuccess={onSuggestionSuccess}
+          />
       )}
     </div>
   );
