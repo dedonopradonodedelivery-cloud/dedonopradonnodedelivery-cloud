@@ -10,7 +10,7 @@ import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 const FALLBACK_STORE_IMAGES = [
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
-  'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600',
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
   'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
@@ -171,39 +171,51 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  useEffect(() => {
-    const fetchCategoryBanner = async () => {
-      if (!supabase) {
-        setLoadingBanner(false);
-        return;
+  const fetchCategoryBanner = async () => {
+    if (!supabase) {
+      setLoadingBanner(false);
+      return;
+    }
+    setLoadingBanner(true);
+    try {
+      const { data, error } = await supabase
+        .from('published_banners')
+        .select('id, config, merchant_id')
+        .eq('target', `category:${category.slug}`)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+          // TRATAMENTO DE ERRO: Caso a tabela não exista no cache do PostgREST (Supabase)
+          if (error.code === 'PGRST116' || error.message?.includes('published_banners')) {
+              console.warn("Recurso 'published_banners' indisponível no momento. Certifique-se de aplicar as migrações SQL.");
+              setActiveBanner(null);
+              return;
+          }
+          throw error;
       }
-      setLoadingBanner(true);
-      try {
-        const { data, error } = await supabase
-          .from('published_banners')
-          .select('id, config, merchant_id')
-          .eq('target', `category:${category.slug}`)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1);
 
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          setActiveBanner(data[0]);
-        } else {
-          setActiveBanner(null);
-        }
-      } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+      if (data && data.length > 0) {
+        setActiveBanner(data[0]);
+      } else {
         setActiveBanner(null);
-      } finally {
-        setLoadingBanner(false);
       }
-    };
-    
+    } catch (e: any) {
+      console.error("Erro ao buscar banner:", e.message || e);
+      setActiveBanner(null);
+    } finally {
+      setLoadingBanner(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCategoryBanner();
 
+    if (!supabase) return;
+
+    // Proteção Realtime: Se a tabela não existe, o subscribe falhará.
+    // Tratamos o erro de inscrição graciosamente.
     const channel = supabase.channel(`category-banner-${category.slug}`)
       .on('postgres_changes', {
           event: '*',
@@ -213,7 +225,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         },
         () => fetchCategoryBanner()
       )
-      .subscribe();
+      .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+              console.warn("Realtime: Tabela 'published_banners' não encontrada para sincronização.");
+          }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -341,7 +357,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
                     <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                     <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>

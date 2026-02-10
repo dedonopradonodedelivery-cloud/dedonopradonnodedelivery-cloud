@@ -1,21 +1,11 @@
 
 import React, { useState, useMemo } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import { Store, Category, CommunityPost, Classified } from '@/types';
 import { 
   Compass, 
-  Sparkles, 
-  ArrowRight, 
   Ticket,
-  CheckCircle2, 
-  Zap, 
-  Loader2, 
   Plus, 
-  Home as HomeIcon,
-  MessageSquare, 
   MapPin, 
-  Camera, 
-  X, 
-  Send, 
   ChevronRight,
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
@@ -31,11 +21,7 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
   'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800'
 ];
 
 const getFallbackImage = (id: string) => {
@@ -50,10 +36,7 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   return (
     <div className="flex-shrink-0 w-28 snap-center p-1">
-      <div 
-        onClick={() => onNavigate('neighborhood_posts')}
-        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
-      >
+      <div onClick={() => onNavigate('neighborhood_posts')} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full cursor-pointer">
         <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
           <img src={postImage} alt={post.content} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
@@ -73,10 +56,7 @@ const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string
   const itemImage = item.imageUrl || getFallbackImage(item.id);
   return (
     <div className="flex-shrink-0 w-40 snap-center p-1.5">
-      <div 
-        onClick={() => onNavigate('classifieds')}
-        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col h-full cursor-pointer"
-      >
+      <div onClick={() => onNavigate('classifieds')} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-700 flex flex-col h-full cursor-pointer">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
           <img src={itemImage} alt={item.title} className="w-full h-full object-cover" />
           {item.price && (
@@ -105,8 +85,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
 
-  // Seleciona exatamente as 5 primeiras categorias
-  const topCategories = useMemo(() => CATEGORIES.slice(0, 5), []);
+  // Seleciona exatamente as categorias obrigatórias para a linha principal
+  const homeCategories = useMemo(() => {
+    const mainIds = ['cat-saude', 'cat-pets', 'cat-fashion', 'cat-beauty', 'cat-comida'];
+    return mainIds.map(id => CATEGORIES.find(c => c.id === id)).filter(Boolean) as Category[];
+  }, []);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
@@ -117,22 +100,22 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         </section>
       )}
 
-      {/* SEÇÃO DE CATEGORIAS REPROJETADA - LINHA ÚNICA E COMPACTA */}
+      {/* SEÇÃO DE CATEGORIAS REPROJETADA - 5 PRINCIPAIS + BOTÃO MAIS */}
       <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-2 relative z-10 px-4">
-        <div className="flex items-center justify-between gap-1">
-          {topCategories.map((cat) => (
+        <div className="flex items-center justify-between gap-1.5">
+          {homeCategories.map((cat) => (
             <button 
               key={cat.id} 
               onClick={() => onSelectCategory(cat)} 
               className="flex flex-col items-center gap-1.5 active:scale-95 transition-all w-[15%]"
             >
-              <div className={`w-14 h-14 rounded-2xl shadow-sm flex items-center justify-center ${cat.color} border border-white/20 transition-transform`}>
+              <div className={`w-full aspect-square rounded-[18px] shadow-sm flex items-center justify-center bg-[#1E5BFF] border border-white/20 transition-transform`}>
                 {React.cloneElement(cat.icon as any, { 
-                  className: "w-6 h-6 text-white drop-shadow-sm", 
+                  className: "w-5 h-5 text-white drop-shadow-sm", 
                   strokeWidth: 2.5 
                 })}
               </div>
-              <span className="text-[9px] font-bold text-gray-600 dark:text-gray-300 text-center uppercase tracking-tighter leading-tight truncate w-full px-0.5">
+              <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-tight truncate w-full">
                 {cat.name}
               </span>
             </button>
@@ -143,10 +126,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
             onClick={() => setIsMoreModalOpen(true)} 
             className="flex flex-col items-center gap-1.5 active:scale-95 transition-all w-[15%]"
           >
-            <div className="w-14 h-14 rounded-2xl shadow-sm flex items-center justify-center bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              <Plus className="w-6 h-6 text-gray-500 dark:text-gray-400" strokeWidth={3} />
+            <div className="w-full aspect-square rounded-[18px] shadow-sm flex items-center justify-center bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <Plus className="w-6 h-6 text-gray-400 dark:text-gray-500" strokeWidth={3} />
             </div>
-            <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 text-center uppercase tracking-tighter leading-tight">
+            <span className="text-[8px] font-black text-[#1E5BFF] dark:text-blue-400 text-center uppercase tracking-tighter leading-tight">
               + Mais
             </span>
           </button>
@@ -162,13 +145,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
             <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div></h2>
             <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
         </div>
-        <div className="relative">
-            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
-                {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (<MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />))}
-            </div>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full flex items-center justify-end bg-gradient-to-l from-white/90 dark:from-gray-950/90 to-transparent w-12 pointer-events-none">
-                <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 opacity-80" />
-            </div>
+        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
+            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (<MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />))}
         </div>
       </section>
 
@@ -212,7 +190,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         isOpen={isMoreModalOpen} 
         onClose={() => setIsMoreModalOpen(false)} 
         onSelectCategory={(cat) => {
-            onSelectCategory(cat);
+            if (cat.slug === 'real_estate' || cat.slug === 'jobs' || cat.slug === 'donations' || cat.slug === 'desapega') {
+                onNavigate(cat.slug);
+            } else {
+                onSelectCategory(cat);
+            }
             setIsMoreModalOpen(false);
         }} 
       />
