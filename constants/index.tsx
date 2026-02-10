@@ -315,7 +315,7 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
       { image: 'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800', storeId: 'fake-beleza-0' }
     ],
     'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'fake-beleza-1' },
+      { image: 'https://images.unsplash.com/photo-1521590832167-ce68d2c6f44d?q=80&w=800', storeId: 'fake-beleza-1' },
       { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'fake-beleza-2' }
     ]
   },

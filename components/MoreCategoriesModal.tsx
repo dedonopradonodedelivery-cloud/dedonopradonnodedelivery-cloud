@@ -51,7 +51,7 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Buscar categorias, serviços ou produtos..."
+              placeholder="Buscar categorias, serviços ou produtos…"
               className="w-full bg-gray-50 dark:bg-gray-800 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white transition-all shadow-inner"
             />
           </div>
@@ -70,7 +70,7 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                   }}
                   className="flex flex-col items-center gap-2 group active:scale-90 transition-transform"
                 >
-                  <div className={`w-14 h-14 rounded-[1.25rem] bg-[#1E5BFF] flex items-center justify-center text-white shadow-md border border-white/20 group-hover:brightness-110`}>
+                  <div className={`w-14 h-14 rounded-[1.25rem] bg-[#1E5BFF] flex items-center justify-center text-white shadow-md border border-white/10 group-hover:brightness-110`}>
                     {React.cloneElement(cat.icon as any, { size: 28, strokeWidth: 2.5, className: "drop-shadow-sm" })}
                   </div>
                   <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-tighter text-center leading-tight">
