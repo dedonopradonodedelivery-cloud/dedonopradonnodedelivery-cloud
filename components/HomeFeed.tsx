@@ -10,12 +10,12 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
-import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
+import { CouponCarousel } from '@/components/CouponCarousel';
 
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
@@ -83,11 +83,10 @@ interface HomeFeedProps {
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory, onStoreClick, stores, user, userRole }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
-  const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
 
-  // Seleciona exatamente as categorias obrigatórias para a linha principal
   const homeCategories = useMemo(() => {
-    const mainIds = ['cat-saude', 'cat-pets', 'cat-fashion', 'cat-beauty', 'cat-comida'];
+    // Saúde, Moda, Pets, Beleza, Comida
+    const mainIds = ['cat-saude', 'cat-fashion', 'cat-pets', 'cat-beauty', 'cat-comida'];
     return mainIds.map(id => CATEGORIES.find(c => c.id === id)).filter(Boolean) as Category[];
   }, []);
 
@@ -100,7 +99,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         </section>
       )}
 
-      {/* SEÇÃO DE CATEGORIAS REPROJETADA - 5 PRINCIPAIS + BOTÃO MAIS */}
+      {/* SEÇÃO DE CATEGORIAS */}
       <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-2 relative z-10 px-4">
         <div className="flex items-center justify-between gap-1.5">
           {homeCategories.map((cat) => (
@@ -121,9 +120,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
             </button>
           ))}
 
-          {/* BOTÃO FIXO + MAIS */}
           <button 
-            onClick={() => setIsMoreModalOpen(true)} 
+            onClick={() => onNavigate('all_categories')} 
             className="flex flex-col items-center gap-1.5 active:scale-95 transition-all w-[15%]"
           >
             <div className="w-full aspect-square rounded-[18px] shadow-sm flex items-center justify-center bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -140,7 +138,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-4 overflow-hidden">
+      <CouponCarousel onNavigate={onNavigate} />
+
+      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-4 overflow-hidden border-t border-gray-50 dark:border-gray-900 mt-2">
         <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div></h2>
             <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
@@ -148,16 +148,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
             {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (<MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />))}
         </div>
-      </section>
-
-      <section className="px-4 mb-6 w-full overflow-hidden">
-        <button onClick={() => onNavigate('weekly_reward_page')} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10">
-           <div className="flex items-center gap-3">
-               <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><Ticket className="text-white" size={20} /></div>
-               <div className="text-left"><p className="text-white font-black text-sm uppercase tracking-wide">Cupons Disponíveis</p><p className="text-emerald-100 text-[10px] font-medium opacity-90">Resgate descontos exclusivos no bairro</p></div>
-           </div>
-           <div className="bg-white/10 p-1.5 rounded-full"><ChevronRight className="text-white" size={16} /></div>
-        </button>
       </section>
 
       <section className="px-4 mb-8 w-full overflow-hidden">
@@ -185,19 +175,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         </div>
         <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
       </div>
-
-      <MoreCategoriesModal 
-        isOpen={isMoreModalOpen} 
-        onClose={() => setIsMoreModalOpen(false)} 
-        onSelectCategory={(cat) => {
-            if (cat.slug === 'real_estate' || cat.slug === 'jobs' || cat.slug === 'donations' || cat.slug === 'desapega') {
-                onNavigate(cat.slug);
-            } else {
-                onSelectCategory(cat);
-            }
-            setIsMoreModalOpen(false);
-        }} 
-      />
     </div>
   );
 };

@@ -20,19 +20,16 @@ import {
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
-// Lista completa organizada para o Modal
 export const CATEGORIES: Category[] = [
-  // Linha Principal da Home (Primeiros 5)
-  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-[#1E5BFF]' },
-  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-[#1E5BFF]' },
-  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-[#1E5BFF]' },
-  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-[#1E5BFF]' },
-  { id: 'cat-comida', name: 'Comida', slug: 'comida', icon: <Utensils />, color: 'bg-[#1E5BFF]' },
-  
-  // Restante das Comerciais
+  // Section 1: Comerciais e Serviços
   { id: 'cat-coupons', name: 'Cupom', slug: 'coupon_landing', icon: <Ticket />, color: 'bg-[#1E5BFF]' },
+  { id: 'cat-comida', name: 'Alimentação', slug: 'comida', icon: <Utensils />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-market', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-[#1E5BFF]' },
+  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-pharmacy', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'bg-[#1E5BFF]' },
+  { id: 'cat-beauty', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-[#1E5BFF]' },
+  { id: 'cat-fashion', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-[#1E5BFF]' },
+  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-services', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-edu', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-[#1E5BFF]' },
@@ -45,7 +42,7 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-public', name: 'S. Públicos', slug: 'servicos-publicos', icon: <Landmark />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-finance', name: 'Financeiro', slug: 'financeiro', icon: <Wallet />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-kids', name: 'Kids', slug: 'kids', icon: <Baby />, color: 'bg-[#1E5BFF]' },
-  { id: 'cat-senior', name: 'Melhor Idade', slug: 'melhor-idade', icon: <Accessibility />, color: 'bg-[#1E5BFF]' },
+  { id: 'cat-senior', name: 'Pessoas Idosas', slug: 'melhor-idade', icon: <Accessibility />, color: 'bg-[#1E5BFF]' },
   { id: 'cat-wellness', name: 'Bem-estar', slug: 'bem-estar', icon: <HeartPulse />, color: 'bg-[#1E5BFF]' },
 ];
 
@@ -57,8 +54,15 @@ export const CLASSIFIED_CATEGORIES: Category[] = [
   { id: 'cl-realestate', name: 'Imóveis', slug: 'real_estate', icon: <Building />, color: 'bg-[#1E5BFF]' },
 ];
 
+export const MOCK_HOME_COUPONS = [
+  { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100', discount: '20% OFF', rules: 'Válido em combos de lanches', code: 'BIBI20', color: 'bg-rose-500' },
+  { id: 'cp-2', storeName: 'Studio Hair Vip', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15,00', rules: 'Corte + Barba às terças', code: 'VIP15', color: 'bg-indigo-600' },
+  { id: 'cp-3', storeName: 'Pet Shop Alegria', storeLogo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100', discount: '10% OFF', rules: 'Válido para Banho & Tosa', code: 'PET10', color: 'bg-emerald-600' },
+  { id: 'cp-4', storeName: 'Pizzaria do Zé', storeLogo: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100', discount: 'R$ 10,00', rules: 'Na primeira pizza grande', code: 'PIZZA10', color: 'bg-orange-600' },
+];
+
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
-  'Comida': [
+  'Alimentação': [
     { name: 'Restaurantes', icon: <Utensils /> },
     { name: 'Lanches & Hamburguerias', icon: <Beef /> },
     { name: 'Pizzarias', icon: <Pizza /> },
@@ -110,7 +114,23 @@ export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
 ];
 
 export const STORES: Store[] = [
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] }
+  {
+    id: 'grupo-esquematiza',
+    name: 'Grupo Esquematiza',
+    category: 'Serviços',
+    subcategory: 'Segurança e Facilities',
+    description: 'Líder em segurança, limpeza e facilities para condomínios e empresas.',
+    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3dab?q=80&w=200&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    rating: 5.0,
+    reviewsCount: 150,
+    distance: 'Freguesia • RJ',
+    neighborhood: 'Freguesia',
+    adType: AdType.PREMIUM,
+    isSponsored: true,
+    tags: ['segurança', 'limpeza residencial', 'manutenção geral']
+  },
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Alimentação', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] }
 ];
 
 export const quickFilters = [
