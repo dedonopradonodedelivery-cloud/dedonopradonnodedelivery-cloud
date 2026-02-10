@@ -50,7 +50,7 @@ import { MoreCategoriesModal } from './MoreCategoriesModal';
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
   'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Rua/Comércio
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas/Comunidade
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1000', // Pessoas/Comunidade
   'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado/Loja
   'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço/Trabalho
   'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800', // Parque/Verde
@@ -417,7 +417,7 @@ const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | 
                     </p>
                     <button 
                         onClick={() => window.open(`https://wa.me/${item.contact}`, '_blank')}
-                        className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all ${isLost ? 'bg-orange-500 shadow-orange-500/30' : 'bg-emerald-500 shadow-emerald-500/30'}`}
+                        className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold uppercase tracking-widest text-xs shadow-lg active:scale-[0.98] transition-all ${isLost ? 'bg-orange-500 shadow-orange-500/30' : 'bg-emerald-500 shadow-emerald-500/30'}`}
                     >
                         <Phone size={16} /> Entrar em Contato
                     </button>
@@ -583,44 +583,43 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-[145px] snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
             >
-               {/* Floating Logo - Circular Initial Design */}
-               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
-                  <div className={`w-12 h-12 rounded-full p-1 shadow-xl border-4 border-white dark:border-gray-950 flex items-center justify-center ${
-                      coupon.id === 'cp-1' ? 'bg-[#FF6B00]' : 
-                      coupon.id === 'cp-2' ? 'bg-[#BC1F66]' : 
-                      coupon.id === 'cp-3' ? 'bg-[#22C55E]' : 
-                      coupon.id === 'cp-4' ? 'bg-[#0EA5E9]' : 
-                      'bg-[#4F46E5]'
-                  }`}>
-                     <span className="text-sm font-black text-white">{coupon.initials}</span>
+               {/* Floating Logo - Perfeitamente centralizado no topo */}
+               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
+                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
                </div>
 
-               {/* Card Body - Height reduced to 168px for square-ish look */}
-               <div className="w-full h-[168px] bg-[#1E5BFF] rounded-[2.5rem] shadow-xl flex flex-col items-center justify-between pt-9 pb-5 px-4 relative overflow-hidden active:scale-95 transition-all">
+               {/* Card Body - Efeito de serrilha nas laterais e linha centralizada */}
+               <div className="w-full h-40 bg-[#F1F5F9] dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
                   
-                  {/* Side Punch Holes - Centered with the dashed line */}
-                  <div className="absolute bottom-[66px] -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner opacity-100"></div>
-                  <div className="absolute bottom-[66px] -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner opacity-100"></div>
+                  {/* Serrilha lateral (Simulada por radial-gradients na máscara ou sobreposição) */}
+                  {/* Bites/Holes Laterais alinhados com a linha pontilhada */}
+                  <div className="absolute top-[63px] -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 z-10"></div>
+                  <div className="absolute top-[63px] -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-700 z-10"></div>
 
-                  {/* Top Content Area */}
-                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
-                      <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-1">Cupom</span>
-                      <span className="text-2xl font-black text-white leading-none tracking-tighter">
+                  {/* Pequenas serrilhas decorativas acima e abaixo do furo principal */}
+                  <div className="absolute top-10 -left-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
+                  <div className="absolute top-10 -right-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
+                  <div className="absolute bottom-12 -left-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
+                  <div className="absolute bottom-12 -right-1 w-2 h-2 rounded-full bg-white dark:bg-gray-950 opacity-40"></div>
+
+                  {/* Top Section - Desconto */}
+                  <div className="flex flex-col items-center justify-center h-[56px] w-full text-center z-10">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Cupom</span>
+                      <span className="text-xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
                   </div>
 
-                  {/* Dashed Separator - Perfectly Aligned with Side Punches */}
-                  <div className="w-full relative h-[1px] mb-5 px-1">
-                      <div className="w-full border-t-2 border-dashed border-white/20"></div>
-                  </div>
+                  {/* Linha Pontilhada - Centralizada perfeitamente com os "bites" */}
+                  <div className="w-full h-px border-t border-dashed border-gray-300 dark:border-gray-600 relative z-0"></div>
 
-                  {/* CTA Button */}
-                  <div className="w-full z-10 px-1">
-                     <button className="w-full bg-white hover:bg-blue-50 text-[#1E5BFF] text-[9px] font-black uppercase tracking-widest py-3 rounded-2xl shadow-md transition-all">
+                  {/* Bottom Section - CTA */}
+                  <div className="w-full z-10 mt-2">
+                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden">
                          Pegar cupom
                      </button>
                   </div>
@@ -893,7 +892,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-xl"><CheckCircle2 size={40} /></div>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto!</h3>
                 <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais notificados.</p>
-                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Ver propostas</button>
+                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-[0.98] transition-all">Ver propostas</button>
             </div>
           )}
         </section>

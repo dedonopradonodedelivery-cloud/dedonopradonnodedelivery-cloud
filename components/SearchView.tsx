@@ -62,7 +62,7 @@ const PRIMARY_INTENTS = [
 const LIVE_EVENTS = [
   {
     id: 'live-1',
-    label: 'Promoção: 20% em pizzas na Freguesia',
+    label: 'Pizza 20% OFF na Freguesia hoje',
     icon: Utensils,
     color: 'text-orange-500',
     bg: 'bg-orange-50 dark:bg-orange-950/20',
@@ -78,7 +78,7 @@ const LIVE_EVENTS = [
   },
   {
     id: 'live-3',
-    label: 'Novo cupom: Salão Studio Hair Vip',
+    label: 'Novo cupom: Salão Studio Hair',
     icon: Ticket,
     color: 'text-blue-500',
     bg: 'bg-blue-50 dark:bg-blue-950/20',
@@ -129,12 +129,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans flex flex-col pb-32 animate-in fade-in duration-300">
-      {/* Search Header - Preservado conforme solicitado */}
+      {/* Search Header */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-5 pt-10 pb-6 shrink-0">
         <div className="flex flex-col gap-5">
             <div>
                 <h1 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Buscar</h1>
-                <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Jacarepaguá em um só lugar</p>
+                <p className="text-[11px] text-blue-600 dark:text-blue-400 font-bold mt-1.5 leading-tight">Encontre o que você precisa perto de você, agora</p>
             </div>
             
             <div className="relative group">
@@ -176,12 +176,38 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-5">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-5 pt-2">
         
         {searchTerm.length === 0 ? (
             <div className="space-y-10 animate-in fade-in duration-500">
                 
-                {/* 1) Bloco: "O que você precisa agora?" */}
+                {/* 1) NOVO Bloco: "Acontecendo agora perto de você" - REPOSICIONADO PARA O TOPO */}
+                <section className="space-y-3">
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </div>
+                        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Acontecendo agora perto de você</h3>
+                    </div>
+                    <div className="space-y-2">
+                        {LIVE_EVENTS.map((event) => (
+                            <button 
+                                key={event.id}
+                                onClick={() => handleQuickSearch(event.term)}
+                                className="w-full flex items-center gap-3.5 p-3 bg-gray-50/50 dark:bg-gray-900/40 rounded-2xl border border-gray-100/60 dark:border-gray-800/60 hover:bg-white dark:hover:bg-gray-800 transition-all active:scale-[0.99] text-left group"
+                            >
+                                <div className={`w-8 h-8 rounded-lg ${event.bg} ${event.color} flex items-center justify-center shrink-0`}>
+                                    <event.icon size={16} />
+                                </div>
+                                <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300 flex-1 leading-tight tracking-tight">{event.label}</p>
+                                <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-500" />
+                            </button>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 2) Bloco: "O que você precisa agora?" */}
                 <section className="space-y-4">
                     <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest ml-1">O que você precisa agora?</h3>
                     <div className="space-y-3">
@@ -203,32 +229,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                                 <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
                                     <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-600" />
                                 </div>
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {/* 2) NOVO Bloco: "Acontecendo agora perto de você" */}
-                <section className="space-y-4">
-                    <div className="flex items-center gap-2 px-1">
-                        <div className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                        </div>
-                        <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest">Acontecendo agora perto de você</h3>
-                    </div>
-                    <div className="space-y-2">
-                        {LIVE_EVENTS.map((event) => (
-                            <button 
-                                key={event.id}
-                                onClick={() => handleQuickSearch(event.term)}
-                                className="w-full flex items-center gap-4 p-3.5 bg-gray-50/50 dark:bg-gray-900/40 rounded-2xl border border-gray-100/80 dark:border-gray-800/60 hover:bg-white dark:hover:bg-gray-800 transition-all active:scale-[0.99] text-left group"
-                            >
-                                <div className={`w-9 h-9 rounded-xl ${event.bg} ${event.color} flex items-center justify-center shrink-0`}>
-                                    <event.icon size={18} />
-                                </div>
-                                <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300 flex-1 leading-tight">{event.label}</p>
-                                <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-500" />
                             </button>
                         ))}
                     </div>
@@ -281,15 +281,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                         ))}
                     </div>
                 </section>
-            </div>
-        ) : isEmpty ? (
-            <div className="flex flex-col items-center justify-center pt-20 text-center animate-in zoom-in duration-300">
-                <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-[2rem] flex items-center justify-center mb-6 border border-dashed border-gray-200 dark:border-gray-800">
-                    <SearchX size={32} className="text-gray-300" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tighter">Nenhum resultado</h3>
-                <p className="text-sm text-gray-400 mt-2 max-w-[240px]">Não encontramos nada para "{searchTerm}" em {currentNeighborhood}.</p>
-                <button onClick={() => setSearchTerm('')} className="mt-8 text-blue-600 font-black text-xs uppercase tracking-widest">Limpar busca</button>
             </div>
         ) : (
             <div className="space-y-10 animate-in fade-in duration-300">
