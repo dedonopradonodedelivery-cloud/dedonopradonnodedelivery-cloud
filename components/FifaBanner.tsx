@@ -16,11 +16,11 @@ const QUICK_SERVICES = [
 
 export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
   return (
-    <div className="flex flex-col gap-6 py-4">
-      {/* Main Professional Service Block - Compact Version */}
+    <div className="flex flex-col py-2">
+      {/* Unified Professional Service Central */}
       <div 
         onClick={onClick}
-        className="relative w-full overflow-hidden rounded-[2.5rem] bg-slate-900 py-8 px-8 shadow-2xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
+        className="relative w-full overflow-hidden rounded-[2.5rem] py-7 px-7 shadow-2xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] cursor-pointer group border border-white/10"
       >
         {/* Background Layer - Deep Brand Blue with Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#1248E0] to-[#0A2E99]"></div>
@@ -34,63 +34,60 @@ export const FifaBanner: React.FC<FifaBannerProps> = ({ onClick }) => {
         {/* Shimmer Effect for Premium Feeling */}
         <div className="absolute -inset-full w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/5 to-transparent rotate-45 animate-slow-shimmer pointer-events-none"></div>
 
-        <div className="relative z-10 flex flex-col gap-5">
-          {/* Badge & Icon Area - More Compact */}
+        <div className="relative z-10 flex flex-col gap-6">
+          {/* Header Area */}
           <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/40 shadow-xl">
-                <Wrench size={28} className="text-white drop-shadow-lg" strokeWidth={2.5} />
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/40 shadow-xl">
+                <Wrench size={24} className="text-white drop-shadow-lg" strokeWidth={2.5} />
               </div>
               <div className="bg-white/15 backdrop-blur-xl px-3 py-1 rounded-full border border-white/20 flex items-center gap-1.5">
                   <ShieldCheck size={12} className="text-emerald-400" />
-                  <span className="text-[9px] font-black text-white uppercase tracking-[0.12em]">Especialistas Verificados</span>
+                  <span className="text-[8px] font-black text-white uppercase tracking-[0.12em]">Especialistas Verificados</span>
               </div>
           </div>
 
-          {/* Text Content - Tighter Leading */}
-          <div className="space-y-2">
-            <h2 className="text-3xl font-black text-white leading-[1.1] uppercase tracking-tighter max-w-[280px]">
+          {/* Text Content */}
+          <div className="space-y-1.5">
+            <h2 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter max-w-[280px]">
               Precisa de um <br/> profissional agora?
             </h2>
-            <p className="text-sm text-blue-50 font-medium leading-relaxed opacity-90 max-w-[260px]">
+            <p className="text-xs text-blue-50 font-medium leading-relaxed opacity-80 max-w-[260px]">
               Receba propostas de especialistas perto de você em Jacarepaguá.
             </p>
           </div>
 
-          {/* Primary CTA - Compact but High Contrast */}
-          <div className="pt-1">
-              <button className="bg-white text-[#1E5BFF] font-black py-4 px-8 rounded-2xl shadow-xl hover:bg-blue-50 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-3 group-hover:gap-4">
+          {/* Primary CTA */}
+          <div>
+              <button className="bg-white text-[#1E5BFF] font-black py-3.5 px-7 rounded-2xl shadow-xl hover:bg-blue-50 transition-all text-[11px] uppercase tracking-widest flex items-center justify-center gap-3 group-hover:gap-4">
                 Receber orçamentos
-                <ArrowRight size={18} strokeWidth={3} />
+                <ArrowRight size={16} strokeWidth={3} />
               </button>
+          </div>
+
+          {/* Integrated Quick Shortcuts - Discreet Style */}
+          <div className="pt-4 border-t border-white/10">
+            <p className="text-[8px] font-black text-white/50 uppercase tracking-[0.2em] mb-3 ml-1">Atalhos rápidos</p>
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-2 px-1 pb-1">
+                {QUICK_SERVICES.map((s, i) => (
+                <div 
+                    key={i} 
+                    className="flex flex-col items-center gap-1.5 min-w-[70px] group/item"
+                >
+                    <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 group-hover/item:bg-white/20 group-hover/item:text-white transition-all">
+                        <s.icon size={18} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[7px] font-black text-white/60 text-center leading-tight uppercase tracking-tighter group-hover/item:text-white transition-colors max-w-[65px] truncate">
+                        {s.name}
+                    </span>
+                </div>
+                ))}
+            </div>
           </div>
         </div>
 
         {/* Decorative Watermark - Scaled Down */}
-        <div className="absolute -bottom-6 -right-6 opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-1000">
-            <Wrench size={180} strokeWidth={1} className="text-white" />
-        </div>
-      </div>
-
-      {/* Horizontal Shortcuts - Tighter Layout */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Serviços em Destaque</p>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
-            {QUICK_SERVICES.map((s, i) => (
-            <button 
-                key={i} 
-                onClick={onClick} 
-                className="flex flex-col items-center gap-2.5 min-w-[80px] group/item active:scale-95 transition-transform"
-            >
-                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover/item:bg-blue-50 dark:group-hover/item:bg-blue-900/20 group-hover/item:text-[#1E5BFF] dark:group-hover/item:text-blue-400 group-hover/item:border-blue-100 dark:group-hover/item:border-blue-800/30 transition-all shadow-sm">
-                <s.icon size={24} strokeWidth={2} />
-                </div>
-                <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 text-center leading-tight uppercase tracking-tighter group-hover/item:text-[#1E5BFF] transition-colors max-w-[70px]">
-                {s.name}
-                </span>
-            </button>
-            ))}
+        <div className="absolute -bottom-6 -right-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-1000">
+            <Wrench size={160} strokeWidth={1} className="text-white" />
         </div>
       </div>
     </div>
