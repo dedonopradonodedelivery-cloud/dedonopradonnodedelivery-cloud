@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Store, AdType } from '../types';
 import { STORES } from '../constants';
@@ -119,44 +120,46 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
         className={`relative aspect-[16/11] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
         {currentBanner.type === 'services' ? (
-          /* DESIGN: SERVIÇOS VERIFICADOS */
-          <div className="w-full h-full relative flex flex-col p-8">
-            {/* Textura Dot Pattern */}
+          /* DESIGN REORGANIZADO: SERVIÇOS VERIFICADOS */
+          <div className="w-full h-full relative flex flex-col justify-between p-8 text-left">
+            {/* Backgrounds */}
             <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1.5px)', backgroundSize: '16px 16px' }}></div>
             
-            {/* Topo: Badge & Ícone Tool */}
-            <div className="relative z-10 flex justify-between items-start">
-               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-xl">
-                 <Sparkles size={14} className="text-blue-400" />
-                 <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{currentBanner.category}</span>
-               </div>
-               
-               <div className="relative">
-                 <div className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-[1.25rem] border border-white/10 flex items-center justify-center shadow-2xl">
-                    <Wrench size={28} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-[#020617] shadow-lg">
-                      <Check size={12} className="text-white" strokeWidth={4} />
-                    </div>
-                 </div>
-               </div>
+            {/* Top Group: Header + Text */}
+            <div>
+              {/* Header */}
+              <div className="relative z-10 flex justify-between items-start mb-6">
+                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-xl">
+                      <Sparkles size={14} className="text-blue-400" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{currentBanner.category}</span>
+                  </div>
+                  <div className="relative">
+                      <div className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-[1.25rem] border border-white/10 flex items-center justify-center shadow-2xl">
+                          <Wrench size={28} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-[#020617] shadow-lg">
+                              <Check size={12} className="text-white" strokeWidth={4} />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              {/* Main Text Content */}
+              <div className="relative z-10 space-y-3">
+                  <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter max-w-[280px] drop-shadow-md">
+                      {currentBanner.title}
+                  </h2>
+                  <p className="text-sm text-blue-100/80 font-medium leading-relaxed max-w-[280px]">
+                      {currentBanner.subtitle}
+                  </p>
+              </div>
             </div>
 
-            {/* Centro: Título e Descrição */}
-            <div className="flex-1 flex flex-col justify-center relative z-10 text-center items-center">
-               <h2 className="text-2xl font-black text-white leading-[1.1] uppercase tracking-tighter max-w-[260px] mb-3 drop-shadow-md">
-                 {currentBanner.title}
-               </h2>
-               <p className="text-[11px] text-blue-100/70 font-medium leading-relaxed max-w-[240px]">
-                 {currentBanner.subtitle}
-               </p>
-            </div>
-
-            {/* Base: Botão CTA */}
-            <div className="relative z-10 flex justify-center mb-6">
-               <div className="bg-white text-[#020617] font-black py-4 px-8 rounded-2xl shadow-2xl flex items-center gap-2 active:scale-95 transition-transform">
-                 <span className="text-[11px] uppercase tracking-widest">{currentBanner.cta}</span>
-                 <ArrowRight size={16} strokeWidth={3} />
-               </div>
+            {/* Bottom Group: CTA */}
+            <div className="relative z-10">
+                <button className="bg-white text-slate-900 font-black py-4 px-6 rounded-2xl shadow-2xl flex items-center gap-2 active:scale-95 transition-transform group/btn">
+                    <span className="text-xs uppercase tracking-widest">{currentBanner.cta}</span>
+                    <ArrowRight size={16} strokeWidth={3} className="transition-transform group-hover/btn:translate-x-1" />
+                </button>
             </div>
           </div>
         ) : (

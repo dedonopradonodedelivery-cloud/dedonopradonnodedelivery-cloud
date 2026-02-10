@@ -22,40 +22,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
-  const hasActiveCoupons = useMemo(() => {
-    if (!user || userRole !== 'cliente') return false;
-    try {
-      const saved = JSON.parse(localStorage.getItem('user_saved_coupons') || '[]');
-      return saved.some((c: any) => c.status === 'available');
-    } catch {
-      return false;
-    }
-  }, [user, userRole, activeTab]);
-
   const navItems = useMemo(() => {
     return [
       { id: 'home', icon: Home, label: 'Início', isMainAction: false },
       { id: 'explore', icon: Compass, label: 'Explorar', isMainAction: true },
-      { id: 'cupom_trigger', icon: Ticket, label: 'Cupom', isMainAction: true, badge: userRole !== 'lojista' ? hasActiveCoupons : false },
       { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true },
       { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },
     ];
-  }, [userRole, hasActiveCoupons]);
+  }, [userRole]);
 
   const handleTabClick = (item: NavItem) => {
-    if (item.id === 'cupom_trigger') {
-      if (!user) {
-        setActiveTab('coupon_landing');
-      } else {
-        if (userRole === 'lojista') {
-          setActiveTab('merchant_coupons');
-        } else {
-          setActiveTab('user_coupons');
-        }
-      }
-    } else {
-      setActiveTab(item.id);
-    }
+    setActiveTab(item.id);
   };
 
   const handleLoginSuccess = () => {
@@ -106,13 +83,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
-        <div className="grid w-full h-full grid-cols-5 items-center">
+        <div className="grid w-full h-full grid-cols-4 items-center">
           {navItems.map((item) => {
             let isActive = false;
             
-            if (item.id === 'cupom_trigger') {
-               isActive = activeTab === 'merchant_coupons' || activeTab === 'user_coupons' || activeTab === 'coupon_landing';
-            } else if (item.id === 'profile') {
+            if (item.id === 'profile') {
                isActive = ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'user_profile_full', 'edit_profile_view'].includes(activeTab);
             } else {
                isActive = activeTab === item.id;

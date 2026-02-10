@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Ticket, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { MOCK_HOME_COUPONS } from '../constants';
+import { Ticket, ArrowRight } from 'lucide-react';
+import { MOCK_HOME_COUPONS } from '@/constants';
 
 interface CouponCarouselProps {
   onNavigate: (view: string) => void;
@@ -12,13 +12,10 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
     <div className="flex-shrink-0 w-72 snap-center p-2">
       <div className={`relative h-44 rounded-[2.5rem] overflow-hidden shadow-xl ${coupon.color} flex flex-col group active:scale-[0.98] transition-transform`}>
         
-        {/* Recortes Circulares Laterais (Efeito Ticket) */}
         <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
         <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
 
-        {/* Área Superior: Logo e Informações de Destaque */}
         <div className="flex-1 p-6 flex items-center gap-4">
-          {/* Logo da Loja em Box Arredondado */}
           <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
             <img 
               src={coupon.storeLogo} 
@@ -26,8 +23,6 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
               className="w-full h-full object-cover rounded-xl"
             />
           </div>
-
-          {/* Nome e Valor do Desconto */}
           <div className="flex flex-col min-w-0">
             <h4 className="text-[10px] font-black text-white/80 uppercase tracking-[0.15em] truncate mb-0.5">
               {coupon.storeName}
@@ -38,12 +33,10 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
           </div>
         </div>
 
-        {/* Linha Divisória Pontilhada Sutil */}
         <div className="px-6">
             <div className="h-px border-t border-dashed border-white/20"></div>
         </div>
 
-        {/* Rodapé: Código e Ação */}
         <div className="h-16 px-6 flex items-center justify-between relative z-10">
           <div className="bg-black/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
             <p className="text-[11px] font-mono font-black text-white tracking-[0.1em]">{coupon.code}</p>
@@ -62,7 +55,7 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
 
 export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) => {
   return (
-    <section className="bg-white dark:bg-gray-950 py-6 mb-2 overflow-visible">
+    <section className="bg-white dark:bg-gray-950 py-6 mb-2 overflow-hidden">
       <div className="px-5 mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-500 shadow-sm">
@@ -81,7 +74,7 @@ export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) =>
         </button>
       </div>
 
-      <div className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory px-3">
+      <div className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-3 px-3">
         {MOCK_HOME_COUPONS.map((coupon) => (
           <CouponTicket 
             key={coupon.id} 
@@ -90,7 +83,6 @@ export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) =>
           />
         ))}
         
-        {/* Card Final: Ver Todos */}
         <div className="flex-shrink-0 w-48 snap-center p-2">
           <button 
             onClick={() => onNavigate('coupon_landing')}

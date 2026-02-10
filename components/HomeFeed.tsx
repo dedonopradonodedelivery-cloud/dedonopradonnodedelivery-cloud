@@ -28,6 +28,7 @@ import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants'
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
+import { CouponCarousel } from '@/components/CouponCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
 
@@ -187,26 +188,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* 3. MICRO-GANCHO DE CUPOM */}
-      <section className="px-5 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-500 shadow-sm">
-              <Ticket size={20} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest leading-none">Cupons e Ofertas</h2>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Exclusivos para o bairro</p>
-            </div>
-          </div>
-          <button 
-            onClick={() => onNavigate('coupon_landing')} 
-            className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest hover:underline"
-          >
-            Ver todos
-          </button>
-        </div>
+      {/* 3. CUPONS E OFERTAS (NOVO COMPONENTE) */}
+      <CouponCarousel onNavigate={onNavigate} />
 
+      {/* 4. MINHA RECOMPENSA (BLOCO SEPARADO) */}
+      <section className="px-5 mb-6">
         <button 
           onClick={() => onNavigate('weekly_reward_page')}
           className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10"
