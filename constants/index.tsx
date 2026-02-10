@@ -6,6 +6,7 @@ import {
   Store as StoreIcon,
   LayoutGrid, Pill, Briefcase, Plane, Zap,
   Beef, Coffee, Pizza, Croissant, Soup, Cake, Sandwich, 
+  // Added Coins import to fix "Cannot find name 'Coins'" error on line 46
   Stethoscope, Package, Clock, Target, Settings, Dog,
   Star, Tag, Award, TrendingUp, ChevronRight, MessageSquare, Users,
   Apple, Building2, Leaf, Shield, PaintRoller, Hammer, Droplets, Laptop,
@@ -19,39 +20,66 @@ import {
   Palette, Printer, Book, Lightbulb, Bike, Sofa, Smartphone, Headphones,
   Wifi, MapPin, Trash2, ShieldAlert, Megaphone, ShieldCheck,
   Circle, Flower, Swords, Gamepad, Gamepad2, Church, Film, Mic, Bus,
-  Lock, Wind, Disc, Cpu, HeartHandshake
+  Lock, Wind, Disc, Cpu, Coins, HeartHandshake
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
 
 export const CATEGORIES: Category[] = [
-  { id: 'cat-servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
   { id: 'cat-alimentacao', name: 'Alimentação', slug: 'alimentacao', icon: <Soup />, color: 'bg-brand-blue' },
-  { id: 'cat-restaurantes', name: 'Restaurantes', slug: 'restaurantes', icon: <Utensils />, color: 'bg-brand-blue' },
-  { id: 'cat-mercados', name: 'Mercados', slug: 'mercados', icon: <ShoppingCart />, color: 'bg-brand-blue' },
-  { id: 'cat-farmacias', name: 'Farmácias', slug: 'farmacias', icon: <Pill />, color: 'bg-brand-blue' },
-  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
-  { id: 'cat-moda', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-brand-blue' },
+  { id: 'cat-mercado', name: 'Mercado', slug: 'mercado', icon: <ShoppingCart />, color: 'bg-brand-blue' },
+  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'cat-farmacia', name: 'Farmácia', slug: 'farmacia', icon: <Pill />, color: 'bg-brand-blue' },
   { id: 'cat-beleza', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
+  { id: 'cat-moda', name: 'Moda', slug: 'moda', icon: <Shirt />, color: 'bg-brand-blue' },
+  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
+  { id: 'cat-servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
+  { id: 'cat-educacao', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
+  { id: 'cat-esportes', name: 'Esportes', slug: 'esportes', icon: <Dumbbell />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-lazer', name: 'Lazer', slug: 'lazer', icon: <Tent />, color: 'bg-brand-blue' },
   { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
   { id: 'cat-informatica', name: 'Informática', slug: 'informatica', icon: <Monitor />, color: 'bg-brand-blue' },
-  { id: 'cat-papelaria', name: 'Papelaria', slug: 'papelaria', icon: <PenTool />, color: 'bg-brand-blue' },
-  { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
-  { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
-  { id: 'cat-educacao', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
-  { id: 'cat-esporte', name: 'Esporte', slug: 'esporte', icon: <Dumbbell />, color: 'bg-brand-blue' },
-  { id: 'cat-bemestar', name: 'Bem-estar', slug: 'bemestar', icon: <Smile />, color: 'bg-brand-blue' },
-  { id: 'cat-infantil', name: 'Infantil', slug: 'infantil', icon: <Baby />, color: 'bg-brand-blue' },
-  { id: 'cat-servicospublicos', name: 'Serviços Públicos', slug: 'servicospublicos', icon: <Landmark />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
-  { id: 'cat-condominios', name: 'Condomínios', slug: 'condominios', icon: <Building2 />, color: 'bg-brand-blue' },
-  { id: 'cat-lazer', name: 'Lazer', slug: 'lazer', icon: <Tent />, color: 'bg-brand-blue' },
-  { id: 'cat-cupons', name: 'Cupons', slug: 'cupons', icon: <TicketPercent />, color: 'bg-brand-blue' },
-  { id: 'cat-promocoes', name: 'Promoções', slug: 'promocoes', icon: <Percent />, color: 'bg-brand-blue' },
-  { id: 'cat-classificados', name: 'Classificados', slug: 'classificados', icon: <Newspaper />, color: 'bg-brand-blue' },
-  { id: 'cat-achados', name: 'Achados e Perdidos', slug: 'achados', icon: <Search />, color: 'bg-brand-blue' },
+  { id: 'cat-condominio', name: 'Condomínios', slug: 'condominios', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'cat-servicos-publicos', name: 'Serviços Públicos', slug: 'servicos-publicos', icon: <Landmark />, color: 'bg-brand-blue' },
+  { id: 'cat-financeiro', name: 'Financeiro & Seguros', slug: 'financeiro', icon: <Coins />, color: 'bg-brand-blue' },
+  { id: 'cat-kids', name: 'Kids', slug: 'kids', icon: <Gamepad2 />, color: 'bg-brand-blue' },
+  { id: 'cat-idosos', name: 'Pessoas Idosas', slug: 'idosos', icon: <HeartHandshake />, color: 'bg-brand-blue' },
+  { id: 'cat-bemestar', name: 'Bem-estar', slug: 'bem-estar', icon: <Smile />, color: 'bg-brand-blue' },
+  { id: 'cat-cupom', name: 'Cupom', slug: 'cupom', icon: <Ticket />, color: 'bg-brand-blue' },
 ];
+
+export const HEALTH_SPECIALTIES: Record<string, string[]> = {
+  'Mulher': [
+    'Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana', 
+    'Fertilidade feminina', 'Planejamento familiar', 'Saúde sexual feminina', 'Saúde íntima feminina', 
+    'Climatério', 'Menopausa', 'Ginecologia oncológica', 'Ginecologia endócrina', 'Uroginecologia', 
+    'Colposcopia', 'Patologia do trato genital inferior', 'Medicina fetal', 'Pré-natal de alto risco', 
+    'Dor pélvica crônica'
+  ],
+  'Homem': [
+    'Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina', 'Fertilidade masculina', 
+    'Saúde prostática', 'Distúrbios hormonais masculinos', 'Urologia oncológica', 'Urologia funcional', 
+    'Saúde do envelhecimento masculino', 'Infertilidade masculina', 'Disfunção erétil', 'Ejaculação precoce', 
+    'Hipogonadismo'
+  ],
+  'Pediatria': [
+    'Pediatria geral', 'Neonatologia', 'Puericultura', 'Pediatria preventiva', 'Alergologia pediátrica', 
+    'Endocrinologia pediátrica', 'Neuropediatria', 'Gastroenterologia pediátrica', 'Pneumologia pediátrica', 
+    'Cardiologia pediátrica', 'Nefrologia pediátrica', 'Hematologia pediátrica', 'Oncologia pediátrica', 
+    'Infectologia pediátrica', 'Reumatologia pediátrica', 'Genética médica pediátrica', 'Psiquiatria infantil', 
+    'Ortopedia pediátrica', 'Cirurgia pediátrica'
+  ],
+  'Geriatria': [
+    'Geriatria', 'Clínica geriátrica', 'Gerontologia', 'Medicina do envelhecimento', 'Fisioterapia geriátrica', 
+    'Fisioterapia domiciliar', 'Enfermagem domiciliar', 'Home care', 'Cuidados paliativos', 'Cuidados continuados', 
+    'Psicologia geriátrica', 'Psiquiatria geriátrica', 'Terapia ocupacional geriátrica', 'Fonoaudiologia geriátrica', 
+    'Nutrição geriátrica', 'Reabilitação geriátrica', 'Ortopedia geriátrica', 'Cardiologia geriátrica', 
+    'Neurologia geriátrica', 'Avaliação multidisciplinar do idoso'
+  ]
+};
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
   'Serviços': [
@@ -97,82 +125,3 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   'Farmácias': [
     { name: 'Farmácias', icon: <Pill /> },
     { name: 'Manipulados', icon: <Microscope /> },
-    { name: 'Materiais Médicos', icon: <Stethoscope /> },
-  ],
-  'Autos': [
-    { name: 'Oficina mecânica', icon: <Wrench /> },
-    { name: 'Auto elétrica', icon: <Zap /> },
-    { name: 'Funilaria e pintura', icon: <PaintRoller /> },
-    { name: 'Alinhamento e balanceamento', icon: <Scale /> },
-    { name: 'Troca de óleo', icon: <Droplets /> },
-    { name: 'Suspensão e freios', icon: <Disc /> },
-    { name: 'Ar-condicionado automotivo', icon: <Wind /> },
-    { name: 'Guincho e reboque', icon: <Truck /> },
-    { name: 'Oficina de motos', icon: <Wrench /> },
-    { name: 'Elétrica de motos', icon: <Zap /> },
-    { name: 'Mecânica geral', icon: <Settings /> },
-    { name: 'Injeção eletrônica', icon: <Cpu /> },
-    { name: 'Peças e acessórios', icon: <Package /> },
-    { name: 'Guincho para motos', icon: <Truck /> },
-  ],
-  'Moda': [
-    { name: 'Feminina', icon: <Shirt /> },
-    { name: 'Masculina', icon: <User /> },
-    { name: 'Infantil', icon: <Baby /> },
-    { name: 'Calçados', icon: <Package /> },
-    { name: 'Acessórios', icon: <Star /> },
-  ],
-  'Beleza': [
-    { name: 'Salão de Cabelo', icon: <Scissors /> },
-    { name: 'Manicure', icon: <Handshake /> },
-    { name: 'Estética Facial', icon: <Sparkles /> },
-    { name: 'Estética Corporal', icon: <User /> },
-    { name: 'Barbearia', icon: <Scissors /> },
-    { name: 'Maquiagem', icon: <Palette /> },
-  ],
-  'Casa': [
-    { name: 'Móveis', icon: <Sofa /> },
-    { name: 'Decoração', icon: <Palette /> },
-    { name: 'Iluminação', icon: <Lightbulb /> },
-    { name: 'Utensílios', icon: <Utensils /> },
-    { name: 'Jardinagem', icon: <Flower /> },
-    { name: 'Construção', icon: <Hammer /> },
-  ],
-  'Informática': [
-    { name: 'Assistência Técnica', icon: <Wrench /> },
-    { name: 'Computadores', icon: <Monitor /> },
-    { name: 'Celulares', icon: <Smartphone /> },
-  ],
-  'Saúde': [
-    // Mulher
-    { name: 'Ginecologia', icon: <User /> },
-    { name: 'Mastologia', icon: <Heart /> },
-    { name: 'Obstetrícia', icon: <Baby /> },
-    // Homem
-    { name: 'Urologia', icon: <User /> },
-    { name: 'Proctologia', icon: <Stethoscope /> },
-    // Criança
-    { name: 'Pediatria', icon: <Baby /> },
-    { name: 'Odontopediatria', icon: <Smile /> },
-    { name: 'Fonoaudiologia', icon: <Mic /> },
-    // Idoso
-    { name: 'Geriatria', icon: <HeartHandshake /> },
-    { name: 'Fisioterapia', icon: <Activity /> },
-    { name: 'Cuidadores', icon: <Users /> },
-    // Geral
-    { name: 'Clínicas', icon: <Building2 /> },
-    { name: 'Exames', icon: <Microscope /> },
-    { name: 'Dentistas', icon: <Smile /> },
-    { name: 'Psicologia', icon: <Brain /> },
-  ],
-};
-
-export const ALL_TAGS = [
-  'tênis', 'camisa', 'camiseta', 'calça', 'bermuda', 'vestido', 'saia', 'moletom', 'jaqueta', 'roupa social', 'roupa feminina', 'roupa masculina',
-  'relógio', 'óculos', 'bolsa', 'mochila', 'cinto', 'pulseira', 'colar', 'boné',
-  'ração', 'banho e tosa', 'brinquedo pet', 'coleira', 'petiscos', 'veterinário', 'adestramento', 'transporte pet',
-  'corte de cabelo', 'manicure', 'pedicure', 'maquiagem', 'estética facial', 'sobrancelha', 'depilação', 'hidratação capilar',
-  'troca de óleo', 'alinhamento', 'balanceamento', 'revisão automotiva', 'lava jato', 'auto elétrica', 'funilaria', 'vistoria veicular',
-  'clínica médica', 'dentista', 'psicologia', 'fisioterapia', 'exames laboratoriais', 'nutrição', 'terapias alternativas', 'saúde preventiva',
-  'eletricista', 'encanador', 'pedreiro', 'pintor', 'chaveiro', 'montagem de móveis', 'limpeza residencial', 'manutenção geral'
-];

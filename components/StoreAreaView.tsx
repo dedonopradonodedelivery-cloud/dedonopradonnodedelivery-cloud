@@ -37,8 +37,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { InstitutionalSponsorBanner } from '@/components/InstitutionalSponsorBanner';
-import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
-import { useFeatures } from '@/contexts/FeatureContext';
+import { MandatoryVideoLock } from './MandatoryVideoLock';
 
 interface StoreAreaViewProps {
   onBack: () => void;
@@ -102,7 +101,6 @@ const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ 
 export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { isFeatureActive } = useFeatures();
 
   const handleLogout = async () => {
     if (confirm('Deseja realmente sair da sua conta de lojista?')) {
@@ -121,6 +119,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
     >
       <div className="min-h-screen bg-[#F4F7FF] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-40">
         
+        {/* HEADER DE PERFIL */}
         <div className="bg-white dark:bg-gray-950 px-6 pt-12 pb-8 border-b border-blue-100 dark:border-gray-800 shadow-sm mb-6">
           <div className="flex items-center gap-5">
             <div className="w-20 h-20 rounded-[2rem] border-4 border-[#F4F7FF] dark:border-slate-800 shadow-xl overflow-hidden shrink-0">
@@ -140,6 +139,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <div className="px-5">
           
+          {/* 1. MINHA LOJA - CENTRALIZADO */}
           <section>
             <SectionHeader title="Minha Loja" icon={Building} />
             <NavCard 
@@ -150,71 +150,133 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
           </section>
 
-          {(isFeatureActive('coupons') || isFeatureActive('banner_highlights')) && (
-            <section>
-                <SectionHeader title="Promoções e Vendas" icon={Tag} />
-                {isFeatureActive('coupons') && (
-                    <NavCard 
-                    icon={Ticket} 
-                    label="Cupons de Desconto" 
-                    description="Crie e gerencie seus cupons"
-                    onClick={() => onNavigate('merchant_coupons')}
-                    colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
-                    />
-                )}
-                {isFeatureActive('banner_highlights') && (
-                    <NavCard 
-                    icon={Zap} 
-                    label="Promoções Ativas" 
-                    description="Vitrine de ofertas especiais"
-                    onClick={() => onNavigate('merchant_promotions')} 
-                    />
-                )}
-            </section>
-          )}
-
+          {/* 2. PROMOÇÕES E VENDAS - MOVIDO PARA CIMA */}
           <section>
-            <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />
-            {isFeatureActive('sponsored_ads') && (
-                <NavCard 
-                icon={TrendingUp} 
-                label="Patrocinados" 
-                description="Suba para o topo por R$ 0,90/dia"
-                onClick={() => onNavigate('store_sponsored')}
-                colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
-                />
-            )}
-            {isFeatureActive('banner_highlights') && (
-                <NavCard 
-                icon={LayoutGrid} 
-                label="Banners em Destaque" 
-                description="Sua loja nas áreas nobres do bairro"
-                onClick={() => onNavigate('store_ads_module')}
-                colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
-                topRightTag={
-                    <div 
-                    className="absolute -top-4 -right-1 z-20 bg-yellow-400 text-slate-900 py-1.5 px-3 shadow-xl border border-yellow-500 animate-subtle-pulse flex flex-col items-center"
-                    style={{
-                        clipPath: 'polygon(100% 0%, 95% 5%, 100% 10%, 95% 15%, 100% 20%, 95% 25%, 100% 30%, 95% 35%, 100% 40%, 95% 45%, 100% 50%, 95% 55%, 100% 60%, 95% 65%, 100% 70%, 95% 75%, 100% 80%, 95% 85%, 100% 90%, 95% 95%, 100% 100%, 0% 100%, 5% 95%, 0% 90%, 5% 85%, 0% 80%, 5% 75%, 0% 70%, 5% 65%, 0% 60%, 5% 55%, 0% 50%, 5% 45%, 0% 40%, 5% 35%, 0% 30%, 5% 25%, 0% 20%, 5% 15%, 0% 10%, 5% 5%, 0% 0%)'
-                    }}
-                    >
-                    <p className="text-[8px] font-black leading-none mb-0.5">💎 A PARTIR DE R$ 49,90/MÊS</p>
-                    <p className="text-[7px] font-bold opacity-80 leading-none">EXCLUSIVO PARA FUNDADORES</p>
-                    </div>
-                }
-                />
-            )}
-            {isFeatureActive('master_sponsor') && (
-                <NavCard 
-                icon={Crown} 
-                label="Patrocinador Master" 
-                description="Visibilidade em 90% do app"
-                onClick={() => onNavigate('sponsor_info')}
-                colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
-                />
-            )}
+            <SectionHeader title="Promoções e Vendas" icon={Tag} />
+            <NavCard 
+              icon={Ticket} 
+              label="Cupons de Desconto" 
+              description="Crie e gerencie seus cupons"
+              onClick={() => onNavigate('merchant_coupons')}
+              colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
+            />
+            <NavCard 
+              icon={Zap} 
+              label="Promoções Ativas" 
+              description="Vitrine de ofertas especiais"
+              onClick={() => onNavigate('merchant_promotions')} 
+            />
           </section>
 
+          {/* 3. CRESCIMENTO E ANÚNCIOS */}
+          <section>
+            <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />
+            <NavCard 
+              icon={TrendingUp} 
+              label="Patrocinados" 
+              description="Suba para o topo por R$ 0,90/dia"
+              onClick={() => onNavigate('store_sponsored')}
+              colorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20"
+            />
+            <NavCard 
+              icon={LayoutGrid} 
+              label="Banners em Destaque" 
+              description="Sua loja nas áreas nobres do bairro"
+              onClick={() => onNavigate('store_ads_module')}
+              colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+              topRightTag={
+                <div 
+                  className="absolute -top-4 -right-1 z-20 bg-yellow-400 text-slate-900 py-1.5 px-3 shadow-xl border border-yellow-500 animate-subtle-pulse flex flex-col items-center"
+                  style={{
+                    clipPath: 'polygon(100% 0%, 95% 5%, 100% 10%, 95% 15%, 100% 20%, 95% 25%, 100% 30%, 95% 35%, 100% 40%, 95% 45%, 100% 50%, 95% 55%, 100% 60%, 95% 65%, 100% 70%, 95% 75%, 100% 80%, 95% 85%, 100% 90%, 95% 95%, 100% 100%, 0% 100%, 5% 95%, 0% 90%, 5% 85%, 0% 80%, 5% 75%, 0% 70%, 5% 65%, 0% 60%, 5% 55%, 0% 50%, 5% 45%, 0% 40%, 5% 35%, 0% 30%, 5% 25%, 0% 20%, 5% 15%, 0% 10%, 5% 5%, 0% 0%)'
+                  }}
+                >
+                  <p className="text-[8px] font-black leading-none mb-0.5">💎 A PARTIR DE R$ 49,90/MÊS</p>
+                  <p className="text-[7px] font-bold opacity-80 leading-none">EXCLUSIVO PARA FUNDADORES</p>
+                </div>
+              }
+            />
+            <NavCard 
+              icon={Crown} 
+              label="Patrocinador Master" 
+              description="Visibilidade em 90% do app"
+              onClick={() => onNavigate('sponsor_info')}
+              colorClass="bg-amber-50 text-amber-600 dark:bg-amber-900/20"
+            />
+            <NavCard 
+              icon={Handshake} 
+              label="JPA Connect" 
+              description="Conectando lojistas do bairro"
+              onClick={() => onNavigate('jpa_connect')}
+              colorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20"
+              rightElement={<span className="text-[8px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-widest">Em breve</span>}
+            />
+          </section>
+
+          {/* 4. RELACIONAMENTO COM CLIENTES */}
+          <section>
+            <SectionHeader title="Relacionamento" icon={Users} />
+            <NavCard 
+              icon={Star} 
+              label="Avaliações de Clientes" 
+              description="Responda o que dizem sobre você"
+              badge={3} 
+              onClick={() => onNavigate('merchant_reviews')} 
+            />
+            <NavCard 
+              icon={MessageSquare} 
+              label="Mensagens / Chat" 
+              description="Fale com interessados em serviços"
+              onClick={() => onNavigate('merchant_leads')} 
+            />
+          </section>
+
+          {/* 5. CONTEÚDO E MARCA */}
+          <section>
+            <SectionHeader title="Conteúdo e Marca" icon={ImageIcon} />
+            <NavCard 
+              icon={LayoutGrid} 
+              label="Feed da Loja" 
+              description="Publique fotos no seu perfil"
+              onClick={() => onNavigate('neighborhood_posts')} 
+            />
+            <NavCard 
+              icon={Video} 
+              label="Vídeos Explicativos" 
+              description="Envie até 2 vídeos da sua loja"
+              onClick={() => onNavigate('store_profile')} 
+            />
+          </section>
+
+          {/* 6. PERFORMANCE E FINANCEIRO */}
+          <section>
+            <SectionHeader title="Resultados" icon={BarChart3} />
+            <NavCard 
+              icon={PieChart} 
+              label="Minha Performance" 
+              description="Cliques, visualizações e alcance"
+              onClick={() => onNavigate('merchant_performance')} 
+            />
+            <NavCard 
+              icon={CreditCard} 
+              label="Pagamentos e Faturas" 
+              description="Extratos e planos ativos"
+              onClick={() => onNavigate('store_finance')} 
+            />
+          </section>
+
+          {/* 7. SUPORTE */}
+          <section>
+            <SectionHeader title="Suporte" icon={LifeBuoy} />
+            <NavCard 
+              icon={HelpCircle} 
+              label="Central de Ajuda" 
+              description="Dúvidas e orientações ao lojista"
+              onClick={() => onNavigate('store_support')} 
+            />
+          </section>
+
+          {/* 8. PREFERÊNCIAS */}
           <section>
             <SectionHeader title="Preferências" icon={Settings} />
             <NavCard 
@@ -236,6 +298,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
           </section>
 
+          <InstitutionalSponsorBanner type="merchant" className="mt-12" />
+
           <div className="mt-16 text-center opacity-30 pb-12">
             <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] leading-relaxed">
               Localizei JPA Parceiros <br/> Central de Gestão v2.0
@@ -243,6 +307,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes subtle-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.03); }
+        }
+        .animate-subtle-pulse {
+          animation: subtle-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
     </MandatoryVideoLock>
   );
 };
