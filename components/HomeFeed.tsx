@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
   Compass, 
@@ -34,7 +34,9 @@ import {
   Scissors,
   BookOpen,
   Lightbulb,
-  User as UserIcon
+  User as UserIcon,
+  ShoppingBag,
+  Search
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -140,34 +142,47 @@ const HAPPENING_NOW_MOCK = [
   {
     id: 'hn-1',
     type: 'promotion',
-    title: 'Rodízio de Pizza',
+    title: 'Rodízio de Pizza 25% OFF',
     subtitle: 'Pizzaria do Zé',
     timeRemaining: 'Até as 23h',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200&auto=format&fit=crop',
+    color: 'from-orange-600 to-red-700'
   },
   {
     id: 'hn-2',
     type: 'event',
-    title: 'Feira Orgânica',
+    title: 'Feira Gastronômica Regional',
     subtitle: 'Praça da Freguesia',
     timeRemaining: 'Termina em 1h',
-    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=200&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=200&auto=format&fit=crop',
+    color: 'from-blue-600 to-indigo-700'
   },
   {
     id: 'hn-3',
     type: 'alert',
-    title: 'Trânsito Intenso',
-    subtitle: 'Est. Três Rios',
+    title: 'Obra na Est. dos Três Rios',
+    subtitle: 'Trânsito lento sentido Centro',
     timeRemaining: 'Reportado agora',
-    image: null
+    image: null,
+    color: 'from-amber-500 to-orange-600'
   },
   {
     id: 'hn-4',
     type: 'promotion',
-    title: 'Happy Hour 50%',
+    title: 'Happy Hour Double Drink',
     subtitle: 'Bar do Zé',
     timeRemaining: 'Inicia às 18h',
-    image: 'https://images.unsplash.com/photo-1514362545857-3bc16549766b?q=80&w=200&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1514362545857-3bc16549766b?q=80&w=200&auto=format&fit=crop',
+    color: 'from-purple-600 to-pink-700'
+  },
+  {
+    id: 'hn-5',
+    type: 'availability',
+    title: 'Diarista para amanhã',
+    subtitle: 'Disponível na região',
+    timeRemaining: 'Apenas 1 vaga',
+    image: 'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+    color: 'from-emerald-600 to-teal-700'
   }
 ];
 
@@ -267,31 +282,41 @@ const LOST_AND_FOUND_MOCK = [
   {
     id: 'lf1',
     type: 'lost_pet',
-    title: 'Cachorro Pinscher - Totó',
-    description: 'Fugiu perto da Praça Seca. Coleira azul. Dócil mas assustado. Atende pelo nome de Totó.',
+    title: 'Pinscher Totó',
+    description: 'Fugiu perto da Praça Seca. Coleira azul. Atende pelo nome de Totó.',
     location: 'Praça Seca',
     time: 'Há 2h',
-    image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?q=80&w=600&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?q=80&w=200&auto=format&fit=crop',
     contact: '5521999999999'
   },
   {
     id: 'lf2',
     type: 'found_item',
     title: 'Chaves de Carro',
-    description: 'Encontradas na calçada da Padaria Imperial. Chaveiro do Flamengo. Deixei no balcão da padaria.',
+    description: 'Encontradas na calçada da Padaria Imperial. Chaveiro do Flamengo.',
     location: 'Freguesia',
     time: 'Há 5h',
-    image: 'https://images.unsplash.com/photo-1583574883377-2f3b9220556b?q=80&w=600&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1583574883377-2f3b9220556b?q=80&w=200&auto=format&fit=crop',
     contact: '5521999999999'
   },
   {
     id: 'lf3',
     type: 'lost_pet',
-    title: 'Gato Siamês - Mimi',
-    description: 'Visto pela última vez no telhado do vizinho na Rua Araguaia. Tem uma mancha branca no nariz.',
+    title: 'Gato Siamês Mimi',
+    description: 'Visto pela última vez no telhado na Rua Araguaia. Tem uma mancha branca no nariz.',
     location: 'Freguesia',
     time: 'Ontem',
-    image: 'https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=600&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1513245543132-31f507417b26?q=80&w=200&auto=format&fit=crop',
+    contact: '5521999999999'
+  },
+  {
+    id: 'lf4',
+    type: 'found_item',
+    title: 'Carteira Couro',
+    description: 'Encontrada no Center Shopping. Documentos em nome de João Paulo.',
+    location: 'Pechincha',
+    time: 'Hoje',
+    image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=200&auto=format&fit=crop',
     contact: '5521999999999'
   }
 ];
@@ -510,13 +535,20 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
 const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
     return (
         <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-            <div className="px-5 mb-3 flex items-center justify-between">
-               <div>
-                  <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Pets e objetos que o bairro procura</p>
-               </div>
+            {/* Header com Banner de Contexto */}
+            <div className="px-5 mb-5">
+                <div className="w-full bg-[#F1F5F9] dark:bg-gray-900 rounded-2xl p-4 flex items-center gap-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1E5BFF] shadow-sm shrink-0">
+                        <Search size={24} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                        <h2 className="text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos do bairro</h2>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium leading-tight">Pets e objetos encontrados ou perdidos recentemente</p>
+                    </div>
+                </div>
             </div>
             
+            {/* Listagem em Cards mais finos/compactos */}
             <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {LOST_AND_FOUND_MOCK.map((item) => {
                     const isLost = item.type === 'lost_pet';
@@ -526,29 +558,37 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
                         <div 
                             key={item.id}
                             onClick={() => onItemClick(item)}
-                            className="flex-shrink-0 w-40 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm"
+                            className="flex-shrink-0 w-64 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center p-2.5 cursor-pointer active:scale-[0.98] transition-all group snap-center shadow-sm"
                         >
-                            <div className="h-28 bg-gray-100 dark:bg-gray-800 relative">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                                    {isLost ? 'Perdido' : 'Achado'}
-                                </div>
+                            {/* Imagem Compacta */}
+                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0">
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
-                            <div className="p-3 flex flex-col gap-1">
-                                <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                                    <Icon size={10} />
-                                    <span className="text-[8px] font-bold uppercase tracking-wide">{isLost ? 'Animal' : 'Objeto'}</span>
-                                </div>
-                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                                <div className="flex flex-col gap-0.5 mt-0.5">
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                                        <MapPin size={9} className="shrink-0" /> {item.location}
+
+                            {/* Informações ao lado */}
+                            <div className="ml-3 flex-1 min-w-0 flex flex-col justify-center">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <div className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                                        {isLost ? 'Perdido' : 'Achado'}
                                     </div>
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-medium">
-                                        <Clock size={9} className="shrink-0" /> {item.time}
+                                    <div className="flex items-center gap-1 text-[8px] font-bold text-gray-400 uppercase">
+                                        <Icon size={10} />
+                                        <span>{isLost ? 'Animal' : 'Objeto'}</span>
                                     </div>
                                 </div>
-                                <span className="text-[9px] font-bold text-[#1E5BFF] mt-1.5 group-hover:underline">Ver detalhes</span>
+                                
+                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight mb-1">{item.title}</h3>
+                                
+                                <div className="flex flex-col gap-0.5">
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium truncate">
+                                        <MapPin size={9} className="shrink-0 text-blue-500" /> {item.location}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium">
+                                        <Clock size={9} className="shrink-0 text-blue-500" /> {item.time}
+                                    </div>
+                                </div>
+                                
+                                <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">Ver detalhes</span>
                             </div>
                         </div>
                     );
@@ -607,12 +647,12 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                       </span>
                   </div>
 
-                  {/* Dotted Line - Perfect center alignment with side holes */}
+                  {/* Dotted Line */}
                   <div className="w-full px-0">
                     <div className="w-full h-px border-t-2 border-dashed border-white/30"></div>
                   </div>
 
-                  {/* Bottom Section - CTA com alinhamento vertical equilibrado */}
+                  {/* Bottom Section - CTA */}
                   <div className="flex-1 flex flex-col justify-center p-3 pb-6">
                      <button className="w-full bg-white text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest py-3 rounded-xl shadow-sm transition-colors">
                          Pegar cupom
@@ -627,9 +667,31 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
 };
 
 const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const nextSlide = () => {
+    setActiveIndex((prev) => (prev + 1) % HAPPENING_NOW_MOCK.length);
+  };
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(nextSlide, 2500);
+    return () => clearInterval(interval);
+  }, [isPaused, activeIndex]);
+
+  const resetAutoplay = () => {
+    setIsPaused(true);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setIsPaused(false), 5000);
+  };
+
+  const handleTouchStart = () => resetAutoplay();
+
   return (
-    <div className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950">
-      <div className="flex items-center justify-between mb-3 px-1">
+    <div className="px-5 pt-4 pb-6 bg-white dark:bg-gray-950">
+      <div className="flex items-center justify-between mb-4 px-1">
         <div>
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
             Acontecendo Agora 
@@ -638,49 +700,69 @@ const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
             </h2>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Tempo real no bairro</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest leading-none">Tempo real no bairro</p>
         </div>
-        <button 
-          onClick={() => alert("Funcionalidade de alerta rápido em breve!")}
-          className="flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 hover:text-blue-500 transition-colors"
-        >
-            <Plus size={16} />
-        </button>
+        <div className="flex gap-1">
+            {HAPPENING_NOW_MOCK.map((_, i) => (
+                <div 
+                    key={i} 
+                    className={`h-1 rounded-full transition-all duration-300 ${i === activeIndex ? 'w-4 bg-[#1E5BFF]' : 'w-1 bg-gray-200 dark:bg-gray-800'}`} 
+                />
+            ))}
+        </div>
       </div>
       
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
-        {HAPPENING_NOW_MOCK.map((item) => (
-            <div key={item.id} className="snap-center flex-shrink-0 w-44 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-2.5 flex gap-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95">
-                <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center">
-                    {item.image ? (
-                        <img src={item.image} className="w-full h-full object-cover" alt="" />
-                    ) : (
-                        <div className="text-amber-500">
-                             {item.type === 'alert' ? <AlertTriangle size={24} /> : <Zap size={24} />}
+      {/* Carrossel de Mini-Banners 100% Width */}
+      <div 
+        className="relative -mx-5 px-5 overflow-hidden"
+        onTouchStart={handleTouchStart}
+      >
+        <div 
+            className="flex transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        >
+            {HAPPENING_NOW_MOCK.map((item) => (
+                <div 
+                    key={item.id} 
+                    className="min-w-full px-5"
+                    onClick={() => alert(`Explorar ${item.title}`)}
+                >
+                    <div className={`relative aspect-[16/4] w-full rounded-2xl overflow-hidden shadow-sm flex items-center p-4 group cursor-pointer bg-gradient-to-r ${item.color}`}>
+                        {/* Imagem de Fundo (se houver) */}
+                        {item.image && (
+                            <img 
+                                src={item.image} 
+                                alt="" 
+                                className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" 
+                            />
+                        )}
+                        
+                        <div className="relative z-10 flex-1 flex flex-col justify-center">
+                            <div className="flex items-center gap-2 mb-1.5">
+                                <span className="bg-white/20 backdrop-blur-md text-white text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-widest border border-white/10">
+                                    {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : item.type === 'alert' ? 'Aviso' : 'Disponível'}
+                                </span>
+                                <div className="flex items-center gap-1 text-[8px] font-bold text-white/90 uppercase tracking-tighter">
+                                    <Clock size={10} /> {item.timeRemaining}
+                                </div>
+                            </div>
+                            <h3 className="text-sm font-black text-white leading-none uppercase tracking-tighter truncate max-w-[240px]">
+                                {item.title}
+                            </h3>
+                            <p className="text-[9px] text-white/70 font-medium truncate max-w-[240px] mt-0.5 uppercase tracking-wide">
+                                {item.subtitle}
+                            </p>
                         </div>
-                    )}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
-                            item.type === 'promotion' ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
-                            item.type === 'event' ? 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' :
-                            'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
-                        }`}>
-                            {item.type === 'promotion' && <Megaphone size={8} />}
-                            {item.type === 'event' && <Calendar size={8} />}
-                            {item.type === 'alert' && <AlertTriangle size={8} />}
-                            {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : 'Aviso'}
-                        </span>
-                    </div>
-                    <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate leading-tight">{item.title}</h3>
-                    <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate mb-1">{item.subtitle}</p>
-                    <div className="flex items-center gap-1 text-[9px] text-blue-600 dark:text-blue-400 font-bold">
-                        <Clock size={10} /> {item.timeRemaining}
+
+                        <div className="relative z-10 shrink-0 ml-2">
+                             <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white active:scale-90 transition-transform">
+                                <ChevronRight size={18} />
+                             </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        ))}
+            ))}
+        </div>
       </div>
     </div>
   )
