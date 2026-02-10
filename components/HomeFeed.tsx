@@ -254,7 +254,7 @@ const TALENTS_MOCK: Talent[] = [
     title: 'Reparos Rápidos do Jorge',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format&fit=crop',
     neighborName: 'Jorge Silva',
-    neighborAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
+    neighborAvatar: 'https://images.unsplash.com/photo-1507003211169-a586c61ea9bc?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
     category: 'Marido de Aluguel'
   },
@@ -535,20 +535,23 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
 const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
     return (
         <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-            {/* Header com Banner de Contexto */}
+            {/* 1. MINI-BANNER DE CONTEXTO (ESTILO ACONTECENDO AGORA) */}
             <div className="px-5 mb-5">
-                <div className="w-full bg-[#F1F5F9] dark:bg-gray-900 rounded-2xl p-4 flex items-center gap-4 border border-gray-100 dark:border-gray-800 shadow-sm">
-                    <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1E5BFF] shadow-sm shrink-0">
-                        <Search size={24} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <h2 className="text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos do bairro</h2>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium leading-tight">Pets e objetos encontrados ou perdidos recentemente</p>
+                <div className="relative aspect-[16/4] w-full rounded-3xl overflow-hidden shadow-sm flex items-center p-5 bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-950 border border-white/5">
+                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1.5px)', backgroundSize: '20px 20px' }}></div>
+                    <div className="relative z-10 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                             <div className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg border border-white/10">
+                                <Search size={14} className="text-white" />
+                             </div>
+                             <h2 className="text-sm font-black text-white uppercase tracking-tighter leading-none">Achados e Perdidos</h2>
+                        </div>
+                        <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest leading-none">Pets e objetos encontrados ou perdidos no bairro</p>
                     </div>
                 </div>
             </div>
             
-            {/* Listagem em Cards mais finos/compactos */}
+            {/* 2. CARROSSEL DE CARDS VERTICAIS FINOS */}
             <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pb-2">
                 {LOST_AND_FOUND_MOCK.map((item) => {
                     const isLost = item.type === 'lost_pet';
@@ -558,37 +561,33 @@ const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_
                         <div 
                             key={item.id}
                             onClick={() => onItemClick(item)}
-                            className="flex-shrink-0 w-64 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center p-2.5 cursor-pointer active:scale-[0.98] transition-all group snap-center shadow-sm"
+                            className="flex-shrink-0 w-36 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 flex flex-col cursor-pointer active:scale-95 transition-all group snap-center overflow-hidden shadow-sm"
                         >
-                            {/* Imagem Compacta */}
-                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden shrink-0">
+                            {/* Imagem no Topo */}
+                            <div className="h-32 bg-gray-100 dark:bg-gray-800 relative">
                                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <div className={`absolute top-2 right-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-md ${isLost ? 'bg-orange-500' : 'bg-emerald-500'}`}>
+                                    {isLost ? 'Perdido' : 'Achado'}
+                                </div>
                             </div>
 
-                            {/* Informações ao lado */}
-                            <div className="ml-3 flex-1 min-w-0 flex flex-col justify-center">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <div className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                                        {isLost ? 'Perdido' : 'Achado'}
+                            {/* Informações Abaixo */}
+                            <div className="p-3 flex flex-col gap-1 flex-1">
+                                <div className="flex items-center gap-1 text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                                    <Icon size={10} className="text-[#1E5BFF]" />
+                                    {isLost ? 'Animal' : 'Objeto'}
+                                </div>
+                                <h3 className="font-bold text-[11px] text-gray-900 dark:text-white leading-tight truncate-2-lines h-8">
+                                    {item.title}
+                                </h3>
+                                <div className="flex flex-col gap-0.5 mt-auto pt-2 border-t border-gray-50 dark:border-gray-800">
+                                    <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400 font-bold truncate">
+                                        <MapPin size={8} className="shrink-0 text-blue-500" /> {item.location}
                                     </div>
-                                    <div className="flex items-center gap-1 text-[8px] font-bold text-gray-400 uppercase">
-                                        <Icon size={10} />
-                                        <span>{isLost ? 'Animal' : 'Objeto'}</span>
+                                    <div className="flex items-center gap-1 text-[8px] text-gray-400 dark:text-gray-500 font-medium">
+                                        <Clock size={8} className="shrink-0" /> {item.time}
                                     </div>
                                 </div>
-                                
-                                <h3 className="font-bold text-xs text-gray-900 dark:text-white truncate leading-tight mb-1">{item.title}</h3>
-                                
-                                <div className="flex flex-col gap-0.5">
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium truncate">
-                                        <MapPin size={9} className="shrink-0 text-blue-500" /> {item.location}
-                                    </div>
-                                    <div className="flex items-center gap-1 text-[9px] text-gray-400 font-medium">
-                                        <Clock size={9} className="shrink-0 text-blue-500" /> {item.time}
-                                    </div>
-                                </div>
-                                
-                                <span className="text-[9px] font-black text-[#1E5BFF] uppercase tracking-widest mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">Ver detalhes</span>
                             </div>
                         </div>
                     );
@@ -647,12 +646,12 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                       </span>
                   </div>
 
-                  {/* Dotted Line */}
+                  {/* Dotted Line - Perfect center alignment with side holes */}
                   <div className="w-full px-0">
                     <div className="w-full h-px border-t-2 border-dashed border-white/30"></div>
                   </div>
 
-                  {/* Bottom Section - CTA */}
+                  {/* Bottom Section - CTA com alinhamento vertical equilibrado */}
                   <div className="flex-1 flex flex-col justify-center p-3 pb-6">
                      <button className="w-full bg-white text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest py-3 rounded-xl shadow-sm transition-colors">
                          Pegar cupom
@@ -667,28 +666,6 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
 };
 
 const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const nextSlide = () => {
-    setActiveIndex((prev) => (prev + 1) % HAPPENING_NOW_MOCK.length);
-  };
-
-  useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(nextSlide, 2500);
-    return () => clearInterval(interval);
-  }, [isPaused, activeIndex]);
-
-  const resetAutoplay = () => {
-    setIsPaused(true);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setIsPaused(false), 5000);
-  };
-
-  const handleTouchStart = () => resetAutoplay();
-
   return (
     <div className="px-5 pt-4 pb-6 bg-white dark:bg-gray-950">
       <div className="flex items-center justify-between mb-4 px-1">
@@ -702,67 +679,51 @@ const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({
             </h2>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest leading-none">Tempo real no bairro</p>
         </div>
-        <div className="flex gap-1">
-            {HAPPENING_NOW_MOCK.map((_, i) => (
-                <div 
-                    key={i} 
-                    className={`h-1 rounded-full transition-all duration-300 ${i === activeIndex ? 'w-4 bg-[#1E5BFF]' : 'w-1 bg-gray-200 dark:bg-gray-800'}`} 
-                />
-            ))}
-        </div>
       </div>
       
-      {/* Carrossel de Mini-Banners 100% Width */}
-      <div 
-        className="relative -mx-5 px-5 overflow-hidden"
-        onTouchStart={handleTouchStart}
-      >
-        <div 
-            className="flex transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-        >
-            {HAPPENING_NOW_MOCK.map((item) => (
-                <div 
-                    key={item.id} 
-                    className="min-w-full px-5"
-                    onClick={() => alert(`Explorar ${item.title}`)}
-                >
-                    <div className={`relative aspect-[16/4] w-full rounded-2xl overflow-hidden shadow-sm flex items-center p-4 group cursor-pointer bg-gradient-to-r ${item.color}`}>
-                        {/* Imagem de Fundo (se houver) */}
-                        {item.image && (
-                            <img 
-                                src={item.image} 
-                                alt="" 
-                                className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" 
-                            />
-                        )}
-                        
-                        <div className="relative z-10 flex-1 flex flex-col justify-center">
-                            <div className="flex items-center gap-2 mb-1.5">
-                                <span className="bg-white/20 backdrop-blur-md text-white text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-widest border border-white/10">
-                                    {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : item.type === 'alert' ? 'Aviso' : 'Disponível'}
-                                </span>
-                                <div className="flex items-center gap-1 text-[8px] font-bold text-white/90 uppercase tracking-tighter">
-                                    <Clock size={10} /> {item.timeRemaining}
-                                </div>
+      {/* Container de Rolagem MANUAL com PEEK do próximo item */}
+      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-5 px-5">
+        {HAPPENING_NOW_MOCK.map((item) => (
+            <div 
+                key={item.id} 
+                className="snap-start shrink-0 w-[90%] md:w-[360px]"
+                onClick={() => alert(`Explorar ${item.title}`)}
+            >
+                <div className={`relative aspect-[16/4] w-full rounded-[2rem] overflow-hidden shadow-sm flex items-center p-4 group cursor-pointer bg-gradient-to-r ${item.color}`}>
+                    {/* Imagem de Fundo (se houver) */}
+                    {item.image && (
+                        <img 
+                            src={item.image} 
+                            alt="" 
+                            className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" 
+                        />
+                    )}
+                    
+                    <div className="relative z-10 flex-1 flex flex-col justify-center">
+                        <div className="flex items-center gap-2 mb-1.5">
+                            <span className="bg-white/20 backdrop-blur-md text-white text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-widest border border-white/10">
+                                {item.type === 'promotion' ? 'Promoção' : item.type === 'event' ? 'Evento' : item.type === 'alert' ? 'Aviso' : 'Disponível'}
+                            </span>
+                            <div className="flex items-center gap-1 text-[8px] font-bold text-white/90 uppercase tracking-tighter">
+                                <Clock size={10} /> {item.timeRemaining}
                             </div>
-                            <h3 className="text-sm font-black text-white leading-none uppercase tracking-tighter truncate max-w-[240px]">
-                                {item.title}
-                            </h3>
-                            <p className="text-[9px] text-white/70 font-medium truncate max-w-[240px] mt-0.5 uppercase tracking-wide">
-                                {item.subtitle}
-                            </p>
                         </div>
+                        <h3 className="text-sm font-black text-white leading-none uppercase tracking-tighter truncate max-w-[240px]">
+                            {item.title}
+                        </h3>
+                        <p className="text-[9px] text-white/70 font-medium truncate max-w-[240px] mt-0.5 uppercase tracking-wide">
+                            {item.subtitle}
+                        </p>
+                    </div>
 
-                        <div className="relative z-10 shrink-0 ml-2">
-                             <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white active:scale-90 transition-transform">
-                                <ChevronRight size={18} />
-                             </div>
-                        </div>
+                    <div className="relative z-10 shrink-0 ml-2">
+                         <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white active:scale-90 transition-transform">
+                            <ChevronRight size={18} />
+                         </div>
                     </div>
                 </div>
-            ))}
-        </div>
+            </div>
+        ))}
       </div>
     </div>
   )
@@ -969,7 +930,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-xl"><CheckCircle2 size={40} /></div>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto!</h3>
                 <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais notificados.</p>
-                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-[0.98] transition-all">Ver propostas</button>
+                <button onClick={() => setWizardStep(0)} className="w-full bg-blue-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">Ver propostas</button>
             </div>
           )}
         </section>
