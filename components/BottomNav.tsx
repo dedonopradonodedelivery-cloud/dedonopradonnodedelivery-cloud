@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
+import { Home, User as UserIcon, Newspaper, Compass, Ticket } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface BottomNavProps {
@@ -18,10 +18,10 @@ interface NavItem {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole }) => {
   const { user } = useAuth();
 
-  // Itens da barra fixa - ESTRUTURA OBRIGATÓRIA: Início, JPA Conversa, Cupom, Classificados, Menu
+  // Itens da barra fixa - ESTRUTURA ATUALIZADA: Início, Explorar, Cupom, Classificados, Menu
   const navItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início' },
-    { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa' },
+    { id: 'explore', icon: Compass, label: 'Explorar' },
     { id: 'coupons_trigger', icon: Ticket, label: 'Cupom' }, 
     { id: 'classifieds', icon: Newspaper, label: 'Classificados' },
     { id: 'profile', icon: UserIcon, label: 'Menu' },

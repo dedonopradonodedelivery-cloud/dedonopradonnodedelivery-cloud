@@ -192,7 +192,7 @@ const App: React.FC = () => {
     }
     const typingTimeout = setTimeout(() => {
       setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 85); // Levemente mais rápido para uma sensação ágil
+    }, 85);
     return () => clearTimeout(typingTimeout);
   }, [sloganText, splashStage]);
 
@@ -263,7 +263,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics', 'explore'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -355,7 +355,7 @@ const App: React.FC = () => {
                             title="Saúde do Homem"
                             subtitle="Cuidado Masculino"
                             themeColor="text-blue-500"
-                            specialties={['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina', 'Fertilidade masculina', 'Saúde prostática', 'Distúrbios hormonais masculinos', 'Urologia oncológica', 'Urologia funcional', 'Saúde do envelhecimento masculino', 'Infertilidade masculina', 'Disfunção erétil', 'Ejaculação precoce', 'Hipogonadismo']}
+                            specialties={['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina', 'Fertilidade masculina', 'Saúde prostática', 'Distúrbios hormonais masculinos', 'Urologia oncológica', 'Urologia functional', 'Saúde do envelhecimento masculino', 'Infertilidade masculina', 'Disfunção erétil', 'Ejaculação precoce', 'Hipogonadismo']}
                             onBack={() => handleNavigate('health_pre_filter')}
                             onSelectStore={handleSelectStore}
                         />

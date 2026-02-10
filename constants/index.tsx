@@ -17,7 +17,7 @@ import {
   Meh, ThumbsDown, Gift, RefreshCw, Accessibility, Landmark, Wallet, HeartPulse,
   MapPin, Building
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
 export const CATEGORIES: Category[] = [
@@ -48,7 +48,7 @@ export const CATEGORIES: Category[] = [
 
 export const CLASSIFIED_CATEGORIES: Category[] = [
   { id: 'cl-jobs', name: 'Empregos', slug: 'jobs', icon: <Briefcase />, color: 'bg-[#1E5BFF]' },
-  { id: 'cl-lost', name: 'Achados', slug: 'neighborhood_posts', icon: <Search />, color: 'bg-[#1E5BFF]' },
+  { id: 'cl-lost', name: 'Achados', slug: 'explore', icon: <Search />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-trade', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-donations', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-realestate', name: 'Imóveis', slug: 'real_estate', icon: <Building />, color: 'bg-[#1E5BFF]' },
@@ -84,23 +84,6 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
-export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
-  {
-    id: 'post-1',
-    userId: 'u1',
-    userName: 'Taty Oliveira',
-    userAvatar: 'https://i.pravatar.cc/100?u=taty',
-    authorRole: 'resident',
-    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '2h',
-    likes: 8,
-    comments: 16
-  }
-];
-
 export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-serv-1', title: 'Eletricista Residencial 24h', advertiser: 'Sérgio Luz', category: 'Orçamento de Serviços', neighborhood: 'Freguesia', description: 'Atendo emergências, curto-circuito, troca de disjuntor. Orçamento rápido pelo WhatsApp.', timestamp: 'Há 15 min', contactWhatsapp: '5521999991111', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800' }
 ];
@@ -130,10 +113,12 @@ export const STORES: Store[] = [
     isSponsored: true,
     tags: ['segurança', 'limpeza residencial', 'manutenção geral']
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Alimentação', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] }
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Alimentação', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600&auto=format&fit=crop', tags: [] }
 ];
 
 export const quickFilters = [
   { id: 'top_rated', label: 'Top Avaliados', icon: 'star' },
   { id: 'open_now', label: 'Aberto Agora', icon: 'clock' }
 ];
+
+export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [];

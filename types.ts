@@ -45,7 +45,6 @@ export interface StorePromotion {
   images: string[];
   status: PromotionStatus;
   createdAt: string;
-  publishToCommunity?: boolean;
 }
 
 export interface Store {
@@ -113,29 +112,6 @@ export interface Store {
   tags?: string[];
 }
 
-export interface CommunityPost {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  authorRole: 'resident' | 'merchant';
-  content: string;
-  type: 'recommendation' | 'alert' | 'event' | 'poll' | 'promotion';
-  communityId: string;
-  neighborhood?: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  imageUrls?: string[];
-  imageUrl?: string;
-  videoUrl?: string;
-  theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
-  showOnStoreProfile?: boolean;
-  storeId?: string;
-  promotionId?: string;
-  isActiveResident?: boolean;
-}
-
 export type SlotStatus = 'available' | 'reserved' | 'sold';
 export interface CategoryBannerSlot { uniqueKey: string; bairroSlug: string; categoriaSlug: string; slotNumber: 1 | 2; status: SlotStatus; merchantId?: string; merchantName?: string; expiresAt?: string; image?: string; title?: string; subtitle?: string; }
 export interface RealEstateProperty { id: string; type: 'Residencial' | 'Comercial'; title: string; description: string; image: string; neighborhood: string; price: number; transaction: 'aluguel' | 'venda'; area: number; postedAt: string; buildingName?: string; bedrooms?: number; bathrooms?: number; parkingSpaces?: number; propertyTypeRes?: 'Casa' | 'Apartamento' | 'Kitnet/Studio' | 'Cobertura'; condoFee?: number; isFurnished?: boolean; petsAllowed?: boolean; propertyTypeCom?: 'Sala comercial' | 'Loja' | 'Galpão' | 'Andar/Conjunto' | 'Terreno comercial'; hasBathroom?: boolean; highCeiling?: boolean; loadingAccess?: boolean; isVerifiedMerchant?: boolean; }
@@ -170,10 +146,6 @@ export interface Classified {
 export type TaxonomyType = 'category' | 'subcategory' | 'specialty';
 export interface StoreCredit { id: string; user_id: string; store_id: string; store_name: string; store_logo?: string; balance_cents: number; expiring_soon_cents?: number; updated_at: string; }
 export interface CashbackTransaction { id: string; user_id: string; user_name?: string; store_id: string; merchant_id: string; amount_cents: number; purchase_total_cents?: number; type: 'earn' | 'use'; status: 'pending' | 'approved' | 'rejected' | 'expired'; created_at: string; approved_at?: string; customer_id?: string; customer_name?: string; total_amount_cents?: number; cashback_used_cents?: number; cashback_to_earn_cents?: number; amount_to_pay_now_cents?: number; rejected_at?: string; }
-export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
-export type ReportStatus = 'open' | 'resolved' | 'dismissed';
-export type ReportPriority = 'high' | 'medium' | 'low';
-export interface PostReport { id: string; postId: string; postAuthorId: string; authorUsername: string; reporterUserId: string; postNeighborhood: string; reporterNeighborhood: string; reason: ReportReason; status: ReportStatus; priority: ReportPriority; timestamp: string; postContentSnippet: string; postThumbnail: string; }
 export interface TaxonomySuggestion { id: string; type: TaxonomyType; name: string; parentName?: string; justification?: string; status: 'pending' | 'approved' | 'rejected'; storeName: string; createdAt: string; merchantId: string; rejectionReason?: string; }
 export interface AppNotification { id: string; userId: string; title: string; message: string; type: 'chat' | 'design' | 'coupon' | 'payment' | 'ad' | 'system'; referenceId?: string; read: boolean; createdAt: string; }
 export interface StoreClaimRequest { id: string; store_id: string; store_name: string; user_id: string; user_email: string; method: 'whatsapp' | 'email' | 'manual'; status: 'pending' | 'approved' | 'rejected'; created_at: string; responsible_name?: string; cnpj?: string; contact_phone?: string; justification?: string; }
@@ -186,3 +158,48 @@ export interface DbMerchantSession { id: string; merchant_id: string; session_ty
 export interface DbCashbackTransaction { id: string; user_id: string; merchant_id: string; session_id?: string; purchase_value: number; amount_from_balance: number; amount_to_pay: number; cashback_value: number; status: TransactionStatus; created_at: string; approved_at?: string; rejected_at?: string; }
 export interface DbWalletMovement { id: string; user_id: string; transaction_id?: string; type: MovementType; amount: number; description: string; created_at: string; }
 export interface AppSuggestion { id: string; userId: string; userName: string; timestamp: string; subject: string; message: string; category: 'bug' | 'idea' | 'improve' | 'other'; contactConsent: boolean; status: 'new' | 'analyzing' | 'responded'; }
+
+// Added missing exports for community posts and reports
+// FIX: Added missing exports to satisfy multiple component imports.
+export type ReportReason = 'spam' | 'offensive' | 'fraud' | 'wrong_neighborhood' | 'other';
+export type ReportStatus = 'open' | 'resolved' | 'dismissed';
+export type ReportPriority = 'high' | 'medium' | 'low';
+
+export interface PostReport {
+  id: string;
+  postId: string;
+  postAuthorId: string;
+  authorUsername: string;
+  reporterUserId: string;
+  postNeighborhood: string;
+  reporterNeighborhood: string;
+  reason: ReportReason;
+  status: ReportStatus;
+  priority: ReportPriority;
+  timestamp: string;
+  postContentSnippet: string;
+  postThumbnail: string;
+}
+
+export interface CommunityPost {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  authorRole: 'resident' | 'merchant';
+  content: string;
+  type: 'recommendation' | 'alert' | 'event' | 'poll' | 'promotion';
+  communityId: string;
+  neighborhood?: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+  imageUrls?: string[];
+  imageUrl?: string;
+  videoUrl?: string;
+  theme?: 'utilidade' | 'seguranca' | 'lazer' | 'dicas' | 'geral';
+  showOnStoreProfile?: boolean;
+  storeId?: string;
+  promotionId?: string;
+  isActiveResident?: boolean;
+}

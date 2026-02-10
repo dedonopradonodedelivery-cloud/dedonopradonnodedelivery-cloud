@@ -1,17 +1,14 @@
 
 import React, { useState, useMemo } from 'react';
-import { Store, Category, CommunityPost, Classified } from '@/types';
+import { Store, Category, Classified } from '@/types';
 import { 
   Compass, 
-  Ticket,
   Plus, 
   MapPin, 
-  ChevronRight,
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '../constants';
-import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { CATEGORIES, MOCK_CLASSIFIEDS } from '../constants';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
@@ -30,26 +27,6 @@ const getFallbackImage = (id: string) => {
         hash = id.charCodeAt(i) + ((hash << 5) - hash);
     }
     return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
-};
-
-const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
-  return (
-    <div className="flex-shrink-0 w-28 snap-center p-1">
-      <div onClick={() => onNavigate('neighborhood_posts')} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full cursor-pointer">
-        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
-          <img src={postImage} alt={post.content} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          <div className="absolute bottom-1 left-1.5 right-1">
-            <p className="text-[9px] font-bold text-white truncate">{post.userName}</p>
-          </div>
-        </div>
-        <div className="p-2 pt-1.5 flex-1">
-            <p className="text-[9px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2 font-medium">{post.content}</p>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string) => void; }> = ({ item, onNavigate }) => {
@@ -140,17 +117,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
 
       <CouponCarousel onNavigate={onNavigate} />
 
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-4 overflow-hidden border-t border-gray-50 dark:border-gray-900 mt-2">
-        <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div></h2>
-            <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-        </div>
-        <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
-            {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (<MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />))}
-        </div>
-      </section>
-
-      <section className="px-4 mb-8 w-full overflow-hidden">
+      <section className="px-4 mb-8 mt-4 w-full overflow-hidden">
         <FifaBanner onClick={() => onNavigate('services_landing')} />
       </section>
 
@@ -164,7 +131,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onNavigate, onSelectCategory
         </div>
       </section>
 
-      <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10 px-4 overflow-hidden">
+      <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10 px-4 overflow-hidden border-t border-gray-50 dark:border-gray-900 mt-4">
         <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
         <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
           {['all', 'top_rated'].map((f) => (

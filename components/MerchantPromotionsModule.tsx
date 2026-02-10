@@ -9,18 +9,9 @@ import {
   Save, 
   X, 
   Camera, 
-  CalendarDays, 
-  Zap, 
-  Clock, 
-  ChevronRight, 
-  MessageSquare,
   Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  Eye,
-  Info
 } from 'lucide-react';
-import { StorePromotion, PromotionType, PromotionStatus, CommunityPost } from '../types';
+import { StorePromotion, PromotionType, PromotionStatus } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
 interface MerchantPromotionsModuleProps {
@@ -44,7 +35,6 @@ export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> =
   const [value, setValue] = useState('');
   const [discount, setDiscount] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [publishToCommunity, setPublishToCommunity] = useState(false);
 
   const storeId = user?.id || 'm-123'; // Mock para id da loja
   const storageKey = `promotions_${storeId}`;
@@ -65,7 +55,6 @@ export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> =
     setValue('');
     setDiscount('');
     setImages([]);
-    setPublishToCommunity(false);
     setView('form');
   };
 
@@ -79,13 +68,11 @@ export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> =
     setValue(promo.value ? String(promo.value) : '');
     setDiscount(promo.discount ? String(promo.discount) : '');
     setImages(promo.images);
-    setPublishToCommunity(false); // Sempre desativado ao editar para evitar repost automático
     setView('form');
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      // FIX: Cast the result of Array.from to File[] to resolve 'unknown' to 'Blob' assignment error in readAsDataURL
       const files = Array.from(e.target.files).slice(0, 6 - images.length) as File[];
       files.forEach(file => {
         const reader = new FileReader();
@@ -133,29 +120,6 @@ export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> =
 
     localStorage.setItem(storageKey, JSON.stringify(updated));
     setPromotions(updated);
-
-    // Lógica de publicação no JPA Conversa
-    if (publishToCommunity) {
-      const savedPosts: CommunityPost[] = JSON.parse(localStorage.getItem('community_posts') || '[]');
-      const post: CommunityPost = {
-          id: `post-promo-${Date.now()}`,
-          userId: user?.id || 'anon',
-          userName: user?.user_metadata?.store_name || 'Lojista Local',
-          userAvatar: user?.user_metadata?.avatar_url || 'https://i.pravatar.cc/100?u=merchant',
-          authorRole: 'merchant',
-          content: `📢 NOVA PROMOÇÃO: ${title}\n\n${description}`,
-          type: 'promotion',
-          communityId: 'comm-residents',
-          neighborhood: user?.user_metadata?.neighborhood || 'Freguesia',
-          timestamp: 'Agora',
-          likes: 0,
-          comments: 0,
-          imageUrls: images,
-          storeId,
-          promotionId: newPromo.id
-      };
-      localStorage.setItem('community_posts', JSON.stringify([post, ...savedPosts]));
-    }
 
     setTimeout(() => {
       setIsSaving(false);
@@ -283,26 +247,13 @@ export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> =
                         )}
                     </div>
                 </div>
-
-                <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-[2.5rem] border border-blue-100 dark:border-blue-800/30">
-                    <label className="flex items-center gap-4 cursor-pointer select-none">
-                        <div className={`w-12 h-6 rounded-full p-1 transition-colors ${publishToCommunity ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                            <div className={`w-4 h-4 bg-white rounded-full transition-transform ${publishToCommunity ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                        </div>
-                        <input type="checkbox" className="hidden" checked={publishToCommunity} onChange={e => setPublishToCommunity(e.target.checked)} />
-                        <div>
-                            <p className="font-bold text-sm text-blue-900 dark:text-blue-200">Publicar no JPA Conversa</p>
-                            <p className="text-[10px] text-blue-700 dark:text-blue-400 font-medium">Informa os vizinhos sobre a novidade automaticamente.</p>
-                        </div>
-                    </label>
-                </div>
              </div>
 
              <div className="pt-8">
                 <button 
                   onClick={handleSave} 
                   disabled={isSaving}
-                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-xs disabled:opacity-50"
+                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-sm disabled:opacity-50"
                 >
                     {isSaving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
                     {editingPromo ? 'Salvar Alterações' : 'Publicar Promoção'}
