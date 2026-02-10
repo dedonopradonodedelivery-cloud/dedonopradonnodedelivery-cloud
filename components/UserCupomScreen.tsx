@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -33,13 +34,6 @@ const MOCK_COUPONS = [
   { id: 'CUP-FIT30', storeId: 'f-8', storeName: 'Academia FitBairro', category: 'Esportes', neighborhood: 'Taquara', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), status: 'expired', discount: '30% OFF' },
   { id: 'CUP-ZEPIZZA', storeId: 'f-5', storeName: 'Pizzaria do Zé', category: 'Comida', neighborhood: 'Freguesia', redeemedAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(), status: 'used', discount: '15% OFF' },
 ];
-
-const MasterSponsorSignature: React.FC = () => (
-    <div className="pointer-events-none text-right shrink-0 ml-4">
-      <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
-    </div>
-);
 
 export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavigate, onStoreClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,11 +102,10 @@ export const UserCupomScreen: React.FC<UserCupomScreenProps> = ({ onBack, onNavi
             <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
           </button>
           <div>
-            <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Meus Cupons</h1>
+            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Meus Cupons</h1>
             <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Histórico de Benefícios</p>
           </div>
         </div>
-        <MasterSponsorSignature />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6">

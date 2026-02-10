@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
     ChevronLeft, X, ArrowRight, Camera, CheckCircle2, 
@@ -453,7 +452,7 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    <button onClick={nextStep} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-2xl shadow-xl uppercase tracking-widest text-xs">Continuar para resumo</button>
+                    <button onClick={nextStep} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs">Continuar para resumo</button>
                 </div>
             </div>
         )}
@@ -536,6 +535,15 @@ export const RealEstateWizard: React.FC<RealEstateWizardProps> = ({ user, onBack
                            {formData.paymentMethod === 'card' && <CheckCircle2 size={18} />}
                        </button>
                    </div>
+
+                   {formData.paymentMethod === 'pix' && (
+                       <div className="flex flex-col items-center space-y-4 animate-in fade-in">
+                           <div className="w-48 h-48 bg-gray-50 dark:bg-gray-800 rounded-3xl flex items-center justify-center border-2 border-dashed border-gray-200">
+                               <QrCode size={120} className="text-gray-300" />
+                           </div>
+                           <button className="flex items-center gap-2 text-[#1E5BFF] font-black text-[10px] uppercase tracking-widest"><Copy size={14}/> Copiar Código Pix</button>
+                       </div>
+                   )}
                 </div>
 
                 <button 

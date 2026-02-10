@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+
+import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
   Compass, 
@@ -39,11 +40,10 @@ import {
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS, STORES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
-// FIX: Import the 'FifaBanner' component to resolve the 'Cannot find name' error.
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
@@ -177,38 +177,35 @@ const COUPONS_MOCK = [
   {
     id: 'cp-1',
     storeName: 'Bibi Lanches',
-    logo: 'https://ui-avatars.com/api/?name=Bibi+Lanches&background=FF6B00&color=fff',
+    initials: 'BL',
+    badgeColor: 'bg-orange-600',
     discount: '15% OFF',
     storeId: 'f-1'
   },
   {
     id: 'cp-2',
     storeName: 'Studio Hair',
-    logo: 'https://ui-avatars.com/api/?name=Studio+Hair&background=BC1F66&color=fff',
+    initials: 'SH',
+    badgeColor: 'bg-pink-600',
     discount: 'R$ 20,00',
     storeId: 'f-2'
   },
   {
     id: 'cp-3',
     storeName: 'Pizzaria do Zé',
-    logo: 'https://ui-avatars.com/api/?name=Pizzaria+Ze&background=22C55E&color=fff',
+    initials: 'PZ',
+    badgeColor: 'bg-green-600',
     discount: 'Entrega Grátis',
     storeId: 'f-5'
   },
   {
     id: 'cp-4',
     storeName: 'Pet Shop Alegria',
-    logo: 'https://ui-avatars.com/api/?name=Pet+Alegria&background=0EA5E9&color=fff',
+    initials: 'PA',
+    badgeColor: 'bg-blue-500',
     discount: '10% OFF',
     storeId: 'f-3'
   },
-  {
-    id: 'cp-5',
-    storeName: 'Academia Fit',
-    logo: 'https://ui-avatars.com/api/?name=Academia+Fit&background=4F46E5&color=fff',
-    discount: '1ª Mês Grátis',
-    storeId: 'f-8'
-  }
 ];
 
 interface Talent {
@@ -566,47 +563,51 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
   };
 
   return (
-    <div className="py-2">
-       <div className="flex items-center justify-between mb-1 px-5">
+    <div className="py-6">
+       <div className="flex items-center justify-between mb-4 px-5">
          <div>
-            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Cupons</h2>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Para você economizar</p>
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">CUPONS</h2>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">PARA VOCÊ ECONOMIZAR</p>
          </div>
-         <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
+         <button onClick={handleCouponClick} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">VER TODOS</button>
        </div>
        
-       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
+       <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-4">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-44 snap-center cursor-pointer group"
             >
-               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
-                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
+               {/* Floating Badges based on Image */}
+               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
+                  <div className={`w-12 h-12 rounded-full ${coupon.badgeColor} flex items-center justify-center text-white font-black text-sm border-4 border-white dark:border-gray-950 shadow-lg group-hover:scale-110 transition-transform`}>
+                     {coupon.initials}
                   </div>
                </div>
-               <div className="w-full h-40 bg-brand-blue rounded-2xl shadow-lg shadow-blue-500/30 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-[#F8F9FC] dark:bg-gray-950"></div>
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-[#F8F9FC] dark:bg-gray-950"></div>
+
+               {/* Card Body - Exactly as Image */}
+               <div className="w-full bg-[#1E5BFF] rounded-3xl p-5 pt-10 flex flex-col items-center shadow-xl shadow-blue-500/10 relative active:scale-[0.97] transition-all">
                   
-                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
-                      <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Cupom</span>
-                      <span className="text-xl font-black text-white leading-none tracking-tight">
+                  {/* Left Notch */}
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                  {/* Right Notch */}
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+
+                  <div className="flex flex-col items-center justify-center text-center space-y-1">
+                      <span className="text-[9px] font-black text-blue-100/60 uppercase tracking-[0.2em]">CUPOM</span>
+                      <span className="text-xl font-black text-white leading-tight">
                          {coupon.discount}
                       </span>
                   </div>
-                  
-                  <div className="w-full z-10">
-                    <div className="w-full border-t-2 border-dashed border-white/40 mb-2"></div>
-                     <button className="relative w-full bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider py-3 rounded-xl shadow-lg transition-transform active:scale-95 group overflow-hidden">
-                        <span className="relative z-10">Pegar cupom</span>
-                        <div className="absolute top-0 right-0 w-8 h-8 transition-all duration-300 group-hover:w-10 group-hover:h-10">
-                            <div className="absolute top-0 right-0 w-full h-full bg-pink-400 [clip-path:polygon(100%_0,0_100%,100%_100%)]"></div>
-                            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-transparent via-transparent to-slate-900 opacity-50"></div>
-                        </div>
-                    </button>
+
+                  {/* Dashed Line */}
+                  <div className="w-full border-t-2 border-dashed border-white/20 my-4"></div>
+
+                  <div className="w-full">
+                     <button className="w-full bg-white text-[#1E5BFF] text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm hover:bg-blue-50 transition-colors">
+                         PEGAR CUPOM
+                     </button>
                   </div>
                </div>
             </div>
@@ -745,11 +746,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
 
   return (
-    <div className="flex flex-col bg-[#F8F9FC] dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
       {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-[#F8F9FC] dark:bg-gray-950 pt-4 pb-0 relative z-10">
+        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
             <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={() => { if (categoryScrollRef.current) setCurrentCategoryPage(Math.round(categoryScrollRef.current.scrollLeft / categoryScrollRef.current.clientWidth)); }}>
             {categoryPages.map((pageCategories, pageIndex) => (
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
@@ -798,7 +799,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
       
-      <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />
+      {isFeatureActive('coupons') && <CouponsBlock onNavigate={onNavigate} user={user} userRole={userRole} />}
       
       <HappeningNowSection onNavigate={onNavigate} />
 

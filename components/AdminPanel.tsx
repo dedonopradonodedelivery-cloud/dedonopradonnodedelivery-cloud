@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ShieldCheck, Users, Store, History, Search, 
@@ -105,92 +104,119 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
     <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-6 rounded-[2.5rem] border border-blue-500/30 shadow-xl hover:shadow-blue-500/10 transition-all text-left group col-span-2 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform border border-blue-100 shadow-sm"><Zap size={24} fill="currentColor"/></div>
-        <h3 className="font-black text-base text-white uppercase tracking-tight">Gestor de Funcionalidades</h3>
-        <p className="text-xs text-blue-200/70 mt-1">Ative ou desative módulos do app em tempo real.</p>
+        <h3 className="font-black text-base text-white uppercase tracking-tight mb-1">Gerenciamento de Funcionalidades</h3>
+        <p className="text-[11px] text-blue-200 leading-relaxed font-medium max-w-xs">Ligar/Desligar abas de navegação, blocos da Home e módulos do aplicativo em tempo real.</p>
+        <div className="mt-6 flex items-center gap-2 text-[9px] font-black text-blue-400 uppercase tracking-widest">
+            Acessar Controle <ChevronRight size={12} />
+        </div>
     </button>
-    
-    <button onClick={() => onSelect('moderation')} className="bg-slate-900 p-6 rounded-[2.5rem] border border-white/5 hover:border-red-500/30 transition-all text-left group">
-        <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mb-4 text-red-500 border border-red-500/20"><ShieldAlert size={24}/></div>
-        <h3 className="font-black text-sm text-white uppercase tracking-tight">Moderação</h3>
-        <p className="text-xs text-slate-400 mt-1">Denúncias e Sugestões.</p>
+    <button onClick={() => onSelect('moderation')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-red-100"><ShieldAlert size={20}/></div>
+        <h3 className="font-black text-sm text-red-900 uppercase tracking-tighter mb-1">Aprovações</h3>
+        <p className="text-[10px] text-red-700 leading-relaxed font-medium">Categorias, denúncias e reivindicações.</p>
     </button>
-
-    <button onClick={() => onSelect('monetization')} className="bg-slate-900 p-6 rounded-[2.5rem] border border-white/5 hover:border-emerald-500/30 transition-all text-left group">
-        <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4 text-emerald-500 border border-emerald-500/20"><Coins size={24}/></div>
-        <h3 className="font-black text-sm text-white uppercase tracking-tight">Monetização</h3>
-        <p className="text-xs text-slate-400 mt-1">Preços e Produtos.</p>
+    <button onClick={() => onSelect('financial')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-emerald-100"><DollarSign size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Financeiro</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Gestão de faturamento, MRR e transações.</p>
+    </button>
+    <button onClick={() => onSelect('monetization')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Coins size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Monetizações</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Tabela de preços e fontes de receita.</p>
+    </button>
+    <button onClick={() => onSelect('management')} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group">
+        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Users size={20}/></div>
+        <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Gerenciamento</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Base de clientes e lojistas parceiros.</p>
     </button>
   </div>
 );
 
-interface AdminPanelProps {
-  onLogout: () => void;
-  viewMode: string;
-  onOpenViewSwitcher: () => void;
-  onNavigateToApp: (view: string, data?: any) => void;
-  onOpenMonitorChat: (id: string) => void;
-  initialTab?: string;
-}
+// --- CORE COMPONENT ---
 
-// FIX: Changed AdminPanel to a named export to align with project conventions and resolve module resolution error.
-export const AdminPanel: React.FC<AdminPanelProps> = ({ 
-  onLogout, 
-  viewMode, 
-  onOpenViewSwitcher, 
-  onNavigateToApp,
-  onOpenMonitorChat,
-  initialTab
-}) => {
-  const [activeTab, setActiveTab] = useState<string>(initialTab || 'hub');
-  
+export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat, initialTab }) => {
+  const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation' | 'monetization' | 'features'>(initialTab || 'hub');
+  const [managementTab, setManagementTab] = useState<'clients' | 'merchants'>('clients');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [merchants, setMerchants] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+
   useEffect(() => {
-    if(initialTab) {
-      setActiveTab(initialTab);
+    if (activeTab === 'management') {
+        if (managementTab === 'clients') loadUsers();
+        else loadMerchants();
     }
-  }, [initialTab]);
-  
+  }, [activeTab, managementTab, searchTerm]);
+
+  const loadMerchants = async () => { 
+    const data = await fetchAdminMerchants(searchTerm);
+    setMerchants(data); 
+  };
+
+  const loadUsers = async () => { 
+    const data = await fetchAdminUsers(searchTerm);
+    setUsers(data); 
+  };
+
+  const headerTitle = useMemo(() => {
+      switch(activeTab) {
+          case 'financial': return 'Finanças';
+          case 'management': return 'Gerenciamento';
+          case 'conversations': return 'Conversas';
+          case 'monitoring': return 'Monitoramento';
+          case 'suggestions': return 'Sugestões';
+          case 'moderation': return 'Aprovações';
+          case 'monetization': return 'Monetizações';
+          case 'features': return 'Funcionalidades';
+          default: return 'Central Localizei';
+      }
+  }, [activeTab]);
+
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans animate-in fade-in duration-500">
-      <header className="bg-slate-900 border-b border-white/5 px-6 py-4 sticky top-0 z-50 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <ShieldCheck size={20} className="text-white" />
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col">
+      <header className="bg-[#0F172A] border-b border-white/10 px-6 py-6 sticky top-0 z-50 shadow-sm shrink-0">
+        <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    {activeTab === 'hub' ? <ShieldCheck size={24} className="text-white" /> : (
+                        <button onClick={() => setActiveTab('hub')} className="text-white hover:scale-110 transition-transform"><ArrowLeft size={24}/></button>
+                    )}
+                </div>
+                <div>
+                    <h1 className="font-black text-xl uppercase tracking-tighter text-white">
+                        {headerTitle}
+                    </h1>
+                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Painel Administrativo</p>
+                </div>
             </div>
-            <div>
-                <h1 className="font-black text-lg text-white">Painel ADM</h1>
-                <p className="text-xs text-slate-500 font-medium">Localizei JPA v2.7</p>
+            <div className="flex gap-2">
+                <button onClick={onOpenViewSwitcher} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-400 border border-white/10 shadow-sm">Visão: {viewMode}</button>
+                <button onClick={() => onNavigateToApp('home')} className="p-2.5 bg-white/5 rounded-xl text-slate-400 hover:text-white border border-white/10 transition-all active:scale-95"><ArrowLeft size={20} /></button>
+                <button onClick={onLogout} className="p-2.5 bg-rose-900/20 rounded-xl text-rose-500 hover:bg-rose-900/40 border border-rose-900/50 transition-all active:scale-95"><LogOut size={20} /></button>
             </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-           <button onClick={onOpenViewSwitcher} className="bg-slate-800 text-slate-300 text-xs font-bold px-4 py-2 rounded-xl border border-white/5">{viewMode}</button>
-           <button onClick={onLogout} className="p-2.5 bg-slate-800 text-slate-400 rounded-xl border border-white/5"><LogOut size={16}/></button>
         </div>
       </header>
 
-      <main className="p-6">
-        {activeTab === 'hub' && <AdminHub onSelect={setActiveTab} />}
+      <main className="flex-1 p-8 overflow-y-auto no-scrollbar pb-32 max-w-7xl mx-auto w-full">
         
+        {activeTab === 'hub' && <AdminHub onSelect={setActiveTab} />}
+
         {activeTab === 'features' && (
-          <div>
-            <SectionHeader title="Gestor de Funcionalidades" onBack={() => setActiveTab('hub')} />
-            <FeatureManagement />
-          </div>
+            <div className="space-y-6">
+                <SectionHeader title="Controle de Recursos" onBack={() => setActiveTab('hub')} />
+                <FeatureManagement />
+            </div>
         )}
 
         {activeTab === 'moderation' && (
-          <div>
-            <SectionHeader title="Moderação" onBack={() => setActiveTab('hub')} />
             <AdminModerationPanel onBack={() => setActiveTab('hub')} />
-          </div>
         )}
 
         {activeTab === 'monetization' && (
-          <div>
-            <SectionHeader title="Monetização" onBack={() => setActiveTab('hub')} />
             <AdminMonetizationView onBack={() => setActiveTab('hub')} />
-          </div>
         )}
+        
       </main>
     </div>
   );

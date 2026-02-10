@@ -1,5 +1,3 @@
-
-
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { BottomNav } from '../BottomNav';
 
@@ -14,20 +12,17 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Reset scroll position when activeTab changes
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [activeTab]);
 
-  // Se for admin_panel, forçamos hideNav true internamente por segurança extra
   const finalHideNav = hideNav || activeTab === 'admin_panel';
 
   return (
     <div
-      // FIX: Use 100dvh for dynamic viewport height on mobile to avoid layout issues with dynamic toolbars.
-      className="h-[100dvh] bg-white dark:bg-gray-950 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
+      className="h-[100dvh] bg-white dark:bg-gray-900 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
     >
       <div
         ref={scrollContainerRef}

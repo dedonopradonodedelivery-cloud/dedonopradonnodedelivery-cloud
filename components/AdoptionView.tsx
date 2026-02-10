@@ -29,13 +29,6 @@ interface AdoptionViewProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
-const MasterSponsorSignature: React.FC = () => (
-    <div className="pointer-events-none text-right shrink-0 ml-4">
-      <p className="text-[9px] font-light text-gray-400 dark:text-gray-500 leading-none">Patrocinador Master</p>
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">Grupo Esquematiza</p>
-    </div>
-);
-
 // Fallback images for pets
 const FALLBACK_PET_IMAGES = [
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800',
@@ -54,7 +47,6 @@ const getFallbackPetImage = (id: string) => {
 
 const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ item, onClick }) => {
   const displayImage = item.imageUrl || getFallbackPetImage(item.id);
-  const isPet = item.category === 'Adoção de pets';
 
   return (
     <div 
@@ -68,7 +60,7 @@ const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
         />
         <div className="absolute top-4 right-4">
-          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] bg-amber-500 text-white shadow-lg border border-white/20`}>
+          <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] bg-amber-500 text-white shadow-lg border border-white/20">
             ADOÇÃO
           </span>
         </div>
@@ -90,7 +82,7 @@ const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
           </div>
         </div>
 
-        <button className="w-full bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-gray-600 dark:text-gray-300 font-black py-4 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] transition-all">
+        <button className="w-full bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-600 dark:text-gray-300 font-black py-4 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] transition-all">
           Ver detalhes
           <ChevronRight size={14} strokeWidth={3} />
         </button>
@@ -102,7 +94,6 @@ const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
 export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequireLogin, onNavigate }) => {
   const [viewState, setViewState] = useState<'list' | 'form' | 'success'>('list');
   const [filterHood, setFilterHood] = useState<string | null>(null);
-  // FIX: Declare the missing filterSpecies state and its setter function.
   const [filterSpecies, setFilterSpecies] = useState<string | null>(null);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -230,7 +221,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
               <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Conte a história do pet e temperamento..." rows={4} className="w-full bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border-none outline-none font-medium resize-none" />
             </div>
 
-            <button type="submit" disabled={isSubmitting || !formData.whatsapp || formData.images.length === 0} className="w-full bg-emerald-600 text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50">
+            <button type="submit" disabled={isSubmitting || !formData.whatsapp || formData.images.length === 0} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50">
               {isSubmitting ? <Loader2 className="animate-spin" /> : 'Publicar anúncio'}
             </button>
           </form>
@@ -246,8 +237,8 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
           <CheckCircle2 size={48} />
         </div>
         <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-4">Anúncio Publicado!</h2>
-        <p className="text-gray-500 text-sm mb-12">Obrigado por ajudar um pet a encontrar um lar.</p>
-        <button onClick={() => setViewState('list')} className="w-full bg-emerald-600 text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs">Voltar para a lista</button>
+        <p className="text-gray-500 text-sm mb-12">Seu anúncio de adoção já está visível para os moradores do bairro.</p>
+        <button onClick={() => setViewState('list')} className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs">Voltar para a lista</button>
       </div>
     );
   }
@@ -262,7 +253,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
             </button>
             <div className="flex-1">
               <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Adoção</h1>
-              <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest mt-1">Pets no Bairro</p>
+              <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Pets no Bairro</p>
             </div>
           </div>
           
@@ -296,7 +287,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-[2.5rem] flex items-center justify-center mb-6 text-gray-400">
               <Search size={32} />
             </div>
-            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Nenhum pet para adoção</h3>
+            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Nenhuma adoção disponível</h3>
           </div>
         )}
       </main>
@@ -333,18 +324,8 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
                             ))}
                         </div>
                     </section>
-                    
-                    <section>
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Espécie</h4>
-                        <div className="flex flex-wrap gap-2">
-                            <button onClick={() => setFilterSpecies(null)} className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterSpecies === null ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}>Todos</button>
-                            <button onClick={() => setFilterSpecies('Cachorro')} className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterSpecies === 'Cachorro' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}>Cachorro</button>
-                            <button onClick={() => setFilterSpecies('Gato')} className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterSpecies === 'Gato' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}>Gato</button>
-                            <button onClick={() => setFilterSpecies('Outros')} className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${filterSpecies === 'Outros' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border-transparent'}`}>Outros</button>
-                        </div>
-                    </section>
                 </div>
-
+                
                 <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
                     <button onClick={() => setIsFilterModalOpen(false)} className="w-full py-4 text-xs font-black text-white uppercase tracking-widest bg-[#1E5BFF] rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">Aplicar Filtros</button>
                 </div>

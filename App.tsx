@@ -25,7 +25,6 @@ import { DesapegaView } from '@/components/DesapegaView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
 import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
 import { SavedPostsView } from '@/components/SavedPostsView';
-// FIX: Changed default import of AdminPanel to a named import to align with project conventions and resolve module resolution error.
 import { AdminPanel } from '@/components/AdminPanel';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
@@ -53,6 +52,7 @@ import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
+import { SearchView } from '@/components/SearchView';
 import { MapPin, X, Palette, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -142,7 +142,6 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    // MAPEAMENTO DE SEGURANÇA: Aba -> Feature Flag correspondente
     const routeMapping: Partial<Record<string, FeatureKey>> = {
         'home': 'home_tab',
         'explore': 'explore_guide',
@@ -151,11 +150,9 @@ const App: React.FC = () => {
         'coupon_landing': 'coupons',
         'user_coupons': 'coupons',
         'merchant_coupons': 'coupons',
-        // Funcionalidades de Crescimento
         'store_sponsored': 'sponsored_ads',
         'store_ads_module': 'banner_highlights',
         'sponsor_info': 'master_sponsor',
-        // Outros
         'merchant_reviews': 'customer_reviews',
         'merchant_leads': 'service_chat',
         'service_messages_list': 'service_chat'
@@ -163,14 +160,13 @@ const App: React.FC = () => {
 
     const requiredFeature = routeMapping[view];
     
-    // BLOQUEIO LOGÍCO: Se a aba estiver OFF no ADM, redireciona para Home
     if (requiredFeature && !isFeatureActive(requiredFeature) && !isAdmin) {
         console.warn(`Tentativa de acesso a recurso desativado: ${view}`);
         setActiveTab('home');
         return;
     }
 
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'feature_unavailable') {
+    if (!['sponsor_info', 'notifications', 'patrocinador_master', 'real_estate_detail', 'job_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'coupon_landing', 'feature_unavailable'].includes(view)) {
       setPreviousTab(activeTab);
     }
     
@@ -220,7 +216,7 @@ const App: React.FC = () => {
             handleNavigate('user_coupons');
         }
     }
-  }, [user, userRole, activeTab, handleNavigate]);
+  }, [user, userRole]);
 
   useEffect(() => {
     if (splashStage >= 4) {
@@ -239,9 +235,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (splashStage === 4) return;
-    // Splash permanece visível por 5 segundos antes de iniciar o fade-out (stage 3)
     const fadeOutTimer = setTimeout(() => setSplashStage(3), 5000);
-    // Completa a transição de fade-out e dissolve aos 5.6 segundos para ser suave
     const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
@@ -285,7 +279,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'feature_unavailable'];
+  const headerExclusionList = ['search', 'store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'feature_unavailable'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -338,10 +332,11 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header onNotificationClick={() => {}} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
+                    {activeTab === 'search' && <SearchView onStoreClick={handleSelectStore} onClassifiedClick={(item) => handleNavigate('classified_detail', { item })} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     {activeTab === 'feature_unavailable' && <FeatureUnavailableView onBack={() => handleNavigate('home')} />}
                     
@@ -519,7 +514,7 @@ const App: React.FC = () => {
                         />
                     )}
 
-                    {activeTab === 'admin_panel' && <AdminPanel onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
+                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
                     
                     {activeTab === 'designer_panel' && user && (
                       <DesignerPanel user={user} onBack={() => handleNavigate('home')} />

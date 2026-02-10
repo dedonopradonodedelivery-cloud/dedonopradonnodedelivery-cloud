@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Store, AdType } from '@/types';
 import { STORES } from '@/constants';
@@ -245,6 +246,9 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
               {currentBanner.subtitle}
             </p>
+            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit shadow-lg">
+               <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
+            </div>
           </div>
         </div>
 

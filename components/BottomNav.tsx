@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { Home, Newspaper, MessageSquare, Ticket } from 'lucide-react';
+import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFeatures, FeatureKey } from '../contexts/FeatureContext';
 
@@ -21,17 +21,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const { user } = useAuth();
   const { isFeatureActive } = useFeatures();
 
-  // Lista de itens da navegação, sem o "Menu"
+  // Lista completa de itens com mapeamento para chaves do ADM
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
     { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', featureKey: 'community_feed' },
     { id: 'coupons_trigger', icon: Ticket, label: 'Cupom', featureKey: 'coupons' }, 
     { id: 'classifieds', icon: Newspaper, label: 'Classificados', featureKey: 'classifieds' },
+    { id: 'profile', icon: UserIcon, label: 'Menu' }, // Menu sempre visível
   ];
 
+  // FILTRAGEM LÓGICA: Fonte de verdade é o ADM (FeatureContext)
+  // A barra é remontada dinamicamente quando o status de uma funcionalidade muda
   const activeNavItems = useMemo(() => {
     return allNavItems.filter(item => {
-      if (!item.featureKey) return true;
+      if (!item.featureKey) return true; // Itens sem chave (Menu) são obrigatórios
       return isFeatureActive(item.featureKey);
     });
   }, [isFeatureActive]);
@@ -49,6 +52,29 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   };
 
   const renderIconOrAvatar = (item: NavItem, isActive: boolean) => {
+    if (item.id === 'profile' && user) {
+      const userInitial = user.email?.charAt(0).toUpperCase() || user.user_metadata?.full_name?.charAt(0).toUpperCase() || 'U';
+      const photoUrl = user.user_metadata?.avatar_url;
+
+      return (
+        <div className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
+          isActive 
+            ? 'border-white scale-110 shadow-lg' 
+            : 'border-white/20 opacity-70'
+        }`}>
+          {photoUrl ? (
+            <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <div className={`w-full h-full flex items-center justify-center text-[11px] font-black ${
+              isActive ? 'bg-white text-[#1E5BFF]' : 'bg-white/20 text-white'
+            }`}>
+              {userInitial}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     const Icon = item.icon;
     return (
       <Icon 
@@ -70,7 +96,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       >
         {activeNavItems.map((item) => {
           const isCouponTab = (item.id === 'coupons_trigger' && (activeTab === 'user_coupons' || activeTab === 'merchant_coupons'));
-          const isActive = activeTab === item.id || isCouponTab;
+          const isProfileTab = (item.id === 'profile' && ['store_area', 'store_ads_module', 'weekly_promo', 'merchant_jobs', 'store_profile', 'store_support', 'about', 'support', 'favorites', 'user_profile_full', 'edit_profile_view'].includes(activeTab));
+          const isActive = activeTab === item.id || isCouponTab || isProfileTab;
 
           return (
             <div key={item.id} className="flex justify-center items-center h-full">

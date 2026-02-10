@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect, useCallback } from 'react';
 // FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
 import { supabase } from '../lib/supabaseClient';
