@@ -119,41 +119,34 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-[#1E5BFF] dark:bg-blue-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {/* ESPAÇADOR PARA O HEADER FIXO (Linha 1 + Linha 2 de Busca = ~120px) */}
-      <div className="h-[120px] shrink-0"></div>
-
-      {/* CAMADA 2 — CATEGORIAS (STICKY TRANSITÓRIO) 
-          Fica logo abaixo do header azul. Ao rolar, o conteúdo principal passa por cima.
-      */}
+      {/* CAMADA 2 — CATEGORIAS (VIVA NO AZUL) */}
       {isFeatureActive('explore_guide') && (
-        <div className="sticky top-[120px] z-10 w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
-            <section className="w-full px-5 py-4 overflow-hidden">
-                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-nowrap">
-                    {topCategories.map((cat) => (
-                        <button key={cat.id} onClick={() => trackCategoryClick(cat)} className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all">
-                            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${cat.color || 'bg-blue-600'} border border-white/20 shadow-sm group-hover:brightness-110`}>
-                                {React.cloneElement(cat.icon as any, { size: 22, className: "text-white", strokeWidth: 2.5 })}
-                            </div>
-                            <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center truncate w-14">{cat.name}</span>
-                        </button>
-                    ))}
-                    <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all">
-                        <div className="w-11 h-11 rounded-2xl bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:bg-gray-100 transition-colors">
-                            <Plus size={22} strokeWidth={2.5} />
+        <section className="w-full bg-[#1E5BFF] dark:bg-blue-950 pt-2 pb-6 px-5 overflow-hidden">
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-nowrap">
+                {topCategories.map((cat) => (
+                    <button key={cat.id} onClick={() => trackCategoryClick(cat)} className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all">
+                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-white/20 border border-white/20 shadow-sm group-hover:bg-white/30 transition-colors`}>
+                            {React.cloneElement(cat.icon as any, { size: 22, className: "text-white", strokeWidth: 2.5 })}
                         </div>
-                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter text-center w-14">+ Mais</span>
+                        <span className="text-[8px] font-black text-white uppercase tracking-tighter text-center truncate w-14">{cat.name}</span>
                     </button>
-                </div>
-            </section>
-        </div>
+                ))}
+                <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-all">
+                    <div className="w-11 h-11 rounded-2xl bg-white/10 border-2 border-dashed border-white/20 flex items-center justify-center text-white/80 group-hover:bg-white/20 transition-colors">
+                        <Plus size={22} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[8px] font-black text-white/80 uppercase tracking-tighter text-center w-14">+ Mais</span>
+                </button>
+            </div>
+        </section>
       )}
 
-      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (Z-INDEX ALTO — PASSA POR CIMA DAS CATEGORIAS) */}
-      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-15px_30px_rgba(0,0,0,0.1)] -mt-1">
+      {/* CAMADA 3 — CONTEÚDO PRINCIPAL (BRANCO ARREDONDADO — SOBE POR CIMA) */}
+      <div className="flex flex-col bg-white dark:bg-gray-950 relative z-20 shadow-[0_-15px_35px_rgba(0,0,0,0.15)] rounded-t-[2.5rem]">
         
         {/* CARROSSEL UNIFICADO */}
         {isFeatureActive('banner_highlights') && (
-            <section className="bg-white dark:bg-gray-950 w-full pt-6">
+            <section className="bg-transparent w-full pt-6">
                <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
             </section>
         )}
@@ -193,7 +186,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
 
         {/* ACONTECENDO AGORA */}
-        <section className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950 border-b border-gray-50 dark:border-gray-900">
+        <section className="px-5 pt-4 pb-4 bg-transparent border-b border-gray-50 dark:border-gray-900">
             <div className="flex items-center justify-between mb-3 px-1">
                 <div>
                     <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">Acontecendo Agora <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span></h2>
@@ -218,7 +211,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
         {/* EXPLORAR BAIRRO */}
         {isFeatureActive('explore_guide') && (
-            <div className="w-full bg-white dark:bg-gray-900 pt-6 pb-12">
+            <div className="w-full bg-transparent pt-6 pb-12">
                 <div className="px-5">
                     <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="O que você precisa" onSeeMore={() => onNavigate('explore')} />
                     <div className="mt-4">

@@ -147,10 +147,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* CAMADA 1 — CABEÇALHO AZUL FIXO (LOGO + BUSCA) */}
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#1E5BFF] dark:bg-blue-950 max-w-md mx-auto shadow-lg">
-            {/* Linha 1: Branding e Botões */}
-            <div className="h-[60px] flex items-center px-4">
+        <div className="w-full bg-[#1E5BFF] dark:bg-blue-950">
+            <div className="max-w-md mx-auto h-[60px] flex items-center px-4">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10 shadow-sm">
                          <MapPin size={18} fill="currentColor" />
@@ -185,9 +183,11 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                 </div>
             </div>
+        </div>
 
-            {/* Linha 2: Barra de Busca (Fica fixa no topo do azul) */}
-            <div className="px-4 pb-4">
+        {/* SOMENTE A BARRA DE BUSCA É STICKY */}
+        <div className="sticky top-0 z-[100] w-full bg-[#1E5BFF] dark:bg-blue-950 shadow-md">
+            <div className="max-w-md mx-auto px-4 pb-4 pt-1">
                 <div className="relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 
@@ -195,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
                       placeholder={dynamicPlaceholder} 
-                      className="block w-full pl-10 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-3 shadow-xl transition-all duration-300" 
+                      className="block w-full pl-10 pr-12 bg-white border-none rounded-2xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/20 py-3.5 shadow-xl transition-all duration-300" 
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                       {searchTerm && (
