@@ -51,7 +51,7 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
   'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Rua/Comércio
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas/Comunidade
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=428aae1ad99d?q=80&w=800', // Mercado/Loja
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado/Loja
   'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço/Trabalho
   'https://images.unsplash.com/photo-1551632432-c735e8399527?q=80&w=800', // Parque/Verde
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Moda/Cotidiano
@@ -578,12 +578,12 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
          <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-4">
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-[150px] snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-[145px] snap-center cursor-pointer group"
             >
                {/* Floating Logo - Circular Initial Design */}
                <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
@@ -598,25 +598,27 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   </div>
                </div>
 
-               {/* Card Body - Standardized Square-ish Shape */}
-               <div className="w-full h-[155px] bg-[#1E5BFF] rounded-[2.5rem] shadow-xl flex flex-col items-center justify-between pt-8 pb-5 px-4 relative overflow-hidden active:scale-95 transition-all border-none">
+               {/* Card Body - Height reduced to 168px for square-ish look */}
+               <div className="w-full h-[168px] bg-[#1E5BFF] rounded-[2.5rem] shadow-xl flex flex-col items-center justify-between pt-9 pb-5 px-4 relative overflow-hidden active:scale-95 transition-all">
                   
-                  {/* Side Punch Holes - Larger as requested */}
-                  <div className="absolute top-[62%] -translate-y-1/2 -left-4 w-9 h-9 rounded-full bg-white dark:bg-gray-950 z-10"></div>
-                  <div className="absolute top-[62%] -translate-y-1/2 -right-4 w-9 h-9 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                  {/* Side Punch Holes - Centered with the dashed line */}
+                  <div className="absolute bottom-[66px] -left-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner opacity-100"></div>
+                  <div className="absolute bottom-[66px] -right-4 w-8 h-8 rounded-full bg-white dark:bg-gray-950 z-10 shadow-inner opacity-100"></div>
 
                   {/* Top Content Area */}
                   <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
                       <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-1">Cupom</span>
-                      <span className="text-xl font-black text-white leading-none tracking-tighter">
+                      <span className="text-2xl font-black text-white leading-none tracking-tighter">
                          {coupon.discount}
                       </span>
                   </div>
 
-                  {/* Dashed Separator */}
-                  <div className="w-full border-t-2 border-dashed border-white/20 mb-4 relative z-0"></div>
+                  {/* Dashed Separator - Perfectly Aligned with Side Punches */}
+                  <div className="w-full relative h-[1px] mb-5 px-1">
+                      <div className="w-full border-t-2 border-dashed border-white/20"></div>
+                  </div>
 
-                  {/* CTA Button - White with Brand Blue Text */}
+                  {/* CTA Button */}
                   <div className="w-full z-10 px-1">
                      <button className="w-full bg-white hover:bg-blue-50 text-[#1E5BFF] text-[9px] font-black uppercase tracking-widest py-3 rounded-2xl shadow-md transition-all">
                          Pegar cupom
@@ -878,7 +880,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">Que tipo de serviço?</h3>
               <div className="grid grid-cols-2 gap-4">
                 {[{l: 'Obras', i: Hammer}, {l: 'Reparos', i: Zap}, {l: 'Casa', i: HomeIcon}, {l: 'Outros', i: Sparkles}].map(s => (
-                  <button key={s.l} onClick={() => setWizardStep(2)} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
+                  <button key={s.l} onClick={() => setWizardStep(2)} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:border-blue-600 active:scale-95">
                     <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600"><s.i size={24} /></div>
                     <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter">{s.l}</p>
                   </button>
