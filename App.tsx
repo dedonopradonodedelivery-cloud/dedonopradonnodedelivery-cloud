@@ -30,7 +30,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
-import { CategoryView } from '@/pages/categories/CategoryView';
+import { CategoryView } from '@/components/CategoryView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';

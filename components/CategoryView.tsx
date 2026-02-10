@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
@@ -127,11 +128,23 @@ interface CategoryViewProps {
   stores: Store[];
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: string, data?: any) => void;
+  onSubcategoryClick?: (subName: string) => void;
+  initialSubcategory?: string;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+export const CategoryView: React.FC<CategoryViewProps> = ({ 
+  category, 
+  onBack, 
+  onStoreClick, 
+  stores, 
+  userRole, 
+  onAdvertiseInCategory, 
+  onNavigate,
+  onSubcategoryClick,
+  initialSubcategory
+}) => {
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(initialSubcategory || null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
 
@@ -150,7 +163,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
       try {
         const { data, error } = await supabase
           .from('published_banners')
-          // FIX: Added merchant_id to the select to allow handleBannerClick to find the associated store.
           .select('id, config, merchant_id')
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
@@ -190,16 +202,32 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     };
   }, [category.slug]);
 
+  useEffect(() => {
+    if (initialSubcategory) {
+        setSelectedSubcategory(initialSubcategory);
+    }
+  }, [initialSubcategory]);
+
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
     if (selectedSubcategory) {
-      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
+      // Regra especial para o pré-filtro de saúde ou subcategorias normais
+      const term = selectedSubcategory.toLowerCase();
+      return categoryStores.filter(s => 
+          s.subcategory?.toLowerCase().includes(term) || 
+          s.description?.toLowerCase().includes(term) ||
+          s.tags?.some(t => t.toLowerCase().includes(term))
+      );
     }
     return categoryStores;
   }, [stores, category.name, selectedSubcategory]);
 
   const handleSubcategoryClick = (subName: string) => {
-    setSelectedSubcategory(prev => (prev === subName ? null : subName));
+    if (onSubcategoryClick) {
+        onSubcategoryClick(subName);
+    } else {
+        setSelectedSubcategory(prev => (prev === subName ? null : subName));
+    }
   };
 
   const handleAdvertiseClick = () => {
@@ -211,7 +239,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
     }
   };
 
-  // FIX: Added handleBannerClick to resolve the error on line 258.
   const handleBannerClick = (banner: any) => {
     if (banner.merchant_id) {
       const store = stores.find(s => s.id === banner.merchant_id);
@@ -308,7 +335,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, on
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
                     <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                     <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>
