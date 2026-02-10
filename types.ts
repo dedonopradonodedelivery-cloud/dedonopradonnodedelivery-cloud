@@ -110,7 +110,6 @@ export interface Store {
   ads_count?: number;
   accepts_online_orders?: boolean;
   min_order_value?: number;
-  videos?: string[];
   tags?: string[];
 }
 
@@ -186,4 +185,4 @@ export interface DbMerchant { id: string; name: string; cashback_percent: number
 export interface DbMerchantSession { id: string; merchant_id: string; session_type: SessionType; pin_code?: string; expires_at: string; is_used: boolean; created_at: string; }
 export interface DbCashbackTransaction { id: string; user_id: string; merchant_id: string; session_id?: string; purchase_value: number; amount_from_balance: number; amount_to_pay: number; cashback_value: number; status: TransactionStatus; created_at: string; approved_at?: string; rejected_at?: string; }
 export interface DbWalletMovement { id: string; user_id: string; transaction_id?: string; type: MovementType; amount: number; description: string; created_at: string; }
-export interface AppSuggestion { id: string; userId: string; userName: string; timestamp: string; subject: string; message: string; whitepace_reason?: string; category: 'bug' | 'idea' | 'improve' | 'other'; contactConsent: boolean; status: 'new' | 'analyzing' | 'responded'; }
+export interface AppSuggestion { id: string; userId: string; userName: string; timestamp: string; subject: string; message: string; category: 'bug' | 'idea' | 'improve' | 'other'; contactConsent: boolean; status: 'new' | 'analyzing' | 'responded'; }
