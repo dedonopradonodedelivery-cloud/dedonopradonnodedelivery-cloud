@@ -16,9 +16,15 @@ import {
 import { Store } from "@/types";
 import { STORES } from "@/constants";
 
-interface ExploreViewProps {
+export interface ExploreViewProps {
+  stores: Store[];
+  searchQuery: string;
   onStoreClick: (store: Store) => void;
   onNavigate: (view: string, data?: any) => void;
+  onLocationClick: () => void;
+  onFilterClick: () => void;
+  onOpenPlans: () => void;
+  onViewAllVerified?: () => void;
 }
 
 const ESSENTIAL_SERVICES = [
@@ -28,17 +34,17 @@ const ESSENTIAL_SERVICES = [
   { id: 'maintenance', label: 'Manutenção', icon: Wrench, color: 'bg-blue-500', category: 'Serviços' },
 ];
 
-export const ExploreView: React.FC<ExploreViewProps> = ({ onStoreClick, onNavigate }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, onStoreClick, onNavigate }) => {
+  const [searchTerm, setSearchTerm] = useState(searchQuery || "");
 
   const novidades = useMemo(() => {
     // Simulando novidades pegando as últimas lojas do array (que não são o patrocinador master)
-    return STORES.filter(s => s.id !== 'grupo-esquematiza').slice(-6).reverse();
-  }, []);
+    return stores.filter(s => s.id !== 'grupo-esquematiza').slice(-6).reverse();
+  }, [stores]);
 
   const populares = useMemo(() => {
-    return STORES.filter(s => s.rating >= 4.5 && s.id !== 'grupo-esquematiza').sort((a, b) => b.rating - a.rating);
-  }, []);
+    return stores.filter(s => s.rating >= 4.5 && s.id !== 'grupo-esquematiza').sort((a, b) => b.rating - a.rating);
+  }, [stores]);
 
   const handleCategoryClick = (categoryName: string) => {
     // Redireciona para a busca geral ou categoria específica

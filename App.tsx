@@ -320,7 +320,17 @@ const App: React.FC = () => {
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole as any} />}
-                    {activeTab === 'explore' && <ExploreView onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'explore' && (
+                        <ExploreView 
+                            stores={STORES} 
+                            searchQuery={globalSearch} 
+                            onStoreClick={handleSelectStore} 
+                            onNavigate={handleNavigate}
+                            onLocationClick={() => {}}
+                            onFilterClick={() => {}}
+                            onOpenPlans={() => {}}
+                        />
+                    )}
                     
                     {activeTab === 'health_pre_filter' && (
                         <HealthPreFilterView 
