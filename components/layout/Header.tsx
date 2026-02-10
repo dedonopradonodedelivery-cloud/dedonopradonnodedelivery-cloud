@@ -6,12 +6,15 @@ import { Store, Category } from '../../types';
 import { CATEGORIES } from '../../constants';
 
 interface HeaderProps {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
   onNotificationClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onNavigate: (view: string, data?: any) => void;
   activeTab: string;
+  userRole: "cliente" | "lojista" | null;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
   isAdmin?: boolean;
@@ -68,7 +71,10 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher,
   onSelectCategory,
-  onOpenMoreCategories
+  onOpenMoreCategories,
+  isDarkMode,
+  toggleTheme,
+  userRole
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
