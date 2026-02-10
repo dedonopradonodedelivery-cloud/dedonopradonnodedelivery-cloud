@@ -1,14 +1,28 @@
-import React, { useState, useEffect } from 'react';
+
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  ShieldCheck, Users, LogOut, Zap, ChevronRight, 
-  ArrowLeft, Coins, ToggleLeft, ToggleRight, Info,
-  ShieldAlert, ShieldCheck as ShieldCheckIcon
+  ShieldCheck, Users, Store, History, Search, 
+  ArrowLeft, Download, TrendingUp, AlertTriangle, 
+  Clock, DollarSign, Calendar, LayoutDashboard,
+  LogOut, User as UserIcon, Building, MessageSquare, 
+  MessageCircle, Paintbrush, Wrench, CheckCircle2,
+  ArrowUpRight, ArrowDownRight, PieChart, FileText,
+  Zap, ChevronRight, Lightbulb, Bug, Activity,
+  Settings, BarChart3, X, Filter, Newspaper, Crown,
+  UserCheck, ArrowRightLeft, CreditCard,
+  LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
+  ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight,
+  // Added Info import to resolve "Cannot find name 'Info'" error
+  Info
 } from 'lucide-react';
-// FIX: Imports pointing to root directory based on project structure
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
+import { ServiceRequest, AppSuggestion } from '../types';
 import { AdminModerationPanel } from './AdminModerationPanel';
 import { AdminMonetizationView } from './AdminMonetizationView';
-import { useFeatures, FeatureState } from '../contexts/FeatureContext';
+import { useFeatures, FeatureKey } from '../contexts/FeatureContext';
+
+// --- SUB-COMPONENTS ---
 
 const FeatureManagement: React.FC = () => {
     const { featureList, toggleFeature } = useFeatures();
@@ -22,8 +36,7 @@ const FeatureManagement: React.FC = () => {
     return (
         <div className="space-y-10 animate-in fade-in duration-500">
             {sections.map(section => {
-                // FIX: Added explicit type to 'f'
-                const items = featureList.filter((f: FeatureState) => f.category === section.id);
+                const items = featureList.filter(f => f.category === section.id);
                 if (items.length === 0) return null;
 
                 return (
@@ -35,8 +48,7 @@ const FeatureManagement: React.FC = () => {
                             </h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* FIX: Added explicit type to 'feature' */}
-                            {items.map((feature: FeatureState) => (
+                            {items.map(feature => (
                                 <div key={feature.id} className="bg-slate-900 border border-white/5 p-6 rounded-[2rem] flex items-center justify-between group transition-all hover:border-blue-500/30 shadow-sm">
                                     <div className="space-y-1">
                                         <p className="font-bold text-white text-sm tracking-tight">{feature.label}</p>
@@ -62,6 +74,7 @@ const FeatureManagement: React.FC = () => {
             
             <div className="p-6 bg-blue-900/10 border border-blue-500/20 rounded-[2.5rem] mt-12">
                 <div className="flex gap-4">
+                    {/* Info icon was previously undefined */}
                     <Info className="text-blue-400 shrink-0" size={20} />
                     <p className="text-xs text-blue-200/70 leading-relaxed">
                         <strong>Nota do Sistema:</strong> As alterações nas abas e módulos são aplicadas instantaneamente em todos os dispositivos sem necessidade de atualização da página ou do aplicativo.
@@ -87,9 +100,9 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
   </div>
 );
 
-const AdminHub: React.FC<{ onSelect: (tab: string) => void }> = ({ onSelect }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
-    <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-6 rounded-[2.5rem] border border-blue-500/30 shadow-xl hover:shadow-blue-500/10 transition-all text-left group md:col-span-2 relative overflow-hidden">
+const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
+  <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
+    <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-6 rounded-[2.5rem] border border-blue-500/30 shadow-xl hover:shadow-blue-500/10 transition-all text-left group col-span-2 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform border border-blue-100 shadow-sm"><Zap size={24} fill="currentColor"/></div>
         <h3 className="font-black text-base text-white uppercase tracking-tight">Gestor de Funcionalidades</h3>
@@ -119,10 +132,13 @@ interface AdminPanelProps {
   initialTab?: string;
 }
 
+// FIX: Changed AdminPanel to a named export to align with project conventions and resolve module resolution error.
 export const AdminPanel: React.FC<AdminPanelProps> = ({ 
   onLogout, 
   viewMode, 
   onOpenViewSwitcher, 
+  onNavigateToApp,
+  onOpenMonitorChat,
   initialTab
 }) => {
   const [activeTab, setActiveTab] = useState<string>(initialTab || 'hub');
@@ -134,7 +150,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [initialTab]);
   
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex flex-col animate-in fade-in duration-500">
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans animate-in fade-in duration-500">
       <header className="bg-slate-900 border-b border-white/5 px-6 py-4 sticky top-0 z-50 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -142,7 +158,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
             <div>
                 <h1 className="font-black text-lg text-white">Painel ADM</h1>
-                <p className="text-xs text-slate-500 font-medium">Localizei JPA v3.3</p>
+                <p className="text-xs text-slate-500 font-medium">Localizei JPA v2.7</p>
             </div>
         </div>
         
@@ -152,7 +168,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       </header>
 
-      <main className="p-6 flex-1 overflow-y-auto no-scrollbar pb-24">
+      <main className="p-6">
         {activeTab === 'hub' && <AdminHub onSelect={setActiveTab} />}
         
         {activeTab === 'features' && (

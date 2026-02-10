@@ -14,7 +14,7 @@ export type FeatureKey =
   | 'store_feed' 
   | 'explainer_videos';
 
-export interface FeatureState {
+interface FeatureState {
   id: FeatureKey;
   label: string;
   active: boolean;
@@ -22,14 +22,19 @@ export interface FeatureState {
 }
 
 const DEFAULT_FEATURES: FeatureState[] = [
+  // Grupo: Abas de Navegação
   { id: 'home_tab', label: 'Aba: Home', active: true, category: 'navigation' },
   { id: 'explore_guide', label: 'Aba: Guia do Bairro', active: true, category: 'navigation' },
   { id: 'classifieds', label: 'Aba: Classificados', active: true, category: 'navigation' },
   { id: 'coupons', label: 'Aba: Cupons', active: true, category: 'navigation' },
   { id: 'community_feed', label: 'Aba: JPA Conversa', active: true, category: 'navigation' },
+  
+  // Grupo: Blocos e Funcionalidades de Crescimento
   { id: 'sponsored_ads', label: 'Patrocinados (Ads)', active: true, category: 'growth' },
   { id: 'banner_highlights', label: 'Banners em Destaque', active: true, category: 'growth' },
   { id: 'master_sponsor', label: 'Patrocinador Master', active: true, category: 'growth' },
+  
+  // Grupo: Outros Módulos
   { id: 'customer_reviews', label: 'Avaliações de Clientes', active: true, category: 'other' },
   { id: 'service_chat', label: 'Mensagens / Chat', active: true, category: 'other' },
   { id: 'store_feed', label: 'Feed da Loja', active: true, category: 'other' },
@@ -47,11 +52,13 @@ const FeatureContext = createContext<FeatureContextType | undefined>(undefined);
 
 export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [featureSettings, setFeatureSettings] = useState<FeatureState[]>(() => {
-    if (typeof window === 'undefined') return DEFAULT_FEATURES;
     const saved = localStorage.getItem('localizei_feature_flags');
     if (!saved) return DEFAULT_FEATURES;
+    
     try {
       const parsed = JSON.parse(saved);
+      // Lógica de Migração: Garante que as categorias sejam atualizadas para o padrão DEFAULT_FEATURES
+      // mas preserva o estado 'active' que o usuário escolheu anteriormente.
       return DEFAULT_FEATURES.map(def => {
         const existing = parsed.find((p: any) => p.id === def.id);
         return existing ? { ...def, active: existing.active } : def;

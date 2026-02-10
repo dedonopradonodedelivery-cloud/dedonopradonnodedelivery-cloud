@@ -16,7 +16,8 @@ import {
   // Added Info import to resolve "Cannot find name 'Info'" error
   Info
 } from 'lucide-react';
-import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
+// FIX: Corrected import path from `../backend/services` to `../../backend/services`.
+import { fetchAdminMerchants, fetchAdminUsers } from '../../backend/services';
 import { ServiceRequest, AppSuggestion } from '../types';
 import { AdminModerationPanel } from './AdminModerationPanel';
 import { AdminMonetizationView } from './AdminMonetizationView';
