@@ -588,17 +588,19 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   </div>
                </div>
                <div className="w-full h-40 bg-brand-blue rounded-2xl shadow-lg shadow-blue-500/30 border border-blue-400 dark:border-blue-700 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-r border-blue-300 dark:border-blue-600 z-10"></div>
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-l border-blue-300 dark:border-blue-600 z-10"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 rounded-full bg-white dark:bg-gray-950"></div>
+                  
                   <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
                       <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Cupom</span>
                       <span className="text-xl font-black text-white leading-none tracking-tight">
                          {coupon.discount}
                       </span>
                   </div>
+                  
                   <div className="w-full z-10">
-                     <button className="w-full bg-white hover:bg-blue-50 text-brand-blue text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden">
-                         <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-blue-200/50"></div>
+                    <div className="w-full border-t-2 border-dashed border-white/40 mb-2"></div>
+                     <button className="w-full bg-white hover:bg-blue-50 text-brand-blue text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm flex items-center justify-center group-active:opacity-90 transition-all">
                          Pegar cupom
                      </button>
                   </div>
