@@ -588,8 +588,8 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   </div>
                </div>
                <div className="w-full h-40 bg-brand-blue rounded-2xl shadow-lg shadow-blue-500/30 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950"></div>
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-white dark:bg-gray-950"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 rounded-full bg-[#F8F9FC] dark:bg-gray-950"></div>
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 rounded-full bg-[#F8F9FC] dark:bg-gray-950"></div>
                   
                   <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
                       <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Cupom</span>
@@ -600,9 +600,13 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
                   
                   <div className="w-full z-10">
                     <div className="w-full border-t-2 border-dashed border-white/40 mb-2"></div>
-                     <button className="w-full bg-white hover:bg-blue-50 text-brand-blue text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl shadow-sm flex items-center justify-center group-active:opacity-90 transition-all">
-                         Pegar cupom
-                     </button>
+                     <button className="relative w-full bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider py-3 rounded-xl shadow-lg transition-transform active:scale-95 group overflow-hidden">
+                        <span className="relative z-10">Pegar cupom</span>
+                        <div className="absolute top-0 right-0 w-8 h-8 transition-all duration-300 group-hover:w-10 group-hover:h-10">
+                            <div className="absolute top-0 right-0 w-full h-full bg-pink-400 [clip-path:polygon(100%_0,0_100%,100%_100%)]"></div>
+                            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-transparent via-transparent to-slate-900 opacity-50"></div>
+                        </div>
+                    </button>
                   </div>
                </div>
             </div>
@@ -741,11 +745,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-[#F8F9FC] dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
       {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
+        <section className="w-full bg-[#F8F9FC] dark:bg-gray-950 pt-4 pb-0 relative z-10">
             <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={() => { if (categoryScrollRef.current) setCurrentCategoryPage(Math.round(categoryScrollRef.current.scrollLeft / categoryScrollRef.current.clientWidth)); }}>
             {categoryPages.map((pageCategories, pageIndex) => (
                 <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
