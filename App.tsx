@@ -54,6 +54,7 @@ import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
 import { CategoriesPageView } from '@/components/CategoriesPageView';
+import { HealthPreFilterView } from '@/components/HealthPreFilterView';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -91,6 +92,7 @@ const App: React.FC = () => {
   const [classifiedSearchTerm, setClassifiedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
+  const [healthPreFilter, setHealthPreFilter] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
   const [activityType, setActivityType] = useState<string>('');
@@ -128,7 +130,7 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'all_categories') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing' && view !== 'all_categories' && view !== 'health_pre_filter') {
       setPreviousTab(activeTab);
     }
     
@@ -213,11 +215,23 @@ const App: React.FC = () => {
   
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
+    
+    // REFA: Interceptação da categoria Saúde
+    if (category.id === 'cat-saude') {
+        handleNavigate('health_pre_filter');
+        return;
+    }
+
     if (category.slug === 'real_estate' || category.slug === 'jobs' || category.slug === 'donations' || category.slug === 'desapega') {
         handleNavigate(category.slug);
     } else {
         handleNavigate('category_detail');
     }
+  };
+
+  const handleHealthPreFilterChoice = (option: string) => {
+      setHealthPreFilter(option);
+      handleNavigate('category_detail');
   };
 
   const handleSelectSubcategory = (subName: string, parentCat: Category) => {
@@ -245,7 +259,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -304,6 +318,13 @@ const App: React.FC = () => {
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
+                    {activeTab === 'health_pre_filter' && (
+                        <HealthPreFilterView 
+                            onBack={() => handleNavigate('home')} 
+                            onSelectOption={handleHealthPreFilterChoice}
+                        />
+                    )}
+
                     {activeTab === 'all_categories' && (
                         <CategoriesPageView 
                             onBack={() => handleNavigate('home')} 
@@ -395,7 +416,11 @@ const App: React.FC = () => {
                     {activeTab === 'category_detail' && selectedCategory && (
                       <CategoryView 
                         category={selectedCategory} 
-                        onBack={() => handleNavigate('home')} 
+                        initialSubcategory={healthPreFilter || undefined}
+                        onBack={() => { 
+                            setHealthPreFilter(null);
+                            handleNavigate(selectedCategory.id === 'cat-saude' ? 'health_pre_filter' : 'home'); 
+                        }} 
                         onStoreClick={handleSelectStore} 
                         stores={STORES} 
                         userRole={userRole as any} 
