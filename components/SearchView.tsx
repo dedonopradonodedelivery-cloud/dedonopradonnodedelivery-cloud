@@ -18,7 +18,9 @@ import {
   ArrowRight,
   Star,
   MapPin,
-  LayoutGrid
+  LayoutGrid,
+  Calendar,
+  Ticket
 } from 'lucide-react';
 import { Store, Classified, Category } from '../types';
 import { STORES, MOCK_CLASSIFIEDS, CATEGORIES } from '../constants';
@@ -54,6 +56,33 @@ const PRIMARY_INTENTS = [
     sub: 'Lojas, mercados e farmácias',
     icon: ShoppingBag, 
     term: 'Loja'
+  }
+];
+
+const LIVE_EVENTS = [
+  {
+    id: 'live-1',
+    label: 'Promoção: 20% em pizzas na Freguesia',
+    icon: Utensils,
+    color: 'text-orange-500',
+    bg: 'bg-orange-50 dark:bg-orange-950/20',
+    term: 'Pizzaria'
+  },
+  {
+    id: 'live-2',
+    label: 'Eletricista disponível agora no Anil',
+    icon: Zap,
+    color: 'text-amber-500',
+    bg: 'bg-amber-50 dark:bg-amber-950/20',
+    term: 'Eletricista'
+  },
+  {
+    id: 'live-3',
+    label: 'Novo cupom: Salão Studio Hair Vip',
+    icon: Ticket,
+    color: 'text-blue-500',
+    bg: 'bg-blue-50 dark:bg-blue-950/20',
+    term: 'Beleza'
   }
 ];
 
@@ -152,7 +181,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
         {searchTerm.length === 0 ? (
             <div className="space-y-10 animate-in fade-in duration-500">
                 
-                {/* 2) Bloco: "O que você precisa agora?" - Novo Foco Principal */}
+                {/* 1) Bloco: "O que você precisa agora?" */}
                 <section className="space-y-4">
                     <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest ml-1">O que você precisa agora?</h3>
                     <div className="space-y-3">
@@ -179,7 +208,33 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                     </div>
                 </section>
 
-                {/* 4) Bloco: "Mais buscados" - Compacto e secundário */}
+                {/* 2) NOVO Bloco: "Acontecendo agora perto de você" */}
+                <section className="space-y-4">
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </div>
+                        <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest">Acontecendo agora perto de você</h3>
+                    </div>
+                    <div className="space-y-2">
+                        {LIVE_EVENTS.map((event) => (
+                            <button 
+                                key={event.id}
+                                onClick={() => handleQuickSearch(event.term)}
+                                className="w-full flex items-center gap-4 p-3.5 bg-gray-50/50 dark:bg-gray-900/40 rounded-2xl border border-gray-100/80 dark:border-gray-800/60 hover:bg-white dark:hover:bg-gray-800 transition-all active:scale-[0.99] text-left group"
+                            >
+                                <div className={`w-9 h-9 rounded-xl ${event.bg} ${event.color} flex items-center justify-center shrink-0`}>
+                                    <event.icon size={18} />
+                                </div>
+                                <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300 flex-1 leading-tight">{event.label}</p>
+                                <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-500" />
+                            </button>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 3) Bloco: "Mais buscados" */}
                 <section className="space-y-3">
                     <div className="flex items-center gap-2 px-1 text-gray-400">
                         <TrendingUp size={12} />
@@ -198,7 +253,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                     </div>
                 </section>
 
-                {/* 5) Categorias: Linha horizontal leve */}
+                {/* 4) Categorias */}
                 <section className="space-y-4">
                     <div className="flex items-center justify-between px-1">
                         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categorias</h3>
