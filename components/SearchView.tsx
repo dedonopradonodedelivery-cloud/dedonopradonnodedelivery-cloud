@@ -16,9 +16,12 @@ import {
   Zap,
   Scissors,
   Key,
-  Percent,
   TrendingUp,
-  X
+  X,
+  Hammer,
+  ShoppingBag,
+  PlusCircle,
+  ArrowRight
 } from 'lucide-react';
 import { Store, Classified, Category } from '../types';
 import { STORES, MOCK_CLASSIFIEDS, CATEGORIES } from '../constants';
@@ -36,7 +39,37 @@ const POPULAR_SEARCHES = [
   { term: 'Eletricista', icon: Zap },
   { term: 'Salão de Beleza', icon: Scissors },
   { term: 'Aluguel', icon: Key },
-  { term: 'Promoções', icon: Percent },
+];
+
+const INTENT_ACTIONS = [
+  { 
+    id: 'pro', 
+    label: 'Preciso de um profissional', 
+    icon: Hammer, 
+    action: 'Profissional',
+    type: 'stores'
+  },
+  { 
+    id: 'food', 
+    label: 'Quero pedir comida', 
+    icon: Utensils, 
+    action: 'Alimentação',
+    type: 'stores'
+  },
+  { 
+    id: 'shop', 
+    label: 'Quero comprar algo', 
+    icon: ShoppingBag, 
+    action: 'Loja',
+    type: 'stores'
+  },
+  { 
+    id: 'classified', 
+    label: 'Quero anunciar ou procurar algo', 
+    icon: PlusCircle, 
+    action: '',
+    type: 'classifieds'
+  },
 ];
 
 export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifiedClick, onSelectCategory }) => {
@@ -47,7 +80,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load recent searches on mount
   useEffect(() => {
     const saved = localStorage.getItem('recent_searches_jpa');
     if (saved) setRecentSearches(JSON.parse(saved));
@@ -101,14 +133,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
 
   const isEmpty = searchTerm.length > 0 && results.stores.length === 0 && results.classifieds.length === 0;
 
-  const handleSearchClick = (term: string) => {
+  const handleSearchClick = (term: string, type: 'all' | 'stores' | 'classifieds' = 'all') => {
     setSearchTerm(term);
-    saveSearch(term);
+    setActiveType(type);
+    if (term) saveSearch(term);
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans flex flex-col pb-32 animate-in fade-in duration-300">
-      {/* 1) Topo da tela: Busca Fixa */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-5 pt-10 pb-6 shrink-0 shadow-sm">
         <div className="flex flex-col gap-5">
             <div>
@@ -137,7 +169,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                 )}
             </div>
 
-            {/* 2) Filtros rápidos */}
             <div className="flex gap-2 overflow-x-auto no-scrollbar">
                 {[
                   { id: 'all', label: 'Tudo', icon: LayoutGrid },
@@ -161,10 +192,10 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-10">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-12">
         
         {searchTerm.length === 0 ? (
-            <div className="space-y-10 animate-in fade-in duration-500">
+            <div className="space-y-12 animate-in fade-in duration-500 pb-10">
                 {/* 4) Histórico de buscas */}
                 {user && recentSearches.length > 0 && (
                   <section className="space-y-4">
@@ -176,7 +207,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                         <button 
                           key={i}
                           onClick={() => handleSearchClick(term)}
-                          className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:border-blue-500 transition-all"
+                          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:border-blue-500 transition-all shadow-sm"
                         >
                           {term}
                           <X size={12} className="text-gray-400 hover:text-red-500" onClick={(e) => removeRecent(e, term)} />
@@ -186,22 +217,22 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                   </section>
                 )}
 
-                {/* 3A) Bloco: "O que as pessoas mais buscam" */}
+                {/* 2) Bloco: "O que as pessoas mais buscam" - Refined */}
                 <section className="space-y-4">
                     <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                       <TrendingUp size={12} /> O que as pessoas mais buscam
                     </h3>
-                    <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
+                    <div className="grid grid-cols-2 gap-3">
                         {POPULAR_SEARCHES.map((item, i) => (
                             <button 
                                 key={i}
                                 onClick={() => handleSearchClick(item.term)}
-                                className="flex-shrink-0 bg-white dark:bg-gray-900 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center gap-3 w-28 active:scale-95 transition-all"
+                                className="bg-white dark:bg-gray-900 px-4 py-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-3 active:scale-95 transition-all text-left"
                             >
-                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600">
-                                    <item.icon size={20} />
+                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 shrink-0">
+                                    <item.icon size={16} />
                                 </div>
-                                <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 text-center uppercase tracking-tighter leading-tight">
+                                <span className="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">
                                     {item.term}
                                 </span>
                             </button>
@@ -209,20 +240,42 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                     </div>
                 </section>
 
-                {/* 3B) Bloco: "Categorias populares no bairro" */}
+                {/* 4) Novo Bloco: "O que você quer fazer agora?" */}
                 <section className="space-y-4">
-                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categorias populares no bairro</h3>
+                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">O que você quer fazer agora?</h3>
+                    <div className="space-y-2.5">
+                        {INTENT_ACTIONS.map((intent) => (
+                            <button 
+                                key={intent.id}
+                                onClick={() => handleSearchClick(intent.action, intent.type as any)}
+                                className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-all group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-blue-500 shadow-inner">
+                                        <intent.icon size={20} />
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{intent.label}</span>
+                                </div>
+                                <ArrowRight size={16} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                            </button>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 3) Bloco: "Categorias populares no bairro" - Refined */}
+                <section className="space-y-4">
+                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categorias populares</h3>
                     <div className="grid grid-cols-4 gap-3">
                         {CATEGORIES.slice(0, 12).map((cat) => (
                             <button 
                                 key={cat.id}
                                 onClick={() => onSelectCategory(cat)}
-                                className="flex flex-col items-center gap-2 active:scale-95 transition-all"
+                                className="flex flex-col items-center gap-2.5 active:scale-95 transition-all group"
                             >
-                                <div className={`w-full aspect-square rounded-[1.75rem] ${cat.color} flex items-center justify-center text-white shadow-sm border border-white/10`}>
-                                    {React.cloneElement(cat.icon as any, { size: 24, strokeWidth: 2.5 })}
+                                <div className="w-full aspect-square rounded-[1.5rem] bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-800 shadow-sm transition-colors group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-600">
+                                    {React.cloneElement(cat.icon as any, { size: 22, strokeWidth: 2.5 })}
                                 </div>
-                                <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase text-center leading-none truncate w-full">
+                                <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase text-center leading-tight truncate w-full px-0.5">
                                     {cat.name}
                                 </span>
                             </button>
@@ -231,7 +284,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                 </section>
             </div>
         ) : isEmpty ? (
-            /* 6) Estado vazio (apenas após tentativa de busca) */
             <div className="flex flex-col items-center justify-center pt-20 text-center animate-in zoom-in duration-300">
                 <div className="w-20 h-20 bg-gray-100 dark:bg-gray-900 rounded-[2rem] flex items-center justify-center mb-6 border border-dashed border-gray-200 dark:border-gray-800">
                     <SearchX size={32} className="text-gray-300" />
@@ -255,7 +307,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ onStoreClick, onClassifi
                 </div>
             </div>
         ) : (
-            /* 5) Comportamento da busca: Resultados organizados */
             <div className="space-y-10 animate-in fade-in duration-300">
                 
                 {/* RESULTADOS DE LOJAS */}
