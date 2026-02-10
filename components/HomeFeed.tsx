@@ -195,12 +195,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                         {/* Corpo do Ticket Azul */}
                         <div className="w-full h-40 bg-[#1E5BFF] dark:bg-blue-800 rounded-2xl flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
                             
-                            {/* Recortes Laterais do Ticket (Aumentados e sem bordas) */}
-                            <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
-                            <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                            {/* Recortes Laterais do Ticket (Aumentados e posicionados mais abaixo, perto do CTA) */}
+                            <div className="absolute top-[108px] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                            <div className="absolute top-[108px] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
                             
-                            {/* Linha Divisória Pontilhada */}
-                            <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 border-t-2 border-dashed border-white/20 z-0"></div>
+                            {/* Linha Divisória Pontilhada (Acompanha o novo posicionamento das meias bolinhas) */}
+                            <div className="absolute top-[108px] -translate-y-1/2 left-4 right-4 border-t-2 border-dashed border-white/20 z-0"></div>
 
                             {/* Conteúdo do Cupom (Texto acima da linha) */}
                             <div className="flex flex-col items-center justify-start h-1/2 w-full text-center z-10 pt-4">
