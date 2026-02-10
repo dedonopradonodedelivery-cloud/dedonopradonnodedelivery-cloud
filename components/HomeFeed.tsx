@@ -176,6 +176,7 @@ const COUPONS_MOCK = [
     id: 'cp-1',
     storeName: 'Bibi Lanches',
     logo: 'https://ui-avatars.com/api/?name=Bibi+Lanches&background=FF6B00&color=fff',
+    initials: 'BL',
     discount: '15% OFF',
     storeId: 'f-1'
   },
@@ -183,6 +184,7 @@ const COUPONS_MOCK = [
     id: 'cp-2',
     storeName: 'Studio Hair',
     logo: 'https://ui-avatars.com/api/?name=Studio+Hair&background=BC1F66&color=fff',
+    initials: 'SH',
     discount: 'R$ 20,00',
     storeId: 'f-2'
   },
@@ -190,6 +192,7 @@ const COUPONS_MOCK = [
     id: 'cp-3',
     storeName: 'Pizzaria do Zé',
     logo: 'https://ui-avatars.com/api/?name=Pizzaria+Ze&background=22C55E&color=fff',
+    initials: 'PZ',
     discount: 'Entrega Grátis',
     storeId: 'f-5'
   },
@@ -197,6 +200,7 @@ const COUPONS_MOCK = [
     id: 'cp-4',
     storeName: 'Pet Shop Alegria',
     logo: 'https://ui-avatars.com/api/?name=Pet+Alegria&background=0EA5E9&color=fff',
+    initials: 'PA',
     discount: '10% OFF',
     storeId: 'f-3'
   },
@@ -204,6 +208,7 @@ const COUPONS_MOCK = [
     id: 'cp-5',
     storeName: 'Academia Fit',
     logo: 'https://ui-avatars.com/api/?name=Academia+Fit&background=4F46E5&color=fff',
+    initials: 'AF',
     discount: '1ª Mês Grátis',
     storeId: 'f-8'
   }
@@ -573,39 +578,47 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
          <button onClick={handleCouponClick} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline active:opacity-60">Ver todos</button>
        </div>
        
-       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-6 pb-4">
+       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x px-5 pt-8 pb-4">
           {COUPONS_MOCK.map((coupon) => (
             <div 
               key={coupon.id} 
               onClick={handleCouponClick}
-              className="relative flex-shrink-0 w-36 snap-center cursor-pointer group"
+              className="relative flex-shrink-0 w-[150px] snap-center cursor-pointer group"
             >
-               {/* Floating Logo */}
-               <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 p-0.5 shadow-md border border-gray-100 dark:border-gray-700">
-                     <img src={coupon.logo} alt="" className="w-full h-full rounded-full object-cover" />
+               {/* Floating Logo - Circular Initial Design as per reference */}
+               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
+                  <div className={`w-12 h-12 rounded-full p-1 shadow-xl border-4 border-white dark:border-gray-950 flex items-center justify-center ${
+                      coupon.id === 'cp-1' ? 'bg-[#FF6B00]' : 
+                      coupon.id === 'cp-2' ? 'bg-[#BC1F66]' : 
+                      coupon.id === 'cp-3' ? 'bg-[#22C55E]' : 
+                      coupon.id === 'cp-4' ? 'bg-[#0EA5E9]' : 
+                      'bg-[#4F46E5]'
+                  }`}>
+                     <span className="text-sm font-black text-white">{coupon.initials}</span>
                   </div>
                </div>
 
-               {/* Standardized Card Body - Updated Background to Brand Blue */}
-               <div className="w-full h-40 bg-[#1E5BFF] rounded-2xl shadow-sm border border-white/10 flex flex-col items-center justify-between pt-7 pb-3 px-3 relative overflow-hidden active:scale-95 transition-transform">
+               {/* Standardized Card Body - Professional Standardized Size */}
+               <div className="w-full h-[190px] bg-[#1E5BFF] rounded-[2.5rem] shadow-xl border border-white/10 flex flex-col items-center justify-between pt-9 pb-5 px-4 relative overflow-hidden active:scale-95 transition-all">
                   
-                  {/* Side Holes */}
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-700 z-10"></div>
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 z-10"></div>
+                  {/* Side Punch Holes - Perfectly aligned with dashed line */}
+                  <div className="absolute top-[62%] -translate-y-1/2 -left-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
+                  <div className="absolute top-[62%] -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-950 z-10"></div>
 
-                  {/* Content - flex-1 and overflow-hidden ensures it stays within standard dimensions */}
-                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10 overflow-hidden">
-                      <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1 shrink-0">Cupom</span>
-                      <span className="text-lg font-black text-white leading-none tracking-tight line-clamp-2">
+                  {/* Top Content Area */}
+                  <div className="flex flex-col items-center justify-center flex-1 w-full text-center z-10">
+                      <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] mb-2">Cupom</span>
+                      <span className="text-2xl font-black text-white leading-none tracking-tighter">
                          {coupon.discount}
                       </span>
                   </div>
 
-                  {/* CTA - Changed to White Background for contrast */}
-                  <div className="w-full z-10 mt-auto">
-                     <button className="w-full bg-white text-[#1E5BFF] text-[9px] font-black uppercase tracking-widest py-2.5 rounded-xl rounded-tl-none shadow-sm flex items-center justify-center group-active:opacity-90 transition-all relative overflow-hidden shrink-0">
-                         <div className="absolute left-0 top-0 bottom-0 w-[3px] border-r border-dashed border-[#1E5BFF]/20"></div>
+                  {/* Dashed Separator - Logic to align with holes */}
+                  <div className="w-full border-t-2 border-dashed border-white/20 mb-5 relative z-0"></div>
+
+                  {/* CTA Button - White with Brand Blue Text as per reference */}
+                  <div className="w-full z-10 px-1">
+                     <button className="w-full bg-white hover:bg-blue-50 text-[#1E5BFF] text-[9px] font-black uppercase tracking-widest py-3 rounded-2xl shadow-md transition-all">
                          Pegar cupom
                      </button>
                   </div>
@@ -770,7 +783,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                     <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
                                        {/* Styling to look like "Add/More" */}
                                        <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-50" strokeWidth={2.5} />
+                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
                                        </div>
                                        <span className="block w-full text-[8.5px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-none truncate">
                                          Mais
@@ -851,7 +864,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       {/* JPA CONVERSA (MOVIDO PARA O FINAL) */}
       {isFeatureActive('community_feed') && (
-        <section className="bg-white dark:bg-gray-900 pt-2 pb-6 relative px-5">
+        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
             <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
             <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
         </section>
