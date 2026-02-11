@@ -1,37 +1,28 @@
 
-import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import React, { useState, useMemo } from 'react';
+import { Store, Category, CommunityPost, ServiceUrgency } from '@/types';
 import { 
   Compass, 
   Sparkles, 
   ArrowRight, 
   Ticket,
   CheckCircle2, 
-  Lock, 
-  Zap, 
-  Loader2, 
-  Hammer, 
   Plus, 
   Heart, 
-  Bookmark, 
   Home as HomeIcon,
-  MessageSquare, 
   MapPin, 
-  Camera, 
-  X, 
-  Send, 
   ChevronRight,
   ShieldAlert,
   Award,
-  Users,
   Tag,
   AlertCircle,
   Hash,
-  Crown
+  Crown,
+  Trophy
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
+import { CATEGORIES, MOCK_COMMUNITY_POSTS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
@@ -59,7 +50,6 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   const getPostTypeIcon = (type: string) => {
     switch (type) {
       case 'promotion': return <Tag className="w-2.5 h-2.5" />;
-      case 'event': return <Calendar className="w-2.5 h-2.5" />;
       case 'alert': return <AlertCircle className="w-2.5 h-2.5" />;
       case 'recommendation': return <Award className="w-2.5 h-2.5" />;
       default: return <Hash className="w-2.5 h-2.5" />;
@@ -69,7 +59,6 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   const getPostTypeLabel = (type: string) => {
     switch (type) {
       case 'promotion': return 'Promoção';
-      case 'event': return 'Evento';
       case 'alert': return 'Alerta';
       case 'recommendation': return 'Dica';
       default: return 'Radar';
@@ -124,7 +113,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
-  // 6 Categorias Principais filtradas na ordem exata
+  // 6 Categorias Principais filtradas na ordem exata solicitada
   const homeCategories = useMemo(() => {
     const fixedIds = ['cat-saude', 'cat-services', 'cat-fashion', 'cat-beauty', 'cat-pets', 'cat-autos'];
     return fixedIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
@@ -142,7 +131,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* 1. STATUS DO BAIRRO EM LINHA ÚNICA */}
       <HojeNoBairro />
 
-      {/* 2. EXPLORE JPA — LISTA HORIZONTAL COMPACTA (6 + 1) */}
+      {/* 2. EXPLORE JPA — LISTA HORIZONTAL COMPACTA (6 + 1) RESTAURADA */}
       <section className="w-full bg-white dark:bg-gray-950 pt-8 pb-4 relative z-10">
         <div className="flex overflow-x-auto no-scrollbar gap-5 px-5 scroll-smooth snap-x">
           {homeCategories.map((cat) => (
@@ -163,7 +152,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             </button>
           ))}
           
-          {/* Item + Mais */}
+          {/* Item + Mais fixo no final da linha horizontal */}
           <button 
             onClick={() => onNavigate('all_categories')}
             className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
@@ -306,16 +295,4 @@ const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle
     </div>
     <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
   </div>
-);
-
-const Calendar = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
-  </svg>
-);
-
-const Trophy = ({ size, className, fill }: { size?: number, className?: string, fill?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill={fill || "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-  </svg>
 );
