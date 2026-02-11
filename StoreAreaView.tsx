@@ -144,6 +144,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               onClick={() => onNavigate('store_sponsored')}
               colorClass="bg-emerald-50 text-emerald-600"
             />
+            <ServiceBlock 
+              icon={LayoutGrid} 
+              label="Anunciar no Bairro" 
+              description="Banners na Home e Categorias (Promoção R$ 29,90)"
+              onClick={() => onNavigate('store_ads_module', 'sales')}
+              colorClass="bg-purple-50 text-purple-600"
+            />
           </div>
         </section>
 
