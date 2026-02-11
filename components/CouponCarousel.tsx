@@ -83,7 +83,7 @@ export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) =>
           />
         ))}
         
-        <div className="flex-shrink-0 w-48 snap-center p-2">
+        <div className="flex-shrink-0 w-72 snap-center p-2">
           <button 
             onClick={() => onNavigate('coupon_landing')}
             className="w-full h-44 rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-all group bg-gray-50/30"

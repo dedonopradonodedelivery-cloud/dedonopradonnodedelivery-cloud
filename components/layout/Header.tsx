@@ -85,11 +85,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[3rem] shadow-lg">
+        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all duration-500">
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
-                {/* Linha Superior: Logo/Texto à esquerda | Bairro/Sino à direita */}
                 <div className="flex items-center justify-between pt-10 pb-4">
-                    {/* Lado Esquerdo: Logo e Nome */}
                     <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm border border-white/20">
                             <MapPin className="w-4 h-4 text-white fill-white" />
@@ -99,7 +97,6 @@ export const Header: React.FC<HeaderProps> = ({
                         </h1>
                     </div>
 
-                    {/* Lado Direito: Bairro e Sino */}
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={toggleSelector} 
@@ -125,7 +122,6 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* Barra de Pesquisa Centralizada */}
                 <div className="relative group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
                     <input 
@@ -133,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
                       placeholder={dynamicPlaceholder} 
-                      className="block w-full pl-11 pr-12 bg-white/20 border border-white/20 rounded-2xl text-sm font-medium text-white placeholder-white/60 focus:outline-none focus:ring-4 focus:ring-white/10 py-3.5 shadow-xl backdrop-blur-sm transition-all" 
+                      className="block w-full pl-11 pr-12 bg-white/15 border border-white/20 rounded-2xl text-sm font-medium text-white placeholder-white/60 focus:outline-none focus:ring-4 focus:ring-white/10 py-3.5 shadow-xl backdrop-blur-sm transition-all" 
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {searchTerm ? (
@@ -143,7 +139,6 @@ export const Header: React.FC<HeaderProps> = ({
                       )}
                     </div>
 
-                    {/* Resultados da Busca */}
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
                         <div className="absolute top-[calc(100%+12px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
                             <div className="p-3 max-h-[60vh] overflow-y-auto no-scrollbar">

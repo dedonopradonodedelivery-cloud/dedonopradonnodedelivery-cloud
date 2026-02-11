@@ -1,6 +1,19 @@
 
 import React, { useState } from 'react';
-import { MapPin, Flame, Music, AlertTriangle, Clock, Zap, ChevronRight, PawPrint, Key, Info } from 'lucide-react';
+import { 
+  MapPin, 
+  Flame, 
+  Music, 
+  AlertTriangle, 
+  Clock, 
+  Zap, 
+  ChevronRight, 
+  PawPrint, 
+  Key, 
+  Info,
+  Radio,
+  BellRing
+} from 'lucide-react';
 
 interface LiveEvent {
   id: string;
@@ -63,8 +76,7 @@ const MOCK_LIVE: LiveEvent[] = [
 const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
   const [confirms, setConfirms] = useState(item.confirms);
   const [hasConfirmed, setHasConfirmed] = useState(false);
-  const Icon = item.icon;
-
+  
   const handleConfirm = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasConfirmed) {
@@ -106,6 +118,18 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
   
   const isInfoCard = item.type === 'pet_lost' || item.type === 'item_found';
 
+  // Ícones contextuais por tipo
+  const getContextIcon = () => {
+    switch (item.type) {
+      case 'evento': return <Music size={10} />;
+      case 'utilidade': return <BellRing size={10} />;
+      case 'promo': return <Zap size={10} />;
+      case 'pet_lost': return <PawPrint size={10} />;
+      case 'item_found': return <Key size={10} />;
+      default: return <Radio size={10} />;
+    }
+  }
+
   return (
     <div className={`flex-shrink-0 w-60 rounded-2xl overflow-hidden relative group border border-gray-100 dark:border-white/10 shadow-sm transition-all active:scale-[0.98] ${getBgClass()}`}>
       {item.image && (
@@ -114,17 +138,11 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
       
       {(item.type === 'evento' || item.type === 'pet_lost') && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>}
       
-      <div className="relative z-10 h-40 p-4 flex flex-col justify-between backdrop-blur-[2px]">
+      <div className="relative z-10 h-40 p-4 flex flex-col justify-between backdrop-blur-[1px]">
         <div>
            <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg mb-2 shadow-sm ${getBadgeClass()}`}>
               <span className="text-[8px] font-black uppercase tracking-widest">{item.badge}</span>
            </div>
-           
-            {Icon && !item.image && (
-                <div className="flex justify-center items-center h-12 my-2">
-                    <Icon size={32} className={getTextColor()} />
-                </div>
-            )}
            
            <h3 className={`font-bold text-xs leading-tight mb-1 ${getTextColor()}`}>
              {item.title}
@@ -135,23 +153,23 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
         </div>
 
         <div className="flex items-center justify-between">
-           <div className={`flex items-center gap-1 text-[9px] font-bold uppercase ${item.type === 'evento' || item.type === 'pet_lost' ? 'text-white/40' : 'text-gray-400'}`}>
-              {(item.type === 'utilidade' || isInfoCard) ? <Zap size={10} /> : <Clock size={10} />}
-              <span>Agora</span>
+           <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-black/10 backdrop-blur-sm ${item.type === 'evento' || item.type === 'pet_lost' ? 'text-white border border-white/10' : 'text-gray-500 border border-gray-100'}`}>
+              {getContextIcon()}
+              <span>{item.type.replace('_', ' ')}</span>
            </div>
            
            <button 
              onClick={handleConfirm}
              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-all ${
                hasConfirmed 
-               ? 'bg-amber-500 border-amber-400 text-white' 
+               ? 'bg-amber-500 border-amber-400 text-white shadow-lg' 
                : isInfoCard
-                 ? 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white hover:bg-black/10'
-                 : 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white hover:bg-black/10'
+                 ? 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white'
+                 : 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white'
              }`}
            >
               {isInfoCard ? <Info size={10} /> : <Flame size={10} className={hasConfirmed ? 'fill-white' : ''} />}
-              <span className="text-[10px] font-bold">{confirms}</span>
+              <span className="text-[10px] font-black">{confirms}</span>
            </button>
         </div>
       </div>
