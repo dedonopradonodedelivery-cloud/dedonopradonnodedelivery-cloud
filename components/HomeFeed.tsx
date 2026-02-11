@@ -30,6 +30,7 @@ import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
+import { CouponCarousel } from '@/components/CouponCarousel';
 
 // Imagens de fallback realistas e variadas
 const FALLBACK_IMAGES = [
@@ -198,6 +199,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       <section className="bg-white dark:bg-gray-950 w-full">
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
+
+      {/* NOVO BLOCO DE CUPONS */}
+      <CouponCarousel onNavigate={onNavigate} />
 
       {/* BLOCO: ACONTECENDO AGORA */}
       <AcontecendoAgora onNavigate={onNavigate} />

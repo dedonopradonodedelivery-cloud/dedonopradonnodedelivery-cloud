@@ -12,9 +12,11 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
     <div className="flex-shrink-0 w-72 snap-center p-2">
       <div className={`relative h-44 rounded-[2.5rem] overflow-hidden shadow-xl ${coupon.color} flex flex-col group active:scale-[0.98] transition-transform`}>
         
+        {/* Cutout effect circles */}
         <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
         <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
 
+        {/* Top part of the ticket */}
         <div className="flex-1 p-6 flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
             <img 
@@ -33,10 +35,12 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
           </div>
         </div>
 
+        {/* Dotted separator */}
         <div className="px-6">
             <div className="h-px border-t border-dashed border-white/20"></div>
         </div>
 
+        {/* Bottom part of the ticket */}
         <div className="h-16 px-6 flex items-center justify-between relative z-10">
           <div className="bg-black/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
             <p className="text-[11px] font-mono font-black text-white tracking-[0.1em]">{coupon.code}</p>
@@ -83,6 +87,7 @@ export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) =>
           />
         ))}
         
+        {/* "Explore All" card */}
         <div className="flex-shrink-0 w-48 snap-center p-2">
           <button 
             onClick={() => onNavigate('coupon_landing')}
