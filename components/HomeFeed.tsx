@@ -34,8 +34,6 @@ import { User } from '@supabase/supabase-js';
 import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
-import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
-import { FifaBanner } from '@/components/FifaBanner';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
 import { CouponCarousel } from '@/components/CouponCarousel';
 import { HojeNoBairro } from '@/components/HojeNoBairro';
@@ -127,7 +125,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { currentNeighborhood } = useNeighborhood();
   
   const homeCategories = useMemo(() => {
-    // Expandindo para compensar a remoção da seção de cima e evitar duplicidade
     const ids = ['cat-pharmacy', 'cat-market', 'cat-saude', 'cat-pets', 'cat-beauty', 'cat-services', 'cat-autos', 'cat-more'];
     return ids.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
   }, []);
@@ -141,11 +138,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. RESUMO DO BAIRRO (CLIMA/TRÂNSITO) */}
+      {/* 1. STATUS DO BAIRRO EM LINHA ÚNICA */}
       <HojeNoBairro />
 
-      {/* 2. EXPLORE JPA — RESOLVA RÁPIDO (REPOSICIONADO E AMPLIADO) */}
-      <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-8 px-5 relative z-10">
+      {/* 2. EXPLORE JPA — RESOLVA RÁPIDO */}
+      <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-6 px-5 relative z-10">
         <div className="mb-5 px-1">
            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Explore JPA</h2>
            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Resolva Rápido</h3>
@@ -174,15 +171,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* 3. CUPONS DO DIA */}
       <CouponCarousel onNavigate={onNavigate} />
 
-      {/* 4. CARROSSEL PRINCIPAL */}
-      <section className="bg-white dark:bg-gray-950 w-full mt-2">
-        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      {/* 4. ACONTECENDO AGORA (Ocupa o espaço logo após os cupons) */}
+      <section className="mt-2">
+        <AcontecendoAgora onNavigate={onNavigate} />
       </section>
 
-      {/* 5. ACONTECENDO AGORA */}
-      <AcontecendoAgora onNavigate={onNavigate} />
-
-      {/* 6. RADAR DO BAIRRO */}
+      {/* 5. RADAR DO BAIRRO */}
       <section className="bg-white dark:bg-gray-950 py-6 mb-4 relative px-5">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -204,7 +198,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 7. MISSÕES DO BAIRRO */}
+      {/* 6. MISSÕES DO BAIRRO */}
       <section className="px-5 mb-10">
         <div className="bg-[#1E5BFF] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
@@ -240,7 +234,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 8. EXPLORAR BAIRRO */}
+      {/* 7. EXPLORAR BAIRRO */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-4">
         <div className="px-5">
           <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
@@ -255,7 +249,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </div>
 
-      {/* 9. QUEM MOVIMENTA O BAIRRO */}
+      {/* 8. QUEM MOVIMENTA O BAIRRO */}
       <section className="px-5 pt-10 pb-20 mt-6 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3 mb-6 px-1">
               <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shadow-sm">
