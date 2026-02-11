@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
     
     if (user) {
         const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0];
-        return { title: `${welcome}, ${name} ${icon}`, sub: "O que você precisa hoje?" };
+        return { title: `${welcome}, ${name} ${icon}`, sub: currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood };
     }
     const neighborhood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
     return { title: `${welcome}! ${icon}`, sub: neighborhood };
@@ -113,12 +113,19 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
                 <div className="flex items-center justify-between pt-10 pb-4">
-                    <div className="flex flex-col">
-                        <h1 className="text-white font-black text-xl tracking-tight leading-none mb-1">
+                    <div className="flex flex-col items-start gap-1.5">
+                        <h1 className="text-white font-black text-xl tracking-tight leading-none">
                             {greeting.title}
                         </h1>
-                        <button onClick={toggleSelector} className="flex items-center gap-1 text-white/70 text-[10px] font-black uppercase tracking-widest text-left">
-                            {greeting.sub} <ChevronDown size={10} strokeWidth={3} />
+                        
+                        {/* FILTRO DE BAIRRO ESTILO PILL/CÁPSULA */}
+                        <button 
+                            onClick={toggleSelector} 
+                            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/15 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-[0_2px_10px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                        >
+                            <MapPin size={10} className="text-blue-300 fill-current" />
+                            <span>{greeting.sub}</span>
+                            <ChevronDown size={10} strokeWidth={3} className="opacity-50" />
                         </button>
                     </div>
 
