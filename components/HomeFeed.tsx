@@ -50,7 +50,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   user,
   userRole
 }) => {
-  const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
   const [wizardStep, setWizardStep] = useState(0);
@@ -106,24 +105,21 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   return (
-    <div className="flex flex-col bg-gray-50 dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-gray-100 dark:bg-black w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
       {userRole === 'lojista' && (
-        <section className="px-4 py-4 bg-white dark:bg-gray-950">
+        <section className="p-4 bg-white dark:bg-gray-950">
            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
 
-      {/* NOVO LAYOUT DA HOME */}
-      <HojeNoBairro onSelectCategory={onSelectCategory} />
-
-      <CouponCarousel onNavigate={onNavigate} />
-
-      <AcontecendoAgora onNavigate={onNavigate} />
-
-      <RadarDoBairro onNavigate={onNavigate} />
-
-      <RecomendadosParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      <div className="space-y-6">
+        <HojeNoBairro onSelectCategory={onSelectCategory} />
+        <CouponCarousel onNavigate={onNavigate} />
+        <AcontecendoAgora onNavigate={onNavigate} />
+        <RadarDoBairro onNavigate={onNavigate} />
+        <RecomendadosParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      </div>
       
       {/* WIZARD DE ORÇAMENTO (Quando aberto - LÓGICA MANTIDA) */}
       {wizardStep > 0 && (

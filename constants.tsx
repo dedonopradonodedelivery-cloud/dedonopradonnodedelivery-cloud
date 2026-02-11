@@ -54,6 +54,24 @@ export const CLASSIFIED_CATEGORIES: Category[] = [
   { id: 'cl-realestate', name: 'Imóveis', slug: 'real_estate', icon: <Building2 />, color: 'bg-[#1E5BFF]' },
 ];
 
+export const MOCK_HOME_COUPONS_V2 = [
+  { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100', discount: '30% OFF', resgates: '290 resgates hoje', code: 'BIBI30', color: 'bg-rose-500', distancia: '200m • 600m' },
+  { id: 'cp-2', storeName: 'Studio Bella', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15', resgates: '15 vagas sem laita', code: 'VIP15', color: 'bg-blue-600', validade: 'Válido até 16:00' },
+  { id: 'cp-3', storeName: 'Pet Shop Alegria', storeLogo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100', discount: '10% OFF', resgates: '120 resgates hoje', code: 'PET10', color: 'bg-emerald-600', distancia: '800m' },
+];
+
+export const MOCK_ACONTECENDO_AGORA = [
+    { id: 'l1', badge: 'AO VIVO', badgeColor: 'bg-emerald-500 text-white', title: 'Música no Espetto Carioca', subtitle: 'Visto om Boca na Praça da Freguesia', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=600', info1_icon: Clock, info1_text: 'Agora', info2_icon: Users, info2_text: '20' },
+    { id: 'l2', badge: 'PET PERDIDO', badgeColor: 'bg-amber-400 text-black', title: 'Procura-se: Golden Retriever', subtitle: 'Visto Vaida ate 18:00 m • Perto', image: 'https://images.unsplash.com/photo-1598875184988-5e67b1a7ea9b?q=80&w=600', info1_icon: MapPin, info1_text: 'Perto', info2_icon: MapPin, info2_text: '150m' },
+];
+
+export const MOCK_RADAR_BAIRRO_V2 = [
+    { id: 'radar-1', title: 'Pão francês em oferta', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', info_badge: 'AGORA • 1 min', temei_badge: 'TEMEI' },
+    { id: 'radar-2', title: 'Vacinação menha', image: 'https://images.unsplash.com/photo-1605289982774-9a6fef564df8?q=80&w=400', info_badge: 'Perto ate 14h • Agora' },
+    { id: 'radar-3', title: 'A TERFICO VTO', image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=400', temei_badge: 'A TERFICO VTO' },
+];
+
+
 export const MOCK_HOME_COUPONS = [
   { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100', discount: '20% OFF', rules: 'Válido em combos de lanches', code: 'BIBI20', color: 'bg-rose-500' },
   { id: 'cp-2', storeName: 'Studio Hair Vip', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15,00', rules: 'Corte + Barba às terças', code: 'VIP15', color: 'bg-indigo-600' },
@@ -143,7 +161,9 @@ export const STORES: Store[] = [
     isSponsored: true,
     tags: ['segurança', 'limpeza residencial', 'manutenção geral']
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] }
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] },
+  { id: 'padaria-santo-pao', name: 'Padaria Santo Pão', category: 'Comida', subcategory: 'Padaria', rating: 4.9, distance: '3m', adType: AdType.ORGANIC, description: 'Pães artesanais e café da manhã.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', tags: ['10% OFF hoje'] },
+  { id: 'bella-saude', name: 'Bella Saúde', category: 'Saúde', subcategory: 'Ginecologia', rating: 4.8, distance: '2.5 km', adType: AdType.ORGANIC, description: 'Clínica de saúde da mulher.', isSponsored: false, image: 'https://images.unsplash.com/photo-1559839734-2b71f1e3c770?q=80&w=400', tags: [] }
 ];
 
 export const quickFilters = [
@@ -206,6 +226,7 @@ export const HOJE_NO_BAIRRO_CATEGORIES = [
     { id: 'mercado', name: 'Mercado', icon: ShoppingCart },
     { id: 'saude', name: 'Saúde', icon: HeartPulse },
     { id: 'pets', name: 'Pets', icon: PawPrint },
+    { id: 'doce', name: 'Doce', icon: Cake },
     { id: 'servicos', name: 'Oficina', icon: Wrench },
     { id: 'coupon_landing', name: 'Promoções', icon: Ticket },
 ];
