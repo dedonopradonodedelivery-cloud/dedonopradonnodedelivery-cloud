@@ -6,10 +6,9 @@ import {
   Star,
   BadgeCheck,
   MapPin,
-  MessageSquare,
-  ArrowRight,
   Stethoscope,
-  Sparkles
+  Sparkles,
+  User as UserIcon
 } from 'lucide-react';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { Store } from '../types';
@@ -21,32 +20,40 @@ interface HealthSpecialtyDetailViewProps {
   onSelectStore: (store: Store) => void;
 }
 
-// Mock de Destaques customizados por médico (simulando dados vindos do banco)
+// Mock de Destaques Reduzidos em 30% no layout
 const MOCK_HIGHLIGHTS = [
     {
         id: 'h1',
         name: 'Dra. Juliana Mendes',
         image: 'https://images.unsplash.com/photo-1559839734-2b71f1536780?q=80&w=400',
-        call: 'Referência em Ginecologia Regenerativa',
-        desc: 'Tratamentos modernos e humanizados para o bem-estar feminino.',
-        cta: 'Agendar Consulta'
+        call: 'Ginecologia Regenerativa',
+        desc: 'Tratamentos modernos e humanizados.',
+        cta: 'Agendar'
     },
     {
         id: 'h2',
         name: 'Dr. Ricardo Silva',
         image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400',
-        call: 'Check-up Preventivo Anual',
-        desc: 'Exames completos e diagnósticos precisos em um só local.',
-        cta: 'Ver Exames'
+        call: 'Check-up Anual',
+        desc: 'Exames completos e precisos.',
+        cta: 'Ver'
     },
     {
         id: 'h3',
         name: 'Clínica Mulher Ativa',
         image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=400',
-        call: 'Inauguração Nova Unidade',
-        desc: 'Agora também na Freguesia com especialistas renomados.',
-        cta: 'Conhecer Clínica'
+        call: 'Nova Unidade',
+        desc: 'Especialistas renomados no bairro.',
+        cta: 'Conhecer'
     }
+];
+
+// Mock da Lista Geral (Fake)
+const MOCK_PROFESSIONALS = [
+    { id: 'p1', name: 'Dra. Beatriz Soares', specialty: 'Ginecologia e Obstetrícia', location: 'Freguesia', rating: 4.9, image: 'https://i.pravatar.cc/150?u=beatriz' },
+    { id: 'p2', name: 'Dr. Marcos Paulo', specialty: 'Ginecologia Endócrina', location: 'Taquara', rating: 4.8, image: 'https://i.pravatar.cc/150?u=marcos' },
+    { id: 'p3', name: 'Dra. Helena Vaz', specialty: 'Mastologia', location: 'Anil', rating: 4.9, image: 'https://i.pravatar.cc/150?u=helena' },
+    { id: 'p4', name: 'Dr. Andre Luiz', specialty: 'Uroginecologia', location: 'Pechincha', rating: 4.7, image: 'https://i.pravatar.cc/150?u=andre' },
 ];
 
 export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps> = ({ 
@@ -56,17 +63,12 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
 }) => {
   const { currentNeighborhood } = useNeighborhood();
 
-  // Filtra médicos da especialidade (simulado)
-  const allDoctors = useMemo(() => {
-      return STORES.filter(s => s.category === 'Saúde' || s.subcategory?.includes(specialtyName)).slice(0, 10);
-  }, [specialtyName]);
-
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
       
-      {/* 1. Header Estilo Premium */}
-      <header className="px-5 pt-12 pb-4 flex items-center gap-4 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-900 shadow-sm">
-        <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform shadow-sm">
+      {/* 1. Header Fixo */}
+      <header className="px-5 pt-12 pb-4 flex items-center gap-4 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-900">
+        <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
           <ChevronLeft size={20} strokeWidth={3} />
         </button>
         <div>
@@ -77,53 +79,50 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
         
-        {/* 2. Banner de Contexto */}
+        {/* 2. Banner Imersivo (Aumentado em 30%) */}
         <section className="px-5 pt-6">
-            <div className="relative w-full aspect-[21/9] rounded-[2.5rem] overflow-hidden bg-blue-600 shadow-xl">
+            <div className="relative w-full aspect-[16/10] rounded-[2.5rem] overflow-hidden bg-blue-600 shadow-2xl">
                 <img 
-                    src="https://images.unsplash.com/photo-1505751172107-573225a94022?q=80&w=800" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-30" 
+                    src="https://images.unsplash.com/photo-1505751172107-573225a94022?q=80&w=1200" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" 
                     alt="Cuidado"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="relative h-full flex flex-col justify-end p-6">
-                    <span className="text-[9px] font-black text-blue-200 uppercase tracking-[0.2em] mb-1">Qualidade Garantida</span>
-                    <h2 className="text-lg font-black text-white leading-tight uppercase tracking-tighter">Onde o bairro encontra <br/>os melhores cuidados</h2>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div className="relative h-full flex flex-col justify-end p-8">
+                    <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30 w-fit mb-3">
+                        <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">Referência Local</span>
+                    </div>
+                    <h2 className="text-3xl font-black text-white leading-[0.95] uppercase tracking-tighter drop-shadow-lg">
+                        Cuidado Especial <br/>Para Você.
+                    </h2>
                 </div>
             </div>
         </section>
 
-        {/* 3. Bloco de Destaques Premium (Configurável via Painel) */}
+        {/* 3. Destaques Compactos (Reduzidos em 30%) */}
         <section className="pt-10 px-5">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-2xl text-amber-500 shadow-sm">
-                    <Sparkles size={18} fill="currentColor" />
-                </div>
-                <div>
-                    <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none">Destaques da Especialidade</h3>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Profissionais Recomendados</p>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                    <Sparkles size={16} className="text-amber-500" fill="currentColor" />
+                    <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest">Destaques</h3>
                 </div>
             </div>
 
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 pb-4">
                 {MOCK_HIGHLIGHTS.map(h => (
-                    <div key={h.id} className="min-w-[280px] max-w-[280px] snap-center bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-xl overflow-hidden flex flex-col group">
-                        {/* Parte Superior: Logo/Imagem */}
-                        <div className="h-32 w-full overflow-hidden bg-gray-50 relative">
-                             <img src={h.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={h.name} />
-                             <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-white/20">
-                                <BadgeCheck size={16} className="text-[#1E5BFF] fill-blue-50" />
+                    <div key={h.id} className="min-w-[200px] max-w-[200px] snap-center bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-lg overflow-hidden flex flex-col group">
+                        <div className="h-28 w-full overflow-hidden bg-gray-50 relative">
+                             <img src={h.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={h.name} />
+                             <div className="absolute top-3 right-3">
+                                <BadgeCheck size={14} className="text-[#1E5BFF] fill-white" />
                              </div>
                         </div>
-                        {/* Parte Inferior: Conteúdo Livre */}
-                        <div className="p-6 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-tight mb-2">{h.call}</h4>
-                                <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-3">{h.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed line-clamp-2">"{h.desc}"</p>
-                            </div>
-                            <button className="mt-6 w-full py-3 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-700 dark:text-gray-200 font-black text-[9px] uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all">
-                                {h.cta} <ChevronRight size={14} strokeWidth={3} />
+                        <div className="p-4 flex-1 flex flex-col">
+                            <h4 className="font-black text-gray-900 dark:text-white text-[11px] uppercase tracking-tighter mb-1 line-clamp-1">{h.call}</h4>
+                            <p className="text-[9px] font-bold text-[#1E5BFF] uppercase tracking-widest mb-2 truncate">{h.name}</p>
+                            <p className="text-[10px] text-gray-400 font-medium leading-tight line-clamp-2 mb-4">"{h.desc}"</p>
+                            <button className="mt-auto w-full py-2 bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] font-black text-[9px] uppercase tracking-widest rounded-xl transition-all active:scale-95">
+                                {h.cta}
                             </button>
                         </div>
                     </div>
@@ -131,44 +130,50 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
             </div>
         </section>
 
-        {/* 4. Lista Geral de Profissionais */}
-        <section className="pt-12 px-5">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-[#1E5BFF] shadow-sm">
-                    <Stethoscope size={18} strokeWidth={2.5} />
-                </div>
-                <div>
-                    <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none">Lista Geral</h3>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Mais especialistas por perto</p>
-                </div>
+        {/* 4. Lista Geral Clean (Abaixo dos destaques) */}
+        <section className="pt-10 px-5 space-y-4">
+            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">
+                <Stethoscope size={16} className="text-gray-400" />
+                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Profissionais no Bairro</h3>
             </div>
 
-            <div className="space-y-3">
-                {allDoctors.map(doctor => (
+            <div className="grid grid-cols-1 gap-3">
+                {MOCK_PROFESSIONALS.map((doc) => (
                     <div 
-                        key={doctor.id}
-                        onClick={() => onSelectStore(doctor)}
-                        className="bg-white dark:bg-gray-900 p-4 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer group"
+                        key={doc.id}
+                        className="bg-white dark:bg-gray-900 p-4 rounded-[1.8rem] border border-gray-100 dark:border-gray-800 flex items-center gap-4 transition-all active:scale-[0.98] cursor-pointer group shadow-sm hover:shadow-md"
                     >
-                        <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700">
-                            <img src={doctor.logoUrl || doctor.image} className="w-full h-full object-cover p-1" />
+                        {/* Foto à esquerda */}
+                        <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700 shadow-inner">
+                            <img src={doc.image} className="w-full h-full object-cover" alt={doc.name} />
                         </div>
+
+                        {/* Info Central */}
                         <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{doctor.name}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                                <div className="flex items-center gap-1 text-[#F59E0B]">
-                                    <Star size={10} fill="currentColor" />
-                                    <span className="text-[10px] font-black">{doctor.rating.toFixed(1)}</span>
+                            <div className="flex justify-between items-start">
+                                <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{doc.name}</h4>
+                                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded-lg border border-yellow-100 dark:border-yellow-800/50">
+                                    <Star size={10} className="text-yellow-500 fill-current" />
+                                    <span className="text-[10px] font-black text-yellow-700 dark:text-yellow-400">{doc.rating}</span>
                                 </div>
-                                <span className="text-gray-300 dark:text-gray-700">•</span>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight truncate">{doctor.neighborhood}</span>
+                            </div>
+                            <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter mt-0.5">{doc.specialty}</p>
+                            <div className="flex items-center gap-1.5 text-gray-400 mt-2">
+                                <MapPin size={10} className="text-gray-300" />
+                                <span className="text-[9px] font-bold uppercase tracking-widest">{doc.location}</span>
                             </div>
                         </div>
-                        <div className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-full text-gray-200 group-hover:text-[#1E5BFF] transition-colors">
-                            <ChevronRight size={16} strokeWidth={3} />
+
+                        {/* Indicador de Ação */}
+                        <div className="p-2 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-200 group-hover:text-[#1E5BFF] transition-colors">
+                            <ChevronRight size={18} strokeWidth={3} />
                         </div>
                     </div>
                 ))}
+            </div>
+
+            <div className="py-10 text-center opacity-30">
+                <p className="text-[8px] font-black uppercase tracking-[0.4em]">Localizei JPA • Rede de Cuidado</p>
             </div>
         </section>
 

@@ -38,7 +38,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
       
-      {/* 1. Header com Patrocinador Master - Mantido para autoridade */}
+      {/* 1. Header com Patrocinador Master */}
       <header className="px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-900">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
@@ -61,7 +61,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-20">
         
-        {/* 2. Seção de Especialidades - Otimizada (Banner removido conforme solicitado) */}
+        {/* 2. Seção de Especialidades - Layout Clean com botões Azuis Sólidos */}
         <section className="pt-8 px-5">
             <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -80,13 +80,15 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                     <button 
                         key={spec}
                         onClick={() => handleSpecialtyClick(spec)}
-                        className={`flex flex-col items-center justify-center p-4 min-h-[100px] rounded-[2rem] border transition-all duration-300 active:scale-95 shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-blue-100`}
+                        className={`flex flex-col items-center justify-center p-4 min-h-[110px] rounded-[2rem] transition-all duration-300 active:scale-95 shadow-md bg-[#1E5BFF] border-none hover:brightness-110 group`}
                     >
-                        {/* Ícone com degradê splash screen para estética premium */}
-                        <div className={`p-2.5 rounded-2xl mb-2.5 shadow-md flex items-center justify-center bg-splash-premium text-white ${selectedSpecialty === spec ? 'scale-110' : ''} transition-transform`}>
-                            <HeartPulse size={20} strokeWidth={2.5} />
+                        {/* Ícone Branco Sólido */}
+                        <div className={`mb-2.5 flex items-center justify-center text-white ${selectedSpecialty === spec ? 'scale-110' : ''} transition-transform`}>
+                            <HeartPulse size={24} strokeWidth={2.5} />
                         </div>
-                        <span className={`text-[9px] font-black uppercase tracking-tighter text-center leading-tight line-clamp-3 w-full px-1 text-gray-700 dark:text-gray-300`}>
+                        
+                        {/* Texto Branco Sólido para Contraste Premium */}
+                        <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-tight line-clamp-3 w-full px-1 text-white">
                             {spec}
                         </span>
                     </button>
