@@ -9,45 +9,45 @@ interface CouponCarouselProps {
 
 const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon, onResgate }) => {
   return (
-    <div className="flex-shrink-0 w-72 snap-center p-2">
-      <div className={`relative h-44 rounded-[2.5rem] overflow-hidden shadow-xl ${coupon.color} flex flex-col group active:scale-[0.98] transition-transform`}>
+    <div className="flex-shrink-0 w-56 snap-center p-2">
+      <div className={`relative h-36 rounded-[2rem] overflow-hidden shadow-lg ${coupon.color} flex flex-col group active:scale-[0.98] transition-transform`}>
         
         {/* Cutout effect circles */}
-        <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
-        <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
+        <div className="absolute top-1/2 -translate-y-1/2 -left-2.5 w-5 h-5 bg-white dark:bg-gray-950 rounded-full z-10"></div>
+        <div className="absolute top-1/2 -translate-y-1/2 -right-2.5 w-5 h-5 bg-white dark:bg-gray-950 rounded-full z-10"></div>
 
         {/* Top part of the ticket */}
-        <div className="flex-1 p-6 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 p-4 flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-white p-1 shadow-md shrink-0 flex items-center justify-center overflow-hidden">
             <img 
               src={coupon.storeLogo} 
               alt={coupon.storeName} 
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover rounded-lg"
             />
           </div>
           <div className="flex flex-col min-w-0">
-            <h4 className="text-[10px] font-black text-white/80 uppercase tracking-[0.15em] truncate mb-0.5">
+            <h4 className="text-[9px] font-black text-white/80 uppercase tracking-widest truncate mb-0.5">
               {coupon.storeName}
             </h4>
-            <p className="text-white font-black text-3xl leading-none tracking-tighter uppercase drop-shadow-md">
+            <p className="text-white font-black text-2xl leading-none tracking-tighter uppercase drop-shadow-sm">
               {coupon.discount}
             </p>
           </div>
         </div>
 
         {/* Dotted separator */}
-        <div className="px-6">
+        <div className="px-4">
             <div className="h-px border-t border-dashed border-white/20"></div>
         </div>
 
         {/* Bottom part of the ticket */}
-        <div className="h-16 px-6 flex items-center justify-between relative z-10">
-          <div className="bg-black/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
-            <p className="text-[11px] font-mono font-black text-white tracking-[0.1em]">{coupon.code}</p>
+        <div className="h-14 px-4 flex items-center justify-between relative z-10">
+          <div className="bg-black/10 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/10">
+            <p className="text-[10px] font-mono font-bold text-white tracking-widest">{coupon.code}</p>
           </div>
           <button 
             onClick={(e) => { e.stopPropagation(); onResgate(); }}
-            className="bg-white text-gray-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-90 transition-transform hover:bg-gray-50 flex items-center gap-1.5"
+            className="bg-white text-gray-900 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md active:scale-90 transition-transform hover:bg-gray-50 flex items-center gap-1"
           >
             Resgatar
           </button>
@@ -88,15 +88,15 @@ export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) =>
         ))}
         
         {/* "Explore All" card */}
-        <div className="flex-shrink-0 w-48 snap-center p-2">
+        <div className="flex-shrink-0 w-40 snap-center p-2">
           <button 
             onClick={() => onNavigate('coupon_landing')}
-            className="w-full h-44 rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-all group bg-gray-50/30"
+            className="w-full h-36 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-all group bg-gray-50/30"
           >
-            <div className="p-3 rounded-full bg-gray-50 dark:bg-gray-900 group-hover:bg-blue-50 transition-colors">
-              <ArrowRight size={24} />
+            <div className="p-2.5 rounded-full bg-gray-50 dark:bg-gray-900 group-hover:bg-blue-50 transition-colors">
+              <ArrowRight size={20} />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-center">Explorar todos<br/>os cupons</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-center">Explorar todos<br/>os cupons</span>
           </button>
         </div>
       </div>

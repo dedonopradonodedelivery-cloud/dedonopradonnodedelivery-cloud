@@ -27,56 +27,11 @@ import { User } from '@supabase/supabase-js';
 import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
-import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
-import { FifaBanner } from '@/components/FifaBanner';
-import { AcontecendoAgora } from '@/components/AcontecendoAgora';
 import { CouponCarousel } from '@/components/CouponCarousel';
-
-// Imagens de fallback realistas e variadas
-const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
-];
-
-const getFallbackImage = (id: string) => {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-        hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return FALLBACK_IMAGES[Math.abs(hash) % FALLBACK_IMAGES.length];
-};
-
-const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
-  
-  return (
-    <div className="flex-shrink-0 w-28 snap-center p-1">
-      <div 
-        onClick={() => onNavigate('neighborhood_posts')}
-        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col group cursor-pointer h-full"
-      >
-        <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
-          <img src={postImage} alt={post.content} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-          <div className="absolute bottom-1 left-1.5 right-1">
-            <p className="text-[9px] font-bold text-white drop-shadow-md truncate">{post.userName}</p>
-          </div>
-        </div>
-        <div className="p-2 pt-1.5 flex-1">
-            <p className="text-[9px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2 font-medium">
-                {post.content}
-            </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { AcontecendoAgora } from '@/components/AcontecendoAgora';
+import { HojeNoBairro } from '@/components/HojeNoBairro';
+import { RadarDoBairro } from '@/components/RadarDoBairro';
+import { RecomendadosParaVoce } from '@/components/RecomendadosParaVoce';
 
 interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
@@ -105,19 +60,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [images, setImages] = useState<string[]>([]);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
-
-  // Filtro de categorias para a Home conforme solicitação do layout
-  const homeCategories = useMemo(() => {
-    const ids = [
-      'cat-saude',   // Saúde
-      'cat-pets',    // Pets
-      'cat-fashion', // Moda
-      'cat-beauty',  // Beleza
-      'cat-coupons', // Cupom
-      'cat-more'     // + Mais
-    ];
-    return ids.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
-  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && images.length < 3) {
@@ -164,7 +106,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-gray-50 dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
       {userRole === 'lojista' && (
         <section className="px-4 py-4 bg-white dark:bg-gray-950">
@@ -172,41 +114,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. CATEGORIAS (LAYOUT ATUALIZADO: 6 ITENS, FILEIRA ÚNICA, SEM COMIDA) */}
-      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 py-6 px-5 relative z-10 border-b border-gray-50 dark:border-gray-900">
-        <div className="flex justify-between items-start gap-1">
-          {homeCategories.map((cat) => (
-            <button 
-              key={cat.id} 
-              onClick={() => onSelectCategory(cat)}
-              className="flex flex-col items-center gap-2 flex-1 active:scale-95 transition-all group"
-            >
-              <div className={`w-12 h-12 rounded-[18px] shadow-sm flex items-center justify-center ${cat.color} ${cat.id === 'cat-more' ? 'border border-gray-100 dark:border-gray-800' : 'border border-white/10'} group-hover:brightness-110`}>
-                {React.cloneElement(cat.icon as any, { 
-                  className: `w-6 h-6 ${cat.id === 'cat-more' ? 'text-gray-400 dark:text-gray-500' : 'text-white'}`, 
-                  strokeWidth: 3 
-                })}
-              </div>
-              <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
-                {cat.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      {/* NOVO LAYOUT DA HOME */}
+      <HojeNoBairro onSelectCategory={onSelectCategory} />
 
-      {/* 2. CARROSSEL PRINCIPAL (Banners) */}
-      <section className="bg-white dark:bg-gray-950 w-full">
-        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
-      </section>
-
-      {/* NOVO BLOCO DE CUPONS */}
       <CouponCarousel onNavigate={onNavigate} />
 
-      {/* BLOCO: ACONTECENDO AGORA */}
       <AcontecendoAgora onNavigate={onNavigate} />
 
-      {/* WIZARD DE ORÇAMENTO (Quando aberto) */}
+      <RadarDoBairro onNavigate={onNavigate} />
+
+      <RecomendadosParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      
+      {/* WIZARD DE ORÇAMENTO (Quando aberto - LÓGICA MANTIDA) */}
       {wizardStep > 0 && (
         <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 -mt-4 mx-5 mb-10 animate-in slide-in-from-bottom duration-500 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden ring-4 ring-blue-500/5 z-50">
           <button onClick={() => setWizardStep(0)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-gray-50 dark:bg-slate-800 rounded-full"><X size={20} /></button>
@@ -326,42 +245,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           )}
         </section>
       )}
-
-      {/* 7. EXPLORAR BAIRRO (Lista de Lojas) */}
-      <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
-        <div className="px-5">
-          <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
-            {['all', 'top_rated'].map((f) => (
-              <button key={f} onClick={() => setListFilter(f as any)} className={`text-[8px] font-black uppercase px-4 py-1.5 rounded-lg transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-[#1E5BFF] shadow-sm' : 'text-gray-400'}`}>
-                {f === 'all' ? 'Tudo' : 'Top'}
-              </button>
-            ))}
-          </div>
-          <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
-        </div>
-      </div>
     </div>
   );
 };
-
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-  <div className="flex items-center justify-between mb-3">
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
-        <Icon size={18} strokeWidth={2.5} />
-      </div>
-      <div>
-        <h2 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
-      </div>
-    </div>
-    <button onClick={onSeeMore} className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest hover:underline active:opacity-60">Ver mais</button>
-  </div>
-);
-
-const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m6 9 6 6 6-6"/>
-  </svg>
-);

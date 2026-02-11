@@ -98,86 +98,98 @@ const MOCK_PROFESSIONALS = [
 
 export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> = ({ 
   title, 
+  subtitle,
   specialties, 
+  themeColor,
   onBack,
   onSelectStore
 }) => {
   const { currentNeighborhood } = useNeighborhood();
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('Ginecologia');
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Lógica de Filtragem
+  const handleSelect = (spec: string) => {
+    setSelectedSpecialty(prev => prev === spec ? null : spec);
+  }
+
+  const filteredSpecialties = useMemo(() => {
+    if (!searchTerm) return specialties;
+    return specialties.filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [specialties, searchTerm]);
+
+  // Lógica de Filtragem de Profissionais
   const filteredPros = useMemo(() => {
-    return MOCK_PROFESSIONALS.filter(pro => pro.specialty === selectedSpecialty);
-  }, [selectedSpecialty]);
+    let list = [...MOCK_PROFESSIONALS];
+    
+    if (selectedSpecialty) {
+      list = list.filter(pro => pro.specialty === selectedSpecialty);
+    }
+    
+    if (currentNeighborhood !== 'Jacarepaguá (todos)') {
+      list = list.filter(pro => pro.neighborhood === currentNeighborhood);
+    }
+
+    return list.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+  }, [selectedSpecialty, currentNeighborhood]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in fade-in duration-300">
       
-      {/* 1. Header com Patrocinador Master */}
+      {/* 1. Header */}
       <header className="px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-900">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
             <ChevronLeft size={20} strokeWidth={3} />
           </button>
           <div>
-            <h1 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{title}</h1>
-            <p className="text-[9px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">{currentNeighborhood}</p>
+            <h1 className={`text-lg font-black ${themeColor} uppercase tracking-tighter leading-none`}>{title}</h1>
+            <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mt-1">{subtitle} em {currentNeighborhood}</p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-2xl border border-amber-100 dark:border-amber-800 shadow-sm">
-            <Crown size={12} className="text-amber-500 fill-amber-500" />
-            <div className="flex flex-col">
-                <span className="text-[7px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest leading-none">Master</span>
-                <span className="text-[10px] font-bold text-gray-900 dark:text-white leading-none">Esquematiza</span>
-            </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
         
-        {/* 2. Banner de Destaque */}
-        <section className="px-5 pt-6">
-            <div className="relative w-full aspect-[21/9] rounded-[2.5rem] overflow-hidden bg-slate-900 shadow-xl group cursor-pointer active:scale-[0.99] transition-transform">
-                <img 
-                    src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700" 
-                    alt="Publicidade"
+        {/* 2. Barra de Busca */}
+        <div className="px-5 pt-4 pb-6">
+            <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input 
+                    type="text"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Buscar especialidade..."
+                    className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/30 transition-all shadow-inner dark:text-white"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/20 to-transparent"></div>
-                <div className="relative h-full flex flex-col justify-center px-6">
-                    <span className="bg-white/20 backdrop-blur-md text-white text-[7px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest w-fit mb-2 border border-white/10">Destaque JPA</span>
-                    <h2 className="text-lg font-black text-white leading-tight uppercase tracking-tight">Hospital e Maternidade <br/>Amparo</h2>
-                    <p className="text-[10px] text-white/70 font-medium mt-1">Cuidado completo no bairro.</p>
-                </div>
             </div>
-        </section>
+        </div>
 
-        {/* 3. Grid Fixo de Especialidades (Todas Visíveis) */}
-        <section className="pt-10 mb-8 px-5">
+        {/* 3. Grid de Especialidades (LAYOUT AJUSTADO) */}
+        <section className="px-5 mb-8">
             <div className="mb-5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="p-1 bg-blue-50 dark:bg-blue-900/30 rounded text-[#1E5BFF]">
-                        <Stethoscope size={14} />
-                    </div>
-                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Especialidades</h3>
-                </div>
-                <span className="text-[9px] font-bold text-[#1E5BFF] bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">{specialties.length} Áreas</span>
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Especialidades</h3>
+                <span className="text-[9px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">{filteredSpecialties.length} Áreas</span>
             </div>
             
             <div className="grid grid-cols-4 gap-2">
-                {specialties.map((spec) => (
-                    <button 
+                {filteredSpecialties.map(spec => (
+                    <button
                         key={spec}
-                        onClick={() => setSelectedSpecialty(spec)}
-                        className={`flex flex-col items-center justify-center p-2.5 min-h-[72px] rounded-2xl border transition-all duration-300 active:scale-95 ${
-                            selectedSpecialty === spec 
-                            ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-lg shadow-blue-500/30' 
-                            : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
+                        onClick={() => handleSelect(spec)}
+                        className={`p-3 rounded-2xl border-2 transition-all text-center group active:scale-95 flex flex-col items-center justify-center h-full ${
+                        selectedSpecialty === spec
+                            ? `bg-white dark:bg-gray-800 border-blue-500 shadow-lg`
+                            : `bg-white dark:bg-gray-800 border-transparent hover:border-blue-200/50`
                         }`}
                     >
-                        <HeartPulse size={20} className={selectedSpecialty === spec ? 'text-white' : 'text-blue-500/40'} />
-                        <span className={`text-[8px] font-black uppercase tracking-tighter text-center mt-2 leading-[1.1] line-clamp-2 w-full px-0.5`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 mx-auto transition-all ${
+                            selectedSpecialty === spec ? `bg-blue-500` : `bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100`
+                        }`}>
+                            <Stethoscope size={18} className={selectedSpecialty === spec ? `text-white` : 'text-gray-400 group-hover:text-blue-500'} />
+                        </div>
+                        <span className={`text-[10px] font-black leading-tight transition-colors line-clamp-2 flex-grow flex items-center ${
+                            selectedSpecialty === spec ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300'
+                        }`}>
                             {spec}
                         </span>
                     </button>
@@ -185,11 +197,10 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
             </div>
         </section>
 
-        {/* 4. Lista de Profissionais Dinâmica */}
+        {/* 4. Lista de Profissionais */}
         <section className="px-5 space-y-4">
             <div className="flex items-center justify-between px-1 mb-2">
                 <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Profissionais Recomendados</h3>
-                <span className="text-[10px] font-bold text-gray-400">Em {selectedSpecialty}</span>
             </div>
 
             <div className="space-y-4 min-h-[200px]">
@@ -197,7 +208,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                     filteredPros.map((pro) => (
                         <div
                             key={pro.id}
-                            className="w-full bg-white dark:bg-gray-900 p-4 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 group hover:border-[#1E5BFF]/30 transition-all animate-in fade-in duration-500"
+                            className="w-full bg-white dark:bg-gray-900 p-4 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 group hover:border-blue-500/30 transition-all animate-in fade-in duration-500"
                         >
                             <div className="relative shrink-0">
                                 <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden border border-gray-50 dark:border-gray-700 shadow-sm">
@@ -213,13 +224,13 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5 mb-1">
                                     <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{pro.name}</h4>
-                                    {pro.verified && <BadgeCheck size={14} className="text-[#1E5BFF] fill-blue-50 dark:fill-blue-900/30" />}
+                                    {pro.verified && <BadgeCheck size={14} className="text-blue-500 fill-blue-50 dark:fill-blue-900/30" />}
                                 </div>
                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{pro.specialty}</p>
                                 
                                 <div className="flex items-center gap-3 mt-2">
                                     <div className="flex items-center gap-1">
-                                        <MapPin size={10} className="text-[#1E5BFF]" />
+                                        <MapPin size={10} className="text-blue-500" />
                                         <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tighter">{pro.neighborhood}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
@@ -230,7 +241,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                             </div>
 
                             <button 
-                              className="shrink-0 bg-gray-50 dark:bg-gray-800 group-hover:bg-[#1E5BFF] p-3 rounded-2xl transition-all shadow-inner group-hover:shadow-blue-500/20 active:scale-90"
+                              className="shrink-0 bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-500 p-3 rounded-2xl transition-all shadow-inner group-hover:shadow-blue-500/20 active:scale-90"
                               title="Agendar"
                             >
                                 <Calendar size={18} className="text-gray-400 group-hover:text-white" />
@@ -243,7 +254,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                             <AlertCircle size={28} />
                         </div>
                         <h4 className="text-sm font-bold text-gray-400 dark:text-gray-600 uppercase tracking-tight">Em breve teremos profissionais de</h4>
-                        <p className="text-sm font-black text-[#1E5BFF] uppercase tracking-tighter mt-1">{selectedSpecialty}</p>
+                        <p className="text-sm font-black text-blue-500 uppercase tracking-tighter mt-1">{selectedSpecialty || 'nesta área'}</p>
                     </div>
                 )}
             </div>

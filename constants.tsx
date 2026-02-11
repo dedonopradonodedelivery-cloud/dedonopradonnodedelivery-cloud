@@ -15,7 +15,7 @@ import {
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
   Key, Fan, Truck, Shovel,
   Meh, ThumbsDown, Gift, RefreshCw, Accessibility, Landmark, Wallet, HeartPulse,
-  MapPin, Building, Plus
+  MapPin, Building, Plus, AlertTriangle
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -200,3 +200,19 @@ export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [...OFFICIAL_CO
 export const SPECIALTIES: Record<string, string[]> = {
   'default': ['Reparo específico', 'Instalação']
 };
+
+export const HOJE_NO_BAIRRO_CATEGORIES = [
+    { id: 'farmacia', name: 'Farmácia', icon: Pill },
+    { id: 'mercado', name: 'Mercado', icon: ShoppingCart },
+    { id: 'saude', name: 'Saúde', icon: HeartPulse },
+    { id: 'pets', name: 'Pets', icon: PawPrint },
+    { id: 'servicos', name: 'Oficina', icon: Wrench },
+    { id: 'coupon_landing', name: 'Promoções', icon: Ticket },
+];
+
+export const MOCK_RADAR_BAIRRO = [
+  { id: 'radar-1', type: 'promo', title: 'Happy Hour em Dobro na Choperia X', expiresIn: '2h', location: 'Freguesia' },
+  { id: 'radar-2', type: 'alert', title: 'Falta de luz programada na Rua Araguaia', description: 'Manutenção da Light das 14h às 16h.', time: 'Hoje' },
+  { id: 'radar-3', type: 'event', title: 'Música ao vivo no Bar do Zé', location: 'Pechincha', time: 'Sábado, 20h' },
+  { id: 'radar-4', type: 'promo', title: 'Últimas peças com 50% OFF na Loja Y', expiresIn: '45min', location: 'Taquara' },
+];

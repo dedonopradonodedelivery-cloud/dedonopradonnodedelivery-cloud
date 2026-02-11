@@ -1,5 +1,4 @@
 
-
 import React, { useMemo } from 'react';
 import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
@@ -79,13 +78,8 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
-  // Placeholder dinâmico conforme o bairro selecionado
-  const dynamicPlaceholder = useMemo(() => {
-    if (currentNeighborhood === "Jacarepaguá (todos)") {
-      return "O que você busca em JPA?";
-    }
-    return `O que você busca em ${currentNeighborhood}?`;
-  }, [currentNeighborhood]);
+  // Placeholder atualizado para ser mais utilitário
+  const dynamicPlaceholder = "O que você precisa hoje?";
 
   return (
     <>
