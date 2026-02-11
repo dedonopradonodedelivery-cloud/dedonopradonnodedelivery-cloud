@@ -54,7 +54,7 @@ import { CouponLandingView } from '@/components/CouponLandingView';
 import { CategoriesPageView } from '@/components/CategoriesPageView';
 import { HealthPreFilterView } from '@/components/HealthPreFilterView';
 import { HealthSubSpecialtiesView } from '@/components/HealthSubSpecialtiesView';
-import { MapPin, X, Palette } from 'lucide-react';
+import { MapPin, X, Palette, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -75,9 +75,7 @@ const App: React.FC = () => {
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  // Controle de estado da Splash Screen: true = visível
   const [isSplashVisible, setIsSplashVisible] = useState(!splashWasShownInSession && !isAuthReturn);
-  // Controle da fase de Fade Out
   const [isFadingOut, setIsFadingOut] = useState(false);
   
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
@@ -110,16 +108,13 @@ const App: React.FC = () => {
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
-  // Lógica principal do Timer da Splash Screen
   useEffect(() => {
     if (!isSplashVisible) return;
 
-    // Timer de 5 segundos para exibição total
     const fadeTimeout = setTimeout(() => {
-      setIsFadingOut(true); // Inicia o fade out de 800ms (via CSS)
+      setIsFadingOut(true);
     }, 5000);
 
-    // Timer de 5.8 segundos para remover o componente totalmente
     const removeTimeout = setTimeout(() => {
       setIsSplashVisible(false);
       splashWasShownInSession = true;
@@ -310,7 +305,6 @@ const App: React.FC = () => {
             />
           )}
 
-          {/* O conteúdo principal do app aparece com fade-in */}
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-out ${!isSplashVisible || isFadingOut ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole as any} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
@@ -605,32 +599,45 @@ const App: React.FC = () => {
               <RoleSwitcherModal />
           </div>
 
-          {/* SPLASH SCREEN PREMIUM */}
+          {/* SPLASH SCREEN PREMIUM REFINADA */}
           {isSplashVisible && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-800 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
-              <div className="flex flex-col items-center text-center px-4">
-                  {/* Logo com animação pop */}
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter">
-                    <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-800 ease-in-out bg-splash-premium ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+              
+              {/* Micro-partículas e brilhos de fundo */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
+                  <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full blur-sm animate-subtle-glow" style={{ animationDelay: '0s' }}></div>
+                  <div className="absolute top-2/3 left-1/2 w-1.5 h-1.5 bg-blue-300 rounded-full blur-sm animate-subtle-glow" style={{ animationDelay: '2s' }}></div>
+                  <div className="absolute top-1/3 right-1/4 w-2.5 h-2.5 bg-white rounded-full blur-sm animate-subtle-glow" style={{ animationDelay: '4s' }}></div>
+                  <div className="absolute inset-0 bg-white/[0.02] animate-particle-drift"></div>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10">
+                  {/* Logo com animação premium (escala + fade) */}
+                  <div className="relative w-32 h-32 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] mb-10 animate-logo-enter border border-white/20">
+                    <MapPin className="w-16 h-16 text-[#1E5BFF] fill-[#1E5BFF]" />
+                    <div className="absolute -inset-2 bg-white/20 rounded-[3rem] blur-xl opacity-0 animate-pulse"></div>
                   </div>
                   
-                  {/* Título Principal */}
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                  {/* Título Principal Sincronizado */}
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-2xl animate-fade-in" style={{ animationDelay: '0.6s' }}>
                     Localizei JPA
                   </h1>
                   
-                  {/* Slogan com animação Slide-up + Fade-in */}
-                  <div className="mt-4 opacity-0 animate-slide-up-fade" style={{ animationDelay: '1s' }}>
-                    <p className="text-lg font-semibold text-white/90">
-                      O bairro na palma de suas mãos! ✋
+                  {/* Slogan com Animação Premium Slide Up e Glow */}
+                  <div className="mt-6 opacity-0 animate-slide-up-fade" style={{ animationDelay: '1.2s' }}>
+                    <p className="text-xl font-bold text-white tracking-tight animate-text-shine">
+                      Seu bairro, na sua mão.
                     </p>
+                    <div className="w-12 h-1 bg-white/30 mx-auto mt-3 rounded-full overflow-hidden">
+                       <div className="h-full bg-white w-1/3 rounded-full animate-slow-shimmer"></div>
+                    </div>
                   </div>
               </div>
               
-              {/* Rodapé institucional */}
-              <div className="text-center animate-fade-in" style={{ animationDelay: '1.2s' }}>
-                <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
-                <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
+              {/* Assinatura Institucional de Patrocinador Master */}
+              <div className="relative z-10 text-center animate-fade-in opacity-0" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
+                <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.4em] mb-1">Patrocinador Master</p>
+                <p className="text-base font-display font-extrabold text-white/90 tracking-wide">Grupo Esquematiza</p>
               </div>
             </div>
           )}

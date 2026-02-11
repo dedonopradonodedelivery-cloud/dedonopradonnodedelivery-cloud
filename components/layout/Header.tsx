@@ -1,6 +1,5 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-// Added Tag and ChevronRight to fix 'Cannot find name' errors on lines 164, 170, and 182
 import { Search, ChevronDown, Check, Bell, X, Mic, ShieldAlert, MapPin, Tag, ChevronRight } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store } from '../../types';
@@ -18,6 +17,11 @@ interface HeaderProps {
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
+  // Propriedades adicionadas para compatibilidade com o App.tsx
+  isDarkMode?: boolean;
+  toggleTheme?: () => void;
+  user?: any;
+  userRole?: "cliente" | "lojista" | null;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -54,11 +58,17 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   stores = [],
   onStoreClick,
-  onOpenViewSwitcher
+  onOpenViewSwitcher,
+  // Props desestruturadas embora o componente use useAuth internamente por padrão
+  user: userProp,
+  userRole: userRoleProp
 }) => {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Usa o usuário do auth context como prioridade
+  const user = authUser || userProp;
 
   // Regra Admin: dedonopradonodedelivery@gmail.com
   const isAdminUser = user?.email === 'dedonopradonodedelivery@gmail.com';
