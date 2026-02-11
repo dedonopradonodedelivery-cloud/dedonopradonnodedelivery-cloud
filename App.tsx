@@ -102,7 +102,6 @@ const App: React.FC = () => {
   const [activityType, setActivityType] = useState<string>('');
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
 
-  // FIX: Added missing adminInitialTab state to store the initial tab data for AdminPanel.
   const [adminInitialTab, setAdminInitialTab] = useState<string | undefined>(undefined);
 
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
@@ -148,7 +147,6 @@ const App: React.FC = () => {
        setInitialModuleView(undefined);
     }
 
-    // FIX: Update adminInitialTab when navigating to 'admin_panel' to satisfy component expectations.
     if (view === 'admin_panel' && data) {
        setAdminInitialTab(data);
     } else {
@@ -289,7 +287,12 @@ const App: React.FC = () => {
                             subtitle="Cuidado Especializado"
                             themeColor={activeTab === 'health_woman' ? "text-pink-500" : activeTab === 'health_man' ? "text-blue-500" : activeTab === 'health_pediatrics' ? "text-teal-500" : "text-amber-500"}
                             specialties={
-                                activeTab === 'health_woman' ? ['Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana'] :
+                                activeTab === 'health_woman' ? [
+                                  'Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana',
+                                  'Fertilidade feminina', 'Planejamento familiar', 'Saúde sexual feminina', 'Saúde íntima feminina',
+                                  'Climatério', 'Menopausa', 'Ginecologia oncológica', 'Ginecologia endócrina', 'Uroginecologia',
+                                  'Colposcopia', 'Patologia do trato genital inferior', 'Medicina fetal', 'Pré-natal de alto risco', 'Dor pélvica crônica'
+                                ] :
                                 activeTab === 'health_man' ? ['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina'] :
                                 activeTab === 'health_pediatrics' ? ['Pediatria geral', 'Neonatologia', 'Puericultura', 'Psiquiatria infantil'] :
                                 ['Geriatria', 'Clínica geriátrica', 'Medicina do envelhecimento', 'Psicologia geriátrica']
