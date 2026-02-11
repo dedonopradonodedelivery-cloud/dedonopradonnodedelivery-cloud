@@ -1,20 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  CloudSun, 
-  Car, 
   MapPin, 
-  Zap, 
-  Pill, 
-  ShoppingCart, 
-  Heart, 
-  PawPrint, 
-  Wrench, 
-  Tag,
   ChevronRight,
-  Sun,
-  Cloud,
-  CloudRain
+  Sun
 } from 'lucide-react';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
@@ -35,7 +24,6 @@ export const HojeNoBairro: React.FC = () => {
         if (data.current_weather) {
           setTemperature(`${Math.round(data.current_weather.temperature)}°C`);
           
-          // Mapeamento simples de Weather Code (WMO)
           const code = data.current_weather.weathercode;
           if (code === 0) setConditionText('ENSOLARADO');
           else if (code >= 1 && code <= 3) setConditionText('NUBLADO');
@@ -67,17 +55,8 @@ export const HojeNoBairro: React.FC = () => {
     setTrafficStatus(getTraffic());
   }, []);
 
-  const shortcuts = [
-    { label: 'Farmácia', icon: Pill, slug: 'farmacia' },
-    { label: 'Mercado', icon: ShoppingCart, slug: 'mercado' },
-    { label: 'Saúde', icon: Heart, slug: 'saude' },
-    { label: 'Pets', icon: PawPrint, slug: 'pets' },
-    { label: 'Oficina', icon: Wrench, slug: 'autos' },
-    { label: 'Promoções', icon: Tag, slug: 'coupon_landing' },
-  ];
-
   return (
-    <section className="px-5 pt-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+    <section className="px-5 pt-6 animate-in fade-in slide-in-from-top-4 duration-700">
       {/* TÍTULO DA SEÇÃO */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
@@ -90,7 +69,7 @@ export const HojeNoBairro: React.FC = () => {
       </div>
 
       {/* NÍVEL 1: INFORMAÇÕES CONTEXTUAIS EM LINHA */}
-      <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-2xl p-3 mb-6 border border-gray-100 dark:border-gray-800 flex items-center justify-between overflow-x-auto no-scrollbar whitespace-nowrap gap-4 shadow-inner">
+      <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-2xl p-3 mb-2 border border-gray-100 dark:border-gray-800 flex items-center justify-between overflow-x-auto no-scrollbar whitespace-nowrap gap-4 shadow-inner">
         <div className="flex items-center gap-2">
             <MapPin size={12} className="text-[#1E5BFF]" fill="currentColor" />
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
@@ -115,23 +94,6 @@ export const HojeNoBairro: React.FC = () => {
             </p>
             <ChevronRight size={10} className="text-gray-300" />
         </div>
-      </div>
-
-      {/* NÍVEL 2: ÍCONES DE ATALHO (LINHA HORIZONTAL) */}
-      <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5">
-        {shortcuts.map((item, idx) => (
-          <button 
-            key={idx} 
-            className="flex flex-col items-center gap-2 group shrink-0 active:scale-95 transition-all"
-          >
-            <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-[22px] shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:shadow-lg transition-all">
-                <item.icon size={26} className="text-[#1E5BFF]" strokeWidth={2.5} />
-            </div>
-            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                {item.label}
-            </span>
-          </button>
-        ))}
       </div>
     </section>
   );

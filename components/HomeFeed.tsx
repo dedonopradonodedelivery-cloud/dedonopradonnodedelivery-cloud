@@ -127,7 +127,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { currentNeighborhood } = useNeighborhood();
   
   const homeCategories = useMemo(() => {
-    const ids = ['cat-saude', 'cat-pets', 'cat-fashion', 'cat-beauty', 'cat-coupons', 'cat-more'];
+    // Expandindo para compensar a remoção da seção de cima e evitar duplicidade
+    const ids = ['cat-pharmacy', 'cat-market', 'cat-saude', 'cat-pets', 'cat-beauty', 'cat-services', 'cat-autos', 'cat-more'];
     return ids.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
   }, []);
 
@@ -140,29 +141,29 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. HOJE NO BAIRRO - RESTAURADO AO TOPO */}
+      {/* 1. RESUMO DO BAIRRO (CLIMA/TRÂNSITO) */}
       <HojeNoBairro />
 
-      {/* 2. RESOLVA RÁPIDO - CATEGORIAS */}
-      <section className="w-full bg-white dark:bg-gray-950 pb-8 px-5 relative z-10">
+      {/* 2. EXPLORE JPA — RESOLVA RÁPIDO (REPOSICIONADO E AMPLIADO) */}
+      <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-8 px-5 relative z-10">
         <div className="mb-5 px-1">
            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Explore JPA</h2>
            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Resolva Rápido</h3>
         </div>
-        <div className="flex justify-between items-start gap-2 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
           {homeCategories.map((cat) => (
             <button 
               key={cat.id} 
               onClick={() => onSelectCategory(cat)}
-              className="flex flex-col items-center gap-2 flex-1 min-w-[64px] active:scale-95 transition-all group"
+              className="flex flex-col items-center gap-2 flex-shrink-0 min-w-[72px] active:scale-95 transition-all group"
             >
-              <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800 flex items-center justify-center group-hover:border-blue-500/50 transition-colors">
+              <div className="w-16 h-16 rounded-[22px] bg-white dark:bg-gray-900 shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-800 flex items-center justify-center group-hover:border-blue-500/50 transition-colors">
                 {React.cloneElement(cat.icon as any, { 
-                  className: "w-6 h-6 text-[#1E5BFF]", 
+                  className: "w-7 h-7 text-[#1E5BFF]", 
                   strokeWidth: 2.5 
                 })}
               </div>
-              <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
+              <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
                 {cat.name}
               </span>
             </button>
@@ -170,7 +171,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 3. CUPONS DO DIA - RESTAURADO POSIÇÃO ANTERIOR */}
+      {/* 3. CUPONS DO DIA */}
       <CouponCarousel onNavigate={onNavigate} />
 
       {/* 4. CARROSSEL PRINCIPAL */}
