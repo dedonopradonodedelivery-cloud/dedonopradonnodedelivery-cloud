@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   User as UserIcon, 
   ChevronRight, 
@@ -8,18 +8,13 @@ import {
   Heart, 
   HelpCircle, 
   LogOut, 
-  Loader2, 
   Info, 
   MessageSquare, 
-  Tag, 
   Bookmark, 
   Ticket, 
   Package, 
   Star, 
-  MapPin, 
   ShieldCheck, 
-  Moon, 
-  CheckCircle2, 
   Crown,
   ArrowRight,
   Lightbulb,
@@ -28,11 +23,11 @@ import {
   Lock
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { User } from '@supabase/supabase-js';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { MasterSponsorBadge } from './MasterSponsorBadge';
 
 interface MenuViewProps {
-  user: User | null;
+  user: any;
   userRole: 'cliente' | 'lojista' | null;
   onAuthClick: () => void;
   onNavigate: (view: string, data?: any) => void;
@@ -120,7 +115,10 @@ export const MenuView: React.FC<MenuViewProps> = ({
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
         <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Menu</h2>
-          {onBack && (<button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500"><X className="w-5 h-5" /></button>)}
+          <div className="flex items-center gap-2">
+            <MasterSponsorBadge />
+            {onBack && (<button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500"><X className="w-5 h-5" /></button>)}
+          </div>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-sm border border-gray-100 transform -rotate-6"><UserIcon className="w-10 h-10 text-[#1E5BFF]" /></div>
@@ -134,15 +132,15 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 pb-32 animate-in fade-in duration-300">
-      {/* Header Fixo */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
         <div><h2 className="text-2xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter">Menu</h2></div>
-        {onBack && (<button onClick={onBack} className="p-2.5 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 active:scale-90 transition-all"><X className="w-6 h-6" /></button>)}
+        <div className="flex items-center gap-3">
+          <MasterSponsorBadge />
+          {onBack && (<button onClick={onBack} className="p-2.5 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 active:scale-90 transition-all"><X className="w-6 h-6" /></button>)}
+        </div>
       </div>
 
       <div className="px-5">
-        
-        {/* BANNER DE ONBOARDING - SÓ APARECE SE NÃO ASSISTIDO */}
         {!hasWatchedVideo && (
           <section className="mt-6">
             <div className="relative bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl border border-blue-500/30 ring-4 ring-blue-500/5">
@@ -186,10 +184,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </section>
         )}
 
-        {/* CONTEÚDO DO PAINEL */}
         <div className={`relative transition-all duration-700 ${!hasWatchedVideo ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
-          
-          {/* 1. TOPO DO MENU: Perfil */}
           <div 
             onClick={() => onNavigate('user_profile_full')} 
             className="mt-6 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-5 cursor-pointer active:scale-[0.98] mb-8 group transition-all"

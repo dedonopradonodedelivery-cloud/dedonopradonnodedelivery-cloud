@@ -5,6 +5,7 @@ import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodConte
 import { Store } from '../../types';
 import { CATEGORIES } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 interface HeaderProps {
   onNotificationClick: () => void;
@@ -14,12 +15,8 @@ interface HeaderProps {
   activeTab: string;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
-  isAdmin?: boolean;
-  viewMode?: string;
   onOpenViewSwitcher?: () => void;
-  // Propriedades adicionadas para compatibilidade com o App.tsx
-  isDarkMode?: boolean;
-  toggleTheme?: () => void;
+  viewMode?: string;
   user?: any;
   userRole?: "cliente" | "lojista" | null;
 }
@@ -60,18 +57,36 @@ export const Header: React.FC<HeaderProps> = ({
   onStoreClick,
   onOpenViewSwitcher,
   viewMode,
-  // Props desestruturadas embora o componente use useAuth internamente por padrão
-  user: userProp,
-  userRole: userRoleProp
+  user: userProp
 }) => {
   const { user: authUser } = useAuth();
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Lógica de Scroll dinâmico
+  const [scrollY, setScrollY] = useState(0);
+  
+  useEffect(() => {
+    const container = document.querySelector('.overflow-y-auto');
+    if (!container) return;
 
-  // Usa o usuário do auth context como prioridade
+    const handleScroll = () => {
+      setScrollY(container.scrollTop);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Mapeamento das animações baseado no scroll (0 a 80px)
+  const scrollLimit = 80;
+  const progress = Math.min(scrollY / scrollLimit, 1);
+  
+  const headerOpacity = 1 - progress;
+  const headerTranslateY = -progress * 40; // Sobe suavemente enquanto some
+  const searchTranslateY = -progress * 78; // Puxa a barra de busca para o topo
+
   const user = authUser || userProp;
-
-  // Regra Admin: dedonopradonodedelivery@gmail.com
   const isAdminUser = user?.email === 'dedonopradonodedelivery@gmail.com';
   
   useEffect(() => {
@@ -87,53 +102,23 @@ export const Header: React.FC<HeaderProps> = ({
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    
-    // Define saudação textual e ícone baseado no horário
     let welcome = 'Bom dia';
     let icon = '☀️';
-    
-    if (hour >= 12 && hour < 18) {
-      welcome = 'Boa tarde';
-      icon = '🌤️';
-    } else if (hour >= 18 || hour < 5) {
-      welcome = 'Boa noite';
-      icon = '🌙';
-    }
+    if (hour >= 12 && hour < 18) { welcome = 'Boa tarde'; icon = '🌤️'; }
+    else if (hour >= 18 || hour < 5) { welcome = 'Boa noite'; icon = '🌙'; }
 
     const neighborhood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
 
-    // 1. REGRA MODO VISITANTE (CRÍTICO): Sempre neutro, mesmo se logado
-    if (viewMode === 'Visitante') {
-      return { 
-        title: `${welcome}! ${icon}`, 
-        sub: neighborhood 
-      };
-    }
-
-    // 2. REGRA MODO LOJISTA: Exibe nome da loja + 👑
+    if (viewMode === 'Visitante') return { title: `${welcome}! ${icon}`, sub: neighborhood };
     if (viewMode === 'Lojista' && user) {
-      // Prioriza store_name atualizado nos metadados
       const storeName = user.user_metadata?.store_name || user.user_metadata?.full_name || user.email?.split('@')[0];
-      return { 
-        title: `${welcome}, ${storeName} 👑`, 
-        sub: neighborhood 
-      };
+      return { title: `${welcome}, ${storeName} 👑`, sub: neighborhood };
     }
-
-    // 3. REGRA MODO USUÁRIO (E OUTROS): Exibe nome do usuário + Icone de horário
     if (user) {
       const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0];
-      return { 
-        title: `${welcome}, ${name} ${icon}`, 
-        sub: neighborhood 
-      };
+      return { title: `${welcome}, ${name} ${icon}`, sub: neighborhood };
     }
-
-    // 4. FALLBACK NEUTRO: Caso não haja usuário logado
-    return { 
-      title: `${welcome}! ${icon}`, 
-      sub: neighborhood 
-    };
+    return { title: `${welcome}! ${icon}`, sub: neighborhood };
   }, [user, currentNeighborhood, viewMode]);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -148,9 +133,24 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-splash-premium rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
+        <div className="sticky top-0 z-40 w-full transition-all duration-300 ease-out">
+            {/* Background fixo do cabeçalho que encolhe */}
+            <div 
+              className="absolute inset-0 bg-splash-premium rounded-b-[2.5rem] shadow-lg shadow-black/10"
+              style={{ height: `${Math.max(100, 185 - scrollY)}px`, transition: 'none' }}
+            />
+
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
-                <div className="flex items-center justify-between pt-10 pb-4">
+                
+                {/* 1. SEÇÃO DE SAUDAÇÃO (DESAPARECE NO SCROLL) */}
+                <div 
+                    className="flex items-center justify-between pt-10 pb-4 transition-all duration-300"
+                    style={{ 
+                      opacity: headerOpacity, 
+                      transform: `translateY(${headerTranslateY}px)`,
+                      pointerEvents: progress > 0.5 ? 'none' : 'auto'
+                    }}
+                >
                     <div className="flex flex-col items-start gap-1.5">
                         <h1 className="text-white font-black text-xl tracking-tight leading-none">
                             {greeting.title}
@@ -158,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
                         
                         <button 
                             onClick={toggleSelector} 
-                            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/15 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-[0_2px_10px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/15 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm backdrop-blur-md"
                         >
                             <MapPin size={10} className="text-blue-300 fill-current" />
                             <span>{greeting.sub}</span>
@@ -168,20 +168,12 @@ export const Header: React.FC<HeaderProps> = ({
 
                     <div className="flex items-center gap-2">
                         {isAdminUser && (
-                            <button 
-                                onClick={onOpenViewSwitcher}
-                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all active:scale-95 border border-white/10 flex items-center gap-2 shadow-sm"
-                                title="Alternar Modo de Visualização"
-                            >
+                            <button onClick={onOpenViewSwitcher} className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all active:scale-95 border border-white/10 flex items-center gap-2 shadow-sm">
                                 <ShieldAlert size={18} className="text-amber-400" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">{viewMode || 'ADM'}</span>
                             </button>
                         )}
-                        
-                        <button 
-                            onClick={onNotificationClick}
-                            className="relative p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90 border border-white/10"
-                        >
+                        <button onClick={onNotificationClick} className="relative p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90 border border-white/10">
                             <Bell size={22} />
                             {unreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg">
@@ -192,7 +184,11 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                <div className="relative group mt-2">
+                {/* 2. BARRA DE BUSCA (FLUTUA PARA O TOPO) */}
+                <div 
+                  className="relative group mt-2 transition-transform duration-300 ease-out"
+                  style={{ transform: `translateY(${searchTranslateY}px)` }}
+                >
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
                         <Search className="h-4 w-4 text-white/60" />
                     </div>
@@ -201,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
                       placeholder={`O que busca em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}?`} 
-                      className="block w-full pl-11 pr-12 bg-white/15 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 py-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-all" 
+                      className={`block w-full pl-11 pr-12 bg-white/15 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 py-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-md transition-all ${progress > 0.8 ? 'bg-white/20 shadow-xl' : ''}`} 
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {searchTerm ? (

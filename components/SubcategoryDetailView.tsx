@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Star, BadgeCheck, ChevronRight, Store as StoreIcon, AlertCircle, ArrowRight, Filter } from 'lucide-react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, ArrowRight, Filter, AlertCircle } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { supabase } from '../lib/supabaseClient';
+import { MasterSponsorBadge } from './MasterSponsorBadge';
 
 interface SubcategoryDetailViewProps {
   subcategoryName: string;
@@ -16,7 +16,7 @@ interface SubcategoryDetailViewProps {
   onNavigate: (view: string) => void;
 }
 
-const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolean }> = ({ store, onClick, isMaster }) => {
+const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
   
   return (
@@ -44,9 +44,7 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolea
   );
 };
 
-// Gerador de Banner Fake Realista baseado no nome da subcategoria
 const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => {
-    // Seed simples baseado no tamanho da string para consistência
     const seed = subcategory.length + neighborhood.length;
     
     const backgrounds = [
@@ -54,19 +52,18 @@ const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => 
     ];
     
     const images = [
-        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', // Business
-        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800', // Restaurant
-        'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800', // Salon
-        'https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800', // Gym
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Shop
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800', // Home
+        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800',
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800',
+        'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800',
+        'https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800',
+        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800',
+        'https://images.unsplash.com/photo-1600585152220-029e859e156b?q=80&w=800',
     ];
 
     const ctas = [
         'Conhecer Agora', 'Ver Ofertas', 'Agendar Visita', 'Pedir Orçamento', 'Saiba Mais'
     ];
     
-    // Seleção determinística
     const bg = backgrounds[seed % backgrounds.length];
     const img = images[seed % images.length];
     const cta = ctas[seed % ctas.length];
@@ -81,11 +78,10 @@ const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => 
     };
 };
 
-export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ subcategoryName, categoryName, onBack, onStoreClick, stores, userRole, onNavigate }) => {
+export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ subcategoryName, categoryName, onBack, onStoreClick, stores, onNavigate }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [activeFilter, setActiveFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
 
-  // Gerar dados do banner fixo
   const bannerData = useMemo(() => {
       const hood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
       return getSubcategoryBannerData(subcategoryName, hood);
@@ -93,9 +89,6 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
 
   const pool = useMemo(() => {
     let list = stores.filter(s => s.subcategory === subcategoryName);
-    
-    // Se "Jacarepaguá (todos)", mostra tudo da subcategoria.
-    // Se for bairro específico, filtra.
     if (currentNeighborhood !== "Jacarepaguá (todos)") {
       list = list.filter(s => s.neighborhood === currentNeighborhood);
     }
@@ -113,9 +106,7 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
     return [...sponsored, ...organic];
   }, [pool, activeFilter]);
 
-  // Handler para clicar no banner (leva para uma loja fake de exemplo ou real se houver)
   const handleBannerClick = () => {
-      // Tenta achar uma loja real compatível para simular clique no banner
       const targetStore = pool[0] || {
           id: `banner-${subcategoryName}`,
           name: bannerData.storeName,
@@ -135,21 +126,22 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 animate-in slide-in-from-right duration-300">
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <div>
-          <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">{subcategoryName}</h1>
-          <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">
-             {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-          </p>
+      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" strokeWidth={3} />
+          </button>
+          <div>
+            <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">{subcategoryName}</h1>
+            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">
+               {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
+            </p>
+          </div>
         </div>
+        <MasterSponsorBadge />
       </div>
 
       <div className="p-5 space-y-8">
-        
-        {/* BANNER FIXO DA SUBCATEGORIA - ESTILO HOME (16/12 ou 16/10) */}
         <div 
             onClick={handleBannerClick}
             className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${bannerData.bgColor} shadow-xl shadow-black/10`}
@@ -182,7 +174,6 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
             </div>
         </div>
 
-        {/* FILTROS */}
         <section>
             <div className="flex items-center gap-2 mb-4 px-1">
                 <Filter size={14} className="text-gray-400" />
@@ -210,7 +201,6 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
             </div>
         </section>
 
-        {/* LISTA DE LOJAS */}
         <section>
             <div className="flex flex-col gap-3">
                 {filteredList.map(store => (

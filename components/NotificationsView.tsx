@@ -2,32 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
-  Bell, 
   MessageSquare, 
   Tag, 
-  Coins, 
   Sparkles, 
-  X, 
-  CheckCircle2, 
-  Zap,
-  ArrowRight,
+  CreditCard, 
+  Megaphone, 
+  Paintbrush,
+  Clock,
+  Bell,
   Loader2,
   Info,
-  CreditCard,
-  Megaphone,
-  Paintbrush,
-  // FIX: Imported the missing Clock icon from lucide-react.
-  Clock
+  ArrowRight
 } from 'lucide-react';
 import { AppNotification } from '../types';
+import { MasterSponsorBadge } from './MasterSponsorBadge';
 
 interface NotificationsViewProps {
   onBack: () => void;
   onNavigate: (view: string, data?: any) => void;
-  userRole: 'cliente' | 'lojista' | 'admin' | null;
+  userRole: 'cliente' | 'lojista' | null;
 }
 
-// MOCK INICIAL COM OS TIPOS SOLICITADOS
 const INITIAL_MOCK_NOTIFS: AppNotification[] = [
   {
     id: 'notif-1',
@@ -102,20 +97,17 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onBack, on
   const handleNotifClick = (notif: AppNotification) => {
     markAsRead(notif.id);
 
-    // LÓGICA DE NAVEGAÇÃO POR TIPO
     switch (notif.type) {
       case 'chat':
         onNavigate('service_chat', { requestId: notif.referenceId });
         break;
       case 'design':
-        // No contexto do design PRO, usamos o mesmo chat de serviço
         onNavigate('service_chat', { requestId: notif.referenceId });
         break;
       case 'coupon':
         onNavigate('user_coupons');
         break;
       case 'payment':
-        // Direciona para o financeiro do lojista ou histórico do cliente
         onNavigate(userRole === 'lojista' ? 'store_finance' : 'user_coupons');
         break;
       case 'ad':
@@ -159,13 +151,16 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ onBack, on
       <header className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+            <ChevronLeft size={20} strokeWidth={3} className="text-gray-800 dark:text-white" />
           </button>
           <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Notificações</h1>
         </div>
-        {notifications.length > 0 && (
-          <button onClick={clearAll} className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500">Limpar</button>
-        )}
+        <div className="flex items-center gap-3">
+          <MasterSponsorBadge />
+          {notifications.length > 0 && (
+            <button onClick={clearAll} className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500">Limpar</button>
+          )}
+        </div>
       </header>
 
       <main className="flex-1 p-5 space-y-4 overflow-y-auto no-scrollbar pb-32">

@@ -13,6 +13,7 @@ import {
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { Store } from '../types';
 import { STORES } from '../constants';
+import { MasterSponsorBadge } from './MasterSponsorBadge';
 
 interface HealthSpecialtyDetailViewProps {
   specialtyName: string;
@@ -20,7 +21,6 @@ interface HealthSpecialtyDetailViewProps {
   onSelectStore: (store: Store) => void;
 }
 
-// Mock de Destaques Reduzidos em 30% no layout
 const MOCK_HIGHLIGHTS = [
     {
         id: 'h1',
@@ -48,7 +48,6 @@ const MOCK_HIGHLIGHTS = [
     }
 ];
 
-// Mock da Lista Geral (Fake)
 const MOCK_PROFESSIONALS = [
     { id: 'p1', name: 'Dra. Beatriz Soares', specialty: 'Ginecologia e Obstetrícia', location: 'Freguesia', rating: 4.9, image: 'https://i.pravatar.cc/150?u=beatriz' },
     { id: 'p2', name: 'Dr. Marcos Paulo', specialty: 'Ginecologia Endócrina', location: 'Taquara', rating: 4.8, image: 'https://i.pravatar.cc/150?u=marcos' },
@@ -66,20 +65,21 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
       
-      {/* 1. Header Fixo */}
-      <header className="px-5 pt-12 pb-4 flex items-center gap-4 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-900">
-        <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
-          <ChevronLeft size={20} strokeWidth={3} />
-        </button>
-        <div>
-          <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{specialtyName}</h1>
-          <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Especialistas em {currentNeighborhood}</p>
+      {/* 1. Header Fixo com Selo Premium */}
+      <header className="px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-900">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
+            <ChevronLeft size={20} strokeWidth={3} />
+          </button>
+          <div>
+            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{specialtyName}</h1>
+            <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Especialistas em {currentNeighborhood}</p>
+          </div>
         </div>
+        <MasterSponsorBadge />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
-        
-        {/* 2. Banner Imersivo (Aumentado em 30%) */}
         <section className="px-5 pt-6">
             <div className="relative w-full aspect-[16/10] rounded-[2.5rem] overflow-hidden bg-blue-600 shadow-2xl">
                 <img 
@@ -99,7 +99,6 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
             </div>
         </section>
 
-        {/* 3. Destaques Compactos (Reduzidos em 30%) */}
         <section className="pt-10 px-5">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
@@ -130,7 +129,6 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
             </div>
         </section>
 
-        {/* 4. Lista Geral Clean (Abaixo dos destaques) */}
         <section className="pt-10 px-5 space-y-4">
             <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">
                 <Stethoscope size={16} className="text-gray-400" />
@@ -143,12 +141,10 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
                         key={doc.id}
                         className="bg-white dark:bg-gray-900 p-4 rounded-[1.8rem] border border-gray-100 dark:border-gray-800 flex items-center gap-4 transition-all active:scale-[0.98] cursor-pointer group shadow-sm hover:shadow-md"
                     >
-                        {/* Foto à esquerda */}
                         <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700 shadow-inner">
                             <img src={doc.image} className="w-full h-full object-cover" alt={doc.name} />
                         </div>
 
-                        {/* Info Central */}
                         <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start">
                                 <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{doc.name}</h4>
@@ -164,16 +160,11 @@ export const HealthSpecialtyDetailView: React.FC<HealthSpecialtyDetailViewProps>
                             </div>
                         </div>
 
-                        {/* Indicador de Ação */}
                         <div className="p-2 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-200 group-hover:text-[#1E5BFF] transition-colors">
                             <ChevronRight size={18} strokeWidth={3} />
                         </div>
                     </div>
                 ))}
-            </div>
-
-            <div className="py-10 text-center opacity-30">
-                <p className="text-[8px] font-black uppercase tracking-[0.4em]">Localizei JPA • Rede de Cuidado</p>
             </div>
         </section>
 
