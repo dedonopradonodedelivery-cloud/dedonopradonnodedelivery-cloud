@@ -47,14 +47,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
       return (
         <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all duration-200 border-2 ${
           isActive 
-            ? 'border-white shadow-lg scale-110' 
-            : 'border-white/20'
+            ? 'border-[#1E5BFF] shadow-md scale-110' 
+            : 'border-gray-200 dark:border-gray-700'
         }`}>
           {photoUrl ? (
             <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className={`w-full h-full flex items-center justify-center text-[10px] font-black ${
-              isActive ? 'bg-white text-[#1E5BFF]' : 'bg-white/20 text-white/80'
+              isActive ? 'bg-[#1E5BFF] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
             }`}>
               {userInitial}
             </div>
@@ -67,14 +67,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     const iconSize = item.isMainAction ? 26 : 22;
     
     return (
-      <div className={`relative flex items-center justify-center w-full h-full transition-all duration-300 ${isActive ? 'opacity-100 scale-110' : 'opacity-70'}`}>
+      <div className={`relative flex items-center justify-center w-full h-full transition-all duration-300 ${isActive ? 'scale-110' : ''}`}>
          <Icon 
           size={iconSize}
-          className={`text-white ${isActive ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]' : ''}`} 
+          className={`${isActive ? 'text-[#1E5BFF]' : 'text-gray-400 dark:text-gray-500'}`} 
           strokeWidth={isActive ? 2.5 : 2} 
         />
         {item.badge && (
-             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1E5BFF] animate-pulse"></span>
+             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></span>
         )}
       </div>
     );
@@ -82,7 +82,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-[#1E5BFF] z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(0,0,0,0.2)] border-t border-white/10 px-2 transition-colors duration-500">
+      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-[1000] h-[90px] rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-gray-100/50 dark:border-white/5 px-2 transition-all duration-500">
         <div className="grid w-full h-full grid-cols-4 items-center">
           {navItems.map((item) => {
             let isActive = false;
@@ -102,10 +102,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                   <div className={`
                     flex items-center justify-center transition-all duration-300 relative
                     ${item.isMainAction 
-                      ? `h-16 w-16 rounded-full border-[3px] -translate-y-8 mb-[-32px] shadow-2xl ${
+                      ? `h-16 w-16 rounded-full border-[3px] -translate-y-8 mb-[-32px] shadow-xl ${
                           isActive 
-                            ? 'bg-blue-700 border-white scale-110' 
-                            : 'bg-[#1E5BFF] border-white/30'
+                            ? 'bg-white dark:bg-gray-900 border-[#1E5BFF] scale-110' 
+                            : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'
                         }`
                       : 'h-8 w-8 mb-1'
                     }
@@ -115,8 +115,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
                   
                   <span className={`text-[8px] font-black uppercase tracking-tighter transition-all leading-none text-center px-0.5 mt-1.5 ${
                     isActive 
-                      ? 'text-white opacity-100 scale-105' 
-                      : 'text-white opacity-70'
+                      ? 'text-[#1E5BFF] opacity-100 scale-105' 
+                      : 'text-gray-400 dark:text-gray-500 opacity-70'
                   } ${item.isMainAction ? 'mt-3' : ''}`}>
                     {item.label}
                   </span>

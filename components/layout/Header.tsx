@@ -27,7 +27,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
     if (!isSelectorOpen) return null;
     return (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-900 w-full max-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2 text-center">Escolha seu Bairro</h3>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
@@ -135,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[3rem] shadow-lg">
+        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-lg">
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
                 {/* Linha Superior */}
                 <div className="flex items-center justify-between pt-10 pb-4">
