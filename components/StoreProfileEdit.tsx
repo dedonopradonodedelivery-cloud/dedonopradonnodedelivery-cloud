@@ -54,8 +54,6 @@ const WEEK_DAYS = [
   { key: 'domingo', label: 'Domingo' },
 ];
 
-const TAX_REGIMES = ['Simples Nacional', 'MEI', 'Lucro Presumido', 'Lucro Real', 'Pessoa Física'];
-
 // --- Componente Auxiliar de Input ---
 const FormField: React.FC<{
   label: string;
@@ -67,23 +65,28 @@ const FormField: React.FC<{
   helperText?: string;
   icon?: React.ElementType;
   disabled?: boolean;
-}> = ({ label, value, onChange, placeholder, type = "text", required, helperText, icon: Icon, disabled }) => (
+  error?: string;
+}> = ({ label, value, onChange, placeholder, type = "text", required, helperText, icon: Icon, disabled, error }) => (
   <div className="space-y-1.5">
     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative group">
-      {Icon && <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1E5BFF]" />}
+      {Icon && <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${error ? 'text-red-400' : 'text-gray-400 group-focus-within:text-[#1E5BFF]'}`} />}
       <input 
         type={type}
         value={value}
         disabled={disabled}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5 transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full bg-gray-50 dark:bg-gray-900 border rounded-2xl p-4 text-sm font-bold dark:text-white outline-none transition-all ${Icon ? 'pl-11' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${error ? 'border-red-500 focus:ring-red-500/10' : 'border-gray-100 dark:border-gray-800 focus:border-[#1E5BFF] focus:ring-4 focus:ring-blue-500/5'}`}
       />
     </div>
-    {helperText && <p className="text-[9px] text-gray-400 italic ml-1 leading-none">{helperText}</p>}
+    {error ? (
+        <p className="text-[10px] text-red-500 font-bold ml-1 animate-in slide-in-from-top-1">{error}</p>
+    ) : helperText ? (
+        <p className="text-[9px] text-gray-400 italic ml-1 leading-none">{helperText}</p>
+    ) : null}
   </div>
 );
 
@@ -169,7 +172,6 @@ const TaxonomyField: React.FC<TaxonomyFieldProps> = ({ label, placeholder, optio
   );
 };
 
-// --- COMPONENTE DE TAGS (Refatorado) ---
 const TagSelector: React.FC<{
   selectedTags: string[];
   onChange: (tags: string[]) => void;
@@ -178,7 +180,6 @@ const TagSelector: React.FC<{
   const [showSuggestions, setShowSuggestions] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Normalização para comparação (remove acentos, espaços extras e vira lowercase)
   const normalize = (str: string) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, ' ');
 
   const availableTags = ALL_TAGS.filter(tag => 
@@ -189,7 +190,6 @@ const TagSelector: React.FC<{
   const normalizedInput = useMemo(() => normalize(input), [input]);
   const isValidNewTag = normalizedInput.length >= 2 && normalizedInput.length <= 30;
   
-  // Verifica se o input atual já existe nas sugestões filtradas ou nas selecionadas
   const hasExactMatch = useMemo(() => {
     return availableTags.some(t => normalize(t) === normalizedInput) || 
            selectedTags.some(t => normalize(t) === normalizedInput);
@@ -197,13 +197,10 @@ const TagSelector: React.FC<{
 
   const handleAddTag = (tag: string) => {
     if (selectedTags.length >= 15) return;
-    const finalTag = tag.trim().replace(/\s+/g, ' '); // Preserva o case original digitado, mas limpa espaços
-    
-    // Evita duplicados reais antes de adicionar
+    const finalTag = tag.trim().replace(/\s+/g, ' '); 
     if (!selectedTags.some(st => normalize(st) === normalize(finalTag))) {
         onChange([...selectedTags, finalTag]);
     }
-    
     setInput('');
     setShowSuggestions(false);
   };
@@ -258,8 +255,6 @@ const TagSelector: React.FC<{
         
         {showSuggestions && (input.length > 0) && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl z-50 max-h-64 overflow-y-auto no-scrollbar py-2">
-            
-            {/* Opção Adicionar Novo (Caso não tenha match exato) */}
             {isValidNewTag && !hasExactMatch && selectedTags.length < 15 && (
                 <button
                   type="button"
@@ -276,7 +271,6 @@ const TagSelector: React.FC<{
                 </button>
             )}
 
-            {/* Sugestões da Base */}
             {availableTags.map(tag => (
               <button
                 key={tag}
@@ -290,223 +284,58 @@ const TagSelector: React.FC<{
                 {tag}
               </button>
             ))}
-
-            {availableTags.length === 0 && !isValidNewTag && !hasExactMatch && (
-                <div className="px-4 py-6 text-center opacity-40">
-                    <p className="text-xs font-bold uppercase">Nenhum resultado</p>
-                </div>
-            )}
           </div>
         )}
       </div>
-      <p className="text-[9px] text-gray-400 font-bold uppercase ml-1 tracking-widest">
-        {selectedTags.length}/15 Tags. Use termos como "pizzaria", "tênis", "oficina".
-      </p>
     </div>
   );
-};
-
-// --- MODAL DE CRIAÇÃO DE TAXONOMIA ---
-const CreateTaxonomyModal: React.FC<{
-    isOpen: boolean;
-    onClose: () => void;
-    type: 'category' | 'subcategory';
-    parentName?: string;
-    storeName: string;
-    onSuccess: () => void;
-    userId: string;
-}> = ({ isOpen, onClose, type, parentName, storeName, onSuccess, userId }) => {
-    const [name, setName] = useState('');
-    const [justification, setJustification] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    if (!isOpen) return null;
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!name.trim()) return;
-        setIsSubmitting(true);
-
-        try {
-            const saved = localStorage.getItem('taxonomy_suggestions') || '[]';
-            const suggestions: TaxonomySuggestion[] = JSON.parse(saved);
-            const exists = suggestions.find(s => s.type === type && s.name.toLowerCase() === name.toLowerCase());
-
-            if (exists) {
-                alert('Já existe uma solicitação para este nome.');
-                setIsSubmitting(false);
-                return;
-            }
-
-            const newSuggestion: TaxonomySuggestion = {
-                id: `sug-${Date.now()}`,
-                type,
-                name: name.trim(),
-                parentName,
-                justification,
-                status: 'pending',
-                storeName,
-                merchantId: userId,
-                createdAt: new Date().toISOString()
-            };
-
-            localStorage.setItem('taxonomy_suggestions', JSON.stringify([...suggestions, newSuggestion]));
-            onSuccess();
-            onClose();
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-black text-lg text-gray-900 dark:text-white">Nova {type === 'category' ? 'Categoria' : 'Subcategoria'}</h3>
-                    <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
-                </div>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {type === 'subcategory' && (
-                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Categoria Pai</p>
-                             <p className="font-bold text-gray-900 dark:text-white">{parentName}</p>
-                        </div>
-                    )}
-                    <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nome sugerido</label>
-                        <input value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 font-medium dark:text-white" placeholder={`Ex: ${type === 'category' ? 'Automóveis' : 'Pneus'}`} autoFocus />
-                    </div>
-                    <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Descrição curta (Opcional)</label>
-                        <textarea value={justification} onChange={e => setJustification(e.target.value)} rows={3} className="w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 outline-none mt-1 text-sm dark:text-white resize-none" placeholder="Breve descrição..." />
-                    </div>
-                    <button type="submit" disabled={isSubmitting || !name} className="w-full bg-[#1E5BFF] text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : 'Enviar para aprovação'}
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
 };
 
 export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
-  // Estados de criação de taxonomia
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createType, setCreateType] = useState<'category' | 'subcategory'>('category');
-  const [pendingTaxonomyMsg, setPendingTaxonomyMsg] = useState<string | null>(null);
-
-  // Combinação de constantes e aprovados
   const [availableCategories, setAvailableCategories] = useState(CATEGORIES.map(c => ({ name: c.name })));
   const [availableSubcategories, setAvailableSubcategories] = useState<any[]>([]);
   
   const logoInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    // --- DADOS PÚBLICOS ---
     nome_exibido: '',
     category: '',
     subcategory: '',
     bairro: '',
     description: '',
     whatsapp_publico: '',
-    telefone_fixo_publico: '',
-    instagram: '',
-    email_publico: '',
     logo_url: '',
     banner_url: '',
-    gallery: [] as string[],
     tags: [] as string[],
-
-    // --- ENDEREÇO UNIDADE ---
-    cep: '',
-    rua: '',
-    numero: '',
-    complemento: '',
-    cidade: 'Rio de Janeiro',
-    estado: 'RJ',
-    is_delivery_only: false,
-    
-    // --- CONFIGURAÇÕES ADICIONAIS ---
     accepts_online_orders: false,
     min_order_value: '',
-
-    // --- HORÁRIOS ---
-    business_hours: WEEK_DAYS.reduce((acc, day) => ({ 
-      ...acc, 
-      [day.key]: { open: true, start: '09:00', end: '18:00' } 
-    }), {} as Record<string, BusinessHour>),
-    hours_observations: '',
-
-    // --- DADOS FISCAIS ---
-    razao_social: '',
-    nome_fantasia_fiscal: '',
-    cnpj: '',
-    inscricao_estadual: '',
-    inscricao_municipal: '',
-    tax_regime: 'Simples Nacional',
-    fiscal_address: '',
-    billing_email: '',
-    legal_representative: '',
-    legal_rep_cpf: '',
-
-    // --- ADMINISTRATIVO ---
-    is_active: true,
-    account_type: 'Grátis',
-    registration_date: new Date().toLocaleDateString('pt-BR'),
   });
 
-  // Carregar taxonomias aprovadas do localStorage e verificar se há pendentes
   useEffect(() => {
     const loadTaxonomies = () => {
         const savedApproved = localStorage.getItem('approved_taxonomy');
         if (savedApproved) {
             const approved = JSON.parse(savedApproved);
-            // Mesclar categorias
             const extraCats = approved.filter((a: any) => a.type === 'category').map((a: any) => ({ name: a.name }));
             setAvailableCategories([...CATEGORIES.map(c => ({ name: c.name })), ...extraCats]);
         }
-
-        // Verificar sugestões pendentes do usuário atual
-        if (user) {
-            const savedSuggestions = localStorage.getItem('taxonomy_suggestions');
-            if (savedSuggestions) {
-                const suggestions: TaxonomySuggestion[] = JSON.parse(savedSuggestions);
-                const myPending = suggestions.filter(s => s.merchantId === user.id && s.status === 'pending');
-                if (myPending.length > 0) {
-                    setPendingTaxonomyMsg(`Você tem ${myPending.length} sugestão(ões) de categoria aguardando aprovação.`);
-                }
-            }
-        }
     };
     loadTaxonomies();
-    window.addEventListener('storage', loadTaxonomies);
-    return () => window.removeEventListener('storage', loadTaxonomies);
-  }, [user]);
+  }, []);
 
-  // Atualizar subcategorias ao mudar categoria
   useEffect(() => {
     if (!formData.category) {
         setAvailableSubcategories([]);
         return;
     }
     const constSubs = SUBCATEGORIES[formData.category] || [];
-    const saved = localStorage.getItem('approved_taxonomy');
-    let extraSubs: any[] = [];
-    if (saved) {
-        const approved = JSON.parse(saved);
-        extraSubs = approved
-            .filter((a: any) => a.type === 'subcategory' && a.parentName === formData.category)
-            .map((a: any) => ({ name: a.name }));
-    }
-    setAvailableSubcategories([...constSubs, ...extraSubs]);
+    setAvailableSubcategories(constSubs);
   }, [formData.category]);
 
   useEffect(() => {
@@ -518,9 +347,6 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
           setFormData(prev => ({
             ...prev,
             ...data,
-            business_hours: data.business_hours || prev.business_hours,
-            accepts_online_orders: data.accepts_online_orders ?? false,
-            min_order_value: data.min_order_value ? String(data.min_order_value) : '',
             tags: data.tags || []
           }));
         }
@@ -530,37 +356,44 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   }, [user]);
 
   const handleSave = async () => {
-    // Validar campos obrigatórios
-    if (!formData.nome_exibido) { alert('Informe o nome da loja.'); return; }
-    if (!formData.description) { alert('Informe uma descrição curta.'); return; }
-    if (!formData.whatsapp_publico) { alert('Informe o telefone/WhatsApp.'); return; }
-    if (!formData.bairro) { alert('Informe o endereço/bairro.'); return; }
-    if (!formData.category) { alert('Selecione uma categoria.'); return; }
-    if (!formData.subcategory) { alert('Selecione uma subcategoria.'); return; }
-    if (!formData.tags || formData.tags.length === 0) { alert('Adicione pelo menos uma tag de produto ou serviço.'); return; }
+    setErrors({});
+    
+    // REGRA DE VALIDAÇÃO: Apenas Nome da Loja é obrigatório
+    if (!formData.nome_exibido.trim()) {
+      setErrors({ nome_exibido: 'O nome da loja é obrigatório para identificação no bairro.' });
+      const el = document.getElementById('nome_exibido_field');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     setIsSaving(true);
     try {
-      const { error } = await supabase.from('merchants').upsert({
+      // 1. Salvar na tabela de merchants
+      const { error: dbError } = await supabase.from('merchants').upsert({
         owner_id: user?.id,
         ...formData,
         min_order_value: formData.min_order_value ? parseFloat(formData.min_order_value) : null,
         updated_at: new Date().toISOString()
       }, { onConflict: 'owner_id' });
       
-      if (error) throw error;
+      if (dbError) throw dbError;
       
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      // 2. Sincronizar com os metadados de autenticação para atualizar o Header instantaneamente
+      await supabase.auth.updateUser({
+          data: { store_name: formData.nome_exibido.trim() }
+      });
+      
+      // 3. Feedback visual moderno
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
     } catch (err) { 
       console.error(err);
-      alert('Erro ao salvar alterações.'); 
     } finally { 
       setIsSaving(false); 
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo_url' | 'banner_url') => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo_url') => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -568,31 +401,37 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     reader.readAsDataURL(file);
   };
 
-  const handleCreateTaxonomy = (type: 'category' | 'subcategory') => {
-      setCreateType(type);
-      setShowCreateModal(true);
-  };
-
-  const onSuggestionSuccess = () => {
-      setPendingTaxonomyMsg("Sua sugestão foi enviada e está aguardando aprovação.");
-      setTimeout(() => setPendingTaxonomyMsg(null), 5000);
-  };
-
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950"><Loader2 className="animate-spin text-[#1E5BFF]" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300 relative">
       
+      {/* TOAST DE SUCESSO MODERNO */}
+      {showSuccessToast && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[3000] animate-in slide-in-from-top-4 duration-500">
+            <div className="bg-gray-900 text-white px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 backdrop-blur-md">
+                <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                    <Check size={14} className="text-white" strokeWidth={4} />
+                </div>
+                <span className="text-sm font-bold tracking-tight">Loja atualizada com sucesso</span>
+            </div>
+        </div>
+      )}
+
       {/* HEADER */}
       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
+        <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
         <div className="flex-1">
           <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Configurar Loja</h1>
           <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mt-0.5">Gestão do Perfil</p>
         </div>
-        <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl shadow-blue-500/20 active:scale-90 transition-all">
+        <button 
+            onClick={handleSave} 
+            disabled={isSaving} 
+            className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl shadow-blue-500/20 active:scale-90 transition-all flex items-center justify-center min-w-[50px]"
+        >
           {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
         </button>
       </div>
@@ -600,68 +439,55 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
         {/* BLOCO 1: INFORMAÇÕES DA LOJA */}
-        <section className="space-y-6">
+        <section className="space-y-6" id="nome_exibido_field">
           <div className="flex items-center gap-2 px-1">
             <StoreIcon size={16} className="text-[#1E5BFF]" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja</h2>
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Identificação</h2>
           </div>
 
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
                 <div className="relative group">
-                    <div className="w-28 h-28 rounded-[2rem] bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                    <div className="w-28 h-28 rounded-[2rem] bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden transition-colors hover:border-blue-300">
                         {formData.logo_url ? <img src={formData.logo_url} className="w-full h-full object-contain p-2" /> : <StoreIcon className="text-gray-300" size={32} />}
                     </div>
-                    <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900"><Pencil size={16} /></button>
+                    <button onClick={() => logoInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-[#1E5BFF] text-white p-2.5 rounded-xl shadow-lg border-2 border-white dark:border-gray-900 active:scale-90 transition-transform"><Pencil size={16} /></button>
                 </div>
-                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo</p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase mt-4">Logotipo da Empresa</p>
              </div>
 
-             <FormField label="Nome da Loja *" value={formData.nome_exibido} onChange={v => setFormData({...formData, nome_exibido: v})} required placeholder="Ex: Padaria Central" />
+             <FormField 
+                label="Nome da Loja *" 
+                value={formData.nome_exibido} 
+                onChange={v => setFormData({...formData, nome_exibido: v})} 
+                required 
+                placeholder="Ex: Padaria do Zé" 
+                error={errors.nome_exibido}
+             />
              
              <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Curta *</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição Curta (Opcional)</label>
                 <textarea 
                     value={formData.description} 
                     onChange={e => setFormData({...formData, description: e.target.value})} 
-                    placeholder="Conte um pouco sobre sua loja..."
+                    placeholder="Conte um pouco sobre o que sua loja oferece..."
                     className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all resize-none min-h-[100px]"
                 />
              </div>
 
-             <FormField label="Telefone / WhatsApp *" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} placeholder="(21) 99999-0000" />
-             
-             <div className="space-y-1.5">
-                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Endereço *</label>
-                 <div className="space-y-3">
-                     <input value={formData.cep} onChange={e => setFormData({...formData, cep: e.target.value})} placeholder="CEP" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
-                     <div className="grid grid-cols-4 gap-3">
-                        <input value={formData.rua} onChange={e => setFormData({...formData, rua: e.target.value})} placeholder="Rua" className="col-span-3 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
-                        <input value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} placeholder="Nº" className="col-span-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
-                     </div>
-                     <input value={formData.bairro} onChange={e => setFormData({...formData, bairro: e.target.value})} placeholder="Bairro" className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none" />
-                 </div>
-             </div>
+             <FormField label="WhatsApp Público" value={formData.whatsapp_publico} onChange={v => setFormData({...formData, whatsapp_publico: v})} icon={Smartphone} placeholder="(21) 99999-0000" />
           </div>
         </section>
 
-        {/* BLOCO 2: RAMO DO NEGÓCIO */}
+        {/* BLOCO 2: CATEGORIAS */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <ShoppingBag size={16} className="text-blue-500" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Ramo do Negócio</h2>
+            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Segmento</h2>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-             
-             {pendingTaxonomyMsg && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/30 flex items-start gap-3">
-                    <Clock size={16} className="text-amber-600 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-700 dark:text-amber-300 font-bold leading-relaxed">{pendingTaxonomyMsg}</p>
-                </div>
-             )}
-
              <TaxonomyField 
-                label="Categoria Principal *" 
+                label="Categoria" 
                 placeholder="Selecione..." 
                 options={availableCategories} 
                 selected={formData.category} 
@@ -669,7 +495,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              />
              
              <TaxonomyField 
-                label="Subcategoria *" 
+                label="Subcategoria" 
                 placeholder="Selecione..." 
                 options={availableSubcategories} 
                 selected={formData.subcategory} 
@@ -677,76 +503,26 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
                 disabled={!formData.category}
              />
 
-             <button 
-                onClick={() => handleCreateTaxonomy(formData.category ? 'subcategory' : 'category')}
-                className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs uppercase tracking-widest hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-2"
-             >
-                <PlusCircle size={16} /> Não encontrou? Sugerir nova categoria
-             </button>
-          </div>
-        </section>
-
-        {/* BLOCO 3: PRODUTOS E TAGS (Separado conforme solicitado) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1">
-            <Tag size={16} className="text-emerald-500" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Produtos e Serviços</h2>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-             {/* TAGS SELECTOR (Fluxo Inline com Adicionar Tag) */}
              <TagSelector 
                 selectedTags={formData.tags || []} 
                 onChange={(tags) => setFormData({...formData, tags})} 
              />
-
-             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 cursor-pointer">
-                 <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Aceita Pedidos Online?</span>
-                 <div className={`w-12 h-6 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${formData.accepts_online_orders ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                 </div>
-             </div>
-
-             <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Valor de Pedido Mínimo</label>
-                <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
-                    <input 
-                        type="number"
-                        value={formData.min_order_value}
-                        onChange={e => setFormData({...formData, min_order_value: e.target.value})}
-                        placeholder="0,00"
-                        className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 pl-10 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
-                    />
-                </div>
-             </div>
           </div>
         </section>
 
       </div>
 
-      {/* INPUTS OCULTOS P/ UPLOAD */}
       <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
-      <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'banner_url')} />
 
-      {/* FEEDBACK SUCESSO */}
-      {showSuccess && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
-           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-           <span className="font-black text-xs uppercase tracking-widest">Loja Atualizada!</span>
-        </div>
-      )}
-
-      {showCreateModal && user && (
-          <CreateTaxonomyModal 
-              isOpen={showCreateModal}
-              onClose={() => setShowCreateModal(false)}
-              type={createType}
-              parentName={createType === 'subcategory' ? formData.category : undefined}
-              storeName={formData.nome_exibido || 'Loja'}
-              userId={user.id}
-              onSuccess={onSuggestionSuccess}
-          />
-      )}
+      <footer className="fixed bottom-[85px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto">
+          <button 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+          >
+              {isSaving ? <Loader2 className="animate-spin" size={18} /> : <><Save size={18} /> Salvar Alterações</>}
+          </button>
+      </footer>
     </div>
   );
 };

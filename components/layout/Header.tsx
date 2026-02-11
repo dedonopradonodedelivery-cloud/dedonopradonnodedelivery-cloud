@@ -86,9 +86,55 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    
+    // Define saudação textual e ícone baseado no horário
+    let welcome = 'Bom dia';
+    let icon = '☀️';
+    
+    if (hour >= 12 && hour < 18) {
+      welcome = 'Boa tarde';
+      icon = '🌤️';
+    } else if (hour >= 18 || hour < 5) {
+      welcome = 'Boa noite';
+      icon = '🌙';
+    }
+
     const neighborhood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
-    return neighborhood;
-  }, [currentNeighborhood]);
+
+    // 1. REGRA MODO VISITANTE (CRÍTICO): Sempre neutro, mesmo se logado
+    if (viewMode === 'Visitante') {
+      return { 
+        title: `${welcome}! ${icon}`, 
+        sub: neighborhood 
+      };
+    }
+
+    // 2. REGRA MODO LOJISTA: Exibe nome da loja + 👑
+    if (viewMode === 'Lojista' && user) {
+      // Prioriza store_name atualizado nos metadados
+      const storeName = user.user_metadata?.store_name || user.user_metadata?.full_name || user.email?.split('@')[0];
+      return { 
+        title: `${welcome}, ${storeName} 👑`, 
+        sub: neighborhood 
+      };
+    }
+
+    // 3. REGRA MODO USUÁRIO (E OUTROS): Exibe nome do usuário + Icone de horário
+    if (user) {
+      const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0];
+      return { 
+        title: `${welcome}, ${name} ${icon}`, 
+        sub: neighborhood 
+      };
+    }
+
+    // 4. FALLBACK NEUTRO: Caso não haja usuário logado
+    return { 
+      title: `${welcome}! ${icon}`, 
+      sub: neighborhood 
+    };
+  }, [user, currentNeighborhood, viewMode]);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -102,33 +148,33 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-gradient-to-b from-[#1E5BFF] to-[#0E45CC] rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
-            <div className="w-full max-w-md mx-auto flex flex-col relative pb-7 px-5">
-                {/* Linha Superior: Logo, Seletor e Notificações */}
-                <div className="flex items-center justify-between pt-12 pb-5">
-                    <div className="flex flex-col items-start">
-                        <h1 className="text-white font-black text-xl tracking-tighter leading-none flex items-center gap-1.5">
-                            Localizei <span className="opacity-80">JPA</span>
+        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
+            <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
+                <div className="flex items-center justify-between pt-10 pb-4">
+                    <div className="flex flex-col items-start gap-1.5">
+                        <h1 className="text-white font-black text-xl tracking-tight leading-none">
+                            {greeting.title}
                         </h1>
                         
-                        {/* Seletor de Bairro Discreto */}
                         <button 
                             onClick={toggleSelector} 
-                            className="flex items-center gap-1 mt-1 group active:opacity-60 transition-all"
+                            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/15 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-[0_2px_10px_rgba(0,0,0,0.1)] backdrop-blur-md"
                         >
-                            <span className="text-white/70 text-[10px] font-bold uppercase tracking-widest">{greeting}</span>
-                            <ChevronDown size={10} className="text-white/50 group-hover:text-white transition-colors" strokeWidth={3} />
+                            <MapPin size={10} className="text-blue-300 fill-current" />
+                            <span>{greeting.sub}</span>
+                            <ChevronDown size={10} strokeWidth={3} className="opacity-50" />
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         {isAdminUser && (
                             <button 
                                 onClick={onOpenViewSwitcher}
-                                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-95 border border-white/10"
-                                title="Alternar Modo"
+                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all active:scale-95 border border-white/10 flex items-center gap-2 shadow-sm"
+                                title="Alternar Modo de Visualização"
                             >
                                 <ShieldAlert size={18} className="text-amber-400" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">{viewMode || 'ADM'}</span>
                             </button>
                         )}
                         
@@ -136,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({
                             onClick={onNotificationClick}
                             className="relative p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90 border border-white/10"
                         >
-                            <Bell size={20} />
+                            <Bell size={22} />
                             {unreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg">
                                     <span className="text-[8px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
@@ -146,31 +192,25 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* Linha de Busca: Translucidez e Modernidade */}
-                <div className="relative group">
+                <div className="relative group mt-2">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 text-white/50" />
+                        <Search className="h-4 w-4 text-white/60" />
                     </div>
                     <input 
                       type="text" 
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
-                      placeholder={`O que busca em ${greeting}?`} 
-                      className="block w-full pl-11 pr-12 bg-white/15 border border-white/10 rounded-2xl text-sm font-medium text-white placeholder-white/40 focus:outline-none focus:ring-4 focus:ring-white/5 py-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-md transition-all" 
+                      placeholder={`O que busca em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}?`} 
+                      className="block w-full pl-11 pr-12 bg-white/15 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 py-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-all" 
                     />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {searchTerm ? (
-                        <button onClick={() => onSearchChange('')} className="p-1.5 text-white/60 hover:text-white transition-colors">
-                            <X size={18} />
-                        </button>
+                        <button onClick={() => onSearchChange('')} className="p-1.5 text-white/60 hover:text-white"><X size={18} /></button>
                       ) : (
-                        <div className="p-1.5 text-white/30 hover:text-white/60 transition-colors cursor-pointer">
-                            <Mic size={18} />
-                        </div>
+                        <div className="p-1.5 text-white/40"><Mic size={18} /></div>
                       )}
                     </div>
 
-                    {/* Resultados de Busca (Dropdown) */}
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
                         <div className="absolute top-[calc(100%+12px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
                             <div className="p-3 max-h-[60vh] overflow-y-auto no-scrollbar">
@@ -202,7 +242,7 @@ export const Header: React.FC<HeaderProps> = ({
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="py-12 px-4 text-center text-gray-400">
+                                    <div className="py-10 px-4 text-center text-gray-400">
                                         <X size={32} className="mx-auto mb-3 opacity-20" />
                                         <p className="text-sm font-bold">Nenhum resultado</p>
                                     </div>
