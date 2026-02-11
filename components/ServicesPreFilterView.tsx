@@ -21,13 +21,13 @@ const FilterCard: React.FC<{
 }> = ({ icon, label, onClick, description }) => (
   <button 
     onClick={onClick}
-    className={`bg-[#1E5BFF] p-8 rounded-[2.5rem] shadow-sm hover:brightness-110 transition-all flex flex-col items-center text-center group active:scale-95 border border-white/10 w-full`}
+    className={`bg-gradient-to-br from-blue-400 to-blue-600 p-8 rounded-[2.5rem] shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all flex flex-col items-center text-center group active:scale-95 border border-white/20 w-full`}
   >
     <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-inner bg-white/10`}>
         {icon}
     </div>
-    <h4 className={`font-black text-white uppercase tracking-tighter text-lg mb-2 leading-none`}>{label}</h4>
-    <p className={`text-white opacity-60 text-[10px] font-bold uppercase tracking-widest leading-relaxed max-w-[180px]`}>{description}</p>
+    <h4 className={`font-black text-white uppercase tracking-tighter text-lg mb-2 leading-none drop-shadow-sm`}>{label}</h4>
+    <p className={`text-white opacity-80 text-[10px] font-bold uppercase tracking-widest leading-relaxed max-w-[180px]`}>{description}</p>
   </button>
 );
 
@@ -43,7 +43,7 @@ export const ServicesPreFilterView: React.FC<ServicesPreFilterViewProps> = ({ on
 
       <main className="flex-1 px-8 flex flex-col justify-center pb-20">
         <div className="mb-12 text-center">
-            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800 mb-4">
+            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800 mb-4 shadow-sm">
                 <Sparkles size={14} className="text-[#1E5BFF]" />
                 <span className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest">Encontre o Profissional Ideal</span>
             </div>

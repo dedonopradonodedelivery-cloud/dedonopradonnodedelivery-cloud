@@ -46,13 +46,13 @@ const FilterCard: React.FC<{
 }> = ({ icon, label, onClick, description }) => (
   <button 
     onClick={onClick}
-    className={`bg-[#1E5BFF] p-6 rounded-[2.5rem] shadow-sm hover:brightness-110 transition-all flex flex-col items-center text-center group active:scale-95 border border-white/10`}
+    className={`bg-gradient-to-br from-blue-400 to-blue-600 p-6 rounded-[2.5rem] shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all flex flex-col items-center text-center group active:scale-95 border border-white/20`}
   >
     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform shadow-inner bg-white/10`}>
         {icon}
     </div>
-    <h4 className={`font-black text-white uppercase tracking-tighter text-sm mb-1 leading-none`}>{label}</h4>
-    <p className={`text-white opacity-60 text-[9px] font-bold uppercase tracking-widest leading-tight`}>{description}</p>
+    <h4 className={`font-black text-white uppercase tracking-tighter text-sm mb-1 leading-none drop-shadow-sm`}>{label}</h4>
+    <p className={`text-white opacity-80 text-[9px] font-bold uppercase tracking-widest leading-tight`}>{description}</p>
   </button>
 );
 
@@ -68,7 +68,7 @@ export const HealthPreFilterView: React.FC<HealthPreFilterViewProps> = ({ onBack
 
       <main className="flex-1 px-8 flex flex-col justify-center pb-20">
         <div className="mb-10 text-center">
-            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800 mb-4">
+            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800 mb-4 shadow-sm">
                 <HeartPulse size={14} className="text-[#1E5BFF]" />
                 <span className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-widest">Cuidado Especializado</span>
             </div>

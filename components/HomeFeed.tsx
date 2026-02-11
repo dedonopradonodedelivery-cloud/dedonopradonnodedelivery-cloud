@@ -129,7 +129,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       <HojeNoBairro />
 
-      {/* EXPLORE JPA — LISTA HORIZONTAL COM PADRÃO BLUE PREMIUM */}
+      {/* EXPLORE JPA — LISTA HORIZONTAL COM PADRÃO SOFT BLUE PREMIUM */}
       <section className="w-full bg-white dark:bg-gray-950 pt-8 pb-4 relative z-10">
         <div className="flex overflow-x-auto no-scrollbar gap-4 px-5 scroll-smooth snap-x">
           {homeCategories.map((cat) => (
@@ -138,14 +138,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               onClick={() => onSelectCategory(cat)}
               className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
             >
-              <div className="w-16 h-16 rounded-[1.5rem] bg-[#1E5BFF] flex flex-col items-center justify-center shadow-sm border border-white/10 transition-all hover:brightness-110">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-blue-400 to-blue-600 flex flex-col items-center justify-center shadow-lg shadow-blue-500/20 border border-white/20 transition-all hover:brightness-110">
                 <div className="flex-1 flex items-center justify-center">
                   {React.cloneElement(cat.icon as any, { 
-                    className: "w-6 h-6 text-white", 
+                    className: "w-6 h-6 text-white drop-shadow-sm", 
                     strokeWidth: 2.5 
                   })}
                 </div>
-                <div className="w-full bg-black/10 py-1 rounded-b-[1.5rem]">
+                <div className="w-full bg-white/10 backdrop-blur-sm py-1 rounded-b-[1.5rem]">
                   <span className="block text-[8px] font-black text-white uppercase tracking-tighter text-center px-1 truncate">
                     {cat.name}
                   </span>
@@ -158,7 +158,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             onClick={() => onNavigate('all_categories')}
             className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
           >
-            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700 transition-all hover:bg-gray-200">
+            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:bg-gray-100">
               <div className="flex-1 flex items-center justify-center">
                 <Plus className="w-6 h-6 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
               </div>
@@ -200,7 +200,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       </section>
 
       <section className="px-5 mb-10">
-        <div className="bg-[#1E5BFF] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             
             <div className="relative z-10 flex flex-col gap-6">

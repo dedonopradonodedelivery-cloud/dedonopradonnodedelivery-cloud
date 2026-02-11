@@ -85,7 +85,7 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
       <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md px-5 h-16 flex flex-col gap-4 border-b border-gray-100 dark:border-gray-900 pb-4">
         <div className="flex items-center justify-between pt-12">
             <div className="flex items-center gap-3">
-                <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
+                <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform shadow-sm">
                     <ChevronLeft size={20} strokeWidth={3} />
                 </button>
                 <div>
@@ -114,13 +114,13 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
                 <button 
                     key={service}
                     onClick={() => onSelectService(service)}
-                    className="flex flex-col items-center justify-between min-h-[115px] rounded-[1.8rem] bg-[#1E5BFF] shadow-sm transition-all hover:brightness-110 active:scale-95 group overflow-hidden border border-white/10"
+                    className="flex flex-col items-center justify-between min-h-[115px] rounded-[1.8rem] bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/10 transition-all hover:brightness-110 active:scale-95 group overflow-hidden border border-white/20"
                 >
                     <div className="flex-1 flex items-center justify-center p-2 text-white">
-                        {React.cloneElement(getIcon(service) as any, { strokeWidth: 2.5 })}
+                        {React.cloneElement(getIcon(service) as any, { strokeWidth: 2.5, className: "drop-shadow-sm" })}
                     </div>
-                    <div className="w-full bg-black/10 py-1.5 px-1">
-                        <span className="block w-full text-[8px] font-black uppercase tracking-tighter text-center leading-tight text-white truncate">
+                    <div className="w-full bg-white/10 backdrop-blur-sm py-1.5 px-1">
+                        <span className="block w-full text-[8px] font-black uppercase tracking-tighter text-center leading-tight text-white truncate drop-shadow-sm">
                             {service}
                         </span>
                     </div>

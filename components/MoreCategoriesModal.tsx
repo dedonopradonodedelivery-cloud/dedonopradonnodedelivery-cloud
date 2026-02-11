@@ -40,7 +40,7 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Categorias</h2>
                 <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mt-1">Explore o bairro de JPA</p>
             </div>
-            <button onClick={onClose} className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl text-gray-500 active:scale-90 transition-all">
+            <button onClick={onClose} className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl text-gray-500 active:scale-90 transition-all shadow-sm">
               <X size={24} strokeWidth={3} />
             </button>
         </div>
@@ -52,7 +52,7 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="O que você procura hoje?"
-              className="w-full bg-gray-50 dark:bg-gray-900 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white transition-all shadow-inner"
+              className="w-full bg-gray-100 dark:bg-gray-900 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 dark:text-white transition-all shadow-inner"
             />
         </div>
       </header>
@@ -77,12 +77,12 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                   }}
                   className="flex flex-col items-center gap-2 group active:scale-95 transition-all"
                 >
-                  <div className={`w-16 h-16 rounded-[1.5rem] bg-[#1E5BFF] flex flex-col items-center justify-between p-2 shadow-sm border border-white/10 group-hover:brightness-110 transition-all`}>
+                  <div className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-blue-400 to-blue-600 flex flex-col items-center justify-between p-2 shadow-lg shadow-blue-500/10 border border-white/20 group-hover:brightness-110 transition-all`}>
                     <div className="flex-1 flex items-center justify-center">
-                        {React.cloneElement(cat.icon as any, { size: 22, strokeWidth: 2.5, className: 'text-white' })}
+                        {React.cloneElement(cat.icon as any, { size: 22, strokeWidth: 2.5, className: 'text-white drop-shadow-sm' })}
                     </div>
-                    <div className="w-full bg-black/10 py-1 rounded-b-[1.5rem] -mx-2 -mb-2">
-                        <span className="block w-full text-[8px] font-black text-white uppercase tracking-tighter text-center leading-none truncate px-1">
+                    <div className="w-full bg-white/10 backdrop-blur-sm py-1 rounded-b-[1.5rem] -mx-2 -mb-2">
+                        <span className="block w-full text-[8px] font-black text-white uppercase tracking-tighter text-center leading-none truncate px-1 drop-shadow-sm">
                             {cat.name}
                         </span>
                     </div>
@@ -108,12 +108,12 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                       onSelectCategory(item);
                       onClose();
                   }}
-                  className="flex items-center gap-3 p-4 bg-[#1E5BFF] rounded-2xl border border-white/10 active:scale-[0.98] transition-all group shadow-sm"
+                  className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl border border-white/20 active:scale-[0.98] transition-all group shadow-lg shadow-blue-500/10"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                    {React.cloneElement(item.icon as any, { size: 18, strokeWidth: 2.5 })}
+                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 border border-white/10">
+                    {React.cloneElement(item.icon as any, { size: 18, strokeWidth: 2.5, className: "drop-shadow-sm" })}
                   </div>
-                  <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-tight text-left">
+                  <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-tight text-left drop-shadow-sm">
                     {item.name}
                   </span>
                 </button>

@@ -49,21 +49,21 @@ const getFallbackImage = (id: string) => {
 };
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-[#1E5BFF]' },
-  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-[#1E5BFF]' },
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-[#1E5BFF]' },
-  { id: 'adocao', name: 'Adoção', slug: 'adoption', icon: <PawPrint />, color: 'bg-[#1E5BFF]' },
-  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-[#1E5BFF]' },
-  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-[#1E5BFF]' },
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench /> },
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 /> },
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase /> },
+  { id: 'adocao', name: 'Adoção', slug: 'adoption', icon: <PawPrint /> },
+  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart /> },
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag /> },
 ];
 
 const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
   <button onClick={onClick} className="flex flex-col items-center group active:scale-95 transition-all">
-    <div className={`w-full aspect-square rounded-[2rem] shadow-sm flex flex-col items-center justify-between p-2.5 ${category.color} border border-white/10`}>
+    <div className={`w-full aspect-square rounded-[2rem] shadow-lg shadow-blue-500/10 flex flex-col items-center justify-between p-2.5 bg-gradient-to-br from-blue-400 to-blue-600 border border-white/20`}>
       <div className="flex-1 flex items-center justify-center w-full">
-        {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white", strokeWidth: 2.5 })}
+        {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white drop-shadow-sm", strokeWidth: 2.5 })}
       </div>
-      <div className="w-full bg-black/10 py-1.5 rounded-b-[1.8rem] -mx-2.5 -mb-2.5">
+      <div className="w-full bg-white/10 backdrop-blur-md py-1.5 rounded-b-[1.8rem] -mx-2.5 -mb-2.5">
         <span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight leading-none px-1 truncate">
             {category.name}
         </span>
@@ -132,8 +132,8 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
         <section className="py-8 border-b border-gray-100 dark:border-gray-800 last:border-0">
             <div className="flex items-center justify-between mb-6 px-1">
                 <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-sm`}>
-                        {React.cloneElement(category.icon as any, { size: 20, strokeWidth: 2.5 })}
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/10 border border-white/20`}>
+                        {React.cloneElement(category.icon as any, { size: 20, strokeWidth: 2.5, className: "drop-shadow-sm" })}
                     </div>
                     <div>
                         <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{category.name}</h2>
@@ -164,7 +164,7 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
                     <p className="text-sm font-bold text-gray-400 dark:text-gray-500 mb-6">{subtitle || 'Nenhum anúncio nesta categoria ainda.'}</p>
                     <button 
                         onClick={() => onAnunciar(category.name)}
-                        className="bg-[#1E5BFF] text-white font-black px-8 py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-lg active:scale-95"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black px-8 py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-lg active:scale-95"
                     >
                         {ctaLabel}
                     </button>
@@ -227,7 +227,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={handleAnunciarHeader}
-              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:brightness-110 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/20 active:scale-95 transition-all h-9"
             >
               <Plus size={12} strokeWidth={4} />
               Anunciar

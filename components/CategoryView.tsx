@@ -75,27 +75,22 @@ const BigSurCard: React.FC<{
   onClick: () => void; 
   isMoreButton?: boolean;
 }> = ({ icon, name, isSelected, onClick, isMoreButton }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[2rem] flex flex-col items-center justify-between p-3 transition-all duration-300 cursor-pointer overflow-hidden border active:scale-95 shadow-sm`;
+  const baseClasses = `relative w-full aspect-square rounded-[2rem] flex flex-col items-center justify-between p-3 transition-all duration-300 cursor-pointer overflow-hidden border active:scale-95`;
   
-  // PADRÃO BLUE PREMIUM APLICADO
+  // PADRÃO SOFT BLUE PREMIUM APLICADO
   const backgroundClass = isMoreButton 
-    ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700" 
-    : "bg-[#1E5BFF] border-white/10 shadow-blue-500/10";
+    ? "bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700" 
+    : "bg-gradient-to-br from-blue-400 to-blue-600 border-white/20 shadow-lg shadow-blue-500/10";
     
-  const textClass = isMoreButton 
-    ? "text-gray-500 dark:text-gray-400" 
-    : "text-white";
-    
-  const iconClass = isMoreButton 
-    ? "text-gray-400" 
-    : "text-white";
+  const textClass = "text-white drop-shadow-sm";
+  const iconClass = "text-white drop-shadow-sm";
 
   return (
-    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${isSelected ? 'ring-4 ring-blue-500/30 brightness-110' : ''}`}>
+    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${isSelected ? 'ring-4 ring-blue-500/30 brightness-110 shadow-inner' : ''}`}>
       <div className="flex-1 flex items-center justify-center">
         {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-7 h-7 ${iconClass}`, strokeWidth: 2.5 }) : null}
       </div>
-      <div className={`w-full bg-black/10 py-1 rounded-b-[1.5rem] -mx-3 -mb-3`}>
+      <div className={`w-full bg-white/10 backdrop-blur-md py-1 rounded-b-[1.5rem] -mx-3 -mb-3`}>
         <span className={`block w-full text-[9px] font-black uppercase tracking-tighter text-center truncate px-1 ${textClass}`}>
           {name}
         </span>
@@ -114,7 +109,7 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>}
+          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
@@ -260,7 +255,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-white dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
