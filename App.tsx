@@ -187,12 +187,12 @@ const App: React.FC = () => {
 
     const fadeTimeout = setTimeout(() => {
       setIsFadingOut(true); 
-    }, 5200);
+    }, 5000); // 5 segundos fixos
 
     const removeTimeout = setTimeout(() => {
       setIsSplashVisible(false);
       splashWasShownInSession = true;
-    }, 6000);
+    }, 6000); // 1 segundo de fade cinematográfico
 
     return () => {
       clearTimeout(fadeTimeout);
@@ -349,7 +349,7 @@ const App: React.FC = () => {
 
           {/* SPLASH SCREEN */}
           {isSplashVisible && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-800 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ background: 'linear-gradient(135deg, #1E5BFF 0%, #0039A6 50%, #020617 100%)' }}>
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-20 transition-all duration-1000 ease-in-out ${isFadingOut ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}`} style={{ background: 'linear-gradient(135deg, #1E5BFF 0%, #0039A6 50%, #020617 100%)' }}>
               <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
                  {[...Array(6)].map((_, i) => (
                    <div key={i} className="particle animate-float-particle" style={{ left: `${Math.random() * 100}%`, width: `${Math.random() * 4}px`, height: `${Math.random() * 4}px`, animationDelay: `${Math.random() * 5}s` }}></div>
@@ -370,12 +370,17 @@ const App: React.FC = () => {
                     <div className="h-1.5 w-12 bg-blue-500 rounded-full mx-auto mt-3 opacity-0 animate-reveal-up" style={{ animationDelay: '1.4s' }}></div>
                   </div>
               </div>
-              <div className="text-center px-6 opacity-0 animate-fadeIn" style={{ animationDelay: '2.5s' }}>
-                <div className="w-8 h-px bg-white/20 mb-3 mx-auto"></div>
-                <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] leading-none">Patrocinador Master</p>
-                <p className="text-sm font-display font-bold text-white/60 mt-1.5 tracking-widest flex items-center justify-center gap-2">
-                   <Crown size={14} className="text-amber-500/50" /> Grupo Localizei
-                </p>
+              
+              {/* Patrocinador Master - Assinatura Institucional Elegante */}
+              <div className="text-center px-6 opacity-0 animate-fade-in" style={{ animationDelay: '2s' }}>
+                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em] leading-none mb-3">Patrocinador Master</p>
+                <div className="flex items-center justify-center gap-3">
+                    <div className="w-8 h-px bg-white/10"></div>
+                    <p className="text-xs font-display font-medium text-white/50 tracking-[0.2em] uppercase">
+                       Grupo Esquematiza
+                    </p>
+                    <div className="w-8 h-px bg-white/10"></div>
+                </div>
               </div>
             </div>
           )}
