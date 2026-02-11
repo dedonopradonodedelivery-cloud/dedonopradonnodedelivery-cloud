@@ -57,6 +57,7 @@ import { HealthPreFilterView } from '@/components/HealthPreFilterView';
 import { HealthSubSpecialtiesView } from '@/components/HealthSubSpecialtiesView';
 import { HealthSpecialtyDetailView } from '@/components/HealthSpecialtyDetailView';
 import { SpecialtyHighlightsManager } from '@/components/SpecialtyHighlightsManager';
+import { ServicesPreFilterView } from '@/components/ServicesPreFilterView';
 import { MapPin, X, Palette, Sparkles, ShieldCheck, User as UserIcon, Store as StoreIcon, Eye, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -88,6 +89,7 @@ const App: React.FC = () => {
   const [previousTab, setPreviousTab] = useState('home');
   const [selectedSpecialtyName, setSelectedSpecialtyName] = useState<string | null>(null);
   const [selectedHealthGroup, setSelectedHealthGroup] = useState<string | null>(null);
+  const [selectedServiceGroup, setSelectedServiceGroup] = useState<string | null>(null);
   
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -133,7 +135,7 @@ const App: React.FC = () => {
   }, [isSplashVisible]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (!['sponsor_info', 'notifications', 'patrocinador_master', 'real_estate_detail', 'job_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'coupon_landing', 'all_categories', 'health_pre_filter', 'health_specialty_detail'].includes(view) && !view.startsWith('health_')) {
+    if (!['sponsor_info', 'notifications', 'patrocinador_master', 'real_estate_detail', 'job_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'coupon_landing', 'all_categories', 'health_pre_filter', 'health_specialty_detail', 'services_pre_filter'].includes(view) && !view.startsWith('health_')) {
       setPreviousTab(activeTab);
     }
     
@@ -200,6 +202,11 @@ const App: React.FC = () => {
         return;
     }
 
+    if (category.id === 'cat-services') {
+        handleNavigate('services_pre_filter');
+        return;
+    }
+
     if (category.slug === 'real_estate' || category.slug === 'jobs' || category.slug === 'donations' || category.slug === 'desapega') {
         handleNavigate(category.slug);
     } else {
@@ -214,6 +221,20 @@ const App: React.FC = () => {
       else if (option === 'PEDIATRIA') handleNavigate('health_pediatrics');
       else if (option === 'GERIATRIA') handleNavigate('health_geriatrics');
       else {
+          handleNavigate('category_detail');
+      }
+  };
+
+  const handleServicesPreFilterChoice = (option: 'MANUAL' | 'SPECIALIZED' | 'ALL') => {
+      setSelectedServiceGroup(option);
+      if (option === 'MANUAL') {
+          setSelectedSubcategoryName('Manutenção Geral');
+          handleNavigate('category_detail');
+      } else if (option === 'SPECIALIZED') {
+          setSelectedSubcategoryName('Assistência Técnica');
+          handleNavigate('category_detail');
+      } else {
+          setSelectedSubcategoryName(null);
           handleNavigate('category_detail');
       }
   };
@@ -238,7 +259,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics', 'health_specialty_detail', 'specialty_highlights_manager', 'explore'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics', 'health_specialty_detail', 'specialty_highlights_manager', 'explore', 'services_pre_filter'];
   
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
@@ -278,6 +299,13 @@ const App: React.FC = () => {
                         <HealthPreFilterView 
                             onBack={() => handleNavigate('home')} 
                             onSelectOption={handleHealthPreFilterChoice}
+                        />
+                    )}
+
+                    {activeTab === 'services_pre_filter' && (
+                        <ServicesPreFilterView 
+                            onBack={() => handleNavigate('home')} 
+                            onSelectOption={handleServicesPreFilterChoice}
                         />
                     )}
 
@@ -412,6 +440,7 @@ const App: React.FC = () => {
                         userRole={userRole as any} 
                         onAdvertiseInCategory={() => {}} 
                         onNavigate={handleNavigate}
+                        initialSubcategory={selectedSubcategoryName || undefined}
                         onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
                       />
                     )}
