@@ -87,16 +87,53 @@ export const Header: React.FC<HeaderProps> = ({
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    const welcome = hour >= 5 && hour < 12 ? 'Bom dia' : hour >= 12 && hour < 18 ? 'Boa tarde' : 'Boa noite';
-    const icon = hour >= 5 && hour < 18 ? '☀️' : '🌙';
     
-    if (user) {
-        const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0];
-        return { title: `${welcome}, ${name} ${icon}`, sub: currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood };
+    // Define saudação textual e ícone baseado no horário
+    let welcome = 'Bom dia';
+    let icon = '☀️';
+    
+    if (hour >= 12 && hour < 18) {
+      welcome = 'Boa tarde';
+      icon = '🌤️';
+    } else if (hour >= 18 || hour < 5) {
+      welcome = 'Boa noite';
+      icon = '🌙';
     }
+
     const neighborhood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
-    return { title: `${welcome}! ${icon}`, sub: neighborhood };
-  }, [user, currentNeighborhood]);
+
+    // 1. REGRA MODO VISITANTE (CRÍTICO): Sempre neutro, mesmo se logado
+    if (viewMode === 'Visitante') {
+      return { 
+        title: `${welcome}! ${icon}`, 
+        sub: neighborhood 
+      };
+    }
+
+    // 2. REGRA MODO LOJISTA: Exibe nome da loja + 👑
+    if (viewMode === 'Lojista' && user) {
+      const storeName = user.user_metadata?.store_name || user.email?.split('@')[0];
+      return { 
+        title: `${welcome}, ${storeName} 👑`, 
+        sub: neighborhood 
+      };
+    }
+
+    // 3. REGRA MODO USUÁRIO (E OUTROS): Exibe nome do usuário + Icone de horário
+    if (user) {
+      const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0];
+      return { 
+        title: `${welcome}, ${name} ${icon}`, 
+        sub: neighborhood 
+      };
+    }
+
+    // 4. FALLBACK NEUTRO: Caso não haja usuário logado
+    return { 
+      title: `${welcome}! ${icon}`, 
+      sub: neighborhood 
+    };
+  }, [user, currentNeighborhood, viewMode]);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
