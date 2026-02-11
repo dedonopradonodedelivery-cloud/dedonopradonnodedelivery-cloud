@@ -21,6 +21,7 @@ interface HeaderProps {
   userRole?: "cliente" | "lojista" | null;
   isDarkMode?: boolean;
   toggleTheme?: () => void;
+  isAdmin?: boolean;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -59,7 +60,8 @@ export const Header: React.FC<HeaderProps> = ({
   onStoreClick,
   onOpenViewSwitcher,
   viewMode,
-  user: userProp
+  user: userProp,
+  isAdmin: isAdminProp
 }) => {
   const { user: authUser } = useAuth();
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
@@ -89,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
   const searchTranslateY = -progress * 78; // Puxa a barra de busca para o topo
 
   const user = authUser || userProp;
-  const isAdminUser = user?.email === 'dedonopradonodedelivery@gmail.com';
+  const isAdminUser = isAdminProp ?? (user?.email === 'dedonopradonodedelivery@gmail.com');
   
   useEffect(() => {
     const checkNotifs = () => {

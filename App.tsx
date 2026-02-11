@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -336,7 +337,7 @@ export const App: React.FC = () => {
                                 ] :
                                 activeTab === 'health_man' ? ['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina'] :
                                 activeTab === 'health_pediatrics' ? ['Pediatria geral', 'Neonatologia', 'Puericultura', 'Psiquiatria infantil'] :
-                                ['Geriatria', 'Clínica geriátrica', 'Medicina do evelhecimento', 'Psicologia geriátrica']
+                                ['Geriatria', 'Clínica geriátrica', 'Medicina do envelhecimento', 'Psicologia geriátrica']
                             }
                             onBack={() => handleNavigate('health_pre_filter')}
                             onSelectStore={handleSelectStore}
