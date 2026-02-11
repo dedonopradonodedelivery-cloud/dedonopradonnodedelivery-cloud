@@ -59,6 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
   stores = [],
   onStoreClick,
   onOpenViewSwitcher,
+  viewMode,
   // Props desestruturadas embora o componente use useAuth internamente por padrão
   user: userProp,
   userRole: userRoleProp
@@ -125,9 +126,11 @@ export const Header: React.FC<HeaderProps> = ({
                         {isAdminUser && (
                             <button 
                                 onClick={onOpenViewSwitcher}
-                                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90 border border-white/10"
+                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all active:scale-95 border border-white/10 flex items-center gap-2 shadow-sm"
+                                title="Alternar Modo de Visualização"
                             >
-                                <ShieldAlert size={20} />
+                                <ShieldAlert size={18} className="text-amber-400" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">{viewMode || 'ADM'}</span>
                             </button>
                         )}
                         

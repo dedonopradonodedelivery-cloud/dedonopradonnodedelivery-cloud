@@ -54,7 +54,8 @@ import { CouponLandingView } from '@/components/CouponLandingView';
 import { CategoriesPageView } from '@/components/CategoriesPageView';
 import { HealthPreFilterView } from '@/components/HealthPreFilterView';
 import { HealthSubSpecialtiesView } from '@/components/HealthSubSpecialtiesView';
-import { MapPin, X, Palette, Sparkles } from 'lucide-react';
+// FIX: Added missing CheckCircle2 import to resolve "Cannot find name 'CheckCircle2'" error
+import { MapPin, X, Palette, Sparkles, ShieldCheck, User as UserIcon, Store as StoreIcon, Eye, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -68,7 +69,7 @@ import { EditProfileView } from '@/components/EditProfileView';
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
-export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
+export type RoleMode = 'Administrador' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
@@ -131,8 +132,8 @@ const App: React.FC = () => {
         const path = window.location.pathname;
         if (path === '/admin/aprovacoes' || path === '/admin/monetizacoes') {
             if (isAdmin) {
-                setViewMode('ADM');
-                localStorage.setItem('admin_view_mode', 'ADM');
+                setViewMode('Administrador');
+                localStorage.setItem('admin_view_mode', 'Administrador');
                 setAdminInitialTab(path === '/admin/aprovacoes' ? 'moderation' : 'monetization');
                 setActiveTab('admin_panel');
             }
@@ -259,29 +260,49 @@ const App: React.FC = () => {
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
+    
+    const roles: { id: RoleMode; label: string; icon: any; color: string }[] = [
+        { id: 'Administrador', label: 'Administrador', icon: ShieldCheck, color: 'text-amber-500' },
+        { id: 'Lojista', label: 'Lojista (Dashboard)', icon: StoreIcon, color: 'text-blue-500' },
+        { id: 'Usuário', label: 'Usuário (Residente)', icon: UserIcon, color: 'text-emerald-500' },
+        { id: 'Visitante', label: 'Visitante (Deslogado)', icon: Eye, color: 'text-gray-400' },
+        { id: 'Designer', label: 'Designer (Jobs)', icon: Palette, color: 'text-indigo-400' }
+    ];
+
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+        <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
             <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-start mb-8 px-2">
-                    <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
-                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                    <div>
+                        <h2 className="text-xl font-black text-white uppercase tracking-tight">Simulador de Acesso</h2>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Troque sua visão do app</p>
+                    </div>
+                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="p-2 bg-white/5 rounded-full text-gray-500 hover:text-white transition-colors">
+                        <X size={20} />
+                    </button>
                 </div>
                 <div className="space-y-3">
-                    {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
+                    {roles.map((role) => (
                         <button 
-                          key={role} 
+                          key={role.id} 
                           onClick={() => { 
-                            setViewMode(role); 
-                            localStorage.setItem('admin_view_mode', role); 
+                            setViewMode(role.id); 
+                            localStorage.setItem('admin_view_mode', role.id); 
                             setIsRoleSwitcherOpen(false); 
-                            if (role === 'Lojista') setActiveTab('profile'); 
-                            else if (role === 'ADM') setActiveTab('admin_panel'); 
-                            else if (role === 'Designer') setActiveTab('designer_panel');
+                            if (role.id === 'Lojista') setActiveTab('profile'); 
+                            else if (role.id === 'Administrador') setActiveTab('admin_panel'); 
+                            else if (role.id === 'Designer') setActiveTab('designer_panel');
                             else setActiveTab('home'); 
                           }} 
-                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all group flex items-center justify-between ${viewMode === role.id ? 'bg-white border-white text-black' : 'bg-white/5 border-white/5 text-white hover:bg-white/10'}`}
                         >
-                            <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
+                            <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${viewMode === role.id ? 'bg-black/5 text-black' : `bg-white/5 ${role.color}`}`}>
+                                    <role.icon size={20} strokeWidth={2.5} />
+                                </div>
+                                <span className="font-black uppercase text-sm tracking-tight">{role.label}</span>
+                            </div>
+                            {viewMode === role.id && <CheckCircle2 size={18} className="text-black" />}
                         </button>
                     ))}
                 </div>
