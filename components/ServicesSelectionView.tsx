@@ -56,42 +56,38 @@ const SPECIALIZED_SERVICES = [
 
 const getIcon = (name: string) => {
     const n = name.toLowerCase();
-    if (n.includes('pedreiro') || n.includes('obra')) return <Hammer size={22} />;
-    if (n.includes('pintor')) return <PaintRoller size={22} />;
-    if (n.includes('eletricista') || n.includes('zap')) return <Zap size={22} />;
-    if (n.includes('encanador') || n.includes('lavajato') || n.includes('piscina')) return <Droplets size={22} />;
-    if (n.includes('chaveiro') || n.includes('segurança')) return <Shield size={22} />;
-    if (n.includes('advogado')) return <Scale size={22} />;
-    if (n.includes('contador') || n.includes('financeiro')) return <Calculator size={22} />;
-    if (n.includes('médico') || n.includes('dentista') || n.includes('psico') || n.includes('terapeuta')) return <Heart size={22} />;
-    if (n.includes('designer') || n.includes('arquiteto') || n.includes('fotógrafo')) return <PenTool size={22} />;
-    if (n.includes('programador') || n.includes('software') || n.includes('analista')) return <Code size={22} />;
-    if (n.includes('marketing') || n.includes('publicitário') || n.includes('coach')) return <TrendingUp size={22} />;
-    return <Settings size={22} />;
+    if (n.includes('pedreiro') || n.includes('obra')) return <Hammer size={20} />;
+    if (n.includes('pintor')) return <PaintRoller size={20} />;
+    if (n.includes('eletricista') || n.includes('zap')) return <Zap size={20} />;
+    if (n.includes('encanador') || n.includes('lavajato') || n.includes('piscina')) return <Droplets size={20} />;
+    if (n.includes('chaveiro') || n.includes('segurança')) return <Shield size={20} />;
+    if (n.includes('advogado')) return <Scale size={20} />;
+    if (n.includes('contador') || n.includes('financeiro')) return <Calculator size={20} />;
+    if (n.includes('médico') || n.includes('dentista') || n.includes('psico') || n.includes('terapeuta')) return <Heart size={20} />;
+    if (n.includes('designer') || n.includes('arquiteto') || n.includes('fotógrafo')) return <PenTool size={20} />;
+    if (n.includes('programador') || n.includes('software') || n.includes('analista')) return <Code size={20} />;
+    if (n.includes('marketing') || n.includes('publicitário') || n.includes('coach')) return <TrendingUp size={20} />;
+    return <Settings size={20} />;
 };
 
 export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ type, onBack, onSelectService }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
   const services = type === 'MANUAL' ? MANUAL_SERVICES : SPECIALIZED_SERVICES;
   const title = type === 'MANUAL' ? 'Serviços Manuais' : 'Serviços Especializados';
-  
-  const filteredServices = useMemo(() => {
-    return services.filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [services, searchTerm]);
+  const filteredServices = useMemo(() => services.filter(s => s.toLowerCase().includes(searchTerm.toLowerCase())), [services, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
-      {/* HEADER AJUSTADO - SEM ALTURA FIXA E COM ESPAÇAMENTO EQUILIBRADO */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 px-5 pt-10 pb-4 shadow-sm">
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300 overflow-hidden">
+      {/* HEADER FIXO INTEGRADO */}
+      <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-5 pt-8 pb-5 shadow-sm shrink-0">
         <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-                <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform shadow-sm">
+                <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
                     <ChevronLeft size={20} strokeWidth={3} />
                 </button>
                 <div>
-                    <h1 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{title}</h1>
-                    <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Jacarepaguá</p>
+                    <h1 className="text-base font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{title}</h1>
+                    <p className="text-[9px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Jacarepaguá</p>
                 </div>
             </div>
             <MasterSponsorBadge />
@@ -104,23 +100,24 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Qual serviço você busca?" 
-                className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 py-3.5 pl-11 pr-4 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-[#1E5BFF]/5 transition-all dark:text-white"
             />
         </div>
       </header>
 
+      {/* GRID DE CARDS MENORES E SÓLIDOS */}
       <main className="flex-1 overflow-y-auto no-scrollbar p-5 pb-32 bg-[#F8F9FC] dark:bg-gray-950">
         <div className="grid grid-cols-3 gap-3">
             {filteredServices.map((service) => (
                 <button 
                     key={service}
                     onClick={() => onSelectService(service)}
-                    className="flex flex-col items-center justify-center aspect-square gap-2.5 rounded-2xl bg-[#1E5BFF] shadow-sm border border-white/10 transition-all hover:brightness-110 active:scale-95 group overflow-hidden p-2"
+                    className="flex flex-col items-center justify-center aspect-square gap-2 rounded-[1.5rem] bg-[#1E5BFF] transition-all hover:brightness-110 active:scale-95 shadow-sm border border-white/10 p-2"
                 >
-                    <div className="text-white drop-shadow-sm flex items-center justify-center">
+                    <div className="text-white flex items-center justify-center">
                         {React.cloneElement(getIcon(service) as any, { strokeWidth: 2.5 })}
                     </div>
-                    <span className="text-white text-[8px] font-black uppercase tracking-tighter text-center leading-tight line-clamp-2 px-1">
+                    <span className="text-white text-[8px] font-black uppercase tracking-tight text-center leading-tight line-clamp-2 px-1">
                         {service}
                     </span>
                 </button>
