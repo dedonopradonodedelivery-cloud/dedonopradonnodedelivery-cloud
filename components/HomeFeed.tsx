@@ -1,32 +1,35 @@
 
-import React, { useState, useMemo, useRef } from 'react';
-import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified } from '@/types';
+import React, { useState, useMemo } from 'react';
+import { Store, Category, ServiceRequest, ServiceUrgency } from '@/types';
 import { 
-  Compass, 
-  Sparkles, 
-  ArrowRight, 
-  Ticket,
-  CheckCircle2, 
-  Lock, 
-  Zap, 
-  Loader2, 
-  Hammer, 
   Plus, 
-  Heart, 
-  Bookmark, 
-  Home as HomeIcon,
-  MessageSquare, 
-  MapPin, 
-  Camera, 
   X, 
   Send, 
   ChevronRight,
+  Zap,
+  ShoppingBag,
+  Pill,
+  Stethoscope,
+  Wrench,
+  AlertTriangle,
+  ArrowRight,
+  Sparkles,
+  Trophy,
+  Star,
+  MapPin,
+  Clock,
+  Flame,
+  CheckCircle2,
+  Loader2,
+  Camera,
+  Home as HomeIcon,
+  Search,
+  // FIX: Added missing Info icon import from lucide-react
+  Info
 } from 'lucide-react';
-import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
+import { CATEGORIES, MOCK_OFERTAS_RELAMPAGO, MOCK_RADAR_V3, MOCK_MISSOES, STORES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { CouponCarousel } from '@/components/CouponCarousel';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
 import { HojeNoBairro } from '@/components/HojeNoBairro';
@@ -58,7 +61,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
-  const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && images.length < 3) {
@@ -73,31 +75,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
   const handleWizardSubmit = () => {
     if (!user) {
-        localStorage.setItem('pending_wizard_state', JSON.stringify({ selectedService, selectedUrgency, description, images }));
         onNavigate('profile');
         return;
     }
-
     setIsSubmittingLead(true);
-    
-    const requestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newLead: ServiceRequest = {
-        id: requestId,
-        userId: user.id,
-        userName: user.user_metadata?.full_name || 'Morador Local',
-        serviceType: selectedService || 'Geral',
-        description,
-        neighborhood: currentNeighborhood,
-        urgency: (selectedUrgency as ServiceUrgency) || 'Não tenho pressa',
-        images,
-        status: 'open',
-        createdAt: new Date().toISOString()
-    };
-
-    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
-    localStorage.setItem('service_requests_mock', JSON.stringify([newLead, ...existing]));
-    setLastCreatedRequestId(requestId);
-
     setTimeout(() => {
       setIsSubmittingLead(false);
       setWizardStep(4);
@@ -105,142 +86,144 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   };
 
   return (
-    <div className="flex flex-col bg-gray-100 dark:bg-black w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-[#F8F9FC] dark:bg-black w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
       
-      {userRole === 'lojista' && (
-        <section className="p-4 bg-white dark:bg-gray-950">
-           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
-        </section>
-      )}
+      {/* 1. HOJE NO BAIRRO (CONTEXTO & CLIMA) */}
+      <HojeNoBairro onSelectCategory={onSelectCategory} />
 
-      <div className="space-y-6">
-        <HojeNoBairro onSelectCategory={onSelectCategory} />
-        <CouponCarousel onNavigate={onNavigate} />
-        <AcontecendoAgora onNavigate={onNavigate} />
-        <RadarDoBairro onNavigate={onNavigate} />
-        <RecomendadosParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
-      </div>
-      
-      {/* WIZARD DE ORÇAMENTO (Quando aberto - LÓGICA MANTIDA) */}
-      {wizardStep > 0 && (
-        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 -mt-4 mx-5 mb-10 animate-in slide-in-from-bottom duration-500 border border-gray-100 dark:border-slate-800 shadow-2xl relative overflow-hidden ring-4 ring-blue-500/5 z-50">
-          <button onClick={() => setWizardStep(0)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-gray-50 dark:bg-slate-800 rounded-full"><X size={20} /></button>
-          
-          {wizardStep === 1 && (
-            <div className="text-center animate-in fade-in zoom-in-95 duration-300">
-              <div className="mb-6">
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-2">Que tipo de serviço?</h3>
-                <p className="text-xs font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest">Escolha uma categoria para encontrar profissionais perto de você</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  {l: 'Obras & Reformas', i: Hammer, iIcon: <Hammer/>, c: 'bg-orange-500', t: 'text-orange-500'}, 
-                  {l: 'Serviços Rápidos', i: Zap, iIcon: <Zap/>, c: 'bg-blue-600', t: 'text-blue-600'}, 
-                  {l: 'Casa & Instalações', i: HomeIcon, iIcon: <HomeIcon/>, c: 'bg-emerald-600', t: 'text-emerald-600'}, 
-                  {l: 'Eventos & Criativos', i: Sparkles, iIcon: <Sparkles/>, c: 'bg-purple-600', t: 'text-purple-600'}
-                ].map(s => (
-                  <button 
-                    key={s.l} 
-                    onClick={() => { setSelectedService(s.l); setWizardStep(2); }} 
-                    className="group p-6 bg-gray-50 dark:bg-slate-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col items-center gap-3 transition-all hover:shadow-lg hover:-translate-y-1 active:scale-95"
-                  >
-                    <div className={`w-14 h-14 rounded-2xl ${s.c} bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center ${s.t} group-hover:scale-110 transition-transform`}>
-                        {React.cloneElement(s.iIcon as any, { size: 32, strokeWidth: 2.5 })}
-                    </div>
-                    <p className="text-[10px] font-black text-gray-800 dark:text-slate-200 uppercase tracking-tighter leading-tight">{s.l}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {wizardStep === 2 && (
-            <div className="text-center animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-8">
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-2">Qual a urgência?</h3>
-                <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">Quanto antes soubermos, mais rápido você recebe propostas</p>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                 {['Para hoje', 'Amanhã', 'Até 3 dias', 'Não tenho pressa'].map(u => (
-                  <button 
-                    key={u} 
-                    onClick={() => { setSelectedUrgency(u); setWizardStep(3); }} 
-                    className="px-6 py-4 bg-gray-50 dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-between group active:scale-[0.98] transition-all hover:border-blue-500/50"
-                  >
-                    <span className="text-sm font-black text-gray-800 dark:text-slate-200 uppercase tracking-widest">{u}</span>
-                    <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-gray-300 group-hover:text-blue-500 transition-colors shadow-sm">
-                        <ChevronRight size={20} strokeWidth={3} />
-                    </div>
-                  </button>
-                 ))}
-              </div>
-            </div>
-          )}
-          {wizardStep === 3 && (
-             <div className="text-center space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="mb-4">
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-2">Quase lá!</h3>
-                    <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">Descreva o que você precisa com detalhes</p>
-                </div>
-                <div className="space-y-4">
-                    <textarea 
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Ex: Preciso de um eletricista para trocar um disjuntor que está desarmando."
-                        maxLength={500}
-                        className="w-full h-36 p-5 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium transition-all shadow-inner"
-                    />
-                    <div className="flex gap-3">
-                        {images.map((img, i) => (
-                            <div key={i} className="w-16 h-16 rounded-2xl overflow-hidden relative border border-gray-100">
-                                <img src={img} className="w-full h-full object-cover" />
-                                <button onClick={() => setImages(images.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-lg"><X size={10}/></button>
-                            </div>
-                        ))}
-                        {images.length < 3 && (
-                            <label className="w-16 h-16 rounded-2xl border-2 border-dashed border-blue-500/20 bg-blue-50/30 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-center text-blue-500 cursor-pointer hover:bg-blue-100/50 transition-all">
-                                <Camera size={24} />
-                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                            </label>
-                        )}
-                    </div>
-                </div>
+      {/* 2. RESOLVA RÁPIDO (ATALHOS INTELIGENTES) */}
+      <section className="px-5 py-6">
+        <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest leading-none">Resolva Rápido ⚡</h2>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+            {[
+                { icon: ShoppingBag, label: 'Delivery', color: 'bg-rose-500', target: 'explore' },
+                { icon: Pill, label: 'Farmácia', color: 'bg-blue-500', target: 'explore' },
+                { icon: Stethoscope, label: 'Saúde', color: 'bg-emerald-500', target: 'health_pre_filter' },
+                { icon: Wrench, label: 'Serviços', color: 'bg-amber-500', target: 'services_landing' },
+            ].map((action, i) => (
                 <button 
-                    onClick={handleWizardSubmit}
-                    disabled={!description || isSubmittingLead}
-                    className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest text-sm transition-all"
+                  key={i} 
+                  onClick={() => onNavigate(action.target)}
+                  className="flex flex-col items-center gap-2 group active:scale-95 transition-all"
                 >
-                    {isSubmittingLead ? <Loader2 size={20} className="animate-spin" /> : <>Enviar pedido agora <Send size={18} /></>}
+                    <div className={`w-full aspect-square rounded-[1.75rem] ${action.color} flex items-center justify-center text-white shadow-lg shadow-${action.color.split('-')[1]}-500/20`}>
+                        <action.icon size={24} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-400 uppercase tracking-tighter">{action.label}</span>
                 </button>
-             </div>
-          )}
-          {wizardStep === 4 && (
-            <div className="text-center py-8 animate-in zoom-in duration-500">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-emerald-600 shadow-xl shadow-emerald-500/10">
-                    <CheckCircle2 size={40} strokeWidth={3} />
-                </div>
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Tudo pronto! 🎉</h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400 mb-10 font-medium">Profissionais qualificados do seu bairro acabam de ser notificados.</p>
-                <div className="space-y-4">
-                    <button 
-                      onClick={() => { 
-                        setWizardStep(0); 
-                        if(lastCreatedRequestId) {
-                          onNavigate('service_chat', { requestId: lastCreatedRequestId }); 
-                        } else {
-                          onNavigate('services_landing');
-                        }
-                      }} 
-                      className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all"
-                    >
-                      Acompanhar propostas
-                    </button>
-                    <button onClick={() => setWizardStep(0)} className="w-full py-3 text-gray-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-gray-600">Voltar ao início</button>
-                </div>
+            ))}
+        </div>
+      </section>
+
+      {/* 3. OFERTAS RELÂMPAGO (URGÊNCIA) */}
+      <section className="py-6">
+        <div className="px-5 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest leading-none">Ofertas Relâmpago ⏰</h2>
+                <div className="bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase animate-pulse">Live</div>
             </div>
-          )}
-        </section>
-      )}
+        </div>
+        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2">
+            {MOCK_OFERTAS_RELAMPAGO.map(oferta => (
+                <button 
+                    key={oferta.id}
+                    onClick={() => onNavigate('explore')}
+                    className="flex-shrink-0 w-72 h-32 bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex overflow-hidden group active:scale-[0.98] transition-all"
+                >
+                    <div className="w-1/3 h-full overflow-hidden">
+                        <img src={oferta.image} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    </div>
+                    <div className="flex-1 p-4 flex flex-col justify-between text-left">
+                        <div>
+                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">Expira em {oferta.timeLeft}</p>
+                            <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight truncate">{oferta.item}</h3>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">{oferta.storeName}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-lg font-black text-emerald-600 italic">{oferta.discount}</span>
+                            <div className="p-1.5 bg-gray-50 rounded-lg text-gray-300 group-hover:text-blue-500 transition-colors">
+                                <ChevronRight size={16} />
+                            </div>
+                        </div>
+                    </div>
+                </button>
+            ))}
+        </div>
+      </section>
+
+      {/* 4. CUPONS DO DIA (CONVERSÃO) */}
+      <CouponCarousel onNavigate={onNavigate} />
+
+      {/* 5. ACONTECENDO AGORA (ENGAGEMENT) */}
+      <AcontecendoAgora onNavigate={onNavigate} />
+
+      {/* 6. RADAR DO BAIRRO ( FEED DINÂMICO) */}
+      <section className="px-5 py-6">
+          <div className="flex items-center justify-between mb-4 px-1">
+              <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest leading-none">Radar do Bairro 📡</h2>
+          </div>
+          <div className="space-y-3">
+              {MOCK_RADAR_V3.map(item => (
+                  <div key={item.id} className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-start gap-4 animate-in slide-in-from-left duration-500">
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                          item.type === 'alert' ? 'bg-red-50 text-red-500' :
+                          item.type === 'new' ? 'bg-emerald-50 text-emerald-600' :
+                          'bg-blue-50 text-blue-600'
+                      }`}>
+                          {item.type === 'alert' ? <AlertTriangle size={20} /> : 
+                           item.type === 'new' ? <Sparkles size={20} /> : <Info size={20} />}
+                      </div>
+                      <div className="flex-1">
+                          <div className="flex justify-between items-start mb-1">
+                              <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
+                              <span className="text-[10px] font-bold text-gray-400">{item.time}</span>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.content}</p>
+                      </div>
+                  </div>
+              ))}
+          </div>
+      </section>
+
+      {/* 7. MISSÕES DO BAIRRO (GAMIFICAÇÃO) */}
+      <section className="px-5 py-6">
+          <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+              <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-6">
+                      <Trophy className="text-amber-400" size={20} />
+                      <h2 className="text-sm font-black uppercase tracking-widest">Missões do Bairro</h2>
+                  </div>
+                  
+                  <div className="space-y-6">
+                      {MOCK_MISSOES.map(missao => (
+                          <div key={missao.id} className="space-y-2">
+                              <div className="flex justify-between items-end">
+                                  <div>
+                                      <p className="font-bold text-sm">{missao.title}</p>
+                                      <p className="text-[10px] text-slate-400 font-medium">{missao.task}</p>
+                                  </div>
+                                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{missao.reward}</span>
+                              </div>
+                              <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                  <div 
+                                      className="h-full bg-blue-500 rounded-full transition-all duration-1000" 
+                                      style={{ width: `${(missao.progress / missao.total) * 100}%` }}
+                                  ></div>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      {/* 8. RECOMENDADOS PARA VOCÊ (PERSONALIZAÇÃO) */}
+      <RecomendadosParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
+
+      <div className="h-10"></div>
     </div>
   );
 };

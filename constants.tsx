@@ -15,7 +15,7 @@ import {
   MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
   Key, Fan, Truck, Shovel,
   Meh, ThumbsDown, Gift, RefreshCw, Accessibility, Landmark, Wallet, HeartPulse,
-  MapPin, Building, Plus, AlertTriangle
+  MapPin, Building, Plus, AlertTriangle, FastForward
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
 import { getStoreLogo } from '@/utils/mockLogos';
@@ -46,37 +46,44 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-wellness', name: 'Bem-estar', slug: 'bem-estar', icon: <HeartPulse />, color: 'bg-[#1E5BFF]' },
 ];
 
+export const MOCK_OFERTAS_RELAMPAGO = [
+    { id: 'or-1', storeName: 'Pizzaria do Zé', discount: '50% OFF', item: 'Pizza Grande', timeLeft: '14:20', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400' },
+    { id: 'or-2', storeName: 'Bibi Lanches', discount: '30% OFF', item: 'Açaí 500ml', timeLeft: '05:45', image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=400' },
+];
+
+export const MOCK_RADAR_V3 = [
+    { id: 'rd-1', type: 'info', title: 'Feira da Freguesia', content: 'Confirmada para amanhã às 08h.', time: 'há 5 min' },
+    { id: 'rd-2', type: 'alert', title: 'Manutenção Light', content: 'Rua Araguaia sem luz hoje até 16h.', time: 'há 15 min' },
+    { id: 'rd-3', type: 'new', title: 'Nova Petshop', content: 'Seja bem-vinda "Patas & Cia" ao Anil.', time: 'há 1h' },
+];
+
+export const MOCK_MISSOES = [
+    { id: 'm1', title: 'Explorador local', task: 'Visite 3 lojas esta semana', progress: 1, total: 3, reward: '100 pts' },
+    { id: 'm2', title: 'Crítico do bairro', task: 'Avalie sua última compra', progress: 0, total: 1, reward: 'Badge Bronze' },
+];
+
+export const MOCK_HOME_COUPONS_V2 = [
+  { id: 'cp-1', storeName: 'Açougue do Zé', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100', discount: '30% OFF', resgates: '290 resgates hoje', code: 'BIBI30', color: 'bg-rose-500', distancia: '200m • Freguesia' },
+  { id: 'cp-2', storeName: 'Studio Bella', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15', resgates: '15 vagas sem falta', code: 'VIP15', color: 'bg-blue-600', validade: 'Válido até 16:00' },
+  { id: 'cp-3', storeName: 'Pet Shop Alegria', storeLogo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100', discount: '10% OFF', resgates: '120 resgates hoje', code: 'PET10', color: 'bg-emerald-600', distancia: '800m • Anil' },
+];
+
+export const MOCK_ACONTECENDO_AGORA = [
+    { id: 'l1', badge: 'AO VIVO', badgeColor: 'bg-emerald-500 text-white', title: 'Música no Espetto Carioca', subtitle: 'Bossa Nova na Praça da Freguesia', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=600', info1_icon: Clock, info1_text: 'Agora', info2_icon: Users, info2_text: '20' },
+    { id: 'l2', badge: 'PET PERDIDO', badgeColor: 'bg-amber-400 text-black', title: 'Procura-se: Golden Retriever', subtitle: 'Visto perto da Estrada dos Três Rios', image: 'https://images.unsplash.com/photo-1598875184988-5e67b1a7ea9b?q=80&w=600', info1_icon: MapPin, info1_text: 'Perto', info2_icon: MapPin, info2_text: '150m' },
+];
+
+export const MOCK_RADAR_BAIRRO_V2 = [
+    { id: 'radar-1', title: 'Pão francês em oferta', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', info_badge: 'AGORA • Padaria Imperial', temei_badge: 'TEMEI' },
+    { id: 'radar-2', title: 'Vacinação amanhã', image: 'https://images.unsplash.com/photo-1605289982774-9a6fef564df8?q=80&w=400', info_badge: 'Perto do Posto de Saúde' },
+];
+
 export const CLASSIFIED_CATEGORIES: Category[] = [
   { id: 'cl-jobs', name: 'Empregos', slug: 'jobs', icon: <Briefcase />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-lost', name: 'Achados', slug: 'neighborhood_posts', icon: <Search />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-trade', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-donations', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-[#1E5BFF]' },
   { id: 'cl-realestate', name: 'Imóveis', slug: 'real_estate', icon: <Building2 />, color: 'bg-[#1E5BFF]' },
-];
-
-export const MOCK_HOME_COUPONS_V2 = [
-  { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=100', discount: '30% OFF', resgates: '290 resgates hoje', code: 'BIBI30', color: 'bg-rose-500', distancia: '200m • 600m' },
-  { id: 'cp-2', storeName: 'Studio Bella', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15', resgates: '15 vagas sem laita', code: 'VIP15', color: 'bg-blue-600', validade: 'Válido até 16:00' },
-  { id: 'cp-3', storeName: 'Pet Shop Alegria', storeLogo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100', discount: '10% OFF', resgates: '120 resgates hoje', code: 'PET10', color: 'bg-emerald-600', distancia: '800m' },
-];
-
-export const MOCK_ACONTECENDO_AGORA = [
-    { id: 'l1', badge: 'AO VIVO', badgeColor: 'bg-emerald-500 text-white', title: 'Música no Espetto Carioca', subtitle: 'Visto om Boca na Praça da Freguesia', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=600', info1_icon: Clock, info1_text: 'Agora', info2_icon: Users, info2_text: '20' },
-    { id: 'l2', badge: 'PET PERDIDO', badgeColor: 'bg-amber-400 text-black', title: 'Procura-se: Golden Retriever', subtitle: 'Visto Vaida ate 18:00 m • Perto', image: 'https://images.unsplash.com/photo-1598875184988-5e67b1a7ea9b?q=80&w=600', info1_icon: MapPin, info1_text: 'Perto', info2_icon: MapPin, info2_text: '150m' },
-];
-
-export const MOCK_RADAR_BAIRRO_V2 = [
-    { id: 'radar-1', title: 'Pão francês em oferta', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', info_badge: 'AGORA • 1 min', temei_badge: 'TEMEI' },
-    { id: 'radar-2', title: 'Vacinação menha', image: 'https://images.unsplash.com/photo-1605289982774-9a6fef564df8?q=80&w=400', info_badge: 'Perto ate 14h • Agora' },
-    { id: 'radar-3', title: 'A TERFICO VTO', image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=400', temei_badge: 'A TERFICO VTO' },
-];
-
-
-export const MOCK_HOME_COUPONS = [
-  { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100', discount: '20% OFF', rules: 'Válido em combos de lanches', code: 'BIBI20', color: 'bg-rose-500' },
-  { id: 'cp-2', storeName: 'Studio Hair Vip', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15,00', rules: 'Corte + Barba às terças', code: 'VIP15', color: 'bg-indigo-600' },
-  { id: 'cp-3', storeName: 'Pet Shop Alegria', storeLogo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100', discount: '10% OFF', rules: 'Válido para Banho & Tosa', code: 'PET10', color: 'bg-emerald-600' },
-  { id: 'cp-4', storeName: 'Pizzaria do Zé', storeLogo: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100', discount: 'R$ 10,00', rules: 'Na primeira pizza grande', code: 'PIZZA10', color: 'bg-orange-600' },
 ];
 
 export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
@@ -102,42 +109,12 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
   ],
 };
 
-export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
-  {
-    id: 'post-1',
-    userId: 'u1',
-    userName: 'Taty Oliveira',
-    userAvatar: 'https://i.pravatar.cc/100?u=taty',
-    authorRole: 'resident',
-    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
-    type: 'recommendation',
-    communityId: 'comm-tips',
-    neighborhood: 'Freguesia',
-    timestamp: '2h',
-    likes: 8,
-    comments: 16
-  }
-];
-
 export const MOCK_CLASSIFIEDS: Classified[] = [
     { id: 'cl-serv-1', title: 'Eletricista Residencial 24h', advertiser: 'Sérgio Luz', category: 'Orçamento de Serviços', neighborhood: 'Freguesia', description: 'Atendo emergências, curto-circuito, troca de disjuntor. Orçamento rápido pelo WhatsApp.', timestamp: 'Há 15 min', contactWhatsapp: '5521999991111', typeLabel: 'Serviço', imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800' }
 ];
 
 export const MOCK_JOBS: Job[] = [
-  {
-    id: 'job-1',
-    role: 'Atendente de Balcão',
-    company: 'Padaria Imperial',
-    neighborhood: 'Freguesia',
-    category: 'Alimentação',
-    type: 'CLT',
-    salary: 'R$ 1.450,00',
-    description: 'Atendimento ao público...',
-    requirements: ['Experiência'],
-    postedAt: 'Há 2h',
-    candidacy_method: 'whatsapp',
-    modality: 'Presencial',
-  }
+  { id: 'job-1', role: 'Atendente de Balcão', company: 'Padaria Imperial', neighborhood: 'Freguesia', category: 'Alimentação', type: 'CLT', salary: 'R$ 1.450,00', description: 'Atendimento ao público...', requirements: ['Experiência'], postedAt: 'Há 2h', candidacy_method: 'whatsapp', modality: 'Presencial' }
 ];
 
 export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
@@ -161,7 +138,7 @@ export const STORES: Store[] = [
     isSponsored: true,
     tags: ['segurança', 'limpeza residencial', 'manutenção geral']
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=600', tags: [] },
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] },
   { id: 'padaria-santo-pao', name: 'Padaria Santo Pão', category: 'Comida', subcategory: 'Padaria', rating: 4.9, distance: '3m', adType: AdType.ORGANIC, description: 'Pães artesanais e café da manhã.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', tags: ['10% OFF hoje'] },
   { id: 'bella-saude', name: 'Bella Saúde', category: 'Saúde', subcategory: 'Ginecologia', rating: 4.8, distance: '2.5 km', adType: AdType.ORGANIC, description: 'Clínica de saúde da mulher.', isSponsored: false, image: 'https://images.unsplash.com/photo-1559839734-2b71f1e3c770?q=80&w=400', tags: [] }
 ];
@@ -177,48 +154,9 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
   'comida': {
     'Freguesia': [
       { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' },
-      { image: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=800', storeId: 'f-1' }
-    ]
-  },
-  'beleza': {
-    'Freguesia': [
-      { image: 'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800', storeId: 'f-2' },
-      { image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800', storeId: 'f-3' }
+      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }
     ]
   }
-};
-
-export const EDITORIAL_SERVICES: EditorialCollection[] = [
-  {
-    id: 'culinaria-jpa',
-    title: 'Melhores de JPA',
-    subtitle: 'Onde comer bem no bairro',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop',
-    keywords: ['comida', 'restaurante']
-  }
-];
-
-export const STORIES: Story[] = [
-  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=400' }
-];
-
-export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
-  {
-    id: 'comm-residents',
-    name: 'Moradores de JPA',
-    description: 'Troca de informações entre vizinhos.',
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
-    icon: <Users />,
-    color: 'bg-blue-500',
-    membersCount: '12.4k',
-    type: 'official'
-  }
-];
-
-export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [];
-export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [...OFFICIAL_COMMUNITIES];
-export const SPECIALTIES: Record<string, string[]> = {
-  'default': ['Reparo específico', 'Instalação']
 };
 
 export const HOJE_NO_BAIRRO_CATEGORIES = [
@@ -231,9 +169,71 @@ export const HOJE_NO_BAIRRO_CATEGORIES = [
     { id: 'coupon_landing', name: 'Promoções', icon: Ticket },
 ];
 
-export const MOCK_RADAR_BAIRRO = [
-  { id: 'radar-1', type: 'promo', title: 'Happy Hour em Dobro na Choperia X', expiresIn: '2h', location: 'Freguesia' },
-  { id: 'radar-2', type: 'alert', title: 'Falta de luz programada na Rua Araguaia', description: 'Manutenção da Light das 14h às 16h.', time: 'Hoje' },
-  { id: 'radar-3', type: 'event', title: 'Música ao vivo no Bar do Zé', location: 'Pechincha', time: 'Sábado, 20h' },
-  { id: 'radar-4', type: 'promo', title: 'Últimas peças com 50% OFF na Loja Y', expiresIn: '45min', location: 'Taquara' },
+/**
+ * STORIES, OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, NEIGHBORHOOD_COMMUNITIES, MOCK_COMMUNITY_POSTS
+ * Added missing exported constants to resolve multiple build errors.
+ */
+
+export const STORIES: Story[] = [
+  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400&auto=format&fit=crop' },
+  { id: 's2', name: 'Salão Vip', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop' },
+  { id: 's3', name: 'Pet Shop', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400&auto=format&fit=crop' },
+];
+
+export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
+  {
+    id: 'comm-residents',
+    name: 'Moradores de JPA',
+    description: 'Comunidade oficial para troca de informações entre vizinhos de Jacarepaguá.',
+    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
+    icon: <Users />,
+    color: 'bg-blue-500',
+    membersCount: '12.4k',
+    type: 'official'
+  },
+  {
+    id: 'comm-tips',
+    name: 'Recomendações e dicas no bairro',
+    description: 'Onde encontrar the melhor serviço? Peça e dê dicas para seus vizinhos.',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+    icon: <HelpCircle />,
+    color: 'bg-orange-500',
+    membersCount: '8.2k',
+    type: 'official'
+  }
+];
+
+export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [
+  {
+    id: 'user-comm-1',
+    name: 'Clube do Livro Freguesia',
+    description: 'Encontros mensais para discutir literatura na Praça da Freguesia.',
+    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=800&auto=format&fit=crop',
+    icon: <BookOpen />,
+    color: 'bg-amber-600',
+    membersCount: '156',
+    type: 'user'
+  }
+];
+
+export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
+  ...OFFICIAL_COMMUNITIES,
+  ...MOCK_USER_COMMUNITIES
+];
+
+export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
+  {
+    id: 'post-1',
+    userId: 'u1',
+    userName: 'Taty Oliveira',
+    userAvatar: 'https://i.pravatar.cc/100?u=taty',
+    authorRole: 'resident',
+    content: 'Alguém conhece um chaveiro de confiança na Freguesia? Perdi as chaves de casa agora pouco.',
+    type: 'recommendation',
+    communityId: 'comm-tips',
+    neighborhood: 'Freguesia',
+    timestamp: '2h',
+    likes: 8,
+    comments: 16
+  }
 ];
