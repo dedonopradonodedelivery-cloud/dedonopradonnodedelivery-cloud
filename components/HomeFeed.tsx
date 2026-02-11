@@ -24,7 +24,6 @@ import {
   ShieldAlert,
   Award,
   Users,
-  // Added missing icon imports
   Tag,
   AlertCircle,
   Hash,
@@ -38,6 +37,8 @@ import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
+import { CouponCarousel } from '@/components/CouponCarousel';
+import { HojeNoBairro } from '@/components/HojeNoBairro';
 
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
@@ -59,13 +60,10 @@ const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) =
   
   const getPostTypeIcon = (type: string) => {
     switch (type) {
-      // Added fix for missing Tag
       case 'promotion': return <Tag className="w-2.5 h-2.5" />;
       case 'event': return <Calendar className="w-2.5 h-2.5" />;
-      // Added fix for missing AlertCircle
       case 'alert': return <AlertCircle className="w-2.5 h-2.5" />;
       case 'recommendation': return <Award className="w-2.5 h-2.5" />;
-      // Added fix for missing Hash
       default: return <Hash className="w-2.5 h-2.5" />;
     }
   };
@@ -128,47 +126,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
-  const [wizardStep, setWizardStep] = useState(0);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
-  const [images, setImages] = useState<string[]>([]);
-  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
-  const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
-
   const homeCategories = useMemo(() => {
     const ids = ['cat-saude', 'cat-pets', 'cat-fashion', 'cat-beauty', 'cat-coupons', 'cat-more'];
     return ids.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
   }, []);
-
-  const handleWizardSubmit = () => {
-    if (!user) {
-        localStorage.setItem('pending_wizard_state', JSON.stringify({ selectedService, selectedUrgency, description, images }));
-        onNavigate('profile');
-        return;
-    }
-    setIsSubmittingLead(true);
-    const requestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newLead: ServiceRequest = {
-        id: requestId,
-        userId: user.id,
-        userName: user.user_metadata?.full_name || 'Morador Local',
-        serviceType: selectedService || 'Geral',
-        description,
-        neighborhood: currentNeighborhood,
-        urgency: (selectedUrgency as ServiceUrgency) || 'Não tenho pressa',
-        images,
-        status: 'open',
-        createdAt: new Date().toISOString()
-    };
-    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
-    localStorage.setItem('service_requests_mock', JSON.stringify([newLead, ...existing]));
-    setLastCreatedRequestId(requestId);
-    setTimeout(() => {
-      setIsSubmittingLead(false);
-      setWizardStep(4);
-    }, 1500);
-  };
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-48">
@@ -179,11 +140,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. CATEGORIAS - REFINADAS (Branco + Azul) */}
-      <section className="w-full bg-white dark:bg-gray-950 pt-8 pb-8 px-5 relative z-10 border-b border-gray-100 dark:border-gray-900">
+      {/* 1. HOJE NO BAIRRO - RESTAURADO AO TOPO */}
+      <HojeNoBairro />
+
+      {/* 2. RESOLVA RÁPIDO - CATEGORIAS */}
+      <section className="w-full bg-white dark:bg-gray-950 pb-8 px-5 relative z-10">
         <div className="mb-5 px-1">
-           <h2 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] mb-1">Resolva Rápido</h2>
-           <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Serviços essenciais a um toque</p>
+           <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Explore JPA</h2>
+           <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Resolva Rápido</h3>
         </div>
         <div className="flex justify-between items-start gap-2 overflow-x-auto no-scrollbar pb-1">
           {homeCategories.map((cat) => (
@@ -206,15 +170,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 2. CARROSSEL PRINCIPAL */}
-      <section className="bg-white dark:bg-gray-950 w-full">
+      {/* 3. CUPONS DO DIA - RESTAURADO POSIÇÃO ANTERIOR */}
+      <CouponCarousel onNavigate={onNavigate} />
+
+      {/* 4. CARROSSEL PRINCIPAL */}
+      <section className="bg-white dark:bg-gray-950 w-full mt-2">
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* BLOCO: ACONTECENDO AGORA */}
+      {/* 5. ACONTECENDO AGORA */}
       <AcontecendoAgora onNavigate={onNavigate} />
 
-      {/* BLOCO: RADAR DO BAIRRO - MURAL ESTRUTURADO */}
+      {/* 6. RADAR DO BAIRRO */}
       <section className="bg-white dark:bg-gray-950 py-6 mb-4 relative px-5">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -236,7 +203,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* BLOCO: MISSÕES DO BAIRRO - GAMIFICAÇÃO REFINADA */}
+      {/* 7. MISSÕES DO BAIRRO */}
       <section className="px-5 mb-10">
         <div className="bg-[#1E5BFF] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
@@ -260,16 +227,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                     <div className="h-2.5 w-full bg-white/10 rounded-full overflow-hidden border border-white/5 relative">
                         <div className="h-full bg-gradient-to-r from-yellow-300 to-amber-400 w-3/5 rounded-full transition-all duration-1000"></div>
                     </div>
-                    <div className="flex justify-between items-center px-1">
-                        <div className="flex items-center gap-2">
-                           <Award size={10} className="text-yellow-300" />
-                           <span className="text-[9px] font-black text-blue-100 uppercase tracking-widest">Ganhando Pontos</span>
-                        </div>
-                        <div className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-lg border border-white/10">
-                            <Lock size={8} className="text-blue-100" />
-                            <span className="text-[8px] font-bold text-blue-100 uppercase">Cupom VIP</span>
-                        </div>
-                    </div>
                 </div>
 
                 <button 
@@ -282,7 +239,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* BLOCO: EXPLORAR BAIRRO */}
+      {/* 8. EXPLORAR BAIRRO */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-4">
         <div className="px-5">
           <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
@@ -297,11 +254,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </div>
 
-      {/* 8. NOVA SEÇÃO FINAL: PARCEIROS DO BAIRRO (MONETIZAÇÃO) */}
+      {/* 9. QUEM MOVIMENTA O BAIRRO */}
       <section className="px-5 pt-10 pb-20 mt-6 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3 mb-6 px-1">
               <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shadow-sm">
-                {/* Added fix for missing Crown */}
                 <Crown size={18} strokeWidth={2.5} />
               </div>
               <div>

@@ -1,13 +1,14 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Search, ChevronDown, Check, Bell, X, Mic, Tag, ChevronRight, MapPin } from 'lucide-react';
+// Added Tag and ChevronRight to fix 'Cannot find name' errors on lines 164, 170, and 182
+import { Search, ChevronDown, Check, Bell, X, Mic, ShieldAlert, MapPin, Tag, ChevronRight } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store } from '../../types';
 import { CATEGORIES } from '../../constants';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface HeaderProps {
   onNotificationClick: () => void;
-  user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onNavigate: (view: string, data?: any) => void;
@@ -17,9 +18,6 @@ interface HeaderProps {
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
-  isDarkMode?: boolean;
-  toggleTheme?: () => void;
-  userRole?: string | null;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -55,10 +53,15 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   activeTab,
   stores = [],
-  onStoreClick
+  onStoreClick,
+  onOpenViewSwitcher
 }) => {
+  const { user } = useAuth();
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Regra Admin: dedonopradonodedelivery@gmail.com
+  const isAdminUser = user?.email === 'dedonopradonodedelivery@gmail.com';
   
   useEffect(() => {
     const checkNotifs = () => {
@@ -71,6 +74,19 @@ export const Header: React.FC<HeaderProps> = ({
     checkNotifs();
   }, []);
 
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    const welcome = hour >= 5 && hour < 12 ? 'Bom dia' : hour >= 12 && hour < 18 ? 'Boa tarde' : 'Boa noite';
+    const icon = hour >= 5 && hour < 18 ? '☀️' : '🌙';
+    
+    if (user) {
+        const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0];
+        return { title: `${welcome}, ${name} ${icon}`, sub: "O que você precisa hoje?" };
+    }
+    const neighborhood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
+    return { title: `${welcome}! ${icon}`, sub: neighborhood };
+  }, [user, currentNeighborhood]);
+
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
   const searchResults = useMemo(() => {
@@ -81,40 +97,37 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores, categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
-  const dynamicPlaceholder = currentNeighborhood === "Jacarepaguá (todos)" ? "O que busca em JPA?" : `O que busca em ${currentNeighborhood}?`;
-
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all duration-500">
+        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
                 <div className="flex items-center justify-between pt-10 pb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm border border-white/20">
-                            <MapPin className="w-4 h-4 text-white fill-white" />
-                        </div>
-                        <h1 className="text-white font-black text-lg tracking-tighter font-display">
-                            Localizei JPA
+                    <div className="flex flex-col">
+                        <h1 className="text-white font-black text-xl tracking-tight leading-none mb-1">
+                            {greeting.title}
                         </h1>
+                        <button onClick={toggleSelector} className="flex items-center gap-1 text-white/70 text-[10px] font-black uppercase tracking-widest text-left">
+                            {greeting.sub} <ChevronDown size={10} strokeWidth={3} />
+                        </button>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button 
-                            onClick={toggleSelector} 
-                            className="flex items-center gap-1.5 px-3 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 active:scale-95 transition-all"
-                        >
-                            <span className="text-[10px] font-black text-white uppercase tracking-wider whitespace-nowrap">
-                                {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-                            </span>
-                            <ChevronDown className="w-3 h-3 text-white/70" />
-                        </button>
-
+                    <div className="flex items-center gap-2">
+                        {isAdminUser && (
+                            <button 
+                                onClick={onOpenViewSwitcher}
+                                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90 border border-white/10"
+                            >
+                                <ShieldAlert size={20} />
+                            </button>
+                        )}
+                        
                         <button 
                             onClick={onNotificationClick}
-                            className="relative p-2 text-white hover:bg-white/10 rounded-full transition-all active:scale-90"
+                            className="relative p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90 border border-white/10"
                         >
                             <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-sm">
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1E5BFF] shadow-lg">
                                     <span className="text-[8px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
@@ -122,14 +135,16 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+                <div className="relative group mt-2">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                        <Search className="h-4 w-4 text-white/60" />
+                    </div>
                     <input 
                       type="text" 
                       value={searchTerm} 
                       onChange={(e) => onSearchChange(e.target.value)} 
-                      placeholder={dynamicPlaceholder} 
-                      className="block w-full pl-11 pr-12 bg-white/15 border border-white/20 rounded-2xl text-sm font-medium text-white placeholder-white/60 focus:outline-none focus:ring-4 focus:ring-white/10 py-3.5 shadow-xl backdrop-blur-sm transition-all" 
+                      placeholder={`O que busca em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}?`} 
+                      className="block w-full pl-11 pr-12 bg-white/15 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 py-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-all" 
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {searchTerm ? (
