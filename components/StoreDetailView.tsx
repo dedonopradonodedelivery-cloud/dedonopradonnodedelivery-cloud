@@ -9,13 +9,19 @@ import {
   Clock,
   Phone,
   MessageSquare,
+  ArrowRight,
   Instagram,
+  ShieldCheck,
   BadgeCheck,
   ChevronRight as ChevronRightIcon,
+  Info,
   LayoutGrid,
   X,
+  Navigation2,
   Map as WazeIcon,
-  Store as StoreIcon,
+  Crown,
+  AlertTriangle,
+  Store as StoreIcon, // Importado para o ícone de fechamento
   User as UserIcon
 } from 'lucide-react';
 import { Store, BusinessHour, StorePromotion } from '../types';
@@ -23,8 +29,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
 import { TrustBlock } from './TrustBlock';
-import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { MasterSponsorBadge } from './MasterSponsorBadge';
+import { MasterSponsorBanner } from './MasterSponsorBanner'; // Componente importado para destaque
 
 const WEEK_DAYS_LABELS: Record<string, string> = {
   segunda: 'Segunda-feira',
@@ -90,13 +95,13 @@ export const StoreDetailView: React.FC<{
   onPay?: () => void;
   onClaim?: () => void;
   onNavigate: (view: string, data?: any) => void;
-}> = ({ store, onBack, onClaim, onNavigate }) => {
+}> = ({ store, onBack, onPay, onClaim, onNavigate }) => {
   const { user } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'promotions' | 'reviews' | 'hours' | 'payments'>('description');
   const [selectedPromotion, setSelectedPromotion] = useState<StorePromotion | null>(null);
-  const [currentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const images = useMemo(() => {
     const gallery = store.gallery?.slice(0, 6) || [];
@@ -134,15 +139,14 @@ export const StoreDetailView: React.FC<{
         {/* HEADER / IMAGEM DE CAPA */}
         <section className="relative w-full h-[220px] sm:h-[260px] bg-gray-100 dark:bg-gray-800">
           <div className="absolute top-0 left-0 right-0 p-4 pt-8 flex justify-between items-center z-40">
-            <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-all">
+            <button onClick={onBack} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
               <ChevronLeft className="w-6 h-6 text-white" />
             </button>
-            <div className="flex gap-2 items-center">
-              <MasterSponsorBadge />
-              <button onClick={() => track('store_click_share')} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-all">
+            <div className="flex gap-2">
+              <button onClick={() => track('store_click_share')} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
                 <Share2 className="w-5 h-5 text-white" />
               </button>
-              <button onClick={() => setIsFavorite(!isFavorite)} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-all">
+              <button onClick={() => setIsFavorite(!isFavorite)} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform">
                 <Heart className={`w-5 h-5 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
               </button>
             </div>
@@ -159,6 +163,7 @@ export const StoreDetailView: React.FC<{
         {/* BANNER ARREDONDADO CENTRALIZADO */}
         <div className="px-5 relative z-10">
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 pt-14 -mt-16 text-center shadow-2xl border border-gray-100 dark:border-gray-800 relative">
+              {/* LOGO AVATAR FLUTUANTE */}
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-40">
                 <div className="w-20 h-20 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden flex items-center justify-center">
                   <img src={logoImg} alt="Logo" className="w-full h-full object-contain rounded-full" />
@@ -184,6 +189,7 @@ export const StoreDetailView: React.FC<{
                   </div>
               </div>
 
+              {/* INFORMAÇÕES DE ENDEREÇO E CONTATO */}
               <div className="space-y-2 mb-8 px-2">
                 <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
                     <MapPin size={14} className="text-[#1E5BFF] shrink-0" />
@@ -195,6 +201,7 @@ export const StoreDetailView: React.FC<{
                 </div>
               </div>
 
+              {/* BOTÕES DE AÇÃO */}
               <div className="space-y-3">
                   <div className="flex gap-3">
                       <button 
@@ -242,6 +249,7 @@ export const StoreDetailView: React.FC<{
           </div>
         </div>
 
+        {/* NAVEGAÇÃO DE ABAS */}
         <div className="mt-10 px-5">
             <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1.5 rounded-full mb-8 overflow-x-auto no-scrollbar border border-gray-100 dark:border-gray-700/50">
                 {[
@@ -285,7 +293,9 @@ export const StoreDetailView: React.FC<{
                             </div>
                         </div>
 
+                        {/* AÇÕES DE ENCERRAMENTO E REIVINDICAÇÃO */}
                         <div className="pt-10 space-y-4 px-1">
+                            {/* CTA Principal: Reivindicar - Azul, Bold, Maior */}
                             <button 
                                 onClick={onClaim}
                                 className="w-full py-4 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-[1.25rem] text-sm font-bold uppercase tracking-[0.15em] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all"
@@ -293,15 +303,17 @@ export const StoreDetailView: React.FC<{
                                 Reivindicar esta loja
                             </button>
                             
+                            {/* Ação Secundária: Informar Fechamento - Branco, Texto Vermelho, Menor */}
                             <button 
-                                onClick={() => {}}
-                                className="w-full py-3.5 flex items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-red-500 rounded-[1.25rem] text-xs font-bold uppercase tracking-[0.15em] hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-[0.98]"
+                                onClick={() => { /* Lógica de reportar fechamento */ }}
+                                className="w-full py-3.5 flex items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-red-500 rounded-[1.25rem] text-xs font-bold uppercase tracking-[0.15em] hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-[0.98]"
                             >
                                 <StoreIcon size={14} className="text-red-500" />
                                 Informar que a loja fechou
                             </button>
                         </div>
 
+                        {/* BANNER DO PATROCINADOR MASTER */}
                         <MasterSponsorBanner 
                             onClick={() => onNavigate('patrocinador_master')} 
                             label={`Parceiro de ${store.neighborhood || 'Jacarepaguá'}`}

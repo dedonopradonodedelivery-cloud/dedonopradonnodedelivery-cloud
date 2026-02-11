@@ -3,35 +3,23 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Store, AdType } from '../types';
 import { STORES } from '../constants';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { Sparkles, Wrench, Check, ArrowRight } from 'lucide-react';
 
 interface BannerData {
   id: string;
-  storeId?: string;
-  type?: 'store' | 'services';
+  storeId: string;
   title: string;
   subtitle: string;
   cta: string;
-  image?: string;
+  image: string;
   bgColor: string;
   neighborhood: string;
   category: string;
+  subcategory?: string;
 }
 
 const MOCK_BANNERS: BannerData[] = [
   {
-    id: 'b-services-1',
-    type: 'services',
-    title: 'PRECISA DE UM PROFISSIONAL NO SEU BAIRRO?',
-    subtitle: 'Especialistas verificados, orçamentos rápidos e atendimento perto de você.',
-    cta: 'SOLICITAR ORÇAMENTO GRÁTIS',
-    bgColor: 'bg-gradient-to-br from-[#020617] via-[#081431] to-[#1E5BFF]',
-    neighborhood: 'Jacarepaguá (todos)',
-    category: 'SERVIÇOS VERIFICADOS'
-  },
-  {
     id: 'b-saude-1',
-    type: 'store',
     storeId: 'fake-saude-banner',
     title: 'Clínica Bem Estar',
     subtitle: 'Cuidado completo para sua família com especialistas.',
@@ -43,7 +31,6 @@ const MOCK_BANNERS: BannerData[] = [
   },
   {
     id: 'b-pet-1',
-    type: 'store',
     storeId: 'fake-pet-banner',
     title: 'Amigão Pet Shop',
     subtitle: 'Banho, tosa e mimos para seu melhor amigo.',
@@ -52,6 +39,28 @@ const MOCK_BANNERS: BannerData[] = [
     bgColor: 'bg-amber-600',
     neighborhood: 'Jacarepaguá (todos)',
     category: 'Pets'
+  },
+  {
+    id: 'b-moda-1',
+    storeId: 'fake-moda-banner',
+    title: 'Boutique Urbana',
+    subtitle: 'As tendências da estação chegaram ao bairro.',
+    cta: 'Conferir Lookbook',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
+    bgColor: 'bg-rose-700',
+    neighborhood: 'Jacarepaguá (todos)',
+    category: 'Moda'
+  },
+  {
+    id: 'b-beleza-1',
+    storeId: 'fake-beleza-banner',
+    title: 'Espaço Glamour',
+    subtitle: 'Realce sua beleza com quem entende do assunto.',
+    cta: 'Ver Promoções',
+    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop',
+    bgColor: 'bg-purple-800',
+    neighborhood: 'Jacarepaguá (todos)',
+    category: 'Beleza'
   }
 ];
 
@@ -67,14 +76,22 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
   const { currentNeighborhood } = useNeighborhood();
   const isCategoryView = !!categoryName;
 
+  const bannerCount = useMemo(() => {
+    return isCategoryView ? 2 : 4;
+  }, [isCategoryView]);
+
   const activeBanners = useMemo(() => {
+    // Se estiver em uma categoria, tenta filtrar banners daquela categoria primeiro
     if (isCategoryView) {
       const catPool = MOCK_BANNERS.filter(b => b.category === categoryName);
-      if (catPool.length > 0) return catPool.slice(0, 2);
+      if (catPool.length > 0) return catPool.slice(0, bannerCount);
     }
+    
+    // Na Home, mostra os 4 banners fixos solicitados
+    // A estrutura já permite filtrar por bairro futuramente
     const pool = MOCK_BANNERS.filter(b => b.neighborhood === 'Jacarepaguá (todos)' || b.neighborhood === currentNeighborhood);
-    return pool;
-  }, [currentNeighborhood, categoryName, isCategoryView]);
+    return pool.slice(0, bannerCount);
+  }, [currentNeighborhood, categoryName, subcategoryName, bannerCount, isCategoryView]);
 
   useEffect(() => {
     if (activeBanners.length <= 1) return;
@@ -84,122 +101,77 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
     return () => clearInterval(interval);
   }, [activeBanners.length]);
 
-  const handleBannerClick = (banner: BannerData) => {
-    if (banner.type === 'services') {
-        onNavigate('services_landing');
-        return;
-    }
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [categoryName, subcategoryName, currentNeighborhood]);
 
-    if (banner.storeId) {
-        const store = STORES.find(s => s.id === banner.storeId) || {
-          id: banner.storeId,
-          name: banner.title,
-          category: banner.category,
-          subcategory: banner.category,
-          description: banner.subtitle,
-          adType: AdType.PREMIUM,
-          rating: 4.9,
-          distance: 'Perto de você',
-          neighborhood: currentNeighborhood === 'Jacarepaguá (todos)' ? 'Freguesia' : currentNeighborhood,
-          verified: true,
-          isOpenNow: true,
-          image: banner.image,
-          logoUrl: '/assets/default-logo.png'
-        };
-        onStoreClick(store as Store);
-    }
+  const handleBannerClick = (banner: BannerData) => {
+    // Busca a loja real ou cria o mock placeholder baseado no segmento
+    const store = STORES.find(s => s.id === banner.storeId) || {
+      id: banner.storeId,
+      name: banner.title,
+      category: banner.category,
+      subcategory: banner.category,
+      description: `O melhor de ${banner.category.toLowerCase()} na região de Jacarepaguá. ${banner.subtitle}`,
+      adType: AdType.PREMIUM,
+      rating: 4.9,
+      distance: 'Perto de você',
+      neighborhood: currentNeighborhood === 'Jacarepaguá (todos)' ? 'Freguesia' : currentNeighborhood,
+      verified: true,
+      isOpenNow: true,
+      image: banner.image,
+      logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(banner.title)}&background=random&color=fff`
+    };
+
+    onStoreClick(store as Store);
   };
 
   if (activeBanners.length === 0) return null;
+
   const currentBanner = activeBanners[currentIndex];
 
   return (
-    <div className="px-4 mb-6 bg-white dark:bg-gray-950 w-full overflow-hidden">
+    <div className="px-5 mb-6 bg-white dark:bg-gray-950">
       <div 
         onClick={() => handleBannerClick(currentBanner)}
-        className={`relative aspect-[16/11] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
+        className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${currentBanner.bgColor}`}
       >
-        {currentBanner.type === 'services' ? (
-          /* DESIGN REORGANIZADO: SERVIÇOS VERIFICADOS */
-          <div className="w-full h-full relative flex flex-col justify-between p-8 text-left">
-            {/* Backgrounds */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1.5px)', backgroundSize: '16px 16px' }}></div>
-            
-            {/* Top Group: Header + Text */}
-            <div>
-              {/* Header */}
-              <div className="relative z-10 flex justify-between items-start mb-6">
-                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-xl">
-                      <Sparkles size={14} className="text-blue-400" />
-                      <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{currentBanner.category}</span>
-                  </div>
-                  <div className="relative">
-                      <div className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-[1.25rem] border border-white/10 flex items-center justify-center shadow-2xl">
-                          <Wrench size={28} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-[#020617] shadow-lg">
-                              <Check size={12} className="text-white" strokeWidth={4} />
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-              {/* Main Text Content */}
-              <div className="relative z-10 space-y-3">
-                  <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter max-w-[280px] drop-shadow-md">
-                      {currentBanner.title}
-                  </h2>
-                  <p className="text-sm text-blue-100/80 font-medium leading-relaxed max-w-[280px]">
-                      {currentBanner.subtitle}
-                  </p>
-              </div>
+        <div className="w-full h-full relative">
+          <img 
+            src={currentBanner.image} 
+            alt={currentBanner.title} 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none"></div>
+          
+          <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+            <div className="flex items-center gap-2 mb-2">
+               <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">
+                  {currentBanner.category}
+               </span>
             </div>
-
-            {/* Bottom Group: CTA */}
-            <div className="relative z-10">
-                <button className="bg-white text-slate-900 font-black py-4 px-6 rounded-2xl shadow-2xl flex items-center gap-2 active:scale-95 transition-transform group/btn">
-                    <span className="text-xs uppercase tracking-widest">{currentBanner.cta}</span>
-                    <ArrowRight size={16} strokeWidth={3} className="transition-transform group-hover/btn:translate-x-1" />
-                </button>
+            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
+              {currentBanner.title}
+            </h2>
+            <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
+              {currentBanner.subtitle}
+            </p>
+            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit">
+               <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
             </div>
           </div>
-        ) : (
-          /* DESIGN PADRÃO: LOJA */
-          <div className="w-full h-full relative">
-            {currentBanner.image && (
-                <img src={currentBanner.image} alt={currentBanner.title} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 pointer-events-none" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
-            
-            <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none pb-12">
-                <div className="flex items-center gap-2 mb-2">
-                <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">{currentBanner.category}</span>
-                </div>
-                <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">{currentBanner.title}</h2>
-                <p className="text-[10px] font-bold text-white/90 max-w-[200px] leading-tight drop-shadow-sm mb-4">{currentBanner.subtitle}</p>
-                <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit"><span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span></div>
-            </div>
+        </div>
+
+        {activeBanners.length > 1 && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
+            {activeBanners.map((_, idx) => (
+              <div 
+                key={idx} 
+                className={`h-1 rounded-full transition-all duration-300 pointer-events-auto ${idx === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`} 
+              />
+            ))}
           </div>
         )}
-
-        {/* BARRA DE PROGRESSO: TRAÇO E PONTOS CENTRALIZADA */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-2 z-20 pointer-events-none">
-          {activeBanners.map((_, idx) => (
-            <div key={idx} className="relative flex items-center justify-center">
-              {idx === currentIndex ? (
-                /* Traço Ativo com Preenchimento Animado */
-                <div className="w-10 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                  <div 
-                    key={currentIndex} 
-                    className="h-full bg-white animate-progress"
-                  ></div>
-                </div>
-              ) : (
-                /* Ponto Inativo */
-                <div className="w-1.5 h-1.5 rounded-full bg-white opacity-40"></div>
-              )}
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

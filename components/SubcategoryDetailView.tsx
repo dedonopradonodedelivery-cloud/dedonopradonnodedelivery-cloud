@@ -1,22 +1,10 @@
 
-import React, { useState, useMemo } from 'react';
-import { 
-  ChevronLeft, 
-  Star, 
-  BadgeCheck, 
-  ChevronRight, 
-  ArrowRight, 
-  Filter, 
-  AlertCircle,
-  Sparkles,
-  MapPin,
-  Wrench,
-  User as UserIcon
-} from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, Star, BadgeCheck, ChevronRight, Store as StoreIcon, AlertCircle, ArrowRight, Filter } from 'lucide-react';
 import { Store, AdType } from '../types';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
-import { MasterSponsorBadge } from './MasterSponsorBadge';
+import { supabase } from '../lib/supabaseClient';
 
 interface SubcategoryDetailViewProps {
   subcategoryName: string;
@@ -28,161 +16,221 @@ interface SubcategoryDetailViewProps {
   onNavigate: (view: string) => void;
 }
 
-// Dados fakes padronizados
-const MOCK_HIGHLIGHTS = [
-    {
-        id: 'h1',
-        name: 'Carlos Reformas',
-        image: 'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=400',
-        call: 'Referência no Bairro',
-        desc: 'Mão de obra qualificada e garantia de 1 ano.',
-        cta: 'CONHECER'
-    },
-    {
-        id: 'h2',
-        name: 'Equipe Master',
-        image: 'https://images.unsplash.com/photo-1504148455328-497c5ef215d2?q=80&w=400',
-        call: 'Orçamento Grátis',
-        desc: 'Atendimento rápido em toda Jacarepaguá.',
-        cta: 'VER'
-    }
-];
+const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolean }> = ({ store, onClick, isMaster }) => {
+  const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
+  
+  return (
+    <div onClick={onClick} className={`rounded-2xl p-3 flex gap-3 cursor-pointer relative group transition-all duration-300 shadow-sm border ${isSponsored ? 'border-slate-100 bg-slate-50/10 dark:bg-white/5' : 'bg-white dark:bg-gray-800 border-transparent'}`}>
+      <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
+        <img src={store.logoUrl || store.image || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-cover p-0 group-hover:scale-105 transition-transform" />
+      </div>
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{store.name}</h4>
+            {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#1E5BFF] shrink-0" />}
+          </div>
+          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase tracking-tighter">PATROCINADO</span>}
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+          <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
+          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+          <span className="truncate">{store.neighborhood}</span>
+          {store.isOpenNow && <span className="text-emerald-500 font-bold ml-1">Aberto</span>}
+        </div>
+      </div>
+      <div className="flex items-center pr-1"><ChevronRight className="w-4 h-4 text-gray-200" /></div>
+    </div>
+  );
+};
 
-const MOCK_LIST = [
-    { id: 'p1', name: 'Sérgio Pintor', sub: 'Pintura Residencial', location: 'Freguesia', rating: 4.9, image: 'https://i.pravatar.cc/150?u=sergio' },
-    { id: 'p2', name: 'Luciano Elétrica', sub: 'Instalações Rápidas', location: 'Taquara', rating: 4.8, image: 'https://i.pravatar.cc/150?u=luciano' },
-    { id: 'p3', name: 'Marcos Encanador', sub: 'Manutenção Hidráulica', location: 'Anil', rating: 5.0, image: 'https://i.pravatar.cc/150?u=marcos' },
-    { id: 'p4', name: 'Amanda Design', sub: 'Design de Interiores', location: 'Pechincha', rating: 4.7, image: 'https://i.pravatar.cc/150?u=amanda' },
-    { id: 'p5', name: 'Pedro Montador', sub: 'Montagem de Móveis', location: 'Freguesia', rating: 4.9, image: 'https://i.pravatar.cc/150?u=pedro' },
-    { id: 'p6', name: 'Cláudio Gesso', sub: 'Acabamentos em Geral', location: 'Taquara', rating: 4.8, image: 'https://i.pravatar.cc/150?u=claudio' },
-];
+// Gerador de Banner Fake Realista baseado no nome da subcategoria
+const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => {
+    // Seed simples baseado no tamanho da string para consistência
+    const seed = subcategory.length + neighborhood.length;
+    
+    const backgrounds = [
+        'bg-blue-600', 'bg-emerald-600', 'bg-purple-600', 'bg-rose-600', 'bg-amber-600', 'bg-indigo-600'
+    ];
+    
+    const images = [
+        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800', // Business
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800', // Restaurant
+        'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800', // Salon
+        'https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800', // Gym
+        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800', // Shop
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800', // Home
+    ];
 
-export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ 
-  subcategoryName, 
-  onBack, 
-  onStoreClick, 
-  stores, 
-  onNavigate 
-}) => {
+    const ctas = [
+        'Conhecer Agora', 'Ver Ofertas', 'Agendar Visita', 'Pedir Orçamento', 'Saiba Mais'
+    ];
+    
+    // Seleção determinística
+    const bg = backgrounds[seed % backgrounds.length];
+    const img = images[seed % images.length];
+    const cta = ctas[seed % ctas.length];
+    
+    return {
+        title: `Destaque em ${subcategory}`,
+        storeName: `${subcategory} Premium ${neighborhood}`,
+        subtitle: `A melhor opção de ${subcategory.toLowerCase()} em ${neighborhood}.`,
+        cta,
+        bgColor: bg,
+        image: img
+    };
+};
+
+export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ subcategoryName, categoryName, onBack, onStoreClick, stores, userRole, onNavigate }) => {
   const { currentNeighborhood } = useNeighborhood();
-  const neighborhoodLabel = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
+  const [activeFilter, setActiveFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
+
+  // Gerar dados do banner fixo
+  const bannerData = useMemo(() => {
+      const hood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
+      return getSubcategoryBannerData(subcategoryName, hood);
+  }, [subcategoryName, currentNeighborhood]);
+
+  const pool = useMemo(() => {
+    let list = stores.filter(s => s.subcategory === subcategoryName);
+    
+    // Se "Jacarepaguá (todos)", mostra tudo da subcategoria.
+    // Se for bairro específico, filtra.
+    if (currentNeighborhood !== "Jacarepaguá (todos)") {
+      list = list.filter(s => s.neighborhood === currentNeighborhood);
+    }
+    return list;
+  }, [subcategoryName, currentNeighborhood, stores]);
+
+  const filteredList = useMemo(() => {
+    let list = [...pool];
+    if (activeFilter === 'top_rated') list = list.filter(s => (s.rating || 0) >= 4.7);
+    if (activeFilter === 'open_now') list = list.filter(s => s.isOpenNow);
+
+    const sponsored = list.filter(s => s.isSponsored || s.adType === AdType.PREMIUM);
+    const organic = list.filter(s => !s.isSponsored && s.adType !== AdType.PREMIUM);
+    
+    return [...sponsored, ...organic];
+  }, [pool, activeFilter]);
+
+  // Handler para clicar no banner (leva para uma loja fake de exemplo ou real se houver)
+  const handleBannerClick = () => {
+      // Tenta achar uma loja real compatível para simular clique no banner
+      const targetStore = pool[0] || {
+          id: `banner-${subcategoryName}`,
+          name: bannerData.storeName,
+          category: categoryName,
+          subcategory: subcategoryName,
+          description: bannerData.subtitle,
+          adType: AdType.PREMIUM,
+          rating: 5.0,
+          neighborhood: currentNeighborhood,
+          verified: true,
+          isOpenNow: true,
+          image: bannerData.image,
+          logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(bannerData.storeName)}&background=random&color=fff`
+      };
+      onStoreClick(targetStore as Store);
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 pb-32 animate-in slide-in-from-right duration-300">
-      
-      {/* 1. TOP BAR PADRONIZADA */}
-      <div className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
-            <ChevronLeft size={20} strokeWidth={3} />
-          </button>
-          <div>
-            <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none uppercase tracking-tighter">{subcategoryName}</h1>
-            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1">
-               Especialistas em {neighborhoodLabel}
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-32 animate-in slide-in-from-right duration-300">
+      <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+        </button>
+        <div>
+          <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">{subcategoryName}</h1>
+          <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">
+             {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
+          </p>
         </div>
-        <MasterSponsorBadge />
       </div>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar">
+      <div className="p-5 space-y-8">
         
-        {/* 2. BANNER HERO PADRONIZADO */}
-        <section className="px-5 pt-6">
-            <div className="relative w-full aspect-[16/7] rounded-[2.5rem] overflow-hidden bg-[#1E5BFF] shadow-2xl border border-white/5">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1E5BFF] via-[#1749CC] to-[#030816] opacity-90"></div>
+        {/* BANNER FIXO DA SUBCATEGORIA - ESTILO HOME (16/12 ou 16/10) */}
+        <div 
+            onClick={handleBannerClick}
+            className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${bannerData.bgColor} shadow-xl shadow-black/10`}
+        >
+            <div className="w-full h-full relative">
+                <img 
+                    src={bannerData.image} 
+                    alt={bannerData.title} 
+                    className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
                 
-                {/* Background Decorativo Estilo App */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1.5px)', backgroundSize: '20px 20px' }}></div>
-                
-                <div className="relative h-full flex flex-col justify-end p-8">
-                    <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30 w-fit mb-3">
-                        <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">Referência Local</span>
+                <div className="relative h-full flex flex-col justify-end p-8 text-white pointer-events-none">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-white/20 backdrop-blur-md text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] border border-white/20">
+                            Destaque
+                        </span>
                     </div>
-                    <h2 className="text-3xl font-black text-white leading-[0.95] uppercase tracking-tighter drop-shadow-lg">
-                        Cuidado Especial <br/>Para Você.
+                    <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-md">
+                        {bannerData.storeName}
                     </h2>
+                    <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
+                        {bannerData.subtitle}
+                    </p>
+                    <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit">
+                        <span className="text-[9px] font-black uppercase tracking-widest">{bannerData.cta}</span>
+                        <ArrowRight size={12} strokeWidth={3} />
+                    </div>
                 </div>
             </div>
+        </div>
+
+        {/* FILTROS */}
+        <section>
+            <div className="flex items-center gap-2 mb-4 px-1">
+                <Filter size={14} className="text-gray-400" />
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filtrar Lista</h3>
+            </div>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                <button 
+                  onClick={() => setActiveFilter('all')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'all' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
+                >
+                    Tudo
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('top_rated')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'top_rated' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
+                >
+                    Top Avaliados
+                </button>
+                <button 
+                  onClick={() => setActiveFilter('open_now')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeFilter === 'open_now' ? 'bg-[#1E5BFF] text-white border-[#1E5BFF] shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700'}`}
+                >
+                    Aberto Agora
+                </button>
+            </div>
         </section>
 
-        {/* 3. SEÇÃO DE DESTAQUES (GRID 2 COLUNAS) */}
-        <section className="pt-10 px-5">
-            <div className="flex items-center gap-2 mb-5 ml-1">
-                <Sparkles size={16} className="text-amber-500" fill="currentColor" />
-                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">✨ Destaques</h3>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                {MOCK_HIGHLIGHTS.map(h => (
-                    <div key={h.id} className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col group active:scale-[0.98] transition-all">
-                        <div className="h-24 w-full overflow-hidden bg-gray-50 relative">
-                             <img src={h.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={h.name} />
-                             <div className="absolute top-2 right-2">
-                                <div className="p-1 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
-                                    <BadgeCheck size={12} className="text-[#1E5BFF] fill-white" />
-                                </div>
-                             </div>
-                        </div>
-                        <div className="p-4 flex-1 flex flex-col">
-                            <h4 className="font-black text-gray-900 dark:text-white text-[10px] uppercase tracking-tighter mb-0.5 line-clamp-1">{h.call}</h4>
-                            <p className="text-[9px] font-bold text-[#1E5BFF] uppercase tracking-widest mb-2 truncate">{h.name}</p>
-                            <p className="text-[9px] text-gray-400 font-medium leading-tight line-clamp-2 mb-4">"{h.desc}"</p>
-                            <button className="mt-auto w-full py-2.5 bg-blue-50 dark:bg-blue-900/30 text-[#1E5BFF] font-black text-[9px] uppercase tracking-widest rounded-xl transition-all border border-blue-100 dark:border-blue-800/30">
-                                {h.cta}
-                            </button>
-                        </div>
-                    </div>
+        {/* LISTA DE LOJAS */}
+        <section>
+            <div className="flex flex-col gap-3">
+                {filteredList.map(store => (
+                    <StoreCard key={store.id} store={store} onClick={() => onStoreClick(store)} />
                 ))}
             </div>
+            
+            {filteredList.length === 0 && (
+                <div className="py-20 text-center opacity-30 flex flex-col items-center">
+                    <AlertCircle size={48} className="mb-4" />
+                    <p className="font-bold uppercase tracking-widest text-xs">Nenhum resultado para os filtros selecionados</p>
+                </div>
+            )}
         </section>
 
-        {/* 4. LISTA PADRONIZADA DE PROFISSIONAIS */}
-        <section className="pt-10 px-5 space-y-4">
-            <div className="flex items-center gap-2 mb-6 ml-1">
-                <Wrench size={16} className="text-gray-400" />
-                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Profissionais no Bairro</h3>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3">
-                {MOCK_LIST.map((prof) => (
-                    <div 
-                        key={prof.id}
-                        className="bg-white dark:bg-gray-900 p-4 rounded-[1.8rem] border border-gray-100 dark:border-gray-800 flex items-center gap-4 transition-all active:scale-[0.98] cursor-pointer group shadow-sm"
-                    >
-                        <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700 shadow-inner">
-                            <img src={prof.image} className="w-full h-full object-cover" alt={prof.name} />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-start">
-                                <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{prof.name}</h4>
-                                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded-lg border border-yellow-100 dark:border-yellow-800/50">
-                                    <Star size={10} className="text-yellow-500 fill-current" />
-                                    <span className="text-[10px] font-black text-yellow-700 dark:text-yellow-400">{prof.rating}</span>
-                                </div>
-                            </div>
-                            <p className="text-[10px] font-black text-[#1E5BFF] uppercase tracking-tighter mt-0.5">{prof.sub}</p>
-                            <div className="flex items-center gap-1.5 text-gray-400 mt-2">
-                                <MapPin size={10} className="text-gray-300" />
-                                <span className="text-[9px] font-bold uppercase tracking-widest">{prof.location}</span>
-                            </div>
-                        </div>
-
-                        <div className="p-2 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-200 group-hover:text-[#1E5BFF] transition-colors">
-                            <ChevronRight size={18} strokeWidth={3} />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </section>
-
-        <section className="p-5">
+        <section>
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={subcategoryName} />
         </section>
 
-      </main>
+      </div>
     </div>
   );
 };

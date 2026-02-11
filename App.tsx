@@ -24,11 +24,13 @@ import { AdoptionView } from '@/components/AdoptionView';
 import { DonationsView } from '@/components/DonationsView';
 import { DesapegaView } from '@/components/DesapegaView';
 import { MerchantPerformanceDashboard } from '@/components/MerchantPerformanceDashboard';
+import { NeighborhoodPostsView } from '@/components/NeighborhoodPostsView';
+import { SavedPostsView } from '@/components/SavedPostsView';
 import { AdminPanel } from '@/components/AdminPanel';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
-import { CategoryView } from '@/components/CategoryView';
+import { CategoryView } from '@/pages/categories/CategoryView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
@@ -51,19 +53,12 @@ import { StoreConnectModule } from '@/components/StoreConnectModule';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
-import { CategoriesPageView } from '@/components/CategoriesPageView';
-import { HealthPreFilterView } from '@/components/HealthPreFilterView';
-import { HealthSubSpecialtiesView } from '@/components/HealthSubSpecialtiesView';
-import { HealthSpecialtyDetailView } from '@/components/HealthSpecialtyDetailView';
-import { SpecialtyHighlightsManager } from '@/components/SpecialtyHighlightsManager';
-import { ServicesPreFilterView } from '@/components/ServicesPreFilterView';
-import { ServicesSelectionView } from '@/components/ServicesSelectionView';
-import { MapPin, X, Palette, Sparkles, ShieldCheck, User as UserIcon, Store as StoreIcon, Eye, CheckCircle2 } from 'lucide-react';
+import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import { Category, Store, Job, RealEstateProperty, PlanType, Classified } from '@/types';
-import { STORES, CATEGORIES } from '@/constants';
+import { STORES } from '@/constants';
 import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhoodsView, PrivacyView, AboutAppView } from '@/components/SimplePages';
 import { MerchantPanel } from '@/components/MerchantPanel';
 import { UserProfileFullView } from '@/components/UserProfileFullView';
@@ -72,25 +67,21 @@ import { EditProfileView } from '@/components/EditProfileView';
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
-export type RoleMode = 'Administrador' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
+export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
-export const App: React.FC = () => {
+const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
-  const [isSplashVisible, setIsSplashVisible] = useState(!splashWasShownInSession && !isAuthReturn);
-  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [splashStage, setSplashStage] = useState(splashWasShownInSession || isAuthReturn ? 4 : 0);
   
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   
   const [activeTab, setActiveTab] = useState('home');
   const [previousTab, setPreviousTab] = useState('home');
-  const [selectedSpecialtyName, setSelectedSpecialtyName] = useState<string | null>(null);
-  const [selectedHealthGroup, setSelectedHealthGroup] = useState<string | null>(null);
-  const [selectedServiceGroup, setSelectedServiceGroup] = useState<string | null>(null);
-  
+  const [adminInitialTab, setAdminInitialTab] = useState<string | undefined>(undefined);
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -104,11 +95,13 @@ export const App: React.FC = () => {
   const [activityType, setActivityType] = useState<string>('');
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
 
-  const [adminInitialTab, setAdminInitialTab] = useState<string | undefined>(undefined);
-
   const [activeServiceRequestId, setActiveServiceRequestId] = useState<string | null>(null);
   const [activeProfessionalId, setActiveProfessionalId] = useState<string | null>(null);
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
+
+  const [sloganText, setSloganText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const fullSlogan = 'Onde o bairro conversa 💬';
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
@@ -116,43 +109,33 @@ export const App: React.FC = () => {
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
+  // LOGICA DE ROUTING PARA ACESSO VIA URL (REQUISITO URGENTE)
   useEffect(() => {
-    if (!isSplashVisible) return;
-
-    const fadeTimeout = setTimeout(() => {
-      setIsFadingOut(true);
-    }, 5000);
-
-    const removeTimeout = setTimeout(() => {
-      setIsSplashVisible(false);
-      splashWasShownInSession = true;
-    }, 5800);
-
-    return () => {
-      clearTimeout(fadeTimeout);
-      clearTimeout(removeTimeout);
+    const handleUrlRouting = () => {
+        const path = window.location.pathname;
+        if (path === '/admin/aprovacoes' || path === '/admin/monetizacoes') {
+            if (isAdmin) {
+                setViewMode('ADM');
+                localStorage.setItem('admin_view_mode', 'ADM');
+                setAdminInitialTab(path === '/admin/aprovacoes' ? 'moderation' : 'monetization');
+                setActiveTab('admin_panel');
+            }
+        }
     };
-  }, [isSplashVisible]);
+    handleUrlRouting();
+    window.addEventListener('popstate', handleUrlRouting);
+    return () => window.removeEventListener('popstate', handleUrlRouting);
+  }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (!['sponsor_info', 'notifications', 'patrocinador_master', 'real_estate_detail', 'job_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'coupon_landing', 'all_categories', 'health_pre_filter', 'health_specialty_detail', 'services_pre_filter', 'services_manual', 'services_specialized'].includes(view) && !view.startsWith('health_')) {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
       setPreviousTab(activeTab);
     }
     
-    if (view === 'health_specialty_detail' && data?.specialty) {
-        setSelectedSpecialtyName(data.specialty);
-    }
-
     if (view === 'store_ads_module' && (data === 'chat' || data === 'sales')) {
        setInitialModuleView(data);
     } else {
        setInitialModuleView(undefined);
-    }
-
-    if (view === 'admin_panel' && data) {
-       setAdminInitialTab(data);
-    } else {
-       setAdminInitialTab(undefined);
     }
     
     if (view === 'service_chat' && data?.requestId) {
@@ -187,54 +170,50 @@ export const App: React.FC = () => {
     setActiveTab(view);
   };
 
-  const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
-  
-  const handleSelectCategory = (category: Category) => {
-    if (category.slug === 'all_categories') {
-      handleNavigate('all_categories');
+  useEffect(() => {
+    if (user && activeTab === 'coupon_landing') {
+        if (userRole === 'lojista') {
+            handleNavigate('merchant_coupons');
+        } else {
+            handleNavigate('user_coupons');
+        }
+    }
+  }, [user, userRole]);
+
+  useEffect(() => {
+    if (splashStage >= 4) {
+      setIsTyping(false);
       return;
     }
+    if (sloganText.length === fullSlogan.length) {
+      setIsTyping(false);
+      return;
+    }
+    const typingTimeout = setTimeout(() => {
+      setSloganText(fullSlogan.slice(0, sloganText.length + 1));
+    }, 96);
+    return () => clearTimeout(typingTimeout);
+  }, [sloganText, splashStage]);
 
+  useEffect(() => {
+    if (splashStage === 4) return;
+    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
+    const endSplashTimer = setTimeout(() => {
+      setSplashStage(4);
+      splashWasShownInSession = true;
+    }, 5000);
+    return () => {
+      clearTimeout(fadeOutTimer);
+      clearTimeout(endSplashTimer);
+    };
+  }, [splashStage]);
+
+  const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
+  const handleSelectJob = (job: Job) => { handleNavigate('job_detail', { job }); };
+  
+  const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
-    
-    if (category.id === 'cat-saude') {
-        handleNavigate('health_pre_filter');
-        return;
-    }
-
-    if (category.id === 'cat-services') {
-        handleNavigate('services_pre_filter');
-        return;
-    }
-
-    if (category.slug === 'real_estate' || category.slug === 'jobs' || category.slug === 'donations' || category.slug === 'desapega') {
-        handleNavigate(category.slug);
-    } else {
-        handleNavigate('category_detail');
-    }
-  };
-
-  const handleHealthPreFilterChoice = (option: string) => {
-      setSelectedHealthGroup(option);
-      if (option === 'MULHER') handleNavigate('health_woman');
-      else if (option === 'HOMEM') handleNavigate('health_man');
-      else if (option === 'PEDIATRIA') handleNavigate('health_pediatrics');
-      else if (option === 'GERIATRIA') handleNavigate('health_geriatrics');
-      else {
-          handleNavigate('category_detail');
-      }
-  };
-
-  const handleServicesPreFilterChoice = (option: 'MANUAL' | 'SPECIALIZED' | 'ALL') => {
-      setSelectedServiceGroup(option);
-      if (option === 'MANUAL') {
-          handleNavigate('services_manual');
-      } else if (option === 'SPECIALIZED') {
-          handleNavigate('services_specialized');
-      } else {
-          setSelectedSubcategoryName(null);
-          handleNavigate('category_detail');
-      }
+    handleNavigate('category_detail');
   };
 
   const handleSelectSubcategory = (subName: string, parentCat: Category) => {
@@ -252,13 +231,51 @@ export const App: React.FC = () => {
     setIsClaimFlowActive(true);
   };
 
+  const handleClaimSuccess = () => {
+    setIsClaimFlowActive(false);
+    handleNavigate('profile');
+  };
+
   const handlePlanSuccess = (plan: PlanType) => {
       localStorage.setItem('merchant_plan', plan);
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics', 'health_specialty_detail', 'specialty_highlights_manager', 'explore', 'services_pre_filter', 'services_manual', 'services_specialized'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
   
+  const RoleSwitcherModal: React.FC = () => {
+    if (!isRoleSwitcherOpen) return null;
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+            <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-between items-start mb-8 px-2">
+                    <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
+                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                </div>
+                <div className="space-y-3">
+                    {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
+                        <button 
+                          key={role} 
+                          onClick={() => { 
+                            setViewMode(role); 
+                            localStorage.setItem('admin_view_mode', role); 
+                            setIsRoleSwitcherOpen(false); 
+                            if (role === 'Lojista') setActiveTab('profile'); 
+                            else if (role === 'ADM') setActiveTab('admin_panel'); 
+                            else if (role === 'Designer') setActiveTab('designer_panel');
+                            else setActiveTab('home'); 
+                          }} 
+                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                        >
+                            <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+  };
+
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
       <NeighborhoodProvider>
@@ -269,101 +286,20 @@ export const App: React.FC = () => {
               store={storeToClaim} 
               userId={user.id} 
               onBack={() => setIsClaimFlowActive(false)} 
-              onSuccess={() => { setIsClaimFlowActive(false); handleNavigate('profile'); }}
+              onSuccess={handleClaimSuccess}
               onNavigate={handleNavigate}
             />
           )}
 
-          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-out ${!isSplashVisible || isFadingOut ? 'opacity-100' : 'opacity-0'}`}>
-              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole as any} hideNav={false}>
+          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
                     <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole as any} />}
-                    {activeTab === 'explore' && (
-                        <ExploreView 
-                            stores={STORES} 
-                            searchQuery={globalSearch} 
-                            onStoreClick={handleSelectStore} 
-                            onNavigate={handleNavigate}
-                            onLocationClick={() => {}}
-                            onFilterClick={() => {}}
-                            onOpenPlans={() => {}}
-                        />
-                    )}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
+                    {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
-                    {activeTab === 'health_pre_filter' && (
-                        <HealthPreFilterView 
-                            onBack={() => handleNavigate('home')} 
-                            onSelectOption={handleHealthPreFilterChoice}
-                        />
-                    )}
-
-                    {activeTab === 'services_pre_filter' && (
-                        <ServicesPreFilterView 
-                            onBack={() => handleNavigate('home')} 
-                            onSelectOption={handleServicesPreFilterChoice}
-                        />
-                    )}
-
-                    {activeTab === 'services_manual' && (
-                        <ServicesSelectionView 
-                            type="MANUAL"
-                            onBack={() => handleNavigate('services_pre_filter')}
-                            onSelectService={(name) => handleSelectSubcategory(name, CATEGORIES.find(c => c.id === 'cat-services')!)}
-                        />
-                    )}
-
-                    {activeTab === 'services_specialized' && (
-                        <ServicesSelectionView 
-                            type="SPECIALIZED"
-                            onBack={() => handleNavigate('services_pre_filter')}
-                            onSelectService={(name) => handleSelectSubcategory(name, CATEGORIES.find(c => c.id === 'cat-services')!)}
-                        />
-                    )}
-
-                    {['health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics'].includes(activeTab) && (
-                        <HealthSubSpecialtiesView 
-                            title={activeTab === 'health_woman' ? "Saúde da Mulher" : activeTab === 'health_man' ? "Saúde do Homem" : activeTab === 'health_pediatrics' ? "Pediatria" : "Geriatria"}
-                            subtitle="Cuidado Especializado"
-                            themeColor={activeTab === 'health_woman' ? "text-pink-500" : activeTab === 'health_man' ? "text-blue-500" : activeTab === 'health_pediatrics' ? "text-teal-500" : "text-amber-500"}
-                            specialties={
-                                activeTab === 'health_woman' ? [
-                                  'Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana',
-                                  'Fertilidade feminina', 'Planejamento familiar', 'Saúde sexual feminina', 'Saúde íntima feminina',
-                                  'Climatério', 'Menopausa', 'Ginecologia oncológica', 'Ginecologia endócrina', 'Uroginecologia',
-                                  'Colposcopia', 'Patologia do trato genital inferior', 'Medicina fetal', 'Pré-natal de alto risco', 'Dor pélvica crônica'
-                                ] :
-                                activeTab === 'health_man' ? ['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina'] :
-                                activeTab === 'health_pediatrics' ? ['Pediatria geral', 'Neonatologia', 'Puericultura', 'Psiquiatria infantil'] :
-                                ['Geriatria', 'Clínica geriátrica', 'Medicina do envelhecimento', 'Psicologia geriátrica']
-                            }
-                            onBack={() => handleNavigate('health_pre_filter')}
-                            onSelectStore={handleSelectStore}
-                            onSelectSpecialty={(spec) => handleNavigate('health_specialty_detail', { specialty: spec })}
-                        />
-                    )}
-
-                    {activeTab === 'health_specialty_detail' && selectedSpecialtyName && (
-                        <HealthSpecialtyDetailView 
-                            specialtyName={selectedSpecialtyName}
-                            onBack={() => handleNavigate(previousTab)}
-                            onSelectStore={handleSelectStore}
-                        />
-                    )}
-
-                    {activeTab === 'specialty_highlights_manager' && (
-                        <SpecialtyHighlightsManager onBack={() => handleNavigate('profile')} />
-                    )}
-
-                    {activeTab === 'all_categories' && (
-                        <CategoriesPageView 
-                            onBack={() => handleNavigate('home')} 
-                            onSelectCategory={handleSelectCategory}
-                        />
-                    )}
-
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}
 
@@ -454,7 +390,6 @@ export const App: React.FC = () => {
                         userRole={userRole as any} 
                         onAdvertiseInCategory={() => {}} 
                         onNavigate={handleNavigate}
-                        initialSubcategory={selectedSubcategoryName || undefined}
                         onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
                       />
                     )}
@@ -478,7 +413,7 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate} 
                             user={user as any} 
                           />
-                        : <MenuView user={user as any} userRole={userRole as any} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
+                        : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
                     )}
 
                     {activeTab === 'user_profile_full' && (
@@ -552,13 +487,15 @@ export const App: React.FC = () => {
                     {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate_detail' && selectedProperty && <RealEstateDetailView property={selectedProperty} onBack={() => handleNavigate('real_estate')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'classified_detail' && selectedClassified && <ClassifiedDetailView item={selectedClassified} onBack={() => handleNavigate(previousTab)} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
-                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={(job) => handleNavigate('job_detail', { job })} onNavigate={handleNavigate} />}
+                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
                     {activeTab === 'job_wizard' && <JobWizard user={user} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
                     {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
                     {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('profile')} onSuccess={handlePlanSuccess} />}
                     {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
+                    {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
                     
                     {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
@@ -575,81 +512,24 @@ export const App: React.FC = () => {
                   </main>
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
               </Layout>
-              
-              {/* Role Switcher Modal */}
-              {isRoleSwitcherOpen && (
-                <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
-                    <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-start mb-8 px-2">
-                            <div>
-                                <h2 className="text-xl font-black text-white uppercase tracking-tight">Simulador de Acesso</h2>
-                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Troque sua visão do app</p>
-                            </div>
-                            <button onClick={() => setIsRoleSwitcherOpen(false)} className="p-2 bg-white/5 rounded-full text-gray-500 hover:text-white transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="space-y-3">
-                            {[
-                                { id: 'Administrador', label: 'Administrador', icon: ShieldCheck, color: 'text-amber-500' },
-                                { id: 'Lojista', label: 'Lojista (Dashboard)', icon: StoreIcon, color: 'text-blue-500' },
-                                { id: 'Usuário', label: 'Usuário (Residente)', icon: UserIcon, color: 'text-emerald-500' },
-                                { id: 'Visitante', label: 'Visitante (Deslogado)', icon: Eye, color: 'text-gray-400' },
-                                { id: 'Designer', label: 'Designer (Jobs)', icon: Palette, color: 'text-indigo-400' }
-                            ].map((role) => (
-                                <button 
-                                  key={role.id} 
-                                  onClick={() => { 
-                                    setViewMode(role.id as any); 
-                                    localStorage.setItem('admin_view_mode', role.id); 
-                                    setIsRoleSwitcherOpen(false); 
-                                    if (role.id === 'Lojista') setActiveTab('profile'); 
-                                    else if (role.id === 'Administrador') setActiveTab('admin_panel'); 
-                                    else if (role.id === 'Designer') setActiveTab('designer_panel');
-                                    else setActiveTab('home'); 
-                                  }} 
-                                  className={`w-full p-5 rounded-[1.5rem] border text-left transition-all group flex items-center justify-between ${viewMode === role.id ? 'bg-white border-white text-black' : 'bg-white/5 border-white/5 text-white hover:bg-white/10'}`}
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${viewMode === role.id ? 'bg-black/5 text-black' : `bg-white/5 ${role.color}`}`}>
-                                            <role.icon size={20} strokeWidth={2.5} />
-                                        </div>
-                                        <span className="font-black uppercase text-sm tracking-tight">{role.label}</span>
-                                    </div>
-                                    {viewMode === role.id && <CheckCircle2 size={18} className="text-black" />}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-              )}
+              <RoleSwitcherModal />
           </div>
 
-          {/* SPLASH SCREEN */}
-          {isSplashVisible && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-800 ease-in-out bg-splash-premium ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-                  <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full blur-sm animate-subtle-glow" style={{ animationDelay: '0s' }}></div>
-                  <div className="absolute top-2/3 left-1/2 w-1.5 h-1.5 bg-blue-300 rounded-full blur-sm animate-subtle-glow" style={{ animationDelay: '2s' }}></div>
-                  <div className="absolute top-1/3 right-1/4 w-2.5 h-2.5 bg-white rounded-full blur-sm animate-subtle-glow" style={{ animationDelay: '4s' }}></div>
-                  <div className="absolute inset-0 bg-white/[0.02] animate-particle-drift"></div>
+          {splashStage < 4 && (
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+              <div className="flex flex-col items-center animate-logo-enter text-center px-4">
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
+                    Localizei JPA
+                  </h1>
+                  <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
+                    {sloganText}
+                    {isTyping && <span className="animate-blink ml-1">|</span>}
+                  </p>
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10">
-                  <div className="relative w-32 h-32 bg-white rounded-[2.8rem] flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] mb-10 animate-logo-enter border border-white/20">
-                    <MapPin className="w-16 h-16 text-[#1E5BFF] fill-[#1E5BFF]" />
-                    <div className="absolute -inset-2 bg-white/20 rounded-[3rem] blur-xl opacity-0 animate-pulse"></div>
-                  </div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-2xl animate-fade-in" style={{ animationDelay: '0.6s' }}>Localizei JPA</h1>
-                  <div className="mt-6 opacity-0 animate-slide-up-fade" style={{ animationDelay: '1.2s' }}>
-                    <p className="text-xl font-bold text-white tracking-tight animate-text-shine">Seu bairro, na sua mão.</p>
-                    <div className="w-12 h-1 bg-white/30 mx-auto mt-3 rounded-full overflow-hidden">
-                       <div className="h-full bg-white w-1/3 rounded-full animate-slow-shimmer"></div>
-                    </div>
-                  </div>
-              </div>
-              <div className="relative z-10 text-center animate-fade-in opacity-0" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
-                <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.4em] mb-1">Patrocinador Master</p>
-                <p className="text-base font-display font-extrabold text-white/90 tracking-wide">Grupo Esquematiza</p>
+              <div className="text-center">
+                <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
+                <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
               </div>
             </div>
           )}
@@ -658,3 +538,4 @@ export const App: React.FC = () => {
     </div>
   );
 };
+export default App;

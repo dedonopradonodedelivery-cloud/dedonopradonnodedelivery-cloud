@@ -10,7 +10,7 @@ import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 const FALLBACK_STORE_IMAGES = [
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600',
+  'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
   'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
   'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
@@ -115,16 +115,16 @@ const BigSurCard: React.FC<{
 const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
   const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
-
+  
   return (
-    <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
-      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
+    <div onClick={onClick} className="flex items-center gap-4 p-2 rounded-2xl hover:bg-white dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+      <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
+        <img src={storeImage} alt={store.name} className="w-full h-full object-cover p-0" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
+          <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
+          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
@@ -150,7 +150,6 @@ interface CategoryViewProps {
   onAdvertiseInCategory: (categoryName: string | null) => void;
   onNavigate: (view: string) => void;
   onSubcategoryClick?: (subName: string) => void;
-  initialSubcategory?: string; // NOVO: Filtro inicial
 }
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ 
@@ -161,11 +160,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   userRole, 
   onAdvertiseInCategory, 
   onNavigate,
-  onSubcategoryClick,
-  initialSubcategory
+  onSubcategoryClick
 }) => {
-  // Inicializa com a prop initialSubcategory se existir
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(initialSubcategory || null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
 
@@ -174,45 +171,38 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
 
-  const fetchCategoryBanner = async () => {
-    if (!supabase) {
-      setLoadingBanner(false);
-      return;
-    }
-    setLoadingBanner(true);
-    try {
-      const { data, error } = await supabase
-        .from('published_banners')
-        .select('id, config, merchant_id')
-        .eq('target', `category:${category.slug}`)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (error) {
-          if (error.code === 'PGRST116' || error.message?.includes('published_banners')) {
-              setActiveBanner(null);
-              return;
-          }
-          throw error;
-      }
-
-      if (data && data.length > 0) {
-        setActiveBanner(data[0]);
-      } else {
-        setActiveBanner(null);
-      }
-    } catch (e: any) {
-      setActiveBanner(null);
-    } finally {
-      setLoadingBanner(false);
-    }
-  };
-
   useEffect(() => {
-    fetchCategoryBanner();
+    const fetchCategoryBanner = async () => {
+      if (!supabase) {
+        setLoadingBanner(false);
+        return;
+      }
+      setLoadingBanner(true);
+      try {
+        const { data, error } = await supabase
+          .from('published_banners')
+          .select('id, config, merchant_id')
+          .eq('target', `category:${category.slug}`)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1);
 
-    if (!supabase) return;
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setActiveBanner(data[0]);
+        } else {
+          setActiveBanner(null);
+        }
+      } catch (e: any) {
+        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        setActiveBanner(null);
+      } finally {
+        setLoadingBanner(false);
+      }
+    };
+    
+    fetchCategoryBanner();
 
     const channel = supabase.channel(`category-banner-${category.slug}`)
       .on('postgres_changes', {
@@ -230,24 +220,10 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     };
   }, [category.slug]);
 
-  // Se initialSubcategory mudou lá no App, atualizamos aqui para refletir (embora App já navegue e remonte)
-  useEffect(() => {
-      if (initialSubcategory) {
-          setSelectedSubcategory(initialSubcategory);
-      }
-  }, [initialSubcategory]);
-
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
     if (selectedSubcategory) {
-      // REGRA ESPECIAL: Se for um dos filtros de Saúde (Mulher, Homem, etc), simulamos o filtro por tags ou descrição
-      // Aqui usamos tags ou subcategorias dependendo da lógica do app
-      const term = selectedSubcategory.toLowerCase();
-      return categoryStores.filter(s => 
-          s.subcategory?.toLowerCase().includes(term) || 
-          s.description?.toLowerCase().includes(term) ||
-          s.tags?.some(t => t.toLowerCase().includes(term))
-      );
+      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
     }
     return categoryStores;
   }, [stores, category.name, selectedSubcategory]);
@@ -361,11 +337,11 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             {filteredStores.length > 0 ? (
                 <div className="flex flex-col gap-2">
                     {filteredStores.map(store => (
-                        <StoreListItem key={store.id} store={store} onClick={() => onStoreClick(store)} />
+                        <StoreCard key={store.id} store={store} onClick={() => onStoreClick(store)} />
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
                     <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                     <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>
@@ -376,6 +352,36 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
+    </div>
+  );
+};
+
+// Re-using the StoreCard internal to list for CategoryView
+const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
+  const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
+  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
+
+  return (
+    <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
+      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
+        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start">
+          <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
+          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
+          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+          <span className="truncate">{store.category}</span>
+        </div>
+        <div className="flex items-center gap-3 mt-1.5">
+          {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
+          {store.verified && <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" /> Verificado</span>}
+        </div>
+      </div>
+      <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300"><ChevronRight className="w-4 h-4" /></div>
     </div>
   );
 };

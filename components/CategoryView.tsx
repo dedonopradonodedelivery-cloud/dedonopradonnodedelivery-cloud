@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
+// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
 import { supabase } from '../lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 
+// --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, headline, subheadline, product_image_url } = config;
     switch (template_id) {
@@ -67,6 +68,7 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
         </div>
     );
 };
+// --- End Banner Rendering Components ---
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -74,27 +76,19 @@ const BigSurCard: React.FC<{
   isSelected: boolean; 
   onClick: () => void; 
   isMoreButton?: boolean;
-}> = ({ icon, name, isSelected, onClick, isMoreButton }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[2rem] flex flex-col items-center justify-between p-3 transition-all duration-300 cursor-pointer overflow-hidden border active:scale-95`;
-  
-  // PADRÃO SOFT BLUE PREMIUM APLICADO
-  const backgroundClass = isMoreButton 
-    ? "bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700" 
-    : "bg-gradient-to-br from-blue-400 to-blue-600 border-white/20 shadow-lg shadow-blue-500/10";
-    
-  const textClass = "text-white drop-shadow-sm";
-  const iconClass = "text-white drop-shadow-sm";
-
+  categoryColor?: string;
+}> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
+  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
+  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
+  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
+  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
+  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
   return (
-    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${isSelected ? 'ring-4 ring-blue-500/30 brightness-110 shadow-inner' : ''}`}>
-      <div className="flex-1 flex items-center justify-center">
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-7 h-7 ${iconClass}`, strokeWidth: 2.5 }) : null}
+    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
       </div>
-      <div className={`w-full bg-white/10 backdrop-blur-md py-1 rounded-b-[1.5rem] -mx-3 -mb-3`}>
-        <span className={`block w-full text-[9px] font-black uppercase tracking-tighter text-center truncate px-1 ${textClass}`}>
-          {name}
-        </span>
-      </div>
+      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
     </button>
   );
 };
@@ -109,7 +103,7 @@ const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store,
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
+          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Patrocinado</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
@@ -133,23 +127,11 @@ interface CategoryViewProps {
   stores: Store[];
   userRole: 'cliente' | 'lojista' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
-  onNavigate: (view: string, data?: any) => void;
-  onSubcategoryClick?: (subName: string) => void;
-  initialSubcategory?: string;
+  onNavigate: (view: string) => void;
 }
 
-export const CategoryView: React.FC<CategoryViewProps> = ({ 
-  category, 
-  onBack, 
-  onStoreClick, 
-  stores, 
-  userRole, 
-  onAdvertiseInCategory, 
-  onNavigate,
-  onSubcategoryClick,
-  initialSubcategory
-}) => {
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(initialSubcategory || null);
+export const CategoryView: React.FC<CategoryViewProps> = ({ category, onBack, onStoreClick, stores, userRole, onAdvertiseInCategory, onNavigate }) => {
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
 
@@ -168,6 +150,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
       try {
         const { data, error } = await supabase
           .from('published_banners')
+          // FIX: Added merchant_id to the select to allow handleBannerClick to find the associated store.
           .select('id, config, merchant_id')
           .eq('target', `category:${category.slug}`)
           .eq('is_active', true)
@@ -207,31 +190,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     };
   }, [category.slug]);
 
-  useEffect(() => {
-    if (initialSubcategory) {
-        setSelectedSubcategory(initialSubcategory);
-    }
-  }, [initialSubcategory]);
-
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
     if (selectedSubcategory) {
-      const term = selectedSubcategory.toLowerCase();
-      return categoryStores.filter(s => 
-          s.subcategory?.toLowerCase().includes(term) || 
-          s.description?.toLowerCase().includes(term) ||
-          s.tags?.some(t => t.toLowerCase().includes(term))
-      );
+      return categoryStores.filter(s => s.subcategory === selectedSubcategory);
     }
     return categoryStores;
   }, [stores, category.name, selectedSubcategory]);
 
   const handleSubcategoryClick = (subName: string) => {
-    if (onSubcategoryClick) {
-        onSubcategoryClick(subName);
-    } else {
-        setSelectedSubcategory(prev => (prev === subName ? null : subName));
-    }
+    setSelectedSubcategory(prev => (prev === subName ? null : subName));
   };
 
   const handleAdvertiseClick = () => {
@@ -243,6 +211,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     }
   };
 
+  // FIX: Added handleBannerClick to resolve the error on line 258.
   const handleBannerClick = (banner: any) => {
     if (banner.merchant_id) {
       const store = stores.find(s => s.id === banner.merchant_id);
@@ -255,7 +224,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -263,6 +232,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
+      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
       <div className="mt-4">
         <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
       </div>
@@ -278,6 +248,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                     name={sub.name}
                     isSelected={selectedSubcategory === sub.name}
                     onClick={() => handleSubcategoryClick(sub.name)}
+                    categoryColor={category.color}
                   />
               ))}
               {shouldShowMore && (
@@ -337,7 +308,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
                     <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                     <p className="text-sm font-medium text-gray-500">Nenhuma loja encontrada.</p>
                 </div>

@@ -40,23 +40,15 @@
               'slow-shimmer': 'slowShimmer 4s linear infinite',
               'subtle-diagonal-scroll': 'subtleDiagonalScroll 25s linear infinite alternate',
               'blink': 'blink 0.7s step-end infinite',
-              'slide-up-fade': 'slideUpFade 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'progress': 'progress 5s linear forwards',
-              'particle-drift': 'particleDrift 20s linear infinite',
-              'text-shine': 'textShine 3s ease-in-out infinite',
             },
             keyframes: {
               logoPop: {
-                '0%': { opacity: '0', transform: 'scale(0.8) translateY(10px)' },
-                '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+                '0%': { opacity: '0', transform: 'scale(0.8)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
               },
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
-              },
-              slideUpFade: {
-                '0%': { opacity: '0', transform: 'translateY(30px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               appExit: {
                 '0%': { opacity: '1' },
@@ -74,17 +66,13 @@
                 '0%': { transform: 'translateX(-100%)' },
                 '100%': { transform: 'translateX(100%)' },
               },
-              textShine: {
-                '0%, 100%': { opacity: '0.8' },
-                '50%': { opacity: '1', textShadow: '0 0 15px rgba(255,255,255,0.4)' },
+              subtleDiagonalScroll: {
+                '0%': { transform: 'translate(0, 0) rotate(-20deg)' },
+                '100%': { transform: 'translate(-20px, -20px) rotate(-20deg)' },
               },
-              particleDrift: {
-                '0%': { transform: 'translate(0, 0)' },
-                '100%': { transform: 'translate(-50px, -50px)' },
-              },
-              progress: {
-                '0%': { width: '0%' },
-                '100%': { width: '100%' },
+              blink: {
+                'from, to': { opacity: 1 },
+                '50%': { opacity: 0 },
               }
             }
           }
@@ -94,9 +82,6 @@
     <style>
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      .bg-splash-premium {
-        background: linear-gradient(180deg, #1E5BFF 0%, #030816 100%);
-      }
     </style>
   <script type="importmap">
 {
@@ -113,8 +98,7 @@
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
     "@/": "/",
     "path": "https://esm.sh/path@^0.12.7",
-    "url": "https://esm.sh/url@^0.11.4",
-    "framer-motion": "https://esm.sh/framer-motion@^12.34.0"
+    "url": "https://esm.sh/url@^0.11.4"
   }
 }
 </script>

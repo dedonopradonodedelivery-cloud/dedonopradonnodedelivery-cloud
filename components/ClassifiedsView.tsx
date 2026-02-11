@@ -32,12 +32,13 @@ import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
 import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
+// Imagens de fallback variadas para manter o padrão visual de "sempre ter imagem"
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800',
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800',
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Objetos
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviços
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800', // Imóveis
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', // Pets
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Genérico
 ];
 
 const getFallbackImage = (id: string) => {
@@ -49,24 +50,22 @@ const getFallbackImage = (id: string) => {
 };
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench /> },
-  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 /> },
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase /> },
-  { id: 'adocao', name: 'Adoção', slug: 'adoption', icon: <PawPrint /> },
-  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart /> },
-  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag /> },
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue' },
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue' },
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue' },
+  { id: 'adocao', name: 'Adoção', slug: 'adoption', icon: <PawPrint />, color: 'bg-brand-blue' },
+  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue' },
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue' },
 ];
 
 const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
   <button onClick={onClick} className="flex flex-col items-center group active:scale-95 transition-all">
-    <div className={`w-full aspect-square rounded-[2rem] shadow-lg shadow-blue-500/10 flex flex-col items-center justify-between p-2.5 bg-gradient-to-br from-blue-400 to-blue-600 border border-white/20`}>
+    <div className={`w-full aspect-square rounded-[22px] shadow-lg flex flex-col items-center justify-between p-2 ${category.color} border border-white/20`}>
       <div className="flex-1 flex items-center justify-center w-full">
-        {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white drop-shadow-sm", strokeWidth: 2.5 })}
+        {React.cloneElement(category.icon as any, { className: "w-8 h-8 text-white drop-shadow-md", strokeWidth: 2.5 })}
       </div>
-      <div className="w-full bg-white/10 backdrop-blur-md py-1.5 rounded-b-[1.8rem] -mx-2.5 -mb-2.5">
-        <span className="block w-full text-[9px] font-black text-white text-center uppercase tracking-tight leading-none px-1 truncate">
-            {category.name}
-        </span>
+      <div className="w-full bg-black/10 backdrop-blur-[2px] py-1 rounded-b-[20px] -mx-2 -mb-2">
+        <span className="block w-full text-[10px] font-black text-white text-center uppercase tracking-tight leading-tight">{category.name}</span>
       </div>
     </div>
   </button>
@@ -79,6 +78,7 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     const isService = item.category === 'Orçamento de Serviços';
     const hasPrice = !!item.price && !isDonation && !isAdoption && !isJob && !isService;
 
+    // Garante uma imagem mesmo se o item não tiver
     const displayImage = item.imageUrl || getFallbackImage(item.id);
 
     return (
@@ -93,18 +93,38 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
-                    {isDonation && <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white shadow-lg">DOAÇÃO</span>}
-                    {isAdoption && <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white shadow-lg">ADOÇÃO</span>}
-                    {isJob && <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-600 text-white shadow-lg">VAGA</span>}
-                    {isService && <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg">SERVIÇO</span>}
-                    <div className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-black/50 text-white backdrop-blur-md">{item.neighborhood}</div>
+                    {isDonation && (
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500 text-white shadow-lg border border-white/20">
+                            DOAÇÃO
+                        </span>
+                    )}
+                    {isAdoption && (
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white shadow-lg border border-white/20">
+                            ADOÇÃO
+                        </span>
+                    )}
+                    {isJob && (
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-600 text-white shadow-lg border border-white/10">
+                            VAGA
+                        </span>
+                    )}
+                    {isService && (
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg border border-white/10">
+                            SERVIÇO
+                        </span>
+                    )}
+                    <div className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-black/50 text-white backdrop-blur-md">
+                        {item.neighborhood}
+                    </div>
                 </div>
             </div>
             <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-[10px] font-black text-blue-500/60 uppercase tracking-widest">{item.category}</span>
                 </div>
-                <h3 className="font-bold text-sm text-gray-800 dark:text-white line-clamp-2 h-10 leading-tight mb-2">{item.title}</h3>
+                <h3 className="font-bold text-sm text-gray-800 dark:text-white line-clamp-2 h-10 leading-tight mb-2">
+                    {item.title}
+                </h3>
                 <div className="mt-auto pt-2 flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-[9px] text-gray-400 font-bold uppercase tracking-wider">
                         <Clock size={10} />
@@ -132,8 +152,8 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
         <section className="py-8 border-b border-gray-100 dark:border-gray-800 last:border-0">
             <div className="flex items-center justify-between mb-6 px-1">
                 <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/10 border border-white/20`}>
-                        {React.cloneElement(category.icon as any, { size: 20, strokeWidth: 2.5, className: "drop-shadow-sm" })}
+                    <div className={`w-10 h-10 rounded-2xl ${category.color} flex items-center justify-center text-white shadow-lg`}>
+                        {React.cloneElement(category.icon as any, { size: 20, strokeWidth: 2.5 })}
                     </div>
                     <div>
                         <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{category.name}</h2>
@@ -164,7 +184,7 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
                     <p className="text-sm font-bold text-gray-400 dark:text-gray-500 mb-6">{subtitle || 'Nenhum anúncio nesta categoria ainda.'}</p>
                     <button 
                         onClick={() => onAnunciar(category.name)}
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black px-8 py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-lg active:scale-95"
+                        className="bg-[#1E5BFF] text-white font-black px-8 py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-lg active:scale-95"
                     >
                         {ctaLabel}
                     </button>
@@ -221,13 +241,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
           
           <div className="flex-1 min-w-0">
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Classificados</h1>
-            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades no Bairro</p>
+            <p className="text-[10px] text-blue-50 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={handleAnunciarHeader}
-              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:brightness-110 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/20 active:scale-95 transition-all h-9"
+              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
               <Plus size={12} strokeWidth={4} />
               Anunciar
@@ -250,15 +270,22 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-                    placeholder="Busque anúncios..."
+                    placeholder="Busque anúncios: vaga, sala comercial, doação, item…"
                     className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-32 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
                 />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-lg border border-blue-100 dark:border-blue-800">
+                    <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Classificados</span>
+                </div>
             </div>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest ml-1 opacity-70">
+                Busca dentro dos Classificados do bairro
+            </p>
         </div>
       </header>
 
       <main className="p-5 space-y-4">
         
+        {/* BOTÕES DE CATEGORIA RÁPIDOS */}
         <div className="grid grid-cols-3 gap-4 mb-8 mt-2">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton key={cat.id} category={cat} onClick={() => onNavigate(cat.slug)} />
@@ -325,11 +352,13 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             subtitle="Venda o que você não usa mais"
         />
 
+        {/* BANNER PATROCINADOR MASTER FINAL */}
         <section className="mt-8">
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
         </section>
       </main>
 
+      {/* MODAL DE SELEÇÃO O QUE ANUNCIAR */}
       <ClassifiedsSelectionModal 
         isOpen={isSelectionOpen}
         onClose={() => setIsSelectionOpen(false)}
@@ -339,10 +368,12 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         }}
       />
 
+      {/* MODAL DE FILTROS GLOBAIS */}
       <ClassifiedsFilterModal 
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={(filters) => {
+            console.log("Filtros aplicados:", filters);
             setIsFilterOpen(false);
         }}
       />
