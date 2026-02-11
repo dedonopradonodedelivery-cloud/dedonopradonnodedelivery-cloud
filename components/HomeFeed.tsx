@@ -124,9 +124,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
+  // 6 Categorias Fixas na ordem solicitada
   const homeCategories = useMemo(() => {
-    const ids = ['cat-pharmacy', 'cat-market', 'cat-saude', 'cat-pets', 'cat-beauty', 'cat-services', 'cat-autos', 'cat-more'];
-    return ids.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
+    const ids = [
+      'cat-saude',    // Saúde
+      'cat-services', // Serviços
+      'cat-fashion',  // Moda
+      'cat-beleza',   // Beleza (obs: verificado se id em constants é cat-beauty ou cat-beleza)
+      'cat-pets',     // Pet
+      'cat-autos'     // Autos
+    ];
+    // Nota: cat-beauty é o slug correto em constants.tsx, mapeando aqui para garantir exibição
+    const fixedIds = ['cat-saude', 'cat-services', 'cat-fashion', 'cat-beauty', 'cat-pets', 'cat-autos'];
+    return fixedIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
   }, []);
 
   return (
@@ -141,26 +151,26 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* 1. STATUS DO BAIRRO EM LINHA ÚNICA */}
       <HojeNoBairro />
 
-      {/* 2. EXPLORE JPA — RESOLVA RÁPIDO */}
-      <section className="w-full bg-white dark:bg-gray-950 pt-6 pb-6 px-5 relative z-10">
-        <div className="mb-5 px-1">
+      {/* 2. EXPLORE JPA — GRADE DE CATEGORIAS 3x2 */}
+      <section className="w-full bg-white dark:bg-gray-950 pt-8 pb-4 px-5 relative z-10">
+        <div className="mb-6 px-1">
            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Explore JPA</h2>
            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Resolva Rápido</h3>
         </div>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+        <div className="grid grid-cols-3 gap-y-6 gap-x-4">
           {homeCategories.map((cat) => (
             <button 
               key={cat.id} 
               onClick={() => onSelectCategory(cat)}
-              className="flex flex-col items-center gap-2 flex-shrink-0 min-w-[72px] active:scale-95 transition-all group"
+              className="flex flex-col items-center gap-2 active:scale-95 transition-all group"
             >
-              <div className="w-16 h-16 rounded-[22px] bg-white dark:bg-gray-900 shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-800 flex items-center justify-center group-hover:border-blue-500/50 transition-colors">
+              <div className="w-full aspect-square rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 flex items-center justify-center group-hover:border-blue-500/50 transition-colors shadow-sm">
                 {React.cloneElement(cat.icon as any, { 
-                  className: "w-7 h-7 text-[#1E5BFF]", 
-                  strokeWidth: 2.5 
+                  className: "w-8 h-8 text-[#1E5BFF]", 
+                  strokeWidth: 2.2 
                 })}
               </div>
-              <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
+              <span className="text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
                 {cat.name}
               </span>
             </button>
@@ -171,7 +181,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       {/* 3. CUPONS DO DIA */}
       <CouponCarousel onNavigate={onNavigate} />
 
-      {/* 4. ACONTECENDO AGORA (Ocupa o espaço logo após os cupons) */}
+      {/* 4. ACONTECENDO AGORA */}
       <section className="mt-2">
         <AcontecendoAgora onNavigate={onNavigate} />
       </section>
