@@ -148,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
+        <div className="sticky top-0 z-40 w-full bg-splash-premium rounded-b-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-500">
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
                 <div className="flex items-center justify-between pt-10 pb-4">
                     <div className="flex flex-col items-start gap-1.5">
