@@ -1,13 +1,10 @@
 
 import React from 'react';
 import { 
-  UserRound, 
   Baby, 
-  Smile, 
   HeartPulse,
   ArrowRight,
-  X,
-  Plus
+  X
 } from 'lucide-react';
 
 interface HealthPreFilterViewProps {
@@ -15,21 +12,47 @@ interface HealthPreFilterViewProps {
   onSelectOption: (option: string) => void;
 }
 
+// Ícones Customizados Premium (Silhuetas Minimalistas)
+const WomanIcon = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+    <path d="M5.5 21a6.5 6.5 0 0 1 13 0" />
+    <path d="M12 8v7" />
+    <path d="M9 12h6" />
+  </svg>
+);
+
+const ManIcon = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="7" r="4" />
+    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+  </svg>
+);
+
+const SeniorIcon = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="6" r="3" />
+    <path d="M9 22V15l-2-1a2 2 0 0 1-1-1.73V9a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2.5" />
+    <path d="M16 11l2 1v10" />
+    <path d="M18 22h1" />
+  </svg>
+);
+
 const FilterCard: React.FC<{ 
-  icon: React.ElementType, 
+  icon: React.ReactNode, 
   label: string, 
   onClick: () => void,
   description: string,
   bgColor: string,
-  iconColor: string,
+  iconContainerColor: string,
   textColor: string
-}> = ({ icon: Icon, label, onClick, description, bgColor, iconColor, textColor }) => (
+}> = ({ icon, label, onClick, description, bgColor, iconContainerColor, textColor }) => (
   <button 
     onClick={onClick}
     className={`${bgColor} p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group active:scale-95 border border-transparent`}
   >
-    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${iconColor} mb-4 group-hover:scale-110 transition-transform shadow-inner`}>
-        <Icon size={32} strokeWidth={2.5} />
+    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${iconContainerColor} mb-4 group-hover:scale-110 transition-transform shadow-inner`}>
+        {icon}
     </div>
     <h4 className={`font-black ${textColor} uppercase tracking-tighter text-sm mb-1 leading-none`}>{label}</h4>
     <p className={`${textColor} opacity-60 text-[9px] font-bold uppercase tracking-widest leading-tight`}>{description}</p>
@@ -63,38 +86,38 @@ export const HealthPreFilterView: React.FC<HealthPreFilterViewProps> = ({ onBack
 
         <div className="grid grid-cols-2 gap-4">
           <FilterCard 
-            icon={UserRound} 
+            icon={<WomanIcon />} 
             label="Mulher" 
             description="Saúde Feminina" 
             bgColor="bg-pink-50 dark:bg-pink-900/20"
-            iconColor="text-pink-600 bg-pink-100 dark:bg-pink-900/40"
+            iconContainerColor="text-pink-600 bg-pink-100 dark:bg-pink-900/40"
             textColor="text-pink-900 dark:text-pink-100"
             onClick={() => onSelectOption('MULHER')} 
           />
           <FilterCard 
-            icon={UserRound} 
+            icon={<ManIcon />} 
             label="Homem" 
             description="Saúde Masculina" 
             bgColor="bg-blue-50 dark:bg-blue-900/20"
-            iconColor="text-blue-600 bg-blue-100 dark:bg-blue-900/40"
+            iconContainerColor="text-blue-600 bg-blue-100 dark:bg-blue-900/40"
             textColor="text-blue-900 dark:text-blue-100"
             onClick={() => onSelectOption('HOMEM')} 
           />
           <FilterCard 
-            icon={Baby} 
+            icon={<Baby size={32} strokeWidth={2.5} />} 
             label="Pediatria" 
             description="Para Crianças" 
             bgColor="bg-teal-50 dark:bg-teal-900/20"
-            iconColor="text-teal-600 bg-teal-100 dark:bg-teal-900/40"
+            iconContainerColor="text-teal-600 bg-teal-100 dark:bg-teal-900/40"
             textColor="text-teal-900 dark:text-teal-100"
             onClick={() => onSelectOption('PEDIATRIA')} 
           />
           <FilterCard 
-            icon={Smile} 
+            icon={<SeniorIcon />} 
             label="Geriatria" 
             description="Melhor Idade" 
             bgColor="bg-amber-50 dark:bg-amber-900/20"
-            iconColor="text-amber-600 bg-amber-100 dark:bg-amber-900/40"
+            iconContainerColor="text-amber-600 bg-amber-100 dark:bg-amber-900/40"
             textColor="text-amber-900 dark:text-amber-100"
             onClick={() => onSelectOption('GERIATRIA')} 
           />
