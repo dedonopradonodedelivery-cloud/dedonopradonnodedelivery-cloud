@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Search, ChevronDown, Check, Bell, X, Mic, Tag, ChevronRight, MapPin } from 'lucide-react';
+import { Search, ChevronDown, Check, Bell, X, Mic, Tag, ChevronRight, MapPin, ShieldCheck, Crown } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
 import { Store } from '../../types';
 import { CATEGORIES } from '../../constants';
@@ -50,12 +50,16 @@ const NeighborhoodSelectorModal: React.FC = () => {
 
 export const Header: React.FC<HeaderProps> = ({
   onNotificationClick, 
+  user,
   searchTerm,
   onSearchChange,
   onNavigate,
   activeTab,
   stores = [],
-  onStoreClick
+  onStoreClick,
+  userRole,
+  onOpenViewSwitcher,
+  viewMode
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -81,29 +85,91 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores, categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
+  const hoodDisplayName = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
   const dynamicPlaceholder = currentNeighborhood === "Jacarepaguá (todos)" ? "O que busca em JPA?" : `O que busca em ${currentNeighborhood}?`;
+
+  // LÓGICA DE SAUDAÇÃO DINÂMICA
+  const greetingData = useMemo(() => {
+    const hour = new Date().getHours();
+    let timeGreeting: string;
+    let emoji: string;
+
+    if (hour >= 5 && hour < 12) {
+      timeGreeting = "Bom dia";
+      emoji = "☀️";
+    } else if (hour >= 12 && hour < 18) {
+      timeGreeting = "Boa tarde";
+      emoji = "🌤️";
+    } else {
+      timeGreeting = "Boa noite";
+      emoji = "🌙";
+    }
+
+    // 1. Lojista Logado
+    if (user && userRole === 'lojista') {
+      const storeName = user.user_metadata?.store_name || "Lojista";
+      return {
+        title: <>{timeGreeting}, {storeName} <Crown size={18} className="inline-block ml-1 fill-amber-400 text-amber-400" /></>,
+        subtitle: "Seus clientes estão por perto",
+      };
+    }
+
+    // 2. Cliente Logado
+    if (user && userRole === 'cliente') {
+      const userName = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Vizinho";
+      return {
+        title: <>{timeGreeting}, {userName} <span className="text-yellow-300">{emoji}</span></>,
+        subtitle: "O que você precisa hoje?",
+      };
+    }
+
+    // 3. Visitante (Modo Default)
+    return {
+      title: <>{timeGreeting}! <span className="text-yellow-300">{emoji}</span> {hoodDisplayName}</>,
+      subtitle: "Tudo para resolver a vida no bairro",
+    };
+  }, [user, userRole, hoodDisplayName]);
+
+  // REGRA CRÍTICA DE ADMIN: Apenas para este e-mail
+  const isAuthorizedAdmin = user?.email === 'dedonopradonodedelivery@gmail.com';
 
   return (
     <>
         <div className="sticky top-0 z-40 w-full bg-[#1E5BFF] rounded-b-[3rem] shadow-lg">
             <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
-                {/* Linha Superior: Logo/Texto à esquerda | Bairro/Sino à direita */}
+                {/* Linha Superior */}
                 <div className="flex items-center justify-between pt-10 pb-4">
-                    {/* Lado Esquerdo: Logo e Nome */}
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm border border-white/20">
-                            <MapPin className="w-4 h-4 text-white fill-white" />
+                    {/* Lado Esquerdo: Saudação Dinâmica */}
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm border border-white/20 shadow-md">
+                            <MapPin className="w-5 h-5 text-white fill-white" />
                         </div>
-                        <h1 className="text-white font-black text-lg tracking-tighter font-display">
-                            Localizei JPA
-                        </h1>
+                        <div className="flex flex-col">
+                            <h1 className="text-white font-black text-lg tracking-tighter leading-none animate-in fade-in slide-in-from-left-2 duration-500">
+                                {greetingData.title}
+                            </h1>
+                            <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest mt-1.5 leading-none">
+                                {greetingData.subtitle}
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Lado Direito: Bairro e Sino */}
-                    <div className="flex items-center gap-3">
+                    {/* Lado Direito: Ações */}
+                    <div className="flex items-center gap-2">
+                        {/* BOTÃO ADMIN - VISIBILIDADE CONDICIONAL ESTRITA */}
+                        {isAuthorizedAdmin && onOpenViewSwitcher && (
+                            <button
+                                onClick={onOpenViewSwitcher}
+                                className="p-2 text-white bg-amber-400/20 backdrop-blur-md rounded-full border border-amber-300/30 active:scale-95 transition-all shadow-md"
+                                title={`Admin: ${viewMode}`}
+                            >
+                                <ShieldCheck size={20} className="text-amber-400" />
+                            </button>
+                        )}
+
                         <button 
                             onClick={toggleSelector} 
-                            className="flex items-center gap-1.5 px-3 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 active:scale-95 transition-all"
+                            className="flex items-center gap-1 px-3 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 active:scale-95 transition-all"
                         >
                             <span className="text-[10px] font-black text-white uppercase tracking-wider whitespace-nowrap">
                                 {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
@@ -125,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* Barra de Pesquisa Centralizada */}
+                {/* Barra de Pesquisa */}
                 <div className="relative group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
                     <input 
