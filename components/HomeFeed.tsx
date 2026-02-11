@@ -114,7 +114,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const { currentNeighborhood } = useNeighborhood();
   
   const homeCategories = useMemo(() => {
-    const fixedIds = ['cat-saude', 'cat-services', 'cat-fashion', 'cat-beauty', 'cat-pets', 'cat-autos'];
+    // Ampliado para justificar o scroll, com foco nas 5 principais iniciais
+    const fixedIds = [
+        'cat-saude', 'cat-services', 'cat-fashion', 'cat-beauty', 'cat-pets', 
+        'cat-autos', 'cat-comida', 'cat-sports', 'cat-edu'
+    ];
     return fixedIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
   }, []);
 
@@ -129,7 +133,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       <HojeNoBairro />
 
-      {/* EXPLORE JPA — LISTA HORIZONTAL COM PADRÃO SOFT BLUE PREMIUM */}
+      {/* EXPLORE JPA — LISTA HORIZONTAL COM 5 ITENS VISÍVEIS + SCROLL */}
       <section className="w-full bg-white dark:bg-gray-950 pt-8 pb-4 relative z-10">
         <div className="flex overflow-x-auto no-scrollbar gap-4 px-5 scroll-smooth snap-x">
           {homeCategories.map((cat) => (
@@ -138,14 +142,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
               onClick={() => onSelectCategory(cat)}
               className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
             >
-              <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-blue-400 to-blue-600 flex flex-col items-center justify-center shadow-lg shadow-blue-500/20 border border-white/20 transition-all hover:brightness-110">
+              <div className="w-[66px] h-[66px] rounded-[1.6rem] bg-gradient-to-br from-blue-400 to-blue-600 flex flex-col items-center justify-center shadow-lg shadow-blue-500/10 border border-white/20 transition-all hover:brightness-110">
                 <div className="flex-1 flex items-center justify-center">
                   {React.cloneElement(cat.icon as any, { 
                     className: "w-6 h-6 text-white drop-shadow-sm", 
                     strokeWidth: 2.5 
                   })}
                 </div>
-                <div className="w-full bg-white/10 backdrop-blur-sm py-1 rounded-b-[1.5rem]">
+                <div className="w-full bg-white/10 backdrop-blur-sm py-1 rounded-b-[1.6rem]">
                   <span className="block text-[8px] font-black text-white uppercase tracking-tighter text-center px-1 truncate">
                     {cat.name}
                   </span>
@@ -158,11 +162,11 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
             onClick={() => onNavigate('all_categories')}
             className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
           >
-            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:bg-gray-100">
+            <div className="w-[66px] h-[66px] rounded-[1.6rem] bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:bg-gray-100">
               <div className="flex-1 flex items-center justify-center">
                 <Plus className="w-6 h-6 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
               </div>
-              <div className="w-full bg-black/5 py-1 rounded-b-[1.5rem]">
+              <div className="w-full bg-black/5 py-1 rounded-b-[1.6rem]">
                 <span className="block text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-tighter text-center px-1">
                   + Mais
                 </span>
@@ -226,7 +230,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
                 <button 
                   onClick={() => onNavigate('weekly_reward_page')}
-                  className="bg-white text-blue-600 font-black py-4 px-6 rounded-2xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl hover:bg-blue-50 active:scale-[0.98] transition-all"
+                  className="bg-white text-blue-600 font-black py-4 px-6 rounded-2xl shadow-xl hover:bg-blue-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest"
                 >
                   Ver recompensas desbloqueáveis <ArrowRight size={14} />
                 </button>
