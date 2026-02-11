@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Ticket, Clock, MapPin, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
-import { MOCK_HOME_COUPONS_V2 } from '@/constants';
+import { Ticket, ArrowRight } from 'lucide-react';
+import { MOCK_HOME_COUPONS } from '@/constants';
 
 interface CouponCarouselProps {
   onNavigate: (view: string) => void;
@@ -9,57 +9,44 @@ interface CouponCarouselProps {
 
 const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon, onResgate }) => {
   return (
-    <div className="flex-shrink-0 w-80 snap-center p-2">
-      <div className={`relative rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col group active:scale-[0.98] transition-transform ${coupon.color}`}>
+    <div className="flex-shrink-0 w-72 snap-center p-2">
+      <div className={`relative h-44 rounded-[2.5rem] overflow-hidden shadow-xl ${coupon.color} flex flex-col group active:scale-[0.98] transition-transform`}>
         
-        {/* Ticket Cutouts */}
-        <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 bg-[#F8F9FC] dark:bg-black rounded-full z-10"></div>
-        <div className="absolute top-1/2 -translate-y-1/2 -right-4 w-8 h-8 bg-[#F8F9FC] dark:bg-black rounded-full z-10"></div>
+        <div className="absolute top-1/2 -translate-y-1/2 -left-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
+        <div className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 bg-white dark:bg-gray-950 rounded-full z-10"></div>
 
-        <div className="p-6 flex gap-5">
-          <div className="w-20 h-20 rounded-3xl bg-white p-1 shadow-2xl shrink-0 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 p-6 flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
             <img 
               src={coupon.storeLogo} 
               alt={coupon.storeName} 
-              className="w-full h-full object-cover rounded-2xl"
+              className="w-full h-full object-cover rounded-xl"
             />
           </div>
-          <div className="flex flex-col min-w-0 text-white">
-            <div className="flex items-center gap-2 mb-1 opacity-80">
-                <Sparkles size={10} className="fill-current" />
-                <h4 className="text-[9px] font-black uppercase tracking-widest truncate">
-                {coupon.storeName}
-                </h4>
-            </div>
-            <p className="font-black text-5xl leading-none tracking-tighter uppercase drop-shadow-xl">
+          <div className="flex flex-col min-w-0">
+            <h4 className="text-[10px] font-black text-white/80 uppercase tracking-[0.15em] truncate mb-0.5">
+              {coupon.storeName}
+            </h4>
+            <p className="text-white font-black text-3xl leading-none tracking-tighter uppercase drop-shadow-md">
               {coupon.discount}
             </p>
-            <div className="flex items-center gap-1.5 mt-3 bg-black/10 w-fit px-2 py-0.5 rounded-lg border border-white/10">
-                <TrendingUp size={10} />
-                <p className="text-[9px] font-black uppercase tracking-tight">{coupon.resgates}</p>
-            </div>
           </div>
         </div>
-        
-        <div className="h-px border-t border-dashed border-white/20 mx-6"></div>
-        
-        <div className="p-6 flex items-center justify-between relative z-10">
-            <div className="flex flex-col gap-1 text-white text-[10px] font-bold uppercase tracking-wider">
-                <div className="flex items-center gap-1.5 opacity-80">
-                    <MapPin size={12} /> {coupon.distancia}
-                </div>
-                {coupon.validade && (
-                    <div className="flex items-center gap-1.5 text-yellow-300">
-                        <Clock size={12} /> {coupon.validade}
-                    </div>
-                )}
-            </div>
-            <button 
-                onClick={(e) => { e.stopPropagation(); onResgate(); }}
-                className="bg-white text-gray-900 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl active:scale-90 transition-transform hover:bg-gray-50 flex items-center gap-2"
-            >
-                Resgatar <ArrowRight size={14} strokeWidth={3} />
-            </button>
+
+        <div className="px-6">
+            <div className="h-px border-t border-dashed border-white/20"></div>
+        </div>
+
+        <div className="h-16 px-6 flex items-center justify-between relative z-10">
+          <div className="bg-black/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+            <p className="text-[11px] font-mono font-black text-white tracking-[0.1em]">{coupon.code}</p>
+          </div>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onResgate(); }}
+            className="bg-white text-gray-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-90 transition-transform hover:bg-gray-50 flex items-center gap-1.5"
+          >
+            Resgatar
+          </button>
         </div>
       </div>
     </div>
@@ -68,11 +55,16 @@ const CouponTicket: React.FC<{ coupon: any; onResgate: () => void }> = ({ coupon
 
 export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) => {
   return (
-    <section className="bg-white dark:bg-gray-950 pt-4 pb-8">
-      <div className="px-5 mb-6 flex items-center justify-between">
+    <section className="bg-white dark:bg-gray-950 py-6 mb-2 overflow-hidden">
+      <div className="px-5 mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none">Cupons do dia 🔥</h2>
-          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></div>
+          <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-500 shadow-sm">
+            <Ticket size={20} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest leading-none">Cupons e Ofertas</h2>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Exclusivos para o bairro</p>
+          </div>
         </div>
         <button 
           onClick={() => onNavigate('coupon_landing')} 
@@ -82,16 +74,26 @@ export const CouponCarousel: React.FC<CouponCarouselProps> = ({ onNavigate }) =>
         </button>
       </div>
 
-      <div className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory gap-2 -mx-5 px-5">
-        <div className="w-1 shrink-0"></div>
-        {MOCK_HOME_COUPONS_V2.map((coupon) => (
+      <div className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-3 px-3">
+        {MOCK_HOME_COUPONS.map((coupon) => (
           <CouponTicket 
             key={coupon.id} 
             coupon={coupon} 
             onResgate={() => onNavigate('coupon_landing')} 
           />
         ))}
-        <div className="w-1 shrink-0"></div>
+        
+        <div className="flex-shrink-0 w-48 snap-center p-2">
+          <button 
+            onClick={() => onNavigate('coupon_landing')}
+            className="w-full h-44 rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-all group bg-gray-50/30"
+          >
+            <div className="p-3 rounded-full bg-gray-50 dark:bg-gray-900 group-hover:bg-blue-50 transition-colors">
+              <ArrowRight size={24} />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-center">Explorar todos<br/>os cupons</span>
+          </button>
+        </div>
       </div>
     </section>
   );

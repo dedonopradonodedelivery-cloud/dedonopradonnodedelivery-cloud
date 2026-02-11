@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
@@ -54,7 +54,7 @@ import { CouponLandingView } from '@/components/CouponLandingView';
 import { CategoriesPageView } from '@/components/CategoriesPageView';
 import { HealthPreFilterView } from '@/components/HealthPreFilterView';
 import { HealthSubSpecialtiesView } from '@/components/HealthSubSpecialtiesView';
-import { MapPin, X, Palette, Sparkles, Crown, ShieldCheck, User as UserIcon, Store as StoreIcon, Users, CheckCircle2 } from 'lucide-react';
+import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -70,70 +70,14 @@ const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
 
 export type RoleMode = 'ADM' | 'Usuário' | 'Lojista' | 'Visitante' | 'Designer';
 
-const RoleSwitcherModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  currentMode: RoleMode;
-  onSelect: (mode: RoleMode) => void;
-}> = ({ isOpen, onClose, currentMode, onSelect }) => {
-  if (!isOpen) return null;
-
-  const roles: { mode: RoleMode, label: string, icon: any, color: string }[] = [
-    { mode: 'ADM', label: 'Administrador', icon: ShieldCheck, color: 'text-indigo-500' },
-    { mode: 'Lojista', label: 'Lojista', icon: StoreIcon, color: 'text-blue-500' },
-    { mode: 'Usuário', label: 'Usuário', icon: UserIcon, color: 'text-emerald-500' },
-    { mode: 'Visitante', label: 'Visitante', icon: Users, color: 'text-gray-500' },
-  ];
-
-  return (
-    <div className="fixed inset-0 z-[3000] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-            <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 text-center uppercase tracking-widest">Alternar Modo</h3>
-            
-            <div className="space-y-2">
-                {roles.map((r) => {
-                    const Icon = r.icon;
-                    const isSelected = currentMode === r.mode;
-                    return (
-                        <button
-                            key={r.mode}
-                            onClick={() => { onSelect(r.mode); onClose(); }}
-                            className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all active:scale-[0.98] ${
-                                isSelected 
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-[#1E5BFF]' 
-                                : 'bg-gray-50 dark:bg-gray-800 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? 'bg-[#1E5BFF] text-white shadow-lg' : 'bg-white dark:bg-gray-700 ' + r.color}`}>
-                                    <Icon size={20} />
-                                </div>
-                                <span className={`font-bold text-sm ${isSelected ? 'text-[#1E5BFF]' : 'text-gray-700 dark:text-gray-200'}`}>{r.label}</span>
-                            </div>
-                            {isSelected && <CheckCircle2 size={20} className="text-[#1E5BFF] animate-in zoom-in" />}
-                        </button>
-                    );
-                })}
-            </div>
-            
-            <button 
-                onClick={onClose}
-                className="w-full mt-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
-            >
-                Cancelar
-            </button>
-        </div>
-    </div>
-  );
-};
-
 const App: React.FC = () => {
   const { user, userRole, loading: isAuthInitialLoading, signOut } = useAuth();
   const { theme } = useTheme();
   const isAuthReturn = window.location.hash.includes('access_token') || window.location.search.includes('code=');
   
+  // Controle de estado da Splash Screen: true = visível
   const [isSplashVisible, setIsSplashVisible] = useState(!splashWasShownInSession && !isAuthReturn);
+  // Controle da fase de Fade Out
   const [isFadingOut, setIsFadingOut] = useState(false);
   
   const [viewMode, setViewMode] = useState<RoleMode>(() => (localStorage.getItem('admin_view_mode') as RoleMode) || 'Usuário');
@@ -149,6 +93,8 @@ const App: React.FC = () => {
   const [selectedClassified, setSelectedClassified] = useState<Classified | null>(null);
   const [classifiedSearchTerm, setClassifiedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
+  const [healthPreFilter, setHealthPreFilter] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
   const [activityType, setActivityType] = useState<string>('');
@@ -159,40 +105,25 @@ const App: React.FC = () => {
   const [chatRole, setChatRole] = useState<'resident' | 'merchant' | 'admin'>('resident');
 
   const isAdmin = user?.email === ADMIN_EMAIL;
-  
-  // LÓGICA DE SIMULAÇÃO DE MODO PARA ADMIN
-  const effectiveUserRole = useMemo(() => {
-    if (!isAdmin) return userRole;
-    switch(viewMode) {
-        case 'ADM': return 'admin';
-        case 'Lojista': return 'lojista';
-        case 'Usuário': return 'cliente';
-        case 'Visitante': return null;
-        default: return userRole;
-    }
-  }, [isAdmin, userRole, viewMode]);
-
-  const effectiveUser = useMemo(() => {
-    if (isAdmin && viewMode === 'Visitante') return null;
-    return user;
-  }, [isAdmin, viewMode, user]);
-
-  const isMerchantMode = effectiveUserRole === 'lojista';
+  const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
 
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
+  // Lógica principal do Timer da Splash Screen
   useEffect(() => {
     if (!isSplashVisible) return;
 
+    // Timer de 5 segundos para exibição total
     const fadeTimeout = setTimeout(() => {
-      setIsFadingOut(true); 
-    }, 5000); // 5 segundos fixos
+      setIsFadingOut(true); // Inicia o fade out de 800ms (via CSS)
+    }, 5000);
 
+    // Timer de 5.8 segundos para remover o componente totalmente
     const removeTimeout = setTimeout(() => {
       setIsSplashVisible(false);
       splashWasShownInSession = true;
-    }, 6000); // 1 segundo de fade cinematográfico
+    }, 5800);
 
     return () => {
       clearTimeout(fadeTimeout);
@@ -231,7 +162,7 @@ const App: React.FC = () => {
     if (view === 'service_chat' && data?.requestId) {
         setActiveServiceRequestId(data.requestId);
         setActiveProfessionalId(data.professionalId || 'admin_auditoria');
-        if (effectiveUserRole === 'admin') setChatRole('admin');
+        if (isAdmin) setChatRole('admin');
         else if (data.role) setChatRole(data.role);
         else if (isMerchantMode) setChatRole('merchant');
         else setChatRole('resident');
@@ -261,27 +192,31 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    if (effectiveUser && activeTab === 'coupon_landing') {
-        if (effectiveUserRole === 'lojista') {
+    if (user && activeTab === 'coupon_landing') {
+        if (userRole === 'lojista') {
             handleNavigate('merchant_coupons');
         } else {
             handleNavigate('user_coupons');
         }
     }
-  }, [effectiveUser, effectiveUserRole]);
+  }, [user, userRole]);
 
   const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
+  const handleSelectJob = (job: Job) => { handleNavigate('job_detail', { job }); };
   
   const handleSelectCategory = (category: Category) => {
     if (category.slug === 'all_categories') {
       handleNavigate('all_categories');
       return;
     }
+
     setSelectedCategory(category);
+    
     if (category.id === 'cat-saude') {
         handleNavigate('health_pre_filter');
         return;
     }
+
     if (category.slug === 'real_estate' || category.slug === 'jobs' || category.slug === 'donations' || category.slug === 'desapega') {
         handleNavigate(category.slug);
     } else {
@@ -289,98 +224,413 @@ const App: React.FC = () => {
     }
   };
 
-  const handleRoleSelect = (mode: RoleMode) => {
-    setViewMode(mode);
-    localStorage.setItem('admin_view_mode', mode);
+  const handleHealthPreFilterChoice = (option: string) => {
+      if (option === 'MULHER') handleNavigate('health_woman');
+      else if (option === 'HOMEM') handleNavigate('health_man');
+      else if (option === 'PEDIATRIA') handleNavigate('health_pediatrics');
+      else if (option === 'GERIATRIA') handleNavigate('health_geriatrics');
+      else {
+          setHealthPreFilter(null);
+          handleNavigate('category_detail');
+      }
+  };
+
+  const handleSelectSubcategory = (subName: string, parentCat: Category) => {
+    setSelectedSubcategoryName(subName);
+    setSelectedCategory(parentCat);
+    handleNavigate('subcategory_detail');
+  };
+
+  const handleClaimStore = (store: Store) => {
+    if (!user) {
+      setIsAuthOpen(true);
+      return;
+    }
+    setStoreToClaim(store);
+    setIsClaimFlowActive(true);
+  };
+
+  const handleClaimSuccess = () => {
+    setIsClaimFlowActive(false);
+    handleNavigate('profile');
+  };
+
+  const handlePlanSuccess = (plan: PlanType) => {
+      localStorage.setItem('merchant_plan', plan);
+      handleNavigate('profile');
   };
 
   const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view', 'all_categories', 'health_pre_filter', 'health_woman', 'health_man', 'health_pediatrics', 'health_geriatrics', 'explore'];
+  
+  const RoleSwitcherModal: React.FC = () => {
+    if (!isRoleSwitcherOpen) return null;
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+            <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-between items-start mb-8 px-2">
+                    <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
+                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                </div>
+                <div className="space-y-3">
+                    {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
+                        <button 
+                          key={role} 
+                          onClick={() => { 
+                            setViewMode(role); 
+                            localStorage.setItem('admin_view_mode', role); 
+                            setIsRoleSwitcherOpen(false); 
+                            if (role === 'Lojista') setActiveTab('profile'); 
+                            else if (role === 'ADM') setActiveTab('admin_panel'); 
+                            else if (role === 'Designer') setActiveTab('designer_panel');
+                            else setActiveTab('home'); 
+                          }} 
+                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                        >
+                            <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+  };
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
       <NeighborhoodProvider>
         <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
           
-          {isClaimFlowActive && storeToClaim && effectiveUser && (
+          {isClaimFlowActive && storeToClaim && user && (
             <StoreClaimFlow 
               store={storeToClaim} 
-              userId={effectiveUser.id} 
+              userId={user.id} 
               onBack={() => setIsClaimFlowActive(false)} 
-              onSuccess={() => { setIsClaimFlowActive(false); handleNavigate('profile'); }}
+              onSuccess={handleClaimSuccess}
               onNavigate={handleNavigate}
             />
           )}
 
+          {/* O conteúdo principal do app aparece com fade-in */}
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-out ${!isSplashVisible || isFadingOut ? 'opacity-100' : 'opacity-0'}`}>
-              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={effectiveUserRole as any} hideNav={false}>
+              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole as any} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header 
-                      onNotificationClick={() => handleNavigate('notifications')} 
-                      user={effectiveUser} 
-                      searchTerm={globalSearch} 
-                      onSearchChange={setGlobalSearch} 
-                      onNavigate={handleNavigate} 
-                      activeTab={activeTab} 
-                      userRole={effectiveUserRole as any} 
-                      stores={STORES} 
-                      onStoreClick={handleSelectStore} 
-                      isAdmin={isAdmin} 
-                      viewMode={viewMode} 
-                      onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
-                    />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={effectiveUser as any} userRole={effectiveUserRole as any} />}
-                    {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onNavigate={handleNavigate} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} />}
-                    {activeTab === 'profile' && (isMerchantMode ? <StoreAreaView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={effectiveUser as any} /> : <MenuView user={effectiveUser as any} userRole={effectiveUserRole as any} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />)}
-                    {activeTab === 'admin_panel' && <AdminPanel user={effectiveUser as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
-                    {/* ... other mapping ... */}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole as any} />}
+                    {activeTab === 'explore' && (
+                        <ExploreView 
+                            stores={STORES} 
+                            searchQuery={globalSearch} 
+                            onStoreClick={handleSelectStore} 
+                            onNavigate={handleNavigate}
+                            onLocationClick={() => {}}
+                            onFilterClick={() => {}}
+                            onOpenPlans={() => {}}
+                        />
+                    )}
+                    
+                    {activeTab === 'health_pre_filter' && (
+                        <HealthPreFilterView 
+                            onBack={() => handleNavigate('home')} 
+                            onSelectOption={handleHealthPreFilterChoice}
+                        />
+                    )}
+
+                    {activeTab === 'health_woman' && (
+                        <HealthSubSpecialtiesView 
+                            title="Saúde da Mulher"
+                            subtitle="Cuidado Feminino"
+                            themeColor="text-pink-500"
+                            specialties={['Ginecologia', 'Obstetrícia', 'Mastologia', 'Endocrinologia feminina', 'Reprodução humana', 'Fertilidade feminina', 'Planejamento familiar', 'Saúde sexual feminina', 'Saúde íntima feminina', 'Climatério', 'Menopausa', 'Ginecologia oncológica', 'Ginecologia endócrina', 'Uroginecologia', 'Colposcopia', 'Patologia do trato genital inferior', 'Medicina fetal', 'Pré-natal de alto risco', 'Dor pélvica crônica']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectStore={handleSelectStore}
+                        />
+                    )}
+
+                    {activeTab === 'health_man' && (
+                        <HealthSubSpecialtiesView 
+                            title="Saúde do Homem"
+                            subtitle="Cuidado Masculino"
+                            themeColor="text-blue-500"
+                            specialties={['Urologia', 'Andrologia', 'Endocrinologia masculina', 'Saúde sexual masculina', 'Fertilidade masculina', 'Saúde prostática', 'Distúrbios hormonais masculinos', 'Urologia oncológica', 'Urologia functional', 'Saúde do envelhecimento masculino', 'Infertilidade masculina', 'Disfunção erétil', 'Ejaculação precoce', 'Hipogonadismo']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectStore={handleSelectStore}
+                        />
+                    )}
+
+                    {activeTab === 'health_pediatrics' && (
+                        <HealthSubSpecialtiesView 
+                            title="Pediatria"
+                            subtitle="Cuidado Infantil"
+                            themeColor="text-teal-500"
+                            specialties={['Pediatria geral', 'Neonatologia', 'Puericultura', 'Pediatria preventiva', 'Alergologia pediátrica', 'Endocrinologia pediátrica', 'Neuropediatria', 'Gastroenterologia pediátrica', 'Pneumologia pediátrica', 'Cardiologia pediátrica', 'Nefrologia pediátrica', 'Hematologia pediátrica', 'Oncologia pediátrica', 'Infectologia pediátrica', 'Reumatologia pediátrica', 'Genética médica pediátrica', 'Psiquiatria infantil', 'Ortopedia pediátrica', 'Cirurgia pediátrica']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectStore={handleSelectStore}
+                        />
+                    )}
+
+                    {activeTab === 'health_geriatrics' && (
+                        <HealthSubSpecialtiesView 
+                            title="Geriatria"
+                            subtitle="Melhor Idade"
+                            themeColor="text-amber-500"
+                            specialties={['Geriatria', 'Clínica geriátrica', 'Gerontologia', 'Medicina do envelhecimento', 'Fisioterapia geriátrica', 'Fisioterapia domiciliar', 'Enfermagem domiciliar', 'Home care', 'Cuidados paliativos', 'Cuidados continuados', 'Psicologia geriátrica', 'Psiquiatria geriátrica', 'Terapia ocupacional geriátrica', 'Fonoaudiologia geriátrica', 'Nutrição geriátrica', 'Reabilitação geriátrica', 'Ortopedia geriátrica', 'Cardiologia geriátrica', 'Neurologia geriátrica', 'Avaliação multidisciplinar do idoso']}
+                            onBack={() => handleNavigate('health_pre_filter')}
+                            onSelectStore={handleSelectStore}
+                        />
+                    )}
+
+                    {activeTab === 'all_categories' && (
+                        <CategoriesPageView 
+                            onBack={() => handleNavigate('home')} 
+                            onSelectCategory={handleSelectCategory}
+                        />
+                    )}
+
+                    {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}
+
+                    {activeTab === 'service_messages_list' && (
+                        <ServiceMessagesListView 
+                            onBack={() => handleNavigate('home')}
+                            onOpenChat={(reqId, proId) => handleNavigate('service_chat', { requestId: reqId, professionalId: proId, role: 'resident' })}
+                        />
+                    )}
+
+                    {activeTab === 'weekly_reward_page' && (
+                        <WeeklyRewardPage 
+                            onBack={() => handleNavigate('home')} 
+                            onNavigate={handleNavigate}
+                        />
+                    )}
+                    
+                    {activeTab === 'coupon_landing' && (
+                        <CouponLandingView 
+                           onBack={() => handleNavigate('home')}
+                           onLogin={() => setIsAuthOpen(true)}
+                        />
+                    )}
+
+                    {activeTab === 'user_coupons' && (
+                        <UserCupomScreen 
+                            onBack={() => handleNavigate('profile')}
+                            onNavigate={handleNavigate}
+                            onStoreClick={handleSelectStore}
+                        />
+                    )}
+
+                    {activeTab === 'user_statement' && (
+                        <UserStatementView 
+                            onBack={() => handleNavigate('profile')}
+                            onExploreStores={() => handleNavigate('explore')}
+                        />
+                    )}
+
+                    {activeTab === 'notifications' && (
+                        <NotificationsView 
+                            onBack={() => handleNavigate('home')}
+                            onNavigate={handleNavigate}
+                            userRole={userRole as any}
+                        />
+                    )}
+
+                    {activeTab === 'banner_sales_wizard' && (
+                        <BannerSalesWizard 
+                            user={user} 
+                            onBack={() => handleNavigate('profile')} 
+                            onNavigate={handleNavigate}
+                        />
+                    )}
+                    
+                    {activeTab === 'store_ads_module' && (
+                        <StoreAdsModule 
+                           onBack={() => handleNavigate('profile')}
+                           onNavigate={handleNavigate}
+                           categoryName={undefined}
+                           user={user}
+                           viewMode={viewMode}
+                           initialView={initialModuleView}
+                        />
+                    )}
+                    
+                    {activeTab === 'store_sponsored' && (
+                        <StoreSponsoredAds 
+                           onBack={() => handleNavigate('profile')}
+                           onNavigate={handleNavigate}
+                        />
+                    )}
+
+                    {activeTab === 'category_banner_sales' && (
+                        <CategoryBannerSalesView 
+                            user={user} 
+                            onBack={() => handleNavigate('profile')} 
+                            onSuccess={() => handleNavigate('profile')}
+                        />
+                    )}
+
+                    {activeTab === 'category_detail' && selectedCategory && (
+                      <CategoryView 
+                        category={selectedCategory} 
+                        initialSubcategory={healthPreFilter || undefined}
+                        onBack={() => { 
+                            setHealthPreFilter(null);
+                            handleNavigate(selectedCategory.id === 'cat-saude' ? 'health_pre_filter' : 'home'); 
+                        }} 
+                        onStoreClick={handleSelectStore} 
+                        stores={STORES} 
+                        userRole={userRole as any} 
+                        onAdvertiseInCategory={() => {}} 
+                        onNavigate={handleNavigate}
+                        onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
+                      />
+                    )}
+
+                    {activeTab === 'subcategory_detail' && selectedSubcategoryName && selectedCategory && (
+                      <SubcategoryDetailView 
+                        subcategoryName={selectedSubcategoryName}
+                        categoryName={selectedCategory.name}
+                        onBack={() => handleNavigate('category_detail')}
+                        onStoreClick={handleSelectStore}
+                        stores={STORES}
+                        userRole={userRole as any}
+                        onNavigate={handleNavigate}
+                      />
+                    )}
+                    
+                    {activeTab === 'profile' && (
+                      isMerchantMode 
+                        ? <StoreAreaView 
+                            onBack={() => handleNavigate('home')} 
+                            onNavigate={handleNavigate} 
+                            user={user as any} 
+                          />
+                        : <MenuView user={user as any} userRole={userRole as any} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
+                    )}
+
+                    {activeTab === 'user_profile_full' && (
+                        <UserProfileFullView onBack={() => handleNavigate('profile')} onEdit={() => handleNavigate('edit_profile_view')} />
+                    )}
+
+                    {activeTab === 'edit_profile_view' && user && (
+                        <EditProfileView user={user} onBack={() => handleNavigate('user_profile_full')} />
+                    )}
+                    
+                    {activeTab === 'merchant_panel' && <MerchantPanel onBack={() => handleNavigate('profile')} />}
+
+                    {activeTab === 'store_profile' && (
+                      <StoreProfileEdit 
+                        onBack={() => handleNavigate('profile')} 
+                      />
+                    )}
+
+                    {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
+                    {activeTab === 'merchant_leads' && <MerchantLeadsView isAdmin={isAdmin} onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { handleNavigate('service_chat', { requestId: id, role: 'merchant' }); }} />}
+                    
+                    {activeTab === 'merchant_reviews' && (
+                        <MerchantReviewsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'merchant_coupons' && (
+                        <MerchantCouponsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'merchant_promotions' && (
+                        <MerchantPromotionsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'store_finance' && (
+                        <StoreFinanceModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'store_support' && (
+                        <StoreSupportModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'store_connect' && (
+                        <StoreConnectModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'service_chat' && activeServiceRequestId && (
+                        <ServiceChatView 
+                            requestId={activeServiceRequestId} 
+                            professionalId={activeProfessionalId || ''}
+                            userRole={chatRole} 
+                            onBack={() => {
+                                if (activeServiceRequestId.startsWith('DSG-') || activeServiceRequestId.startsWith('MASTER-')) {
+                                    handleNavigate('home');
+                                } else {
+                                    handleNavigate(isMerchantMode ? 'merchant_leads' : 'service_messages_list');
+                                }
+                            }} 
+                        />
+                    )}
+
+                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
+                    
+                    {activeTab === 'designer_panel' && user && (
+                      <DesignerPanel user={user} onBack={() => handleNavigate('home')} />
+                    )}
+                    
+                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} onNavigate={handleNavigate} />}
+                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'classified_search_results' && <ClassifiedSearchResultsView searchTerm={classifiedSearchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate_detail' && selectedProperty && <RealEstateDetailView property={selectedProperty} onBack={() => handleNavigate('real_estate')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'classified_detail' && selectedClassified && <ClassifiedDetailView item={selectedClassified} onBack={() => handleNavigate(previousTab)} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
+                    {activeTab === 'job_wizard' && <JobWizard user={user} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
+                    {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
+                    {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('profile')} onSuccess={handlePlanSuccess} />}
+                    {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    
+                    {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
+                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
+                    
+                    {activeTab === 'user_activity' && <UserActivityView type={activityType} onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'my_neighborhoods' && <MyNeighborhoodsView onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'privacy_policy' && <PrivacyView onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'app_suggestion' && <AppSuggestionView user={user as any} onBack={() => handleNavigate('profile')} />}
+
+                    {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}
+                    {activeTab === 'about_app' && <AboutAppView onBack={() => handleNavigate('profile')} />}
                   </main>
-                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={effectiveUser as any} />
+                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
               </Layout>
+              <RoleSwitcherModal />
           </div>
 
-          <RoleSwitcherModal 
-            isOpen={isRoleSwitcherOpen} 
-            onClose={() => setIsRoleSwitcherOpen(false)} 
-            currentMode={viewMode} 
-            onSelect={handleRoleSelect} 
-          />
-
-          {/* SPLASH SCREEN */}
+          {/* SPLASH SCREEN PREMIUM */}
           {isSplashVisible && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-20 transition-all duration-1000 ease-in-out ${isFadingOut ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}`} style={{ background: 'linear-gradient(135deg, #1E5BFF 0%, #0039A6 50%, #020617 100%)' }}>
-              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-                 {[...Array(6)].map((_, i) => (
-                   <div key={i} className="particle animate-float-particle" style={{ left: `${Math.random() * 100}%`, width: `${Math.random() * 4}px`, height: `${Math.random() * 4}px`, animationDelay: `${Math.random() * 5}s` }}></div>
-                 ))}
-              </div>
-              <div className="flex-1 flex flex-col items-center justify-center px-4 relative">
-                  <div className="absolute w-64 h-64 bg-blue-400/20 rounded-full blur-[80px] animate-pulse-glow pointer-events-none"></div>
-                  <div className="relative w-36 h-36 bg-white rounded-[2.5rem] flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] mb-8 animate-logo-pop border border-white/20">
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-800 ease-in-out ${isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+              <div className="flex flex-col items-center text-center px-4">
+                  {/* Logo com animação pop */}
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 animate-logo-enter">
                     <MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" />
                   </div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-2xl animate-reveal-up" style={{ animationDelay: '0.4s' }}>
-                    Localizei <span className="text-blue-300">JPA</span>
+                  
+                  {/* Título Principal */}
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                    Localizei JPA
                   </h1>
-                  <div className="mt-4 overflow-hidden">
-                    <p className="text-xl sm:text-2xl font-black font-display text-white/90 tracking-tighter uppercase opacity-0 animate-reveal-up" style={{ animationDelay: '1.2s' }}>
-                      “Seu bairro, na sua mão.”
+                  
+                  {/* Slogan com animação Slide-up + Fade-in */}
+                  <div className="mt-4 opacity-0 animate-slide-up-fade" style={{ animationDelay: '1s' }}>
+                    <p className="text-lg font-semibold text-white/90">
+                      O bairro na palma de suas mãos! ✋
                     </p>
-                    <div className="h-1.5 w-12 bg-blue-500 rounded-full mx-auto mt-3 opacity-0 animate-reveal-up" style={{ animationDelay: '1.4s' }}></div>
                   </div>
               </div>
               
-              {/* Patrocinador Master - Assinatura Institucional Elegante */}
-              <div className="text-center px-6 opacity-0 animate-fade-in" style={{ animationDelay: '2s' }}>
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.4em] leading-none mb-3">Patrocinador Master</p>
-                <div className="flex items-center justify-center gap-3">
-                    <div className="w-8 h-px bg-white/10"></div>
-                    <p className="text-xs font-display font-medium text-white/50 tracking-[0.2em] uppercase">
-                       Grupo Esquematiza
-                    </p>
-                    <div className="w-8 h-px bg-white/10"></div>
-                </div>
+              {/* Rodapé institucional */}
+              <div className="text-center animate-fade-in" style={{ animationDelay: '1.2s' }}>
+                <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
+                <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
               </div>
             </div>
           )}
