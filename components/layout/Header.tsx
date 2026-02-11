@@ -19,6 +19,8 @@ interface HeaderProps {
   viewMode?: string;
   user?: any;
   userRole?: "cliente" | "lojista" | null;
+  isDarkMode?: boolean;
+  toggleTheme?: () => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
