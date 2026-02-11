@@ -2,27 +2,21 @@
 import React from 'react';
 import { 
   ChevronRight, 
-  Megaphone, 
   LayoutGrid, 
   BarChart3, 
   MessageSquare, 
-  FileText, 
   CreditCard, 
   Heart, 
-  Info, 
-  HelpCircle, 
   LogOut,
   User,
   Sparkles,
   Compass,
   LifeBuoy,
-  AlertTriangle,
   Crown,
-  Star,
   Moon,
   Sun,
-  ImageIcon,
-  TrendingUp
+  TrendingUp,
+  Stethoscope
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,9 +36,8 @@ const ServiceBlock: React.FC<{
   isDestructive?: boolean;
   colorClass?: string;
   badge?: number;
-  labelBadge?: string;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, labelBadge, rightElement }) => (
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
@@ -131,6 +124,13 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
           <SectionHeader title="Ações de Crescimento" icon={Sparkles} />
           <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
             <ServiceBlock 
+              icon={Stethoscope} 
+              label="Vitrine de Saúde" 
+              description="Gerencie seus cards de destaque na especialidade"
+              onClick={() => onNavigate('specialty_highlights_manager')}
+              colorClass="bg-blue-50 text-[#1E5BFF]"
+            />
+            <ServiceBlock 
               icon={Crown} 
               label="Patrocinador Master" 
               description="Apareça em destaque em 90% das telas do bairro"
@@ -143,20 +143,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
               description="Suba para o topo da lista por R$ 0,90/dia"
               onClick={() => onNavigate('store_sponsored')}
               colorClass="bg-emerald-50 text-emerald-600"
-            />
-            <ServiceBlock 
-              icon={ImageIcon} 
-              label="Banners de Categoria" 
-              description="Garante seu espaço exclusivo no carrossel"
-              onClick={() => onNavigate('category_banner_sales')}
-              colorClass="bg-blue-50 text-blue-600"
-            />
-            <ServiceBlock 
-              icon={LayoutGrid} 
-              label="Banners Home" 
-              description="Anúncios visuais na página inicial"
-              onClick={() => onNavigate('store_ads_module')}
-              colorClass="bg-purple-50 text-purple-600"
             />
           </div>
         </section>
@@ -198,18 +184,6 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                   <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
                 </div>
               }
-            />
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title="Suporte" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-            <ServiceBlock 
-              icon={LifeBuoy} 
-              label="Suporte ao Lojista" 
-              description="Ajuda com o app e conta"
-              onClick={() => onNavigate('store_support')} 
             />
           </div>
         </section>

@@ -17,16 +17,25 @@ interface HealthSubSpecialtiesViewProps {
   themeColor: string;
   onBack: () => void;
   onSelectStore: (store: Store) => void;
+  onSelectSpecialty: (specialty: string) => void;
 }
 
 export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> = ({ 
   title, 
   specialties, 
   onBack,
-  onSelectStore
+  onSelectStore,
+  onSelectSpecialty
 }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
+
+  const handleSpecialtyClick = (spec: string) => {
+    setSelectedSpecialty(spec);
+    setTimeout(() => {
+        onSelectSpecialty(spec);
+    }, 200);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
@@ -89,7 +98,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                 {specialties.map((spec) => (
                     <button 
                         key={spec}
-                        onClick={() => setSelectedSpecialty(spec)}
+                        onClick={() => handleSpecialtyClick(spec)}
                         className={`flex flex-col items-center justify-center p-4 min-h-[90px] rounded-[2rem] border transition-all duration-300 active:scale-95 shadow-sm ${
                             selectedSpecialty === spec 
                             ? 'bg-[#1E5BFF] border-[#1E5BFF] text-white shadow-blue-500/30' 
@@ -108,7 +117,7 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
             
             <div className="mt-16 text-center opacity-40">
                 <p className="text-[8px] font-black text-gray-400 dark:text-white uppercase tracking-[0.4em]">
-                    Localizei JPA • Especialidades Femininas
+                    Localizei JPA • Especialidades de Saúde
                 </p>
             </div>
         </section>
