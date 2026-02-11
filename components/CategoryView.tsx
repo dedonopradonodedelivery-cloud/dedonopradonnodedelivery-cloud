@@ -3,12 +3,10 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
 import { Category, Store, AdType } from '../types';
 import { SUBCATEGORIES } from '../constants';
-// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
 import { supabase } from '../lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 
-// --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
     const { template_id, headline, subheadline, product_image_url } = config;
     switch (template_id) {
@@ -69,7 +67,6 @@ const CustomBannerRender: React.FC<{ config: any }> = ({ config }) => {
         </div>
     );
 };
-// --- End Banner Rendering Components ---
 
 const BigSurCard: React.FC<{ 
   icon: React.ReactNode; 
@@ -77,19 +74,32 @@ const BigSurCard: React.FC<{
   isSelected: boolean; 
   onClick: () => void; 
   isMoreButton?: boolean;
-  categoryColor?: string;
-}> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
-  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
-  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
-  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
+}> = ({ icon, name, isSelected, onClick, isMoreButton }) => {
+  const baseClasses = `relative w-full aspect-square rounded-[2rem] flex flex-col items-center justify-between p-3 transition-all duration-300 cursor-pointer overflow-hidden border active:scale-95 shadow-sm`;
+  
+  // PADRÃO BLUE PREMIUM APLICADO
+  const backgroundClass = isMoreButton 
+    ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700" 
+    : "bg-[#1E5BFF] border-white/10 shadow-blue-500/10";
+    
+  const textClass = isMoreButton 
+    ? "text-gray-500 dark:text-gray-400" 
+    : "text-white";
+    
+  const iconClass = isMoreButton 
+    ? "text-gray-400" 
+    : "text-white";
+
   return (
-    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
+    <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${isSelected ? 'ring-4 ring-blue-500/30 brightness-110' : ''}`}>
+      <div className="flex-1 flex items-center justify-center">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-7 h-7 ${iconClass}`, strokeWidth: 2.5 }) : null}
       </div>
-      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
+      <div className={`w-full bg-black/10 py-1 rounded-b-[1.5rem] -mx-3 -mb-3`}>
+        <span className={`block w-full text-[9px] font-black uppercase tracking-tighter text-center truncate px-1 ${textClass}`}>
+          {name}
+        </span>
+      </div>
     </button>
   );
 };
@@ -211,7 +221,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   const filteredStores = useMemo(() => {
     let categoryStores = stores.filter(s => s.category === category.name);
     if (selectedSubcategory) {
-      // Regra especial para o pré-filtro de saúde ou subcategorias normais
       const term = selectedSubcategory.toLowerCase();
       return categoryStores.filter(s => 
           s.subcategory?.toLowerCase().includes(term) || 
@@ -259,7 +268,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
       <div className="mt-4">
         <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
       </div>
@@ -275,7 +283,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                     name={sub.name}
                     isSelected={selectedSubcategory === sub.name}
                     onClick={() => handleSubcategoryClick(sub.name)}
-                    categoryColor={category.color}
                   />
               ))}
               {shouldShowMore && (

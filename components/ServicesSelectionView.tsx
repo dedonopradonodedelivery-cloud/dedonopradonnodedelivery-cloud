@@ -82,8 +82,8 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-900 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md px-5 h-16 flex flex-col gap-4 border-b border-gray-100 dark:border-gray-900 pb-4">
+        <div className="flex items-center justify-between pt-12">
             <div className="flex items-center gap-3">
                 <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform">
                     <ChevronLeft size={20} strokeWidth={3} />
@@ -114,14 +114,16 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
                 <button 
                     key={service}
                     onClick={() => onSelectService(service)}
-                    className="flex flex-col items-center justify-center p-4 min-h-[110px] rounded-[2rem] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm transition-all hover:shadow-md active:scale-95 group"
+                    className="flex flex-col items-center justify-between min-h-[115px] rounded-[1.8rem] bg-[#1E5BFF] shadow-sm transition-all hover:brightness-110 active:scale-95 group overflow-hidden border border-white/10"
                 >
-                    <div className="mb-2.5 w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#1E5BFF] group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
-                        {getIcon(service)}
+                    <div className="flex-1 flex items-center justify-center p-2 text-white">
+                        {React.cloneElement(getIcon(service) as any, { strokeWidth: 2.5 })}
                     </div>
-                    <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-tight text-gray-600 dark:text-gray-300">
-                        {service}
-                    </span>
+                    <div className="w-full bg-black/10 py-1.5 px-1">
+                        <span className="block w-full text-[8px] font-black uppercase tracking-tighter text-center leading-tight text-white truncate">
+                            {service}
+                        </span>
+                    </div>
                 </button>
             ))}
         </div>
@@ -129,7 +131,7 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
         {filteredServices.length === 0 && (
             <div className="py-20 text-center flex flex-col items-center opacity-30">
                 <Search size={48} className="text-gray-400 mb-4" />
-                <p className="font-bold uppercase tracking-widest text-xs">Nenhum serviço encontrado</p>
+                <p className="font-bold uppercase tracking-widest text-xs text-gray-500">Nenhum serviço encontrado</p>
             </div>
         )}
       </main>

@@ -72,21 +72,23 @@ export const HealthSubSpecialtiesView: React.FC<HealthSubSpecialtiesViewProps> =
                     <button 
                         key={spec}
                         onClick={() => handleSpecialtyClick(spec)}
-                        className={`flex flex-col items-center justify-center p-4 min-h-[110px] rounded-[2rem] transition-all duration-300 active:scale-95 shadow-md bg-[#1E5BFF] border-none hover:brightness-110 group`}
+                        className={`flex flex-col items-center justify-between min-h-[115px] rounded-[1.8rem] transition-all duration-300 active:scale-95 shadow-md bg-[#1E5BFF] border border-white/10 hover:brightness-110 group overflow-hidden`}
                     >
-                        <div className={`mb-2.5 flex items-center justify-center text-white ${selectedSpecialty === spec ? 'scale-110' : ''} transition-transform`}>
+                        <div className={`flex-1 flex items-center justify-center text-white ${selectedSpecialty === spec ? 'scale-110' : ''} transition-transform`}>
                             <HeartPulse size={24} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-tight line-clamp-3 w-full px-1 text-white">
-                            {spec}
-                        </span>
+                        <div className="w-full bg-black/10 py-1.5 px-1">
+                            <span className="block w-full text-[8px] font-black uppercase tracking-tighter text-center leading-tight text-white truncate">
+                                {spec}
+                            </span>
+                        </div>
                     </button>
                 ))}
             </div>
             
             <div className="mt-16 text-center opacity-40">
                 <p className="text-[8px] font-black text-gray-400 dark:text-white uppercase tracking-[0.4em]">
-                    Localizei JPA • Rede de Cuidado Feminino
+                    Localizei JPA • Rede de Cuidado
                 </p>
             </div>
         </section>

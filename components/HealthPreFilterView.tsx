@@ -43,26 +43,22 @@ const FilterCard: React.FC<{
   label: string, 
   onClick: () => void,
   description: string,
-  bgColor: string,
-  iconContainerColor: string,
-  textColor: string
-}> = ({ icon, label, onClick, description, bgColor, iconContainerColor, textColor }) => (
+}> = ({ icon, label, onClick, description }) => (
   <button 
     onClick={onClick}
-    className={`${bgColor} p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group active:scale-95 border border-transparent`}
+    className={`bg-[#1E5BFF] p-6 rounded-[2.5rem] shadow-sm hover:brightness-110 transition-all flex flex-col items-center text-center group active:scale-95 border border-white/10`}
   >
-    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${iconContainerColor} mb-4 group-hover:scale-110 transition-transform shadow-inner`}>
+    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform shadow-inner bg-white/10`}>
         {icon}
     </div>
-    <h4 className={`font-black ${textColor} uppercase tracking-tighter text-sm mb-1 leading-none`}>{label}</h4>
-    <p className={`${textColor} opacity-60 text-[9px] font-bold uppercase tracking-widest leading-tight`}>{description}</p>
+    <h4 className={`font-black text-white uppercase tracking-tighter text-sm mb-1 leading-none`}>{label}</h4>
+    <p className={`text-white opacity-60 text-[9px] font-bold uppercase tracking-widest leading-tight`}>{description}</p>
   </button>
 );
 
 export const HealthPreFilterView: React.FC<HealthPreFilterViewProps> = ({ onBack, onSelectOption }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans flex flex-col animate-in fade-in duration-500">
-      {/* Header Minimalista */}
       <header className="px-5 pt-12 pb-4 flex items-center justify-between">
         <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 active:scale-90 transition-all">
           <X size={24} strokeWidth={3} />
@@ -89,36 +85,24 @@ export const HealthPreFilterView: React.FC<HealthPreFilterViewProps> = ({ onBack
             icon={<WomanIcon />} 
             label="Mulher" 
             description="Saúde Feminina" 
-            bgColor="bg-pink-50 dark:bg-pink-900/20"
-            iconContainerColor="text-pink-600 bg-pink-100 dark:bg-pink-900/40"
-            textColor="text-pink-900 dark:text-pink-100"
             onClick={() => onSelectOption('MULHER')} 
           />
           <FilterCard 
             icon={<ManIcon />} 
             label="Homem" 
             description="Saúde Masculina" 
-            bgColor="bg-blue-50 dark:bg-blue-900/20"
-            iconContainerColor="text-blue-600 bg-blue-100 dark:bg-blue-900/40"
-            textColor="text-blue-900 dark:text-blue-100"
             onClick={() => onSelectOption('HOMEM')} 
           />
           <FilterCard 
             icon={<Baby size={32} strokeWidth={2.5} />} 
             label="Pediatria" 
             description="Para Crianças" 
-            bgColor="bg-teal-50 dark:bg-teal-900/20"
-            iconContainerColor="text-teal-600 bg-teal-100 dark:bg-teal-900/40"
-            textColor="text-teal-900 dark:text-teal-100"
             onClick={() => onSelectOption('PEDIATRIA')} 
           />
           <FilterCard 
             icon={<SeniorIcon />} 
             label="Geriatria" 
             description="Melhor Idade" 
-            bgColor="bg-amber-50 dark:bg-amber-900/20"
-            iconContainerColor="text-amber-600 bg-amber-100 dark:bg-amber-900/40"
-            textColor="text-amber-900 dark:text-amber-100"
             onClick={() => onSelectOption('GERIATRIA')} 
           />
         </div>

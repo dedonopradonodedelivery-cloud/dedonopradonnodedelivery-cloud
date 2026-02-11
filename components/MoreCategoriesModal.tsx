@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { X, Search, Hash, Info, ChevronRight } from 'lucide-react';
+import { X, Search, Hash, Info, Plus } from 'lucide-react';
 import { Category } from '../types';
 import { CATEGORIES, CLASSIFIED_CATEGORIES } from '../constants';
 
@@ -67,7 +67,7 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                 Comerciais e Serviços
             </h3>
-            <div className="grid grid-cols-4 gap-x-2 gap-y-8">
+            <div className="grid grid-cols-4 gap-x-2 gap-y-6">
               {filteredGerais.map((cat) => (
                 <button 
                   key={cat.id}
@@ -77,12 +77,16 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                   }}
                   className="flex flex-col items-center gap-2 group active:scale-95 transition-all"
                 >
-                  <div className={`w-14 h-14 rounded-[20px] bg-[#1E5BFF] flex items-center justify-center text-white shadow-lg border border-white/20 group-hover:brightness-110 transition-all`}>
-                    {React.cloneElement(cat.icon as any, { size: 22, strokeWidth: 2.5 })}
+                  <div className={`w-16 h-16 rounded-[1.5rem] bg-[#1E5BFF] flex flex-col items-center justify-between p-2 shadow-sm border border-white/10 group-hover:brightness-110 transition-all`}>
+                    <div className="flex-1 flex items-center justify-center">
+                        {React.cloneElement(cat.icon as any, { size: 22, strokeWidth: 2.5, className: 'text-white' })}
+                    </div>
+                    <div className="w-full bg-black/10 py-1 rounded-b-[1.5rem] -mx-2 -mb-2">
+                        <span className="block w-full text-[8px] font-black text-white uppercase tracking-tighter text-center leading-none truncate px-1">
+                            {cat.name}
+                        </span>
+                    </div>
                   </div>
-                  <span className="text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-tighter text-center leading-tight">
-                    {cat.name}
-                  </span>
                 </button>
               ))}
             </div>
@@ -104,12 +108,12 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
                       onSelectCategory(item);
                       onClose();
                   }}
-                  className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 active:scale-[0.98] transition-all group"
+                  className="flex items-center gap-3 p-4 bg-[#1E5BFF] rounded-2xl border border-white/10 active:scale-[0.98] transition-all group shadow-sm"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[#1E5BFF] flex items-center justify-center text-white shadow-md shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
                     {React.cloneElement(item.icon as any, { size: 18, strokeWidth: 2.5 })}
                   </div>
-                  <span className="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tighter leading-tight text-left">
+                  <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-tight text-left">
                     {item.name}
                   </span>
                 </button>
@@ -126,7 +130,6 @@ export const MoreCategoriesModal: React.FC<MoreCategoriesModalProps> = ({ isOpen
         )}
       </div>
 
-      {/* Footer Informativo */}
       <footer className="p-6 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shrink-0">
         <div className="flex items-start gap-3 opacity-60">
           <Info size={16} className="text-blue-500 mt-0.5 shrink-0" />

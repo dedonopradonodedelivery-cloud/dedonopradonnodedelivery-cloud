@@ -113,7 +113,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   
-  // 6 Categorias Principais filtradas na ordem exata solicitada
   const homeCategories = useMemo(() => {
     const fixedIds = ['cat-saude', 'cat-services', 'cat-fashion', 'cat-beauty', 'cat-pets', 'cat-autos'];
     return fixedIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
@@ -128,54 +127,57 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. STATUS DO BAIRRO EM LINHA ÚNICA */}
       <HojeNoBairro />
 
-      {/* 2. EXPLORE JPA — LISTA HORIZONTAL COMPACTA (6 + 1) RESTAURADA */}
+      {/* EXPLORE JPA — LISTA HORIZONTAL COM PADRÃO BLUE PREMIUM */}
       <section className="w-full bg-white dark:bg-gray-950 pt-8 pb-4 relative z-10">
-        <div className="flex overflow-x-auto no-scrollbar gap-5 px-5 scroll-smooth snap-x">
+        <div className="flex overflow-x-auto no-scrollbar gap-4 px-5 scroll-smooth snap-x">
           {homeCategories.map((cat) => (
             <button 
               key={cat.id} 
               onClick={() => onSelectCategory(cat)}
               className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 flex items-center justify-center group-hover:border-blue-500/50 transition-colors shadow-sm">
-                {React.cloneElement(cat.icon as any, { 
-                  className: "w-6 h-6 text-[#1E5BFF]", 
-                  strokeWidth: 2.2 
-                })}
+              <div className="w-16 h-16 rounded-[1.5rem] bg-[#1E5BFF] flex flex-col items-center justify-center shadow-sm border border-white/10 transition-all hover:brightness-110">
+                <div className="flex-1 flex items-center justify-center">
+                  {React.cloneElement(cat.icon as any, { 
+                    className: "w-6 h-6 text-white", 
+                    strokeWidth: 2.5 
+                  })}
+                </div>
+                <div className="w-full bg-black/10 py-1 rounded-b-[1.5rem]">
+                  <span className="block text-[8px] font-black text-white uppercase tracking-tighter text-center px-1 truncate">
+                    {cat.name}
+                  </span>
+                </div>
               </div>
-              <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
-                {cat.name}
-              </span>
             </button>
           ))}
           
-          {/* Item + Mais fixo no final da linha horizontal */}
           <button 
             onClick={() => onNavigate('all_categories')}
             className="flex flex-col items-center gap-2 shrink-0 snap-start active:scale-95 transition-all group"
           >
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex items-center justify-center group-hover:border-blue-500/50 transition-colors shadow-sm">
-              <Plus className="w-6 h-6 text-[#1E5BFF]" strokeWidth={2.5} />
+            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700 transition-all hover:bg-gray-200">
+              <div className="flex-1 flex items-center justify-center">
+                <Plus className="w-6 h-6 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
+              </div>
+              <div className="w-full bg-black/5 py-1 rounded-b-[1.5rem]">
+                <span className="block text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-tighter text-center px-1">
+                  + Mais
+                </span>
+              </div>
             </div>
-            <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
-              + Mais
-            </span>
           </button>
         </div>
       </section>
 
-      {/* 3. CUPONS DO DIA */}
       <CouponCarousel onNavigate={onNavigate} />
 
-      {/* 4. ACONTECENDO AGORA */}
       <section className="mt-2">
         <AcontecendoAgora onNavigate={onNavigate} />
       </section>
 
-      {/* 5. RADAR DO BAIRRO */}
       <section className="bg-white dark:bg-gray-950 py-6 mb-4 relative px-5">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -197,7 +199,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 6. MISSÕES DO BAIRRO */}
       <section className="px-5 mb-10">
         <div className="bg-[#1E5BFF] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
@@ -233,7 +234,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
-      {/* 7. EXPLORAR BAIRRO */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-4">
         <div className="px-5">
           <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
@@ -248,7 +248,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </div>
 
-      {/* 8. QUEM MOVIMENTA O BAIRRO */}
       <section className="px-5 pt-10 pb-20 mt-6 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3 mb-6 px-1">
               <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shadow-sm">
