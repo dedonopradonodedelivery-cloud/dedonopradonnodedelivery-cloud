@@ -61,6 +61,9 @@ export const Header: React.FC<HeaderProps> = ({
   stores = [],
   onStoreClick,
   onNotificationClick,
+  isAdmin,
+  viewMode,
+  onOpenViewSwitcher,
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
 
@@ -111,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
     const userName = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Vizinho(a)";
     return {
       title: <>{timeGreeting}, {userName} <span className="text-yellow-300">{emoji}</span></>,
-      subtitle: "O que vamos resolver hoje?",
+      subtitle: "O que você precisa hoje?",
     };
   }, [user, userRole, hoodDisplayName]);
 
@@ -144,6 +147,18 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                         {hoodDisplayName} <Crown size={12} className="fill-yellow-300 text-yellow-400" /> <ChevronRight size={14} />
                     </button>
+
+                    {/* ADMIN BUTTON - CONDITIONAL */}
+                    {isAdmin && onOpenViewSwitcher && (
+                        <button
+                            onClick={onOpenViewSwitcher}
+                            className="p-2.5 text-white bg-amber-400/20 backdrop-blur-md rounded-full border border-amber-300/30 active:scale-95 transition-all shadow-md"
+                            title={`Mudar visualização (Modo: ${viewMode})`}
+                        >
+                            <ShieldCheck size={18} />
+                        </button>
+                    )}
+
                     <button 
                         onClick={onNotificationClick}
                         className="relative p-2.5 text-white bg-white/10 backdrop-blur-md rounded-full border border-white/20 active:scale-95 transition-all shadow-md"
