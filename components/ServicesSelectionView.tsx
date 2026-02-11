@@ -56,18 +56,18 @@ const SPECIALIZED_SERVICES = [
 
 const getIcon = (name: string) => {
     const n = name.toLowerCase();
-    if (n.includes('pedreiro') || n.includes('obra')) return <Hammer size={20} />;
-    if (n.includes('pintor')) return <PaintRoller size={20} />;
-    if (n.includes('eletricista') || n.includes('zap')) return <Zap size={20} />;
-    if (n.includes('encanador') || n.includes('lavajato') || n.includes('piscina')) return <Droplets size={20} />;
-    if (n.includes('chaveiro') || n.includes('segurança')) return <Shield size={20} />;
-    if (n.includes('advogado')) return <Scale size={20} />;
-    if (n.includes('contador') || n.includes('financeiro')) return <Calculator size={20} />;
-    if (n.includes('médico') || n.includes('dentista') || n.includes('psico') || n.includes('terapeuta')) return <Heart size={20} />;
-    if (n.includes('designer') || n.includes('arquiteto') || n.includes('fotógrafo')) return <PenTool size={20} />;
-    if (n.includes('programador') || n.includes('software') || n.includes('analista')) return <Code size={20} />;
-    if (n.includes('marketing') || n.includes('publicitário') || n.includes('coach')) return <TrendingUp size={20} />;
-    return <Settings size={20} />;
+    if (n.includes('pedreiro') || n.includes('obra')) return <Hammer size={22} />;
+    if (n.includes('pintor')) return <PaintRoller size={22} />;
+    if (n.includes('eletricista') || n.includes('zap')) return <Zap size={22} />;
+    if (n.includes('encanador') || n.includes('lavajato') || n.includes('piscina')) return <Droplets size={22} />;
+    if (n.includes('chaveiro') || n.includes('segurança')) return <Shield size={22} />;
+    if (n.includes('advogado')) return <Scale size={22} />;
+    if (n.includes('contador') || n.includes('financeiro')) return <Calculator size={22} />;
+    if (n.includes('médico') || n.includes('dentista') || n.includes('psico') || n.includes('terapeuta')) return <Heart size={22} />;
+    if (n.includes('designer') || n.includes('arquiteto') || n.includes('fotógrafo')) return <PenTool size={22} />;
+    if (n.includes('programador') || n.includes('software') || n.includes('analista')) return <Code size={22} />;
+    if (n.includes('marketing') || n.includes('publicitário') || n.includes('coach')) return <TrendingUp size={22} />;
+    return <Settings size={22} />;
 };
 
 export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ type, onBack, onSelectService }) => {
@@ -81,9 +81,10 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
   }, [services, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md px-5 h-16 flex flex-col gap-4 border-b border-gray-100 dark:border-gray-900 pb-4">
-        <div className="flex items-center justify-between pt-12">
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col animate-in slide-in-from-right duration-300">
+      {/* HEADER AJUSTADO - SEM ALTURA FIXA E COM ESPAÇAMENTO EQUILIBRADO */}
+      <header className="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 px-5 pt-10 pb-4 shadow-sm">
+        <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
                 <button onClick={onBack} className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-transform shadow-sm">
                     <ChevronLeft size={20} strokeWidth={3} />
@@ -103,33 +104,31 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ ty
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Qual serviço você busca?" 
-                className="w-full bg-gray-50 dark:bg-gray-800 border-none py-4 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
+                className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-4 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
             />
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-5 pb-32">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-5 pb-32 bg-[#F8F9FC] dark:bg-gray-950">
         <div className="grid grid-cols-3 gap-3">
             {filteredServices.map((service) => (
                 <button 
                     key={service}
                     onClick={() => onSelectService(service)}
-                    className="flex flex-col items-center justify-between min-h-[115px] rounded-[1.8rem] bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/10 transition-all hover:brightness-110 active:scale-95 group overflow-hidden border border-white/20"
+                    className="flex flex-col items-center justify-center aspect-square gap-2.5 rounded-2xl bg-[#1E5BFF] shadow-sm border border-white/10 transition-all hover:brightness-110 active:scale-95 group overflow-hidden p-2"
                 >
-                    <div className="flex-1 flex items-center justify-center p-2 text-white">
-                        {React.cloneElement(getIcon(service) as any, { strokeWidth: 2.5, className: "drop-shadow-sm" })}
+                    <div className="text-white drop-shadow-sm flex items-center justify-center">
+                        {React.cloneElement(getIcon(service) as any, { strokeWidth: 2.5 })}
                     </div>
-                    <div className="w-full bg-white/10 backdrop-blur-sm py-1.5 px-1">
-                        <span className="block w-full text-[8px] font-black uppercase tracking-tighter text-center leading-tight text-white truncate drop-shadow-sm">
-                            {service}
-                        </span>
-                    </div>
+                    <span className="text-white text-[8px] font-black uppercase tracking-tighter text-center leading-tight line-clamp-2 px-1">
+                        {service}
+                    </span>
                 </button>
             ))}
         </div>
 
         {filteredServices.length === 0 && (
-            <div className="py-20 text-center flex flex-col items-center opacity-30">
+            <div className="py-24 text-center flex flex-col items-center opacity-30">
                 <Search size={48} className="text-gray-400 mb-4" />
                 <p className="font-bold uppercase tracking-widest text-xs text-gray-500">Nenhum serviço encontrado</p>
             </div>
