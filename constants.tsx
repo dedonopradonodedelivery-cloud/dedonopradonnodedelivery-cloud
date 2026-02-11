@@ -55,7 +55,7 @@ export const CLASSIFIED_CATEGORIES: Category[] = [
 ];
 
 export const MOCK_HOME_COUPONS_V2 = [
-  { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=100', discount: '30% OFF', resgates: '290 resgates hoje', code: 'BIBI30', color: 'bg-rose-500', distancia: '200m • 600m' },
+  { id: 'cp-1', storeName: 'Bibi Lanches', storeLogo: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=100', discount: '30% OFF', resgates: '290 resgates hoje', code: 'BIBI30', color: 'bg-rose-500', distancia: '200m • 600m' },
   { id: 'cp-2', storeName: 'Studio Bella', storeLogo: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=100', discount: 'R$ 15', resgates: '15 vagas sem laita', code: 'VIP15', color: 'bg-blue-600', validade: 'Válido até 16:00' },
   { id: 'cp-3', storeName: 'Pet Shop Alegria', storeLogo: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=100', discount: '10% OFF', resgates: '120 resgates hoje', code: 'PET10', color: 'bg-emerald-600', distancia: '800m' },
 ];
@@ -161,7 +161,7 @@ export const STORES: Store[] = [
     isSponsored: true,
     tags: ['segurança', 'limpeza residencial', 'manutenção geral']
   },
-  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=600', tags: [] },
+  { id: 'f-1', name: 'Bibi Lanches', category: 'Comida', subcategory: 'Lanches', rating: 4.8, distance: 'Freguesia', adType: AdType.PREMIUM, description: 'Lanches clássicos.', isSponsored: true, image: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=600', tags: [] },
   { id: 'padaria-santo-pao', name: 'Padaria Santo Pão', category: 'Comida', subcategory: 'Padaria', rating: 4.9, distance: '3m', adType: AdType.ORGANIC, description: 'Pães artesanais e café da manhã.', isSponsored: false, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400', tags: ['10% OFF hoje'] },
   { id: 'bella-saude', name: 'Bella Saúde', category: 'Saúde', subcategory: 'Ginecologia', rating: 4.8, distance: '2.5 km', adType: AdType.ORGANIC, description: 'Clínica de saúde da mulher.', isSponsored: false, image: 'https://images.unsplash.com/photo-1559839734-2b71f1e3c770?q=80&w=400', tags: [] }
 ];
@@ -177,7 +177,7 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
   'comida': {
     'Freguesia': [
       { image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800', storeId: 'f-5' },
-      { image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800', storeId: 'f-1' }
+      { image: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=800', storeId: 'f-1' }
     ]
   },
   'beleza': {
@@ -199,7 +199,7 @@ export const EDITORIAL_SERVICES: EditorialCollection[] = [
 ];
 
 export const STORIES: Story[] = [
-  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=400' }
+  { id: 's1', name: 'Hamburgueria', image: 'https://images.unsplash.com/photo-1561758033-d89a/9ad46330?q=80&w=400' }
 ];
 
 export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = [
