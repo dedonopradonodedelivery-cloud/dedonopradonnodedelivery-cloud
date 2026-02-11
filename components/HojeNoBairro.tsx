@@ -1,33 +1,55 @@
 
 import React, { useState, useEffect } from 'react';
-import { CloudSun, Car, MapPin, Zap } from 'lucide-react';
+import { 
+  CloudSun, 
+  Car, 
+  MapPin, 
+  Zap, 
+  Pill, 
+  ShoppingCart, 
+  Heart, 
+  PawPrint, 
+  Wrench, 
+  Tag,
+  ChevronRight,
+  Sun,
+  Cloud,
+  CloudRain
+} from 'lucide-react';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
 
 export const HojeNoBairro: React.FC = () => {
   const { currentNeighborhood } = useNeighborhood();
   const [temperature, setTemperature] = useState<string>('--°C');
-  const [trafficStatus, setTrafficStatus] = useState<string>('CARREGANDO');
-  const [userLocation, setUserLocation] = useState<string>('');
+  const [conditionText, setConditionText] = useState<string>('CARREGANDO');
+  const [trafficStatus, setTrafficStatus] = useState<{label: string, color: string}>({label: 'FLUINDO', color: 'bg-emerald-500'});
 
-  // 1. Lógica de Clima Real (Open-Meteo API - Gratuita/Sem Key)
+  // 1. Lógica de Clima Real (Open-Meteo API)
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // Coordenadas aproximadas de Jacarepaguá
         const response = await fetch(
           'https://api.open-meteo.com/v1/forecast?latitude=-22.9329&longitude=-43.3456&current_weather=true'
         );
         const data = await response.json();
         if (data.current_weather) {
           setTemperature(`${Math.round(data.current_weather.temperature)}°C`);
+          
+          // Mapeamento simples de Weather Code (WMO)
+          const code = data.current_weather.weathercode;
+          if (code === 0) setConditionText('ENSOLARADO');
+          else if (code >= 1 && code <= 3) setConditionText('NUBLADO');
+          else if (code >= 51) setConditionText('CHUVOSO');
+          else setConditionText('PARCIAL');
         }
       } catch (error) {
-        setTemperature('28°C'); // Fallback estático caso a API falhe
+        setTemperature('27°C');
+        setConditionText('ENSOLARADO');
       }
     };
 
     fetchWeather();
-    const interval = setInterval(fetchWeather, 600000); // Atualiza a cada 10 min
+    const interval = setInterval(fetchWeather, 600000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -36,72 +58,80 @@ export const HojeNoBairro: React.FC = () => {
     const getTraffic = () => {
       const hour = new Date().getHours();
       if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19)) {
-        return 'INTENSO';
+        return { label: 'INTENSO', color: 'bg-red-500' };
       } else if (hour >= 11 && hour <= 14) {
-        return 'MODERADO';
+        return { label: 'MODERADO', color: 'bg-amber-500' };
       }
-      return 'FLUINDO';
+      return { label: 'FLUINDO', color: 'bg-emerald-500' };
     };
     setTrafficStatus(getTraffic());
   }, []);
 
-  // 3. Lógica de Bairro Dinâmico
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        // Em um app real, faríamos geocoding aqui. 
-        // Para o MVP, validamos que a permissão existe e usamos o bairro do contexto como nome real.
-        setUserLocation(currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood.toUpperCase());
-      }, () => {
-        setUserLocation(currentNeighborhood === "Jacarepaguá (todos)" ? "SUA REGIÃO" : currentNeighborhood.toUpperCase());
-      });
-    } else {
-      setUserLocation(currentNeighborhood.toUpperCase());
-    }
-  }, [currentNeighborhood]);
+  const shortcuts = [
+    { label: 'Farmácia', icon: Pill, slug: 'farmacia' },
+    { label: 'Mercado', icon: ShoppingCart, slug: 'mercado' },
+    { label: 'Saúde', icon: Heart, slug: 'saude' },
+    { label: 'Pets', icon: PawPrint, slug: 'pets' },
+    { label: 'Oficina', icon: Wrench, slug: 'autos' },
+    { label: 'Promoções', icon: Tag, slug: 'coupon_landing' },
+  ];
 
   return (
-    <section className="px-5 pt-4 mb-2">
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between gap-2 whitespace-nowrap overflow-x-auto no-scrollbar">
-          
-          {/* ITEM 1: LOCALIZAÇÃO */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <MapPin size={10} className="text-[#1E5BFF]" fill="currentColor" />
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-              HOME EM <span className="text-gray-900 dark:text-white">{userLocation}</span>
-            </p>
-          </div>
-
-          <span className="text-gray-200 dark:text-gray-700 font-light">/</span>
-
-          {/* ITEM 2: CLIMA */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <CloudSun size={10} className="text-amber-500" />
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-              AGORA <span className="text-gray-900 dark:text-white">{temperature}</span>
-            </p>
-          </div>
-
-          <span className="text-gray-200 dark:text-gray-700 font-light">/</span>
-
-          {/* ITEM 3: TRÂNSITO */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Car size={10} className="text-blue-500" />
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-              TRÂNSITO <span className={trafficStatus === 'INTENSO' ? 'text-red-500' : 'text-emerald-500'}>{trafficStatus}</span>
-            </p>
-          </div>
-
+    <section className="px-5 pt-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+      {/* TÍTULO DA SEÇÃO */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+          Hoje no bairro
+        </h2>
+        <div className="flex items-center gap-1.5">
+           <Sun size={14} className="text-amber-500 fill-amber-500" />
+           <span className="text-sm font-black text-gray-900 dark:text-white">{temperature}</span>
         </div>
       </div>
 
-      {/* Alerta de Utilidade sutil (Mantido porém mais compacto) */}
-      <div className="mt-2 px-1 flex items-center gap-2 opacity-60">
-        <Zap size={10} className="text-[#1E5BFF]" fill="currentColor" />
-        <p className="text-[8px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">
-          Linha Amarela sem restrições.
-        </p>
+      {/* NÍVEL 1: INFORMAÇÕES CONTEXTUAIS EM LINHA */}
+      <div className="bg-gray-50/50 dark:bg-gray-900/50 rounded-2xl p-3 mb-6 border border-gray-100 dark:border-gray-800 flex items-center justify-between overflow-x-auto no-scrollbar whitespace-nowrap gap-4 shadow-inner">
+        <div className="flex items-center gap-2">
+            <MapPin size={12} className="text-[#1E5BFF]" fill="currentColor" />
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                {currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood.toUpperCase()}
+            </p>
+        </div>
+
+        <span className="text-gray-200 dark:text-gray-800">/</span>
+
+        <div className="flex items-center gap-2">
+            <p className="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest leading-none">
+                {conditionText}
+            </p>
+        </div>
+
+        <span className="text-gray-200 dark:text-gray-800">/</span>
+
+        <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${trafficStatus.color} shadow-sm animate-pulse`}></div>
+            <p className="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest leading-none">
+                TRÂNSITO {trafficStatus.label}
+            </p>
+            <ChevronRight size={10} className="text-gray-300" />
+        </div>
+      </div>
+
+      {/* NÍVEL 2: ÍCONES DE ATALHO (LINHA HORIZONTAL) */}
+      <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5">
+        {shortcuts.map((item, idx) => (
+          <button 
+            key={idx} 
+            className="flex flex-col items-center gap-2 group shrink-0 active:scale-95 transition-all"
+          >
+            <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-[22px] shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:shadow-lg transition-all">
+                <item.icon size={26} className="text-[#1E5BFF]" strokeWidth={2.5} />
+            </div>
+            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                {item.label}
+            </span>
+          </button>
+        ))}
       </div>
     </section>
   );
