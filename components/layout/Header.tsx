@@ -5,7 +5,6 @@ import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodConte
 import { Store } from '../../types';
 import { CATEGORIES } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
-import { motion, useScroll, useTransform } from 'framer-motion';
 
 interface HeaderProps {
   onNotificationClick: () => void;
@@ -66,29 +65,23 @@ export const Header: React.FC<HeaderProps> = ({
   const { user: authUser } = useAuth();
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
-  
-  // Lógica de Scroll dinâmico
   const [scrollY, setScrollY] = useState(0);
   
   useEffect(() => {
     const container = document.querySelector('.overflow-y-auto');
     if (!container) return;
-
-    const handleScroll = () => {
-      setScrollY(container.scrollTop);
-    };
-
+    const handleScroll = () => setScrollY(container.scrollTop);
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Mapeamento das animações baseado no scroll (0 a 80px)
-  const scrollLimit = 80;
+  const scrollLimit = 70;
   const progress = Math.min(scrollY / scrollLimit, 1);
   
+  // Somente a barra de busca fica fixa. O resto some.
   const headerOpacity = 1 - progress;
-  const headerTranslateY = -progress * 40; // Sobe suavemente enquanto some
-  const searchTranslateY = -progress * 78; // Puxa a barra de busca para o topo
+  const headerTranslateY = -progress * 30;
+  const searchTranslateY = -progress * 76; // Sincronizado para atingir o topo
 
   const user = authUser || userProp;
   const isAdminUser = isAdminProp ?? (user?.email === 'dedonopradonodedelivery@gmail.com');
@@ -137,22 +130,26 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className="sticky top-0 z-40 w-full transition-all duration-300 ease-out">
-            {/* Background fixo do cabeçalho que encolhe */}
+        <div className="sticky top-0 z-40 w-full transition-all duration-300">
+            {/* Background fixo do cabeçalho que encolhe e perde arredondamento no scroll */}
             <div 
-              className="absolute inset-0 bg-splash-premium rounded-b-[2.5rem] shadow-lg shadow-black/10"
-              style={{ height: `${Math.max(100, 185 - scrollY)}px`, transition: 'none' }}
+              className="absolute inset-0 bg-splash-premium shadow-lg shadow-black/5"
+              style={{ 
+                height: `${Math.max(90, 195 - scrollY)}px`, 
+                borderRadius: `0 0 ${Math.max(0, 2.5 - progress * 2.5)}rem ${Math.max(0, 2.5 - progress * 2.5)}rem`,
+                transition: 'none' 
+              }}
             />
 
-            <div className="w-full max-w-md mx-auto flex flex-col relative pb-6 px-5">
+            <div className="w-full max-w-md mx-auto flex flex-col relative px-5">
                 
-                {/* 1. SEÇÃO DE SAUDAÇÃO (DESAPARECE NO SCROLL) */}
+                {/* 1. SEÇÃO DE SAUDAÇÃO (DESAPARECE) */}
                 <div 
-                    className="flex items-center justify-between pt-10 pb-4 transition-all duration-300"
+                    className="flex items-center justify-between pt-10 pb-4"
                     style={{ 
                       opacity: headerOpacity, 
                       transform: `translateY(${headerTranslateY}px)`,
-                      pointerEvents: progress > 0.5 ? 'none' : 'auto'
+                      pointerEvents: progress > 0.8 ? 'none' : 'auto'
                     }}
                 >
                     <div className="flex flex-col items-start gap-1.5">
@@ -188,31 +185,34 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* 2. BARRA DE BUSCA (FLUTUA PARA O TOPO) */}
+                {/* 2. BARRA DE BUSCA (ESTADO PADRÃO INTEGRADO, FIXA NO TOPO AO ROLAR) */}
                 <div 
-                  className="relative group mt-2 transition-transform duration-300 ease-out"
+                  className="relative group mt-1 pb-6 transition-transform duration-300 ease-out"
                   style={{ transform: `translateY(${searchTranslateY}px)` }}
                 >
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 text-white/60" />
-                    </div>
-                    <input 
-                      type="text" 
-                      value={searchTerm} 
-                      onChange={(e) => onSearchChange(e.target.value)} 
-                      placeholder={`O que busca em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}?`} 
-                      className={`block w-full pl-11 pr-12 bg-white/15 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 py-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-md transition-all ${progress > 0.8 ? 'bg-white/20 shadow-xl' : ''}`} 
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {searchTerm ? (
-                        <button onClick={() => onSearchChange('')} className="p-1.5 text-white/60 hover:text-white"><X size={18} /></button>
-                      ) : (
-                        <div className="p-1.5 text-white/40"><Mic size={18} /></div>
-                      )}
+                    <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-white/60" />
+                        </div>
+                        <input 
+                          type="text" 
+                          value={searchTerm} 
+                          onChange={(e) => onSearchChange(e.target.value)} 
+                          placeholder={`O que busca em ${currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}?`} 
+                          className={`block w-full pl-11 pr-12 rounded-2xl text-sm font-bold text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 py-4 backdrop-blur-md transition-all border ${progress > 0.5 ? 'bg-white/20 border-white/20 shadow-xl' : 'bg-white/10 border-white/10 shadow-none'}`} 
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {searchTerm ? (
+                            <button onClick={() => onSearchChange('')} className="p-1.5 text-white/60 hover:text-white"><X size={18} /></button>
+                          ) : (
+                            <div className="p-1.5 text-white/40"><Mic size={18} /></div>
+                          )}
+                        </div>
                     </div>
 
+                    {/* Resultados da Busca */}
                     {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
-                        <div className="absolute top-[calc(100%+12px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
+                        <div className="absolute top-[calc(100%-8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
                             <div className="p-3 max-h-[60vh] overflow-y-auto no-scrollbar">
                                 {(searchResults.stores.length > 0 || searchResults.categories.length > 0) ? (
                                     <div className="flex flex-col gap-1">
