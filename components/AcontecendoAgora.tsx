@@ -1,14 +1,15 @@
 
 import React, { useState } from 'react';
-import { MapPin, Flame, Music, AlertTriangle, Clock, Zap, ChevronRight } from 'lucide-react';
+import { MapPin, Flame, Music, AlertTriangle, Clock, Zap, ChevronRight, PawPrint, Key, Info } from 'lucide-react';
 
 interface LiveEvent {
   id: string;
-  type: 'evento' | 'utilidade' | 'promo';
+  type: 'evento' | 'utilidade' | 'promo' | 'pet_lost' | 'item_found';
   badge: string;
   title: string;
   subtitle: string;
   image?: string;
+  icon?: React.ElementType;
   confirms: number;
 }
 
@@ -23,12 +24,31 @@ const MOCK_LIVE: LiveEvent[] = [
     confirms: 12
   },
   {
+    id: 'l4',
+    type: 'pet_lost',
+    badge: 'PET PERDIDO',
+    title: 'Procura-se: Golden Retriever',
+    subtitle: 'Visto por último na Praça da Freguesia.',
+    image: 'https://images.unsplash.com/photo-1598875184988-5e67b1a7ea9b?q=80&w=600',
+    icon: PawPrint,
+    confirms: 8
+  },
+  {
     id: 'l2',
     type: 'utilidade',
     badge: 'ALERTA',
     title: 'Sinal Ruim na Linha Amarela',
     subtitle: 'Instabilidade reportada por motoristas.',
     confirms: 45
+  },
+  {
+    id: 'l5',
+    type: 'item_found',
+    badge: 'ACHADOS',
+    title: 'Chaves encontradas',
+    subtitle: 'Entregues na recepção do Condomínio X.',
+    icon: Key,
+    confirms: 3
   },
   {
     id: 'l3',
@@ -43,6 +63,7 @@ const MOCK_LIVE: LiveEvent[] = [
 const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
   const [confirms, setConfirms] = useState(item.confirms);
   const [hasConfirmed, setHasConfirmed] = useState(false);
+  const Icon = item.icon;
 
   const handleConfirm = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -57,6 +78,8 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
       case 'evento': return 'bg-slate-900';
       case 'utilidade': return 'bg-red-50 dark:bg-red-950/20';
       case 'promo': return 'bg-purple-50 dark:bg-purple-950/20';
+      case 'pet_lost': return 'bg-amber-500';
+      case 'item_found': return 'bg-cyan-50 dark:bg-cyan-950/20';
       default: return 'bg-white';
     }
   };
@@ -66,12 +89,22 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
       case 'evento': return 'bg-emerald-500 text-white';
       case 'utilidade': return 'bg-red-500 text-white';
       case 'promo': return 'bg-purple-600 text-white';
+      case 'pet_lost': return 'bg-amber-400 text-black';
+      case 'item_found': return 'bg-cyan-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
 
-  const getTextColor = () => item.type === 'evento' ? 'text-white' : 'text-gray-900 dark:text-white';
-  const getSubColor = () => item.type === 'evento' ? 'text-white/60' : 'text-gray-500 dark:text-gray-400';
+  const getTextColor = () => {
+    if (item.type === 'evento' || item.type === 'pet_lost') return 'text-white';
+    return 'text-gray-900 dark:text-white';
+  }
+  const getSubColor = () => {
+    if (item.type === 'evento' || item.type === 'pet_lost') return 'text-white/60';
+    return 'text-gray-500 dark:text-gray-400';
+  }
+  
+  const isInfoCard = item.type === 'pet_lost' || item.type === 'item_found';
 
   return (
     <div className={`flex-shrink-0 w-60 rounded-2xl overflow-hidden relative group border border-gray-100 dark:border-white/10 shadow-sm transition-all active:scale-[0.98] ${getBgClass()}`}>
@@ -79,13 +112,19 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
         <img src={item.image} className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-700 group-hover:scale-110" alt="" />
       )}
       
-      {item.type === 'evento' && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>}
+      {(item.type === 'evento' || item.type === 'pet_lost') && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>}
       
       <div className="relative z-10 h-40 p-4 flex flex-col justify-between backdrop-blur-[2px]">
         <div>
            <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg mb-2 shadow-sm ${getBadgeClass()}`}>
               <span className="text-[8px] font-black uppercase tracking-widest">{item.badge}</span>
            </div>
+           
+            {Icon && !item.image && (
+                <div className="flex justify-center items-center h-12 my-2">
+                    <Icon size={32} className={getTextColor()} />
+                </div>
+            )}
            
            <h3 className={`font-bold text-xs leading-tight mb-1 ${getTextColor()}`}>
              {item.title}
@@ -96,8 +135,8 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
         </div>
 
         <div className="flex items-center justify-between">
-           <div className={`flex items-center gap-1 text-[9px] font-bold uppercase ${item.type === 'evento' ? 'text-white/40' : 'text-gray-400'}`}>
-              {item.type === 'utilidade' ? <Zap size={10} /> : <Clock size={10} />}
+           <div className={`flex items-center gap-1 text-[9px] font-bold uppercase ${item.type === 'evento' || item.type === 'pet_lost' ? 'text-white/40' : 'text-gray-400'}`}>
+              {(item.type === 'utilidade' || isInfoCard) ? <Zap size={10} /> : <Clock size={10} />}
               <span>Agora</span>
            </div>
            
@@ -106,10 +145,12 @@ const LiveCard: React.FC<{ item: LiveEvent }> = ({ item }) => {
              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-all ${
                hasConfirmed 
                ? 'bg-amber-500 border-amber-400 text-white' 
-               : 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white hover:bg-black/10'
+               : isInfoCard
+                 ? 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white hover:bg-black/10'
+                 : 'bg-black/5 dark:bg-white/10 border-black/5 dark:border-white/10 text-gray-500 dark:text-white hover:bg-black/10'
              }`}
            >
-              <Flame size={10} className={hasConfirmed ? 'fill-white' : ''} />
+              {isInfoCard ? <Info size={10} /> : <Flame size={10} className={hasConfirmed ? 'fill-white' : ''} />}
               <span className="text-[10px] font-bold">{confirms}</span>
            </button>
         </div>

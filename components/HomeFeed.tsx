@@ -28,20 +28,19 @@ import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants'
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
-import { CouponCarousel } from '@/components/CouponCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { AcontecendoAgora } from '@/components/AcontecendoAgora';
 
-// Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
+// Imagens de fallback realistas e variadas
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Casa/Interior
-  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800', // Urbano
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'  // Pet
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+  'https://images.unsplash.com/photo-1605218427368-35b019b85c11?q=80&w=800',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800'
 ];
 
 const getFallbackImage = (id: string) => {
@@ -53,7 +52,6 @@ const getFallbackImage = (id: string) => {
 };
 
 const MiniPostCard: React.FC<{ post: CommunityPost; onNavigate: (view: string) => void; }> = ({ post, onNavigate }) => {
-  // Garante que SEMPRE haja uma imagem, usando fallback determinístico se necessário
   const postImage = post.imageUrl || (post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : getFallbackImage(post.id));
   
   return (
@@ -106,6 +104,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [images, setImages] = useState<string[]>([]);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
+
+  // Filtro de categorias para a Home conforme solicitação do layout
+  const homeCategories = useMemo(() => {
+    const ids = [
+      'cat-saude',   // Saúde
+      'cat-pets',    // Pets
+      'cat-fashion', // Moda
+      'cat-beauty',  // Beleza
+      'cat-coupons', // Cupom
+      'cat-more'     // + Mais
+    ];
+    return ids.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && images.length < 3) {
@@ -160,22 +171,22 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </section>
       )}
 
-      {/* 1. CATEGORIAS (RESTAURAÇÃO: Linha única horizontal) */}
-      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 py-4 relative z-10 border-b border-gray-50 dark:border-gray-900">
-        <div className="flex overflow-x-auto no-scrollbar snap-x px-4 gap-4">
-          {CATEGORIES.map((cat) => (
+      {/* 1. CATEGORIAS (LAYOUT ATUALIZADO: 6 ITENS, FILEIRA ÚNICA, SEM COMIDA) */}
+      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 py-6 px-5 relative z-10 border-b border-gray-50 dark:border-gray-900">
+        <div className="flex justify-between items-start gap-1">
+          {homeCategories.map((cat) => (
             <button 
               key={cat.id} 
               onClick={() => onSelectCategory(cat)}
-              className="flex flex-col items-center gap-1.5 flex-shrink-0 snap-start active:scale-95 transition-all"
+              className="flex flex-col items-center gap-2 flex-1 active:scale-95 transition-all group"
             >
-              <div className={`w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center ${cat.color} ${cat.id === 'cat-more' ? 'border border-gray-200 dark:border-gray-700' : 'border border-white/20'}`}>
+              <div className={`w-12 h-12 rounded-[18px] shadow-sm flex items-center justify-center ${cat.color} ${cat.id === 'cat-more' ? 'border border-gray-100 dark:border-gray-800' : 'border border-white/10'} group-hover:brightness-110`}>
                 {React.cloneElement(cat.icon as any, { 
-                  className: `w-6 h-6 ${cat.id === 'cat-more' ? 'text-gray-500 dark:text-gray-400' : 'text-white'}`, 
+                  className: `w-6 h-6 ${cat.id === 'cat-more' ? 'text-gray-400 dark:text-gray-500' : 'text-white'}`, 
                   strokeWidth: 3 
                 })}
               </div>
-              <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
+              <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tighter text-center leading-tight">
                 {cat.name}
               </span>
             </button>
@@ -188,65 +199,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
       </section>
 
-      {/* 3. CUPONS E OFERTAS (NOVO COMPONENTE) */}
-      <CouponCarousel onNavigate={onNavigate} />
-
-      {/* 4. MINHA RECOMPENSA (BLOCO SEPARADO) */}
-      <section className="px-5 mb-6">
-        <button 
-          onClick={() => onNavigate('weekly_reward_page')}
-          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all border border-white/10"
-        >
-           <div className="flex items-center gap-3">
-               <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm text-white">
-                 <Zap size={20} fill="currentColor" />
-               </div>
-               <div className="text-left">
-                 <p className="text-white font-black text-sm uppercase tracking-wide">Minha Recompensa</p>
-                 <p className="text-emerald-100 text-[10px] font-medium opacity-90">Acesse 5 dias e ganhe 1 cupom de 20%</p>
-               </div>
-           </div>
-           <div className="bg-white/10 p-1.5 rounded-full">
-             <ChevronRight className="text-white" size={16} />
-           </div>
-        </button>
-      </section>
-
-      {/* NOVO BLOCO: ACONTECENDO AGORA (Entre Cupons e JPA Conversa) */}
+      {/* BLOCO: ACONTECENDO AGORA */}
       <AcontecendoAgora onNavigate={onNavigate} />
-
-      {/* 4. ONDE O BAIRRO CONVERSA */}
-      <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
-        <div className="">
-            <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 tracking-tighter">
-                    JPA Conversa
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button>
-                </div>
-            </div>
-        </div>
-        
-        <div className="relative group">
-            <div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">
-                {MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => (
-                    <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />
-                ))}
-            </div>
-            
-            {/* Indicador Sutil de Scroll */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-full flex items-center justify-end bg-gradient-to-l from-white/90 dark:from-gray-950/90 to-transparent w-12 pointer-events-none">
-                <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 opacity-80" />
-            </div>
-        </div>
-      </section>
-
-      {/* 5. SERVIÇOS / PROFISSIONAIS (Banner Direcional) */}
-      <section className="px-5 mb-8 bg-white dark:bg-gray-950">
-        <FifaBanner onClick={() => setWizardStep(1)} />
-      </section>
 
       {/* WIZARD DE ORÇAMENTO (Quando aberto) */}
       {wizardStep > 0 && (
