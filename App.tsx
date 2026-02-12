@@ -542,21 +542,23 @@ const App: React.FC = () => {
           </div>
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500 ease-out bg-gradient-to-br from-[#1E5BFF] to-[#001D4A] relative overflow-hidden ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-stretch text-center p-6 transition-opacity duration-500 ease-out bg-gradient-to-br from-[#1E5BFF] to-[#001D4A] relative overflow-hidden ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <div className="absolute top-0 left-0 w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent animate-bg-shine opacity-50"></div>
               
-              <div className="flex flex-col items-center animate-splash-logo-enter text-center px-4" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
-                    Localizei JPA
-                  </h1>
-                  <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
-                    {sloganText}
-                    {isTyping && <span className="animate-blink ml-1">|</span>}
-                  </p>
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center animate-splash-logo-enter" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+                    <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+                    <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
+                      Localizei JPA
+                    </h1>
+                    <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
+                      {sloganText}
+                      {isTyping && <span className="animate-blink ml-1">|</span>}
+                    </p>
+                </div>
               </div>
               
-              <div className="absolute bottom-0 left-0 right-0 text-center pb-12 animate-in fade-in duration-1000 delay-1000 fill-mode-backwards">
+              <div className="flex-shrink-0 animate-in fade-in duration-1000 delay-1000 fill-mode-backwards">
                 <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em]">Patrocinador Master</p>
                 <p className="text-base font-display font-bold text-white/70 mt-2 tracking-wide">Grupo Esquematiza</p>
               </div>

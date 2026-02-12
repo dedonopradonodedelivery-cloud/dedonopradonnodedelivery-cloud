@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Plus } from 'lucide-react';
+import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Plus, CloudSun, Thermometer, TrafficCone } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
 import { CATEGORIES } from '@/constants';
@@ -68,6 +68,24 @@ export const Header: React.FC<HeaderProps> = ({
   isSticky = true
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
+  const [weatherInfo, setWeatherInfo] = useState({
+    weather: '',
+    temp: 0,
+    traffic: '',
+    loading: true,
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setWeatherInfo({
+        weather: 'Parcialmente Nublado',
+        temp: 28,
+        traffic: 'Moderado',
+        loading: false,
+      });
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -164,9 +182,41 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                 </div>
             </div>
+
+            {activeTab === 'home' && (
+              <div className="w-full overflow-hidden border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-center gap-4 px-4 pb-3 text-[10px] font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap overflow-x-auto no-scrollbar">
+                  {weatherInfo.loading ? (
+                    <span className="opacity-50 animate-pulse">Carregando informações do bairro...</span>
+                  ) : (
+                    <div className="flex items-center gap-3 animate-in fade-in duration-700">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin size={12} className="text-blue-500" />
+                        <span className="uppercase">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
+                      </div>
+                      <span className="opacity-30">•</span>
+                      <div className="flex items-center gap-1.5">
+                        <CloudSun size={12} className="text-amber-500" />
+                        <span className="uppercase">{weatherInfo.weather}</span>
+                      </div>
+                      <span className="opacity-30">•</span>
+                      <div className="flex items-center gap-1.5">
+                        <Thermometer size={12} className="text-rose-500" />
+                        <span className="uppercase">{weatherInfo.temp}°C</span>
+                      </div>
+                      <span className="opacity-30">•</span>
+                      <div className="flex items-center gap-1.5">
+                        <TrafficCone size={12} className="text-orange-500" />
+                        <span className="uppercase">Trânsito {weatherInfo.traffic}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             
             {activeTab === 'home' && (
-              <div className="flex items-center gap-4 overflow-x-auto no-scrollbar px-4 pb-4 pt-1">
+              <div className="flex items-center gap-4 overflow-x-auto no-scrollbar px-4 pb-4 pt-4">
                 {headerCategories.map(cat => (
                   <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center gap-2 text-center group flex-shrink-0 w-16">
                     <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shadow-sm border border-gray-100 dark:border-gray-700">
