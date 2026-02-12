@@ -1,6 +1,5 @@
-
 import React, { ReactNode, useEffect, useRef } from 'react';
-import { BottomNav } from './BottomNav';
+import { BottomNav } from '@/components/BottomNav';
 
 interface LayoutProps {
   children: ReactNode;
@@ -25,7 +24,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
   return (
     <div
-      className="h-full bg-white dark:bg-gray-950 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
+      className="h-[100dvh] bg-white dark:bg-gray-900 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
     >
       <div
         ref={scrollContainerRef}

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Header } from '@/components/layout/Header';
+import { Layout } from '@/components/Layout';
+import { Header } from '@/components/Header';
 import { HomeFeed } from '@/components/HomeFeed';
 import { ExploreView } from '@/components/ExploreView';
 import { StoreDetailView } from '@/components/StoreDetailView';
@@ -29,7 +29,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { DesignerPanel } from '@/components/DesignerPanel';
 import { MerchantLeadsView } from '@/components/MerchantLeadsView';
 import { ServiceChatView } from '@/components/ServiceChatView';
-import { CategoryView } from '@/pages/categories/CategoryView';
+import { CategoryView } from '@/components/CategoryView';
 import { SubcategoryDetailView } from '@/components/SubcategoryDetailView';
 import { SponsorInfoView } from '@/components/SponsorInfoView';
 import { ServicesLandingView } from '@/components/ServicesLandingView';
@@ -337,7 +337,8 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    // FIX: Changed onAuthClick={() => onNavigate('profile')} to onAuthClick={() => handleNavigate('profile')}
+                    <Header onAuthClick={() => handleNavigate('profile')} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
@@ -488,7 +489,7 @@ const App: React.FC = () => {
                     )}
 
                     {activeTab === 'merchant_promotions' && (
-                        <MerchantPromotionsModule onBack={() => handleNavigate('profile')} />
+                        <MerchantPromotionsModule onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />
                     )}
 
                     {activeTab === 'store_finance' && (
@@ -525,6 +526,7 @@ const App: React.FC = () => {
                     )}
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} onNavigate={handleNavigate} />}
+                    {/* FIX: Changed onNavigate={onNavigate} to onNavigate={handleNavigate} */}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'classified_search_results' && <ClassifiedSearchResultsView searchTerm={classifiedSearchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
@@ -553,7 +555,7 @@ const App: React.FC = () => {
                     {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}
                     {activeTab === 'about_app' && <AboutAppView onBack={() => handleNavigate('profile')} />}
                   </main>
-                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} customTitle={undefined} customSubtitle={undefined} />
               </Layout>
               <RoleSwitcherModal />
           </div>

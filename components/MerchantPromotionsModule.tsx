@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -25,9 +24,10 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface MerchantPromotionsModuleProps {
   onBack: () => void;
+  onNavigate: (view: string, data?: any) => void;
 }
 
-export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> = ({ onBack }) => {
+export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> = ({ onBack, onNavigate }) => {
   const { user } = useAuth();
   const [view, setView] = useState<'list' | 'form'>('list');
   const [promotions, setPromotions] = useState<StorePromotion[]>([]);

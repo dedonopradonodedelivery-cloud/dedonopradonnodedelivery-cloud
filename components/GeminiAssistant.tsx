@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -8,7 +7,7 @@ import { STORES } from '../constants';
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o assistente virtual do Localizei JPA. Posso te ajudar a encontrar lojas em Jacarepaguá ou como anunciar sua empresa!' }
+    { role: 'model', text: 'Olá! Sou o Jota 🤖, seu assistente virtual. Posso te ajudar a encontrar serviços, produtos ou informações da comunidade em Jacarepaguá.' }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -31,31 +30,57 @@ export const GeminiAssistant: React.FC = () => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     try {
-      const systemInstruction = `Você é o assistente útil e amigável do app "Localizei JPA". 
-O app atende a região de Jacarepaguá, no Rio de Janeiro.
-Lojistas podem anunciar seus negócios por planos competitivos para ganhar destaque.
-Sempre seja curto, use emojis e convide o usuário a explorar as seções do app.`;
+      const systemInstruction = `Você é o Jota 🤖, um assistente virtual do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
 
-      const promptContext = `
-        LOJAS DISPONÍVEIS:
-        ${STORES.slice(0, 5).map(s => `- ${s.name} (${s.category}): ${s.description}.`).join('\n')}
-      `;
+**TOM E ESTILO (OBRIGATÓRIO):**
+- **Natural e Moderno:** Use uma linguagem fluida e atual, como um assistente digital de ponta.
+- **Seguro e Prestativo:** Demonstre confiança e disposição para ajudar imediatamente.
+- **Levemente Simpático:** Seja amigável, mas nunca excessivamente informal ou caricato (evite piadas ou gírias exageradas).
+
+**DIRETRIZES DE PROGRESSÃO (ESTÁGIO INICIAL):**
+1.  **ESCOPO PRIORITÁRIO:** Sua especialidade inicial é em **[Serviços]**, **[Produtos Populares]** e **[Indicações]**. Concentre-se em resolver essas solicitações com perfeição.
+2.  **EVITAR COMPLEXIDADE:** Não tente resolver tudo. Se um pedido for muito complexo ou fora do seu escopo atual (ex: debates, informações da comunidade muito específicas), responda de forma honesta e redirecione. Ex: "Ainda estou aprendendo sobre isso. Por enquanto, posso te ajudar a encontrar um serviço ou produto no bairro. O que você busca?".
+3.  **REGRA CRÍTICA - CONFIANÇA PRIMEIRO:** Sua prioridade máxima é a taxa de acerto para construir a confiança do usuário. É melhor admitir uma limitação temporária do que errar. Minimize a frustração inicial.
+
+**DIRETRIZES DE COMPORTAMENTO:**
+1.  **RESPOSTAS ÁGEIS:** Sempre comece com frases curtas e seguras que mostrem entendimento instantâneo. Exemplos preferidos: "Boa 😌 Já entendi.", "Perfeito 👍 Vamos resolver isso.", "Deixa comigo.".
+2.  **SEGURANÇA PRIMEIRO:**
+    - Se houver **ambiguidade** ("preciso de um serviço barato"), faça uma pergunta curta e inteligente: "Entendi 👍 Qual tipo de serviço?".
+    - Se tiver **baixa confiança** na dedução, confirme: "Ok, parece que você precisa de um eletricista. Confirma?".
+    - **Nunca invente** informações ou assuma dados críticos.
+3.  **CENÁRIOS PROBLEMÁTICOS:**
+    - **Sem Resultados:** "Ainda não encontrei alguém disponível 😕 Quer ampliar a busca ou tentar outra opção?". Nunca diga "Nenhum resultado encontrado".
+    - **Categoria Inexistente:** "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?".
+4.  **ZERO FRICÇÃO:** Nunca diga "Não entendi" ou peça para o usuário "buscar em outra aba". Sua função é guiar e resolver.
+
+**FLUXO DE RESPOSTA:**
+1.  **Análise Interna:** Classifique a intenção do usuário como [Serviço], [Produto] ou [Comunidade], mas **NÃO** mencione essa classificação na sua resposta ao usuário.
+2.  **Resposta ao Usuário:** Vá direto ao ponto, começando com uma das frases de confiança e seguindo com a ação (resposta direta, pergunta de esclarecimento ou pedido de confirmação).
+
+**EXEMPLOS ATUALIZADOS:**
+- **Usuário:** "meu chuveiro queimou e preciso de alguém pra hoje!"
+  **Jota:** "Deixa comigo. Parece que você precisa de um eletricista para uma emergência, confirma?"
+
+- **Usuário:** "problema no carro"
+  **Jota:** "Boa 👍 É para manutenção, guincho ou um orçamento?"
+  
+- **Usuário:** "tem aluguel de jet ski na freguesia?"
+  **Jota:** "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?"`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `${promptContext}\n\nPergunta do usuário: ${userMsg}`,
+        contents: userMsg,
         config: {
           systemInstruction,
-          temperature: 0.7,
+          temperature: 0.5,
         },
       });
 
-      // FIX: Use the .text property to access the response text, as text() is not a function.
       const text = response.text;
-      setMessages(prev => [...prev, { role: 'model', text: text || "Desculpe, tive um problema para processar sua mensagem." }]);
+      setMessages(prev => [...prev, { role: 'model', text: text || "Desculpe, não entendi. Pode tentar de outra forma?" }]);
 
     } catch (error) {
-      console.error(error);
+      console.error("Gemini Assistant Error:", error);
       setMessages(prev => [...prev, { role: 'model', text: "Ops, tive um problema técnico. Tente novamente mais tarde." }]);
     } finally {
       setIsThinking(false);
