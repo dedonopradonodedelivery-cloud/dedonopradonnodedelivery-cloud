@@ -15,23 +15,29 @@ const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
       d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z"
       fill="url(#paint0_linear_jota_avatar)"
     />
-    {/* --- JOTA v3 (achatado e alongado) --- */}
-    <path 
-      d="M8 21 C12 17, 18 15, 23 15 L32 16 C36 17, 37 19, 34 20 L25 22 C20 24, 12 24, 8 21 Z"
-      fill="white"
-    />
-    <path 
-      d="M9 24 C15 26, 23 27, 32 26 L33 24 C26 23, 16 23, 9 24 Z"
-      fill="white"
-    />
-    {/* Dentes */}
-    <path d="M20 22.5 L21 23.5 L22 22.5 Z" fill="#1E5BFF" />
-    <path d="M24 22.5 L25 23.5 L26 22.5 Z" fill="#1E5BFF" />
-    <path d="M28 22.5 L29 23.5 L30 22.5 Z" fill="#1E5BFF" />
+    {/* --- JOTA TUCANO v1 --- */}
+    <defs>
+      <linearGradient id="jotaToucanBeak" x1="25" y1="16" x2="40" y2="28">
+        <stop stopColor="#FBBF24" />
+        <stop offset="1" stopColor="#F97316" />
+      </linearGradient>
+    </defs>
+
+    {/* Corpo (Sombra sutil) */}
+    <path d="M13 29 C 9 21, 15 11, 25 11 C 33 11, 37 17, 37 23 C 37 33, 29 37, 21 37 C 15 37, 13 33, 13 29 Z" fill="#111827" />
+
+    {/* Bico */}
+    <path d="M26 19 C 40 17, 46 23, 39 30 C 33 36, 26 32, 26 25 V 19 Z" fill="url(#jotaToucanBeak)" />
+    <path d="M26 22 L 39 25 L 37 27 L 26 24 Z" fill="rgba(0,0,0,0.4)" />
+
+    {/* Peito Branco */}
+    <path d="M23 24 C 19 24, 17 26, 17 29 C 17 33, 19 35, 23 35 S 25 33, 25 29 C 25 26, 23 24, 23 24 Z" fill="white" />
+    
     {/* Olho */}
-    <circle cx="24" cy="18" r="1.8" fill="#1E5BFF"/>
-    <circle cx="24.6" cy="17.4" r="0.5" fill="white"/>
-    {/* --- FIM DO AVATAR v3 --- */}
+    <circle cx="29" cy="19" r="5" fill="#1E5BFF" />
+    <circle cx="29" cy="19" r="2" fill="#111827" />
+    <circle cx="29.8" cy="18.2" r="0.7" fill="white" />
+    {/* --- FIM DO AVATAR --- */}
     <defs>
       <linearGradient
         id="paint0_linear_jota_avatar"
@@ -101,7 +107,7 @@ export const GeminiAssistant: React.FC = () => {
       model: 'gemini-3-flash-preview',
       contents: userMsg,
       config: {
-        systemInstruction: `Você é o Jota 🐊, um assistente virtual em formato de jacaré estilizado, mascote do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
+        systemInstruction: `Você é o Jota 🦜, um assistente virtual em formato de tucano estilizado, mascote do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
 
 **TOM E ESTILO (OBRIGATÓRIO):**
 - **Natural e Moderno:** Use uma linguagem fluida e atual, como um assistente digital de ponta.

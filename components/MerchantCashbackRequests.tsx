@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { CashbackTransaction } from '../types';
+import { supabase } from '@/lib/supabaseClient';
+import { CashbackTransaction } from '@/types';
 
 interface MerchantCashbackRequestsProps {
   merchantId: string; // ID do lojista logado
