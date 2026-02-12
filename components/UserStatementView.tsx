@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChevronLeft, ArrowUpRight, ArrowDownLeft, Info, Coins, ArrowRight } from 'lucide-react';
-import { InstitutionalSponsorBanner } from './InstitutionalSponsorBanner';
+import { InstitutionalSponsorBanner } from '@/components/InstitutionalSponsorBanner';
 
 interface Transaction {
   id: string;
@@ -125,7 +125,7 @@ export const UserStatementView: React.FC<UserStatementViewProps> = ({
           
           <button 
             onClick={onExploreStores}
-            className="w-full mt-6 bg-[#1E5BFF] text-white font-bold text-sm py-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full mt-6 bg-[#1E5BFF] text-white font-bold text-sm py-4 rounded-2xl shadow-lg shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             Ver lojas com cashback
             <ArrowRight className="w-4 h-4" />

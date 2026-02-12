@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, Gift, CheckCircle2, Lock, ArrowRight, Tag, Info, Calendar, Sparkles, ChevronRight } from 'lucide-react';
-import { STORES } from '../constants';
-import { Store } from '../types';
+import { STORES } from '@/constants';
+import { Store } from '@/types';
 
 interface WeeklyPromoSelectionViewProps {
   onBack: () => void;

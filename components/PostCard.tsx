@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { CommunityPost, Store, ReportReason } from '../types';
+import { CommunityPost, Store, ReportReason } from '@/types';
 import { User } from '@supabase/supabase-js';
-import { STORES } from '../constants';
+import { STORES } from '@/constants';
 import { 
     Bookmark, 
     Heart, 
@@ -18,7 +18,7 @@ import {
     AlertCircle,
     Zap 
 } from 'lucide-react';
-import { ReportModal } from './ReportModal';
+import { ReportModal } from '@/components/ReportModal';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -31,8 +31,8 @@ interface PostCardProps {
 
 // Imagens genéricas para posts sem mídia (Bairro, cotidiano, casas, serviços, pessoas, comércio local)
 const PLACEHOLDERS = [
-  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Casa/Bairro
-  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Rua/Comércio
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800', // Bairro/Rua
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800', // Comércio
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800', // Pessoas/Comunidade
   'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Mercado/Loja
   'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviço/Trabalho

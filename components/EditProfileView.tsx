@@ -17,9 +17,8 @@ import {
   Heart,
   Edit3
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-// FIX: Using relative path for constants to ensure consistency and availability of exported members.
-import { NEIGHBORHOOD_COMMUNITIES } from '../constants';
+import { supabase } from '@/lib/supabaseClient';
+import { NEIGHBORHOOD_COMMUNITIES } from '@/constants';
 
 interface EditProfileViewProps {
   user: User;
@@ -97,12 +96,12 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 pb-32">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-right duration-300">
       {/* Header Fixo */}
       <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-20 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+            <ChevronLeft size={20} className="text-gray-800 dark:text-white" />
           </button>
           <div>
             <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Perfil Moderno</h1>
@@ -237,7 +236,7 @@ export const EditProfileView: React.FC<EditProfileViewProps> = ({ user, onBack }
       </div>
 
       {showSuccess && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-2 z-[100]">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
            <span className="font-black text-xs uppercase tracking-widest">Perfil Sincronizado!</span>
         </div>

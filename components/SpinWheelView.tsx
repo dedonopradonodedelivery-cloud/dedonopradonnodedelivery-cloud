@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { Gift, RefreshCw, ThumbsDown, History, Wallet, Volume2, VolumeX, Lock, ArrowRight, Dices, Ticket } from 'lucide-react';
-import { useCountdown } from '../hooks/useCountdown';
+import { useCountdown } from '@/hooks/useCountdown';
 
 // --- Tipos e Constantes ---
 interface SpinWheelViewProps {

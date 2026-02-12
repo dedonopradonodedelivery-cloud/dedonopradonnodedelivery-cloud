@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { MOCK_CLASSIFIEDS } from '../constants';
-import { Classified } from '../types';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { MOCK_CLASSIFIEDS } from '@/constants';
+import { Classified } from '@/types';
 
 interface HighlightBanner {
   id: string;

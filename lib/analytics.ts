@@ -1,4 +1,5 @@
-import { supabase } from './supabaseClient';
+
+import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 
 export type OrganicEventType =
