@@ -18,17 +18,15 @@ import {
   X, 
   Send, 
   ChevronRight,
-  Search,
-  Tag,
-  SearchX,
-  Bot
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, MOCK_COMMUNITY_POSTS, MOCK_CLASSIFIEDS } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
+import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
+import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
 
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
@@ -113,8 +111,8 @@ const MiniClassifiedCard: React.FC<{ item: Classified; onNavigate: (view: string
 
 interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
+  onSelectCategory: (category: Category) => void;
   onStoreClick: (store: Store) => void;
-  onOpenJota: (query?: string) => void;
   stores: Store[];
   user: User | null;
   userRole: 'cliente' | 'lojista' | null;
@@ -122,53 +120,162 @@ interface HomeFeedProps {
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
+  onSelectCategory, 
   onStoreClick, 
-  onOpenJota,
   stores,
   user,
-  userRole,
+  userRole
 }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
+  const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
+
+  // 1️⃣ ORDEM DAS CATEGORIAS (8 POR TELA)
+  const categoryPages = useMemo(() => {
+    const page1Ids = [
+      'cat-saude',     // Saúde
+      'cat-fashion',   // Moda
+      'cat-pets',      // Pets
+      'cat-pro',       // Profissionais
+      'cat-beauty',    // Beleza
+      'cat-autos',     // Autos
+      'cat-sports',    // Esportes
+      'cat-edu'        // Educação
+    ];
+
+    const p1 = page1Ids.map(id => CATEGORIES.find(c => c.id === id)).filter(Boolean) as Category[];
+    const remaining = CATEGORIES.filter(c => !page1Ids.includes(c.id));
+    
+    // Página 2 (7 categorias + Botão Mais)
+    return [p1, remaining.slice(0, 7)];
+  }, []);
+
+  const handleCategoryScroll = () => {
+    if (!categoryScrollRef.current) return;
+    const scrollLeft = categoryScrollRef.current.scrollLeft;
+    const width = categoryScrollRef.current.clientWidth;
+    const page = Math.round(scrollLeft / width);
+    if (page !== currentCategoryPage) setCurrentCategoryPage(page);
+  };
+
+  const [wizardStep, setWizardStep] = useState(0);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedUrgency, setSelectedUrgency] = useState<string | null>(null);
+  const [description, setDescription] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [lastCreatedRequestId, setLastCreatedRequestId] = useState<string | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && images.length < 3) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImages(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
+  const handleWizardSubmit = () => {
+    if (!user) {
+        localStorage.setItem('pending_wizard_state', JSON.stringify({ selectedService, selectedUrgency, description, images }));
+        onNavigate('profile');
+        return;
+    }
+    setIsSubmittingLead(true);
+    const requestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newLead: ServiceRequest = {
+        id: requestId,
+        userId: user.id,
+        userName: user.user_metadata?.full_name || 'Morador Local',
+        serviceType: selectedService || 'Geral',
+        description,
+        neighborhood: currentNeighborhood,
+        urgency: (selectedUrgency as ServiceUrgency) || 'Não tenho pressa',
+        images,
+        status: 'open',
+        createdAt: new Date().toISOString()
+    };
+    const existing = JSON.parse(localStorage.getItem('service_requests_mock') || '[]');
+    localStorage.setItem('service_requests_mock', JSON.stringify([newLead, ...existing]));
+    setLastCreatedRequestId(requestId);
+    setTimeout(() => {
+      setIsSubmittingLead(false);
+      setWizardStep(4);
+    }, 1500);
+  };
 
   return (
-    <div className="pt-2">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+      
       {userRole === 'lojista' && (
         <section className="px-4 py-4 bg-white dark:bg-gray-950">
            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
 
-      {/* JOTA ASSISTANT HIGHLIGHT (Design Evoluído) */}
-      <section className="px-5 mb-8 pt-8">
+      {/* 2️⃣ CATEGORIAS (Grid 4x2 com Swipe - PADRÃO IMAGEM 2) */}
+      <section className="w-full bg-[#FFFFFF] dark:bg-gray-950 pt-4 relative z-10">
         <div 
-          onClick={() => onOpenJota()}
-          className="relative bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all cursor-pointer overflow-hidden"
+          ref={categoryScrollRef}
+          onScroll={handleCategoryScroll}
+          className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
         >
-          {/* Efeitos de Fundo */}
-          <div className="absolute top-0 right-0 w-48 h-48 bg-[#1E5BFF]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#1E5BFF]/10 transition-colors"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -ml-16 -mb-16"></div>
-          
-          <div className="flex items-center gap-5 relative z-10">
-              <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-b from-[#1E5BFF] to-[#001D4A] flex items-center justify-center text-white shadow-2xl shadow-blue-500/30 group-hover:scale-110 transition-transform border border-white/20">
-                <Bot className="w-9 h-9" />
-              </div>
-              <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Fale com o Jota 🤖</h3>
-                    <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-black text-emerald-500 uppercase tracking-widest animate-pulse">Inteligente</div>
+          {categoryPages.map((page, pageIdx) => (
+            <div key={pageIdx} className="min-w-full px-4 grid grid-cols-4 gap-x-2 gap-y-4 snap-center pb-2">
+              {page.map((cat) => (
+                <button 
+                  key={cat.id} 
+                  onClick={() => onSelectCategory(cat)}
+                  className={`flex flex-col items-center justify-between p-2 rounded-[25px] border border-white/20 shadow-sm active:scale-95 transition-all w-full aspect-square ${cat.color}`}
+                >
+                  <div className="flex-1 flex items-center justify-center">
+                    {React.cloneElement(cat.icon as any, { className: "w-6 h-6 text-white", strokeWidth: 3 })}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight line-clamp-1 italic">"Meu chuveiro queimou" ou "Acabou o gás"</p>
-              </div>
-          </div>
-          
-          <div className="mt-6 flex items-center justify-between bg-gray-50 dark:bg-gray-800/80 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
-             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Escreva qualquer necessidade do bairro...</span>
-             <Sparkles size={16} className="text-[#1E5BFF] animate-pulse" />
-          </div>
+                  <span className="w-full text-[8px] font-black text-white text-center uppercase tracking-tighter leading-tight pb-1 truncate">
+                    {cat.name}
+                  </span>
+                </button>
+              ))}
+
+              {/* Inserção do Botão "Mais" se for a última página */}
+              {pageIdx === categoryPages.length - 1 && (
+                <button 
+                  onClick={() => setIsMoreModalOpen(true)}
+                  className="flex flex-col items-center justify-between p-2 rounded-[25px] border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 shadow-sm active:scale-95 transition-all w-full aspect-square"
+                >
+                  <div className="flex-1 flex items-center justify-center">
+                    <Plus size={24} className="text-gray-600 dark:text-gray-400" strokeWidth={4} />
+                  </div>
+                  <span className="w-full text-[8px] font-black text-gray-600 dark:text-gray-400 text-center uppercase tracking-tighter leading-tight pb-1">
+                    Mais
+                  </span>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Indicadores de Página (Dots) */}
+        <div className="flex justify-center gap-1.5 mt-4 mb-6">
+          {categoryPages.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'w-4 bg-blue-600 shadow-sm' : 'w-1.5 bg-gray-300'}`} 
+            />
+          ))}
         </div>
       </section>
 
+      {/* 3️⃣ CARROSSEL PRINCIPAL */}
+      <section className="bg-white dark:bg-gray-950 w-full">
+        <HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} />
+      </section>
+
+      {/* 4️⃣ JPA CONVERSA */}
       <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
         <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -189,6 +296,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
+      {/* 5️⃣ CUPONS */}
       <section className="px-5 mb-6">
         <button 
           onClick={() => onNavigate('weekly_reward_page')}
@@ -207,10 +315,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </button>
       </section>
 
+      {/* 6️⃣ SERVIÇOS */}
       <section className="px-5 mb-8 bg-white dark:bg-gray-950">
-        <FifaBanner onClick={() => onNavigate('services_landing')} />
+        <FifaBanner onClick={() => setWizardStep(1)} />
       </section>
 
+      {/* 7️⃣ CLASSIFICADOS */}
       <section className="bg-white dark:bg-gray-950 pb-8">
         <div className="px-5">
             <div className="flex items-center justify-between mb-4">
@@ -225,6 +335,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
         </div>
       </section>
 
+      {/* 8️⃣ EXPLORAR BAIRRO */}
       <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
         <div className="px-5">
           <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
@@ -238,6 +349,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
           <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
         </div>
       </div>
+
+      <MoreCategoriesModal 
+        isOpen={isMoreModalOpen}
+        onClose={() => setIsMoreModalOpen(false)}
+        onSelectCategory={onSelectCategory}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
+
 import React, { useMemo, useState } from 'react';
-import { Home, User as UserIcon, Newspaper, Compass, Ticket } from 'lucide-react';
+import { Home, User as UserIcon, Newspaper, MessageSquare, Ticket } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../AuthModal';
 
@@ -34,7 +35,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   const navItems = useMemo(() => {
     return [
       { id: 'home', icon: Home, label: 'Início', isMainAction: false },
-      { id: 'explore', icon: Compass, label: 'Explorar', isMainAction: true },
+      { id: 'neighborhood_posts', icon: MessageSquare, label: 'JPA Conversa', isMainAction: true },
       { id: 'cupom_trigger', icon: Ticket, label: 'Cupom', isMainAction: true, badge: userRole !== 'lojista' ? hasActiveCoupons : false },
       { id: 'classifieds', icon: Newspaper, label: 'Classificados', isMainAction: true },
       { id: 'profile', icon: UserIcon, label: 'Menu', isMainAction: false },

@@ -1,9 +1,10 @@
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Plus, CloudSun, Thermometer, TrafficCone } from 'lucide-react';
-import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
-import { Store, Category } from '@/types';
-import { CATEGORIES } from '@/constants';
+
+import React, { useMemo } from 'react';
+import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
+import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { Store, Category } from '../types';
+import { CATEGORIES } from '../constants';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -13,16 +14,15 @@ interface HeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onNavigate: (tab: string) => void;
-  onSelectCategory: (category: Category) => void;
-  onOpenMoreCategories: () => void;
   activeTab: string;
   userRole: "cliente" | "lojista" | null;
+  onOpenMerchantQr?: () => void; // Mantido para compatibilidade, não renderizado
+  customPlaceholder?: string;
   stores?: Store[];
   onStoreClick?: (store: Store) => void;
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
-  isSticky?: boolean;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -34,6 +34,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
                 <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
                 <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
+                    {/* FIX: Added "Jacarepaguá (todos)" option to the selector modal. */}
                     <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                         <span>Jacarepaguá (todos)</span>
                         {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
@@ -57,35 +58,16 @@ export const Header: React.FC<HeaderProps> = ({
   searchTerm,
   onSearchChange,
   onNavigate,
-  onSelectCategory,
-  onOpenMoreCategories,
   activeTab,
   stores = [],
   onStoreClick,
   isAdmin,
   viewMode,
-  onOpenViewSwitcher,
-  isSticky = true
+  onOpenViewSwitcher
 }) => {
-  const { currentNeighborhood, toggleSelector } = useNeighborhood();
-  const [weatherInfo, setWeatherInfo] = useState({
-    weather: '',
-    temp: 0,
-    traffic: '',
-    loading: true,
-  });
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setWeatherInfo({
-        weather: 'Parcialmente Nublado',
-        temp: 28,
-        traffic: 'Moderado',
-        loading: false,
-      });
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Added setNeighborhood to the destructuring here
+  const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
+  const showNeighborhoodFilter = ['home', 'explore', 'services', 'community_feed'].includes(activeTab);
 
   const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
@@ -97,6 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
     return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
   }, [stores, searchTerm, activeTab]);
 
+  // Placeholder dinâmico conforme o bairro selecionado
   const dynamicPlaceholder = useMemo(() => {
     if (currentNeighborhood === "Jacarepaguá (todos)") {
       return "O que você busca em JPA?";
@@ -104,56 +87,37 @@ export const Header: React.FC<HeaderProps> = ({
     return `O que você busca em ${currentNeighborhood}?`;
   }, [currentNeighborhood]);
 
-  const headerCategories = useMemo(() => {
-    const names = ['Saúde', 'Serviços', 'Pets', 'Moda', 'Beleza'];
-    return CATEGORIES.filter(c => names.includes(c.name));
-  }, []);
-
-  const wrapperClasses = isSticky
-    ? "sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800"
-    : "w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800";
-
   return (
     <>
-        <div className={wrapperClasses}>
-          <div className="max-w-md mx-auto flex flex-col relative">
-            <div className="flex items-center justify-between px-4 pt-3 pb-1 h-16">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#1E5BFF] rounded-xl flex items-center justify-center shadow-md">
-                        <MapPin className="w-4 h-4 text-white" />
+        <div className="sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-800">
+        <div className="max-w-md mx-auto flex flex-col relative">
+            <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                <button onClick={toggleSelector} className="flex items-center gap-1.5 active:scale-95">
+                    <div className="p-1.5 bg-[#1E5BFF]/10 rounded-full"><MapPin className="w-3.5 h-3.5 text-[#1E5BFF]" fill="currentColor" /></div>
+                    <div className="text-left flex flex-col">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase leading-none">Local</span>
+                        <div className="flex items-center gap-1">
+                            <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate max-w-[120px]">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
+                            <ChevronDown className="w-3 h-3 text-gray-400" />
+                        </div>
                     </div>
-                    {activeTab === 'home' ? (
-                        <h2 className="font-display text-xl font-bold text-gray-900 dark:text-white">
-                            Olá, {user ? (user.user_metadata?.full_name?.split(' ')[0] || 'Membro') : 'Visitante'}
-                        </h2>
-                    ) : (
-                        <span className="font-black text-lg text-gray-900 dark:text-white">JPA</span>
-                    )}
-                </div>
-                
+                </button>
                 <div className="flex items-center gap-2">
-                    <button onClick={toggleSelector} className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-700 shadow-inner active:scale-95 transition-transform">
-                        <MapPin className="w-3.5 h-3.5 text-[#1E5BFF]" />
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate max-w-[80px]">
-                            {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-                        </span>
-                        <ChevronDown className="w-3 h-3 text-gray-400" />
-                    </button>
-                    
                     {isAdmin && (
-                        <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm h-10">
+                        <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
                             <ShieldCheck size={14} className="text-amber-600 dark:text-amber-400" />
                             <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 uppercase">{viewMode}</span>
                         </button>
                     )}
-                    
-                    <button onClick={onAuthClick} className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-inner border border-gray-100 dark:border-gray-700 active:scale-95 transition-transform">
-                        {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5" />}
+                    <button onClick={onAuthClick} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-1 pl-3 rounded-full border border-gray-100 dark:border-gray-700 shadow-inner">
+                        <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">{user ? 'Perfil' : 'Entrar'}</span>
+                        <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-sm">
+                            {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4" />}
+                        </div>
                     </button>
                 </div>
             </div>
-            
-            <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+            <div className="flex items-center gap-3 px-4 pt-2 pb-3">
                 <div className="relative flex-1 group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input 
@@ -182,56 +146,12 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                 </div>
             </div>
-
-            {activeTab === 'home' && (
-              <div className="w-full overflow-hidden border-b border-gray-100 dark:border-gray-800">
-                <div className="flex items-center justify-center gap-4 px-4 pb-3 text-[10px] font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap overflow-x-auto no-scrollbar">
-                  {weatherInfo.loading ? (
-                    <span className="opacity-50 animate-pulse">Carregando informações do bairro...</span>
-                  ) : (
-                    <div className="flex items-center gap-3 animate-in fade-in duration-700">
-                      <div className="flex items-center gap-1.5">
-                        <MapPin size={12} className="text-blue-500" />
-                        <span className="uppercase">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
-                      </div>
-                      <span className="opacity-30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <CloudSun size={12} className="text-amber-500" />
-                        <span className="uppercase">{weatherInfo.weather}</span>
-                      </div>
-                      <span className="opacity-30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <Thermometer size={12} className="text-rose-500" />
-                        <span className="uppercase">{weatherInfo.temp}°C</span>
-                      </div>
-                      <span className="opacity-30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <TrafficCone size={12} className="text-orange-500" />
-                        <span className="uppercase">Trânsito {weatherInfo.traffic}</span>
-                      </div>
-                    </div>
-                  )}
+            {showNeighborhoodFilter && (
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 pb-3 pt-1">
+                    {/* FIX: Added "Todos" button to the horizontal filter bar. */}
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>Todos</button>
+                    {NEIGHBORHOODS.map(hood => (<button key={hood} onClick={() => setNeighborhood(hood)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white border-[#1E5BFF]" : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-800"}`}>{hood}</button>))}
                 </div>
-              </div>
-            )}
-            
-            {activeTab === 'home' && (
-              <div className="flex items-center gap-4 overflow-x-auto no-scrollbar px-4 pb-4 pt-4">
-                {headerCategories.map(cat => (
-                  <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center gap-2 text-center group flex-shrink-0 w-16">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shadow-sm border border-gray-100 dark:border-gray-700">
-                      {React.cloneElement(cat.icon as React.ReactElement<any>, { size: 18, strokeWidth: 2.5 })}
-                    </div>
-                    <span className="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{cat.name}</span>
-                  </button>
-                ))}
-                <button onClick={onOpenMoreCategories} className="flex flex-col items-center gap-2 text-center group flex-shrink-0 w-16">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shadow-sm border border-gray-100 dark:border-gray-700">
-                    <Plus size={18} strokeWidth={3} />
-                  </div>
-                  <span className="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">+ Mais</span>
-                </button>
-              </div>
             )}
         </div>
         </div>

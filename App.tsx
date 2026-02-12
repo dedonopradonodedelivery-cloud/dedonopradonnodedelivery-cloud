@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/layout/Layout';
+import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
 import { ExploreView } from '@/components/ExploreView';
 import { StoreDetailView } from '@/components/StoreDetailView';
@@ -49,11 +49,10 @@ import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { MerchantPromotionsModule } from '@/components/MerchantPromotionsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
-import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
+import { StoreConnectModule } from '@/components/StoreConnectModule';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
-import { JotaAssistant } from '@/components/GeminiAssistant';
 import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -64,7 +63,6 @@ import { AboutView, SupportView, FavoritesView, UserActivityView, MyNeighborhood
 import { MerchantPanel } from '@/components/MerchantPanel';
 import { UserProfileFullView } from '@/components/UserProfileFullView';
 import { EditProfileView } from '@/components/EditProfileView';
-import { MoreCategoriesModal } from '@/components/MoreCategoriesModal';
 
 let splashWasShownInSession = false;
 const ADMIN_EMAIL = 'dedonopradonodedelivery@gmail.com';
@@ -93,7 +91,6 @@ const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   
   const [activityType, setActivityType] = useState<string>('');
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
@@ -104,7 +101,7 @@ const App: React.FC = () => {
 
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'Seu bairro, na sua mão.';
+  const fullSlogan = 'Onde o bairro conversa 💬';
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
@@ -112,23 +109,7 @@ const App: React.FC = () => {
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
 
-  const [isJotaOpen, setIsJotaOpen] = useState(false);
-  const [jotaInitialMessage, setJotaInitialMessage] = useState<string | undefined>(undefined);
-
-  const handleOpenJota = (query?: string) => {
-    if (query) {
-      setJotaInitialMessage(query);
-    } else {
-      setJotaInitialMessage(undefined);
-    }
-    setIsJotaOpen(true);
-  };
-
-  const handleCloseJota = () => {
-    setIsJotaOpen(false);
-    setJotaInitialMessage(undefined);
-  };
-
+  // LOGICA DE ROUTING PARA ACESSO VIA URL (REQUISITO URGENTE)
   useEffect(() => {
     const handleUrlRouting = () => {
         const path = window.location.pathname;
@@ -147,7 +128,7 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
       setPreviousTab(activeTab);
     }
     
@@ -197,7 +178,7 @@ const App: React.FC = () => {
             handleNavigate('user_coupons');
         }
     }
-  }, [user, userRole, activeTab]);
+  }, [user, userRole]);
 
   useEffect(() => {
     if (splashStage >= 4) {
@@ -260,7 +241,7 @@ const App: React.FC = () => {
       handleNavigate('profile');
   };
 
-  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'store_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
   
   const RoleSwitcherModal: React.FC = () => {
     if (!isRoleSwitcherOpen) return null;
@@ -313,10 +294,10 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    <Header isSticky={true} isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => setIsAuthOpen(true)} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onOpenMoreCategories={() => setIsMoreCategoriesOpen(true)} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header isDarkMode={theme === 'dark'} toggleTheme={() => {}} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
                   )}
                   <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onOpenJota={handleOpenJota} />}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     
                     {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
@@ -474,8 +455,8 @@ const App: React.FC = () => {
                         <StoreSupportModule onBack={() => handleNavigate('profile')} />
                     )}
 
-                    {activeTab === 'jpa_connect' && (
-                        <JPAConnectSalesView onBack={() => handleNavigate('profile')} />
+                    {activeTab === 'store_connect' && (
+                        <StoreConnectModule onBack={() => handleNavigate('profile')} />
                     )}
 
                     {activeTab === 'service_chat' && activeServiceRequestId && (
@@ -532,35 +513,23 @@ const App: React.FC = () => {
                   <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
               </Layout>
               <RoleSwitcherModal />
-              <JotaAssistant 
-                isOpen={isJotaOpen}
-                onClose={handleCloseJota}
-                onNavigate={handleNavigate}
-                initialMessage={jotaInitialMessage}
-              />
-              <MoreCategoriesModal isOpen={isMoreCategoriesOpen} onClose={() => setIsMoreCategoriesOpen(false)} onSelectCategory={handleSelectCategory} />
           </div>
 
           {splashStage < 4 && (
-            <div className={`fixed inset-0 z-[9999] flex flex-col items-stretch text-center p-6 transition-opacity duration-500 ease-out bg-gradient-to-br from-[#1E5BFF] to-[#001D4A] relative overflow-hidden ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              <div className="absolute top-0 left-0 w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent animate-bg-shine opacity-50"></div>
-              
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <div className="flex flex-col items-center animate-splash-logo-enter" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-                    <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
-                    <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
-                      Localizei JPA
-                    </h1>
-                    <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
-                      {sloganText}
-                      {isTyping && <span className="animate-blink ml-1">|</span>}
-                    </p>
-                </div>
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between py-16 transition-opacity duration-500 ease-out ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ backgroundColor: '#1E5BFF' }}>
+              <div className="flex flex-col items-center animate-logo-enter text-center px-4">
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
+                    Localizei JPA
+                  </h1>
+                  <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
+                    {sloganText}
+                    {isTyping && <span className="animate-blink ml-1">|</span>}
+                  </p>
               </div>
-              
-              <div className="flex-shrink-0 animate-in fade-in duration-1000 delay-1000 fill-mode-backwards">
-                <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em]">Patrocinador Master</p>
-                <p className="text-base font-display font-bold text-white/70 mt-2 tracking-wide">Grupo Esquematiza</p>
+              <div className="text-center">
+                <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Patrocinador Master</p>
+                <p className="text-lg font-display font-bold text-white mt-1 tracking-wide">Grupo Esquematiza</p>
               </div>
             </div>
           )}
