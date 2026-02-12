@@ -2,19 +2,26 @@
 import React from 'react';
 import { 
   ChevronRight, 
+  Megaphone, 
   LayoutGrid, 
   BarChart3, 
   MessageSquare, 
+  FileText, 
   CreditCard, 
   Heart, 
+  Info, 
+  HelpCircle, 
   LogOut,
   User,
   Sparkles,
   Compass,
   LifeBuoy,
+  AlertTriangle,
   Crown,
+  Star,
   Moon,
   Sun,
+  ImageIcon,
   TrendingUp
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -35,8 +42,9 @@ const ServiceBlock: React.FC<{
   isDestructive?: boolean;
   colorClass?: string;
   badge?: number;
+  labelBadge?: string;
   rightElement?: React.ReactNode;
-}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, rightElement }) => (
+}> = ({ icon: Icon, label, description, onClick, isDestructive, colorClass, badge, labelBadge, rightElement }) => (
   <button 
     onClick={onClick}
     className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0 active:bg-gray-50 dark:active:bg-gray-700/50 transition-colors group"
@@ -93,7 +101,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${storeName.replace(' ', '+')}&background=1E5BFF&color=fff`;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
       <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
@@ -138,8 +146,8 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
             <ServiceBlock 
               icon={LayoutGrid} 
-              label="Anunciar no Bairro" 
-              description="Banners na Home e Categorias (Inauguração R$ 29,90)"
+              label="Banners em Destaque" 
+              description="Sua loja nos banners da Home com benefícios exclusivos de Fundador Apoiador."
               onClick={() => onNavigate('store_ads_module')}
               colorClass="bg-purple-50 text-purple-600"
             />
@@ -148,7 +156,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
 
         <section>
           <SectionHeader title="Serviços" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={MessageSquare} 
               label="Chat com Designer" 
@@ -188,8 +196,20 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </section>
 
         <section>
+          <SectionHeader title="Suporte" />
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+            <ServiceBlock 
+              icon={LifeBuoy} 
+              label="Suporte ao Lojista" 
+              description="Ajuda com o app e conta"
+              onClick={() => onNavigate('store_support')} 
+            />
+          </div>
+        </section>
+
+        <section>
           <SectionHeader title="Geral" />
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
             <ServiceBlock 
               icon={Heart} 
               label="Favoritos" 
