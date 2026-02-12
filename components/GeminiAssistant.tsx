@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '@/types';
-import { STORES } from '@/constants';
 
 const TucoAvatar: React.FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -75,25 +74,21 @@ export const GeminiAssistant: React.FC = () => {
     const userMsg = retryMessage || input;
     if (!userMsg.trim() || isLoading) return;
 
-    // Guardar mensagem atual para o histórico antes de limpar o input
     const currentUserMsg: ChatMessage = { role: 'user', text: userMsg, type: 'response' };
 
     setInput('');
     setIsLoading(true);
     
-    // Adiciona a mensagem do usuário se não for um retry
     if (!retryMessage) {
       setMessages(prev => [...prev, currentUserMsg]);
     }
     
-    // Adiciona o placeholder de digitação
     setMessages(prev => [...prev, { role: 'model', type: 'typing' }]);
 
     let intermediateTimer: ReturnType<typeof setTimeout> | null = null;
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     try {
-      // Inicia timer para mensagem intermediária de "personalidade"
       intermediateTimer = setTimeout(() => {
         setMessages(prev => {
           const lastMessage = prev[prev.length - 1];
@@ -106,8 +101,6 @@ export const GeminiAssistant: React.FC = () => {
         });
       }, 1800);
 
-      // PREPARAÇÃO DO HISTÓRICO PARA O GEMINI (Contexto/Memória)
-      // Filtramos mensagens de erro, typing e intermediárias para manter o contexto limpo
       const conversationContext = messages
         .filter(m => m.type === 'response' && m.text)
         .map(m => ({
@@ -115,7 +108,6 @@ export const GeminiAssistant: React.FC = () => {
           parts: [{ text: m.text || '' }]
         }));
 
-      // Adiciona a mensagem atual ao contexto enviado para a API
       const payload = [...conversationContext, { role: 'user', parts: [{ text: userMsg }] }];
 
       const apiCallPromise = ai.models.generateContent({
@@ -128,13 +120,12 @@ Sua personalidade deve ser: Amigável, Natural, Moderna, Leve e Elegante (premiu
 
 REGRAS DE COMPORTAMENTO:
 1. Nunca reinicie a conversa após a primeira interação. Não repita saudações completas como "Olá, sou o Tuco".
-2. Sempre responda de forma contextual. Considere as mensagens anteriores enviadas no histórico.
+2. Sempre responda de forma contextual. Considere a mensagem anterior do usuário no histórico.
 3. Evite respostas robóticas ou institucionais. Prefira mensagens curtas e conversacionais.
-4. Quando o usuário enviar mensagens curtas (ex: "opa", "oi"): Responda de forma leve, ex: "Olá 😉 Como posso ajudar?", "Oi 😌 O que você procura?". NUNCA reinicie apresentação.
-5. Objetivo: Ajudar a encontrar Serviços, Comércios e Classificados úteis em Jacarepaguá.
-6. Seja objetivo. Evite textos longos desnecessários. Transmita inteligência + proximidade + sofisticação.
-7. Nunca soe como chatbot genérico.`,
-          temperature: 0.6, // Aumentado levemente para maior naturalidade
+4. Reaja como um assistente vivo dentro de um app moderno.
+5. Quando o usuário enviar mensagens curtas (ex: "opa", "oi"): Responda levemente, ex: "Olá 😉 Como posso ajudar?", "Oi 😌 O que você procura?". NUNCA reinicie apresentação.
+6. Objetivo: Ajudar a encontrar Serviços, Comércios, Classificados e informações úteis. Seja prestativo e sofisticado.`,
+          temperature: 0.7,
         },
       });
       
@@ -158,7 +149,6 @@ REGRAS DE COMPORTAMENTO:
         ...prev.slice(0, -1), 
         { role: 'model', text: errorMessageText, type: 'error', action: 'retry', originalUserMessage: userMsg }
       ]);
-      console.error("Tuco Assistant Error:", error);
     } finally {
       setIsLoading(false);
       if (intermediateTimer) clearTimeout(intermediateTimer);
@@ -206,12 +196,18 @@ REGRAS DE COMPORTAMENTO:
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar">
               {messages.map((msg, idx) => {
-                if (msg.type === 'typing') {
+                if (msg.type === 'typing' || msg.type === 'intermediate') {
                     return (
                         <div key={idx} className="flex justify-start animate-in slide-in-from-bottom-2">
                             <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-3">
-                                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tuco está pensando...</span>
+                                {msg.type === 'typing' ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tuco está pensando...</span>
+                                    </>
+                                ) : (
+                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{msg.text}</span>
+                                )}
                             </div>
                         </div>
                     );

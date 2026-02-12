@@ -1,6 +1,6 @@
+
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-// Added missing icons: Heart, Wrench, PawPrint, Shirt, Scissors, CarFront
-import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Sun, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, Bell, X, Mic, Sun, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront, Plus, ShieldCheck } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
 import { CATEGORIES } from '@/constants';
@@ -29,31 +29,31 @@ const NeighborhoodSelectorModal: React.FC = () => {
     if (!isSelectorOpen) return null;
     return (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
-                        <MapPin className="w-5 h-5 text-[#1E5BFF]" />
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
+                <div className="w-12 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto mb-8"></div>
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-[1.25rem]">
+                        <MapPin className="w-6 h-6 text-[#1E5BFF]" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white leading-none uppercase tracking-tighter">Escolha o Bairro</h3>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Ver conteúdo específico</p>
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white leading-none uppercase tracking-tighter">Bairros</h3>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1.5">Onde você está agora?</p>
                     </div>
                 </div>
-                <div className="max-h-[50vh] overflow-y-auto no-scrollbar space-y-2">
-                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-5 py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
+                <div className="max-h-[50vh] overflow-y-auto no-scrollbar space-y-2.5">
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-5 py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20" : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200"}`}>
                         <span>Jacarepaguá (todos)</span>
                         {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4 stroke-[3]" />}
                     </button>
-                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 opacity-50"></div>
                     {NEIGHBORHOODS.map(hood => (
-                        <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-5 py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between ${currentNeighborhood === hood ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
+                        <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-5 py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF] text-white shadow-lg shadow-blue-500/20" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                             <span>{hood}</span>
                             {currentNeighborhood === hood && <Check className="w-4 h-4 stroke-[3]" />}
                         </button>
                     ))}
                 </div>
-                <button onClick={toggleSelector} className="w-full mt-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">Fechar</button>
+                <button onClick={toggleSelector} className="w-full mt-8 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-gray-900 transition-colors">Fechar</button>
             </div>
         </div>
     );
@@ -142,14 +142,13 @@ export const Header: React.FC<HeaderProps> = ({
         <div className={`w-full z-40 relative ${isHome ? 'bg-brand-blue' : 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md'}`}>
             <div className="max-w-md mx-auto flex items-center justify-between px-5 pt-5 pb-2">
                 
-                {/* Saudação à esquerda */}
                 <div className="flex-1 min-w-0">
                     <h2 className={`font-display text-2xl tracking-tighter truncate ${isHome ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                         <span className="font-medium opacity-70">Olá,</span> <span className="font-black">{greetingName}</span>
                     </h2>
                 </div>
 
-                {/* Grupo de Ações à direita (Bairro + Sino) */}
+                {/* GRUPO DE AÇÕES PREMIUM (BAIRRO + SINO) */}
                 <div className="flex items-center gap-2.5">
                     {isAdmin && (
                         <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
@@ -158,7 +157,6 @@ export const Header: React.FC<HeaderProps> = ({
                         </button>
                     )}
 
-                    {/* SELETOR DE BAIRRO PREMIUM */}
                     <button 
                       onClick={toggleSelector} 
                       className={`flex items-center gap-2 h-11 px-4 rounded-2xl text-[11px] font-black uppercase tracking-tight transition-all active:scale-95 shadow-sm border ${
@@ -167,12 +165,11 @@ export const Header: React.FC<HeaderProps> = ({
                           : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
-                      <MapPin size={14} className={isHome ? 'text-white/60' : 'text-blue-500'}/>
+                      <MapPin size={14} className={isHome ? 'text-white/60' : 'text-[#1E5BFF]'}/>
                       <span className="truncate max-w-[80px]">{currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}</span>
                       <ChevronDown size={14} className="opacity-40" />
                     </button>
                     
-                    {/* Botão de Notificações */}
                     <button 
                         onClick={onNotificationClick}
                         className={`relative w-11 h-11 flex items-center justify-center rounded-2xl border transition-all active:scale-90 shadow-sm ${
@@ -192,7 +189,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
         </div>
 
-        {/* PARTE 2: BUSCA E CATEGORIAS (Sticky) */}
         <div className={`sticky top-0 z-50 w-full ${isHome ? 'bg-brand-blue' : 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm'}`}>
             <div className="max-w-md mx-auto">
                 {!isHome && (
@@ -254,7 +250,7 @@ export const Header: React.FC<HeaderProps> = ({
                           )
                         })}
                         <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center justify-center gap-1 p-2 rounded-[1.5rem] w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/5 border-2 border-dashed border-white/20">
-                          <Plus size={20} className="text-white/60" />
+                          <Plus size={20} className="text-white/70" />
                           <span className="text-[9px] font-bold text-white/70 uppercase tracking-tighter">Mais</span>
                         </button>
                       </div>
