@@ -75,12 +75,15 @@ export const GeminiAssistant: React.FC = () => {
     const userMsg = retryMessage || input;
     if (!userMsg.trim() || isLoading) return;
 
+    // Guardar mensagem atual para o histórico antes de limpar o input
+    const currentUserMsg: ChatMessage = { role: 'user', text: userMsg, type: 'response' };
+
     setInput('');
     setIsLoading(true);
     
     // Adiciona a mensagem do usuário se não for um retry
     if (!retryMessage) {
-      setMessages(prev => [...prev, { role: 'user', text: userMsg, type: 'response' }]);
+      setMessages(prev => [...prev, currentUserMsg]);
     }
     
     // Adiciona o placeholder de digitação
@@ -103,21 +106,35 @@ export const GeminiAssistant: React.FC = () => {
         });
       }, 1800);
 
+      // PREPARAÇÃO DO HISTÓRICO PARA O GEMINI (Contexto/Memória)
+      // Filtramos mensagens de erro, typing e intermediárias para manter o contexto limpo
+      const conversationContext = messages
+        .filter(m => m.type === 'response' && m.text)
+        .map(m => ({
+          role: m.role,
+          parts: [{ text: m.text || '' }]
+        }));
+
+      // Adiciona a mensagem atual ao contexto enviado para a API
+      const payload = [...conversationContext, { role: 'user', parts: [{ text: userMsg }] }];
+
       const apiCallPromise = ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: userMsg,
+        contents: payload,
         config: {
-          systemInstruction: `Você é o Tuco 🦜, um assistente virtual em formato de tucano minimalista e premium, mascote do super-app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e sofisticado.
+          systemInstruction: `Você é Tuco, assistente inteligente do app Localizei, um aplicativo premium de descoberta de serviços, comércios e classificados do bairro.
 
-**DIRETRIZES DE PERSONA:**
-- **Nome:** Tuco.
-- **Tom:** Moderno, prestativo e seguro.
-- **Estilo:** Respostas rápidas e diretas.
+Sua personalidade deve ser: Amigável, Natural, Moderna, Leve e Elegante (premium, nunca infantil). Seu tom deve parecer humano, fluido e agradável.
 
-**ESCOPO DE ATUAÇÃO:**
-1. Serviços e Orçamentos (Prioridade).
-2. Guia Local de Jacarepaguá.`,
-          temperature: 0.4,
+REGRAS DE COMPORTAMENTO:
+1. Nunca reinicie a conversa após a primeira interação. Não repita saudações completas como "Olá, sou o Tuco".
+2. Sempre responda de forma contextual. Considere as mensagens anteriores enviadas no histórico.
+3. Evite respostas robóticas ou institucionais. Prefira mensagens curtas e conversacionais.
+4. Quando o usuário enviar mensagens curtas (ex: "opa", "oi"): Responda de forma leve, ex: "Olá 😉 Como posso ajudar?", "Oi 😌 O que você procura?". NUNCA reinicie apresentação.
+5. Objetivo: Ajudar a encontrar Serviços, Comércios e Classificados úteis em Jacarepaguá.
+6. Seja objetivo. Evite textos longos desnecessários. Transmita inteligência + proximidade + sofisticação.
+7. Nunca soe como chatbot genérico.`,
+          temperature: 0.6, // Aumentado levemente para maior naturalidade
         },
       });
       
