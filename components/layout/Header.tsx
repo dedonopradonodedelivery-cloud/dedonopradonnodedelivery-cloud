@@ -1,153 +1,160 @@
 
 import React, { useMemo } from 'react';
-import { Search, MapPin, Bell, Mic, Heart, Wrench, Shirt, Scissors, PawPrint, Plus, Sun, Activity, ChevronDown, Sparkles } from 'lucide-react';
-import { useNeighborhood } from '../../contexts/NeighborhoodContext';
-import { Category } from '../../types';
-import { CATEGORIES } from '../../constants';
+import { Search, User as UserIcon, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag } from 'lucide-react';
+import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
+import { Store, Category } from '@/types';
+import { CATEGORIES } from '@/constants';
 
 interface HeaderProps {
-  onNotificationClick: () => void;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+  onAuthClick: () => void;
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onSelectCategory: (category: Category) => void;
-  onOpenMoreCategories: () => void;
-  onOpenJota: (initialQuery?: string) => void;
-  onNavigate?: (tab: string) => void;
-  activeTab?: string;
+  onNavigate: (tab: string) => void;
+  activeTab: string;
+  userRole: "cliente" | "lojista" | null;
+  onOpenMerchantQr?: () => void; // Mantido para compatibilidade, não renderizado
+  customPlaceholder?: string;
+  stores?: Store[];
+  onStoreClick?: (store: Store) => void;
+  isAdmin?: boolean;
+  viewMode?: string;
+  onOpenViewSwitcher?: () => void;
+  isSticky?: boolean;
 }
 
-const CategoryButton: React.FC<{ icon: React.ElementType, label: string, onClick: () => void }> = ({ icon: Icon, label, onClick }) => (
-  <button onClick={onClick} className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[58px] group">
-    <div className="w-11 h-11 bg-white/10 rounded-full flex items-center justify-center group-hover:bg-white/20 transition-colors">
-      <Icon className="w-5 h-5 text-white" strokeWidth={2} />
-    </div>
-    <span className="text-[9px] font-black text-white uppercase tracking-tighter">{label}</span>
-  </button>
-);
+const NeighborhoodSelectorModal: React.FC = () => {
+    const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
+    if (!isSelectorOpen) return null;
+    return (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={toggleSelector}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative" onClick={e => e.stopPropagation()}>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 px-2">Escolha o Bairro</h3>
+                <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-2">
+                    {/* FIX: Added "Jacarepaguá (todos)" option to the selector modal. */}
+                    <button onClick={() => setNeighborhood("Jacarepaguá (todos)")} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === "Jacarepaguá (todos)" ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
+                        <span>Jacarepaguá (todos)</span>
+                        {currentNeighborhood === "Jacarepaguá (todos)" && <Check className="w-4 h-4" />}
+                    </button>
+                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+                    {NEIGHBORHOODS.map(hood => (
+                        <button key={hood} onClick={() => setNeighborhood(hood)} className={`w-full text-left px-4 py-3.5 rounded-xl font-medium transition-colors flex items-center justify-between ${currentNeighborhood === hood ? "bg-[#1E5BFF]/10 text-[#1E5BFF]" : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
+                            <span>{hood}</span>
+                            {currentNeighborhood === hood && <Check className="w-4 h-4" />}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export const Header: React.FC<HeaderProps> = ({
-  onNotificationClick, 
+  onAuthClick, 
   user,
   searchTerm,
   onSearchChange,
-  onSelectCategory,
-  onOpenMoreCategories,
-  onOpenJota
+  onNavigate,
+  activeTab,
+  stores = [],
+  onStoreClick,
+  isAdmin,
+  viewMode,
+  onOpenViewSwitcher,
+  isSticky = true
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
 
-  const userName = useMemo(() => {
-    if (!user) return 'Visitante';
-    const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
-    return fullName?.split(' ')[0] || 'Usuário';
-  }, [user]);
+  const normalize = (text: any) => (String(text || "")).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-  const categoriesToShow = useMemo(() => {
-    const ids = ['cat-saude', 'cat-services', 'cat-fashion', 'cat-beauty', 'cat-pets'];
-    const icons: { [key: string]: React.ElementType } = {
-        'cat-saude': Heart,
-        'cat-services': Wrench,
-        'cat-fashion': Shirt,
-        'cat-beauty': Scissors,
-        'cat-pets': PawPrint,
-    };
-    const labels: { [key: string]: string } = {
-        'cat-saude': 'Saúde',
-        'cat-services': 'Serviços',
-        'cat-fashion': 'Moda',
-        'cat-beauty': 'Beleza',
-        'cat-pets': 'Pets'
-    };
-    return ids.map(id => {
-        const cat = CATEGORIES.find(c => c.id === id);
-        return cat ? { ...cat, icon: icons[id], name: labels[id] } : null;
-    }).filter((c): c is Category & { icon: React.ElementType } => c !== null);
-  }, []);
+  const searchResults = useMemo(() => {
+    const term = normalize(searchTerm);
+    if (!term || (activeTab !== 'home' && activeTab !== 'explore')) return { stores: [], categories: [] };
+    const matchedCategories = CATEGORIES.filter(cat => normalize(cat.name).includes(term));
+    const matchedStores = stores.filter(s => normalize(s.name + s.category + (s.neighborhood || "")).includes(term));
+    return { stores: matchedStores.slice(0, 15), categories: matchedCategories.slice(0, 4) };
+  }, [stores, searchTerm, activeTab]);
 
   const dynamicPlaceholder = useMemo(() => {
     if (currentNeighborhood === "Jacarepaguá (todos)") {
-      return "Peça algo ao Jota...";
+      return "O que você busca em JPA?";
     }
-    return `O que você precisa em ${currentNeighborhood}?`;
+    return `O que você busca em ${currentNeighborhood}?`;
   }, [currentNeighborhood]);
 
+  const wrapperClasses = isSticky
+    ? "sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-800"
+    : "w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800";
+
   return (
-    <header className="sticky top-0 z-30 bg-[#1E5BFF]">
-      <div className="px-5 pt-12 pb-4">
-        {/* Saudação, Bairro, Notificações */}
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-black text-white tracking-tight font-display">
-            Olá, {userName}
-          </h1>
-          <div className="flex items-center gap-2">
-            <button onClick={toggleSelector} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10">
-              <MapPin className="w-4 h-4 text-white" />
-              <span className="text-xs font-bold text-white">{currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}</span>
-              <ChevronDown className="w-4 h-4 text-white/70" />
-            </button>
-            <button onClick={onNotificationClick} className="relative p-2.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10">
-              <Bell size={18} className="text-white" />
-            </button>
-          </div>
-        </div>
-
-        {/* Barra de Busca Inteligente (Jota Trigger) */}
-        <div className="relative mb-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
-            <input 
-              type="text" 
-              value={searchTerm} 
-              onChange={(e) => onSearchChange(e.target.value)}
-              onFocus={() => onOpenJota(searchTerm)}
-              onKeyDown={(e) => e.key === 'Enter' && onOpenJota(searchTerm)}
-              placeholder={dynamicPlaceholder} 
-              className="w-full pl-12 pr-12 py-4 bg-white/10 border-2 border-transparent focus:border-white/30 text-white placeholder-white/50 rounded-2xl text-sm font-bold focus:outline-none transition-all shadow-inner"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <div className="w-px h-6 bg-white/10 mx-1"></div>
-                <button 
-                  onClick={() => onOpenJota(searchTerm)}
-                  className="p-2 text-white hover:text-amber-400 transition-colors"
-                >
-                  <Sparkles size={20} fill="currentColor" className="opacity-80" />
-                </button>
+    <>
+        <div className={wrapperClasses}>
+        <div className="max-w-md mx-auto flex flex-col relative">
+            <div className="flex items-center justify-between px-4 pt-3 pb-1 h-16">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-[#1E5BFF] rounded-xl flex items-center justify-center shadow-md">
+                        <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-black text-lg text-gray-900 dark:text-white">JPA</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                    <button onClick={toggleSelector} className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-700 shadow-inner active:scale-95 transition-transform">
+                        <MapPin className="w-3.5 h-3.5 text-[#1E5BFF]" />
+                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate max-w-[80px]">
+                            {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
+                        </span>
+                        <ChevronDown className="w-3 h-3 text-gray-400" />
+                    </button>
+                    
+                    {isAdmin && (
+                        <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm h-10">
+                            <ShieldCheck size={14} className="text-amber-600 dark:text-amber-400" />
+                            <span className="text-[10px] font-bold text-amber-900 dark:text-amber-200 uppercase">{viewMode}</span>
+                        </button>
+                    )}
+                    
+                    <button onClick={onAuthClick} className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-[#1E5BFF] overflow-hidden relative shadow-inner border border-gray-100 dark:border-gray-700 active:scale-95 transition-transform">
+                        {user?.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5" />}
+                    </button>
+                </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-4 pt-2 pb-3">
+                <div className="relative flex-1 group">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input 
+                      type="text" 
+                      value={searchTerm} 
+                      onChange={(e) => onSearchChange(e.target.value)} 
+                      placeholder={dynamicPlaceholder} 
+                      className="block w-full pl-10 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 py-3 shadow-inner" 
+                    />
+                    {searchTerm.trim().length > 0 && (activeTab === 'home' || activeTab === 'explore') && (
+                        <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2">
+                            <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
+                                {(searchResults.stores.length > 0 || searchResults.categories.length > 0) ? (
+                                    <div className="flex flex-col">
+                                        {searchResults.categories.map(cat => (<button key={cat.id} onClick={() => { onNavigate('explore'); onSearchChange(''); }} className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors text-left group"><div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shrink-0`}><Tag size={14} /></div><div className="flex-1"><p className="text-sm font-bold text-gray-900 dark:text-white">{cat.name}</p></div><ChevronRight className="w-4 h-4 text-gray-300" /></button>))}
+                                        {searchResults.stores.map(store => (<button key={store.id} onClick={() => { onStoreClick?.(store); onSearchChange(''); }} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl text-left group"><div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0"><img src={store.logoUrl || store.image || "/assets/default-logo.png"} className="w-full h-full object-contain" /></div><div className="flex-1 min-w-0"><p className="text-sm font-bold text-gray-900 dark:text-white truncate">{store.name}</p><p className="text-[9px] text-gray-400 font-medium truncate">{store.category} • {store.neighborhood}</p></div><ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#1E5BFF]" /></button>))}
+                                    </div>
+                                ) : (
+                                    <div className="py-8 px-4 text-center">
+                                        <SearchX className="w-6 h-6 text-gray-300 mx-auto mb-3" />
+                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Nenhum resultado</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
-
-        {/* Categorias */}
-        <div className="flex justify-between items-start mb-6">
-          {categoriesToShow.map(cat => (
-            <CategoryButton 
-              key={cat.id} 
-              icon={cat.icon}
-              label={cat.name}
-              onClick={() => onSelectCategory(cat)}
-            />
-          ))}
-          <CategoryButton icon={Plus} label="Mais" onClick={onOpenMoreCategories} />
         </div>
-        
-        {/* Linha Informativa */}
-        <div>
-          <div className="bg-black/10 backdrop-blur-md rounded-full px-3 py-2 flex items-center justify-between border border-white/10 shadow-sm">
-            <div className="flex items-center gap-1.5 text-white text-[10px] font-bold">
-              <MapPin size={14} className="text-white/70" />
-              <span className="uppercase tracking-wider">JACAREPAGUÁ</span>
-            </div>
-            <div className="w-px h-4 bg-white/20"></div>
-            <div className="flex items-center gap-1.5 text-white text-[10px] font-bold">
-              <Sun size={14} className="text-yellow-300" />
-              <span>28°</span>
-            </div>
-            <div className="w-px h-4 bg-white/20"></div>
-            <div className="flex items-center gap-1.5 text-white text-[10px] font-bold">
-              <Activity size={14} className="text-red-400" />
-              <span className="text-red-300 uppercase tracking-wider">TRÂNSITO INTENSO</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+        <NeighborhoodSelectorModal />
+    </>
   );
 };

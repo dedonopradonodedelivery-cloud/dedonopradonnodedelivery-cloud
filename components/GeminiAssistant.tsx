@@ -1,29 +1,7 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
-import { 
-    Zap, ShoppingBag, Users, ArrowRight, HelpCircle, SearchX, Clock, CheckCircle2,
-    MessageCircle, X, Send, Sparkles, Loader2, 
-    // FIX: Imported missing icons
-    MessageSquare, AlertCircle
-} from 'lucide-react';
-
-interface JotaAnalysis {
-  tipo: 'Serviço' | 'Produto' | 'Comunidade' | 'Amíguo' | 'Inexistente' | 'SemResultados';
-  categoria_label: string;
-  urgencia: 'Baixa' | 'Média' | 'Alta' | 'Imediata';
-  resposta_humana: string; 
-  sugerir_acao?: 'solicitar_orcamento' | 'buscar_lojas' | 'ver_comunidade' | 'registrar_demanda';
-  rota_destino?: string;
-  sugestoes_interativas?: string[]; 
-  confianca: 'baixa' | 'media' | 'alta';
-}
-
-interface JotaMessage {
-  role: 'user' | 'jota';
-  text: string;
-  analysis?: JotaAnalysis;
-}
+import { GoogleGenAI, Type } from "@google/genai";
+import { X, Send, Sparkles, Loader2, Zap, ShoppingBag, MessageSquare, ArrowRight, Bot, AlertTriangle, Clock } from 'lucide-react';
+import { ChatMessage } from '../types';
 
 interface JotaAssistantProps {
   isOpen: boolean;
@@ -32,100 +10,26 @@ interface JotaAssistantProps {
   initialMessage?: string;
 }
 
-const getUrgencyStyles = (urgency: string) => {
-    switch (urgency) {
-      case 'Imediata': return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50';
-      case 'Alta': return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800/50';
-      default: return 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50';
-    }
-};
-
-const JotaMessageContent: React.FC<{ 
-  message: JotaMessage, 
-  onNavigate: (view: string, data?: any) => void, 
-  onSend: (text: string) => void 
-}> = ({ message, onNavigate, onSend }) => {
-    const { text, analysis } = message;
-
-    if (!analysis) {
-        return <p className="text-gray-800 dark:text-gray-200">{text}</p>;
-    }
-
-    const icons = {
-        Serviço: <Zap size={12} className="text-amber-500" />,
-        Produto: <ShoppingBag size={12} className="text-blue-500" />,
-        Comunidade: <Users size={12} className="text-purple-500" />
-    };
-
-    const actionButtons: { [key: string]: { label: string; icon: React.ReactNode; action: () => void } } = {
-        solicitar_orcamento: { label: 'Pedir Orçamento Grátis', icon: <MessageSquare size={14} />, action: () => onNavigate('services_landing') },
-        buscar_lojas: { label: 'Explorar Lojas', icon: <ShoppingBag size={14} />, action: () => onNavigate('explore') },
-        ver_comunidade: { label: 'Ir para JPA Conversa', icon: <Users size={14} />, action: () => onNavigate('neighborhood_posts') },
-        registrar_demanda: { label: 'Registrar Minha Demanda', icon: <HelpCircle size={14} />, action: () => onNavigate('services_landing') }
-    };
-    
-    const action = analysis.sugerir_acao ? actionButtons[analysis.sugerir_acao] : null;
-
-    return (
-        <div className="space-y-4">
-            <p className="text-gray-800 dark:text-gray-200">{text}</p>
-            
-            <div className="flex flex-wrap gap-2">
-              {['Serviço', 'Produto', 'Comunidade'].includes(analysis.tipo) && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-full border border-gray-200 dark:border-gray-600">
-                  {icons[analysis.tipo as keyof typeof icons]}
-                  <span className="text-[10px] font-black uppercase tracking-tight text-gray-600 dark:text-gray-400">{analysis.categoria_label}</span>
-                </div>
-              )}
-              {analysis.urgencia !== 'Baixa' && (
-                  <div className={`px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${getUrgencyStyles(analysis.urgencia)}`}>
-                      <Clock size={10} /> {analysis.urgencia}
-                  </div>
-              )}
-            </div>
-
-            {analysis.sugestoes_interativas && analysis.sugestoes_interativas.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2">
-                    {analysis.sugestoes_interativas.map(sug => (
-                        <button key={sug} onClick={() => onSend(sug)} className="px-4 py-2.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 rounded-full text-xs font-bold border border-blue-100 dark:border-blue-800 hover:bg-blue-100 active:scale-95 transition-all">
-                            {sug}
-                        </button>
-                    ))}
-                </div>
-            )}
-            
-            {action && analysis.confianca === 'alta' && (
-                <button onClick={action.action} className="w-full mt-2 bg-blue-600 text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-500/10">
-                    {action.icon} {action.label} <ArrowRight size={14} />
-                </button>
-            )}
-
-            {analysis.tipo === 'Inexistente' && (
-                 <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl flex items-center gap-3">
-                    <SearchX size={18} className="text-gray-400" />
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Quer que eu anote sua sugestão para o time?</p>
-                 </div>
-            )}
-            {analysis.tipo === 'SemResultados' && (
-                 <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl flex items-center gap-3">
-                    <AlertCircle size={18} className="text-gray-400" />
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Posso te ajudar com outra coisa?</p>
-                 </div>
-            )}
-        </div>
-    );
-};
+interface JotaAnalysis {
+  intent: 'Serviço' | 'Produto' | 'Comunidade' | 'Outro';
+  category: string;
+  urgency: 'Imediata' | 'Alta' | 'Normal';
+  human_response: string;
+  suggestedAction: 'open_services' | 'open_explore' | 'open_community' | 'none';
+  smartOptions?: string[]; // Botões de resposta rápida sugeridos pela IA
+}
 
 export const JotaAssistant: React.FC<JotaAssistantProps> = ({ isOpen, onClose, onNavigate, initialMessage }) => {
-  const [messages, setMessages] = useState<JotaMessage[]>([
-    { role: 'jota', text: 'Olá! Sou o Jota, a inteligência do bairro. Posso encontrar serviços, produtos e até te conectar com a vizinhança. O que você precisa?' }
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'model', text: 'Oi! Sou o Jota. 🤖 Do que você precisa no bairro agora?' }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
+  const [lastAnalysis, setLastAnalysis] = useState<JotaAnalysis | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && initialMessage && messages.length <= 1) {
+    if (isOpen && initialMessage && messages.length === 1) {
       handleSend(initialMessage);
     }
   }, [isOpen, initialMessage]);
@@ -136,147 +40,257 @@ export const JotaAssistant: React.FC<JotaAssistantProps> = ({ isOpen, onClose, o
     }
   }, [messages, isThinking]);
   
-  const handleSend = async (sendText?: string) => {
-    const userMsg = sendText || input;
-    if (!userMsg.trim()) return;
-    
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    setIsThinking(true);
-
+  const callGeminiAPI = async (userMsg: string) => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     try {
-        const systemInstruction = `Você é o Jota 🤖, a inteligência ultra-ágil do app "Localizei JPA" para Jacarepaguá, RJ.
+      const systemInstruction = `Você é o Jota 🤖, a inteligência central do Localizei JPA. 
+Sua missão é ser o assistente mais útil e direto de Jacarepaguá.
 
-        PERSONALIDADE:
-        - Inteligente, ágil, prestativo e simpático. Tom natural, seguro e moderno.
-        - Respostas humanas (resposta_humana) devem ter entre 3 e 8 palavras.
-        
-        COMPORTAMENTO SEGURO:
-        1. AMBIGUIDADE: Se o pedido for vago (ex: "preciso de serviço", "carro"), responda "Entendi 👍 Qual tipo de serviço?" e forneça opções em 'sugestoes_interativas'.
-        2. BAIXA CONFIANÇA: Nunca assuma dados críticos. Confirme antes de agir.
-        3. INEXISTENTE: Se a categoria não existir em JPA, responda "Boa 👍 Ainda não temos essa categoria no bairro." e mude tipo para 'Inexistente'.
-        4. SEM RESULTADOS: Se não houver prestadores ativos, responda "Ainda não encontrei alguém disponível 😕" e mude tipo para 'SemResultados'.
-        
-        MAPEAMENTO DE ROTAS:
-        - Serviço -> 'services_landing'
-        - Produto/Loja -> 'explore'
-        - Conversa/Comunidade -> 'neighborhood_posts'
-        
-        RETORNE APENAS JSON com a seguinte estrutura:
-        {
-          "tipo": "Serviço" | "Produto" | "Comunidade" | "Amíguo" | "Inexistente" | "SemResultados",
-          "categoria_label": "Nome Curto da Categoria/Serviço",
-          "urgencia": "Baixa" | "Média" | "Alta" | "Imediata",
-          "resposta_humana": "string (3-8 palavras)",
-          "sugerir_acao": "solicitar_orcamento" | "buscar_lojas" | "ver_comunidade" | "registrar_demanda",
-          "rota_destino": "string (conforme mapeamento)",
-          "sugestoes_interativas": ["Opção Curta A", "Opção Curta B"],
-          "confianca": "baixa" | "media" | "alta"
-        }`;
-        
+TOM E PERSONALIDADE:
+1.  TOM IDEAL: Seja natural, seguro, fluido e moderno. Levemente simpático, mas nunca excessivamente informal ou caricato.
+2.  COMPORTAMENTO: Ágil, inteligente e prestativo. Seu objetivo é resolver.
+3.  EXEMPLOS DE ESTILO: "Boa 😌 Já entendi.", "Perfeito 👍 Vamos resolver isso.", "Deixa comigo."
+
+ESCOPO E EVOLUÇÃO (COMPORTAMENTO PROGRESSIVO):
+1.  FOCO INICIAL: Sua prioridade é acertar o básico com perfeição para construir confiança. Concentre-se em resolver solicitações claras e diretas.
+2.  PRIORIDADES ATUAIS:
+    *   SERVIÇOS: Identifique e direcione pedidos de profissionais (eletricista, pintor, etc.).
+    *   PRODUTOS POPULARES: Identifique e direcione buscas por itens comuns (bolo, gás, pizza, farmácia).
+    *   INDICAÇÕES DIRETAS: Responda a pedidos de indicação claros ("alguém conhece...?").
+3.  EVITAR COMPLEXIDADE: Não tente resolver problemas complexos, debates da comunidade ou solicitações de múltiplos passos. Para esses casos, sua \`human_response\` deve direcionar para a área correta do app (ex: "Para debates, o ideal é postar no JPA Conversa. Quer que eu te leve pra lá?"). Sua meta é ter uma alta taxa de acerto, mesmo que o escopo seja limitado.
+
+DIRECIONAMENTO EFICIENTE (FLUXO PRINCIPAL):
+1.  OBJETIVO: Seu principal objetivo é entender a intenção do usuário e direcioná-lo o mais rápido possível para a área correta do app (Profissionais, Lojistas, Comunidade). Isso gera uma sensação de eficiência e conversão rápida.
+2.  AÇÃO PROATIVA: Use o campo \`suggestedAction\` sempre que a intenção for clara. Evite perguntas desnecessárias. Vá direto ao ponto.
+3.  EXEMPLOS DE FLUXO:
+    *   "Preciso de um eletricista" -> \`intent: "Serviço"\`, \`suggestedAction: "open_services"\`.
+    *   "Onde comprar bolo?" -> \`intent: "Produto"\`, \`suggestedAction: "open_explore"\`.
+    *   "Alguém conhece uma diarista?" -> \`intent: "Comunidade"\`, \`suggestedAction: "open_community"\`.
+
+COMPORTAMENTO SEGURO (REGRAS CRÍTICAS):
+1.  AMBIGUIDADE: Se a solicitação for ambígua (ex: "serviço barato", "preciso de ajuda"), sua \`human_response\` DEVE ser uma pergunta para esclarecer. Não assuma a categoria. Exemplo: "Preciso de um serviço barato" -> "Entendi 👍 Qual tipo de serviço?".
+2.  BAIXA CONFIANÇA: Se não tiver certeza da intenção, confirme. Ex: "Você está procurando um produto ou um serviço?".
+3.  NÃO INVENTE: Nunca invente informações, preços, horários ou nomes de lojas. Se não souber, diga que pode buscar no app.
+4.  SEM DADOS CRÍTICOS: Nunca assuma dados críticos. Peça confirmação.
+5.  SEM RESULTADOS: Se não houver resultados para a busca do usuário, sua \`human_response\` DEVE ser: "Ainda não encontrei alguém disponível 😕 Quer ampliar a busca ou tentar outra opção?". NÃO use a frase "Nenhum resultado encontrado".
+6.  CATEGORIA INEXISTENTE: Se a categoria solicitada não existir, sua \`human_response\` DEVE ser: "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?".
+
+REGRAS GERAIS:
+1. NUNCA diga "não entendi" ou peça para reformular. Faça perguntas inteligentes.
+2. SMART OPTIONS: Se a solicitação for ampla, mas a intenção for clara (ex: "restaurantes"), sugira 3 opções curtas de resposta no array 'smartOptions' (ex: "Japonês", "Pizza", "Lanches").
+3. CONCISÃO: Responda como uma pessoa real no WhatsApp. Use emojis com moderação.
+
+MAPEAMENTO DE INTENÇÃO:
+- 'Serviço': Mão de obra (reparos, aulas, fretes). Direciona para Profissionais.
+- 'Produto': Itens para comprar (comida, gás, farmácia). Direciona para Lojistas.
+- 'Comunidade': Indicações, dúvidas sobre o bairro. Direciona para os fluxos corretos da comunidade.
+
+Responda SEMPRE em JSON:
+{
+  "intent": "Serviço" | "Produto" | "Comunidade" | "Outro",
+  "category": "String curta",
+  "urgency": "Imediata" | "Alta" | "Normal",
+  "human_response": "Sua resposta curta e proativa aqui.",
+  "suggestedAction": "open_services" | "open_explore" | "open_community" | "none",
+  "smartOptions": ["Opção 1", "Opção 2", "Opção 3"]
+}`;
+
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: userMsg,
         config: {
           systemInstruction,
           responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              intent: { type: Type.STRING },
+              category: { type: Type.STRING },
+              urgency: { type: Type.STRING },
+              human_response: { type: Type.STRING },
+              suggestedAction: { type: Type.STRING },
+              smartOptions: { 
+                type: Type.ARRAY,
+                items: { type: Type.STRING }
+              }
+            },
+            required: ["intent", "category", "urgency", "human_response", "suggestedAction"]
+          },
+          temperature: 0.3,
         },
       });
 
       const analysis: JotaAnalysis = JSON.parse(response.text || '{}');
-      setMessages(prev => [...prev, { role: 'jota', text: analysis.resposta_humana || "Entendido! Deixa eu ver o que encontro para você.", analysis }]);
+      setLastAnalysis(analysis);
+      // Substitui a mensagem de "ack" pela resposta final.
+      setMessages(prev => [...prev.slice(0, -1), { role: 'model', text: analysis.human_response }]);
+
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'jota', text: "Opa, tive um problema técnico. Tente me perguntar de novo." }]);
+      // Substitui a mensagem de "ack" pela mensagem de erro.
+      setMessages(prev => [...prev.slice(0, -1), { role: 'model', text: "Tive um soluço técnico aqui. O que você precisa?" }]);
     } finally {
       setIsThinking(false);
     }
   };
 
+  const handleSend = async (textOverride?: string) => {
+    const userMsg = textOverride || input;
+    if (!userMsg.trim() || isThinking) return;
+    
+    if (!textOverride) setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+    setLastAnalysis(null);
+
+    // Pausa para dar um ritmo mais natural à conversa.
+    await new Promise(r => setTimeout(r, 700));
+
+    // Adiciona uma mensagem de confirmação para o usuário.
+    const ackMessages = ["Boa 👍 Já entendi...", "Deixa comigo, estou verificando...", "Ok, só um momento..."];
+    const randomAck = ackMessages[Math.floor(Math.random() * ackMessages.length)];
+    setMessages(prev => [...prev, { role: 'model', text: randomAck }]);
+    
+    setIsThinking(true);
+
+    // Outra pausa antes de chamar a API para simular o "pensamento".
+    await new Promise(r => setTimeout(r, 1200));
+    
+    callGeminiAPI(userMsg);
+  };
+
   if (!isOpen) return null;
 
+  const handleAction = (action: string) => {
+    switch (action) {
+      case 'open_services': onNavigate('services_landing'); break;
+      case 'open_explore': onNavigate('explore'); break;
+      case 'open_community': onNavigate('neighborhood_posts'); break;
+    }
+    onClose();
+  };
+
   return (
-    <div 
-      className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300"
-      onClick={onClose}
-    >
-      <div 
-        className="w-full max-w-[400px] h-[90vh] max-h-[850px] bg-[#F8F9FC] dark:bg-gray-950 flex flex-col rounded-[3rem] shadow-2xl border-8 border-black overflow-hidden relative ring-4 ring-gray-700"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-7 bg-black rounded-b-xl z-50"></div>
+    <div className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-gray-950 w-full max-w-md h-full sm:h-[90vh] sm:rounded-[3rem] shadow-2xl flex flex-col overflow-hidden relative border-l border-r border-gray-100 dark:border-gray-800 animate-in slide-in-from-bottom duration-500">
         
-        <header className="px-6 pt-12 pb-6 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 flex items-center justify-between z-40">
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-xl shadow-blue-500/20 transition-transform duration-500 ${isThinking ? 'scale-110' : ''}`}>
-              <span className={`font-black text-xl italic transition-opacity ${isThinking ? 'opacity-0' : 'opacity-100'}`}>J</span>
-              {isThinking && <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse absolute" />}
+        {/* Header Superior */}
+        <div className="bg-gradient-to-b from-[#1E5BFF] to-[#001D4A] p-6 pt-12 sm:pt-6 flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-4 text-white">
+            <div className={`w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg transition-all duration-300 ${isThinking ? 'scale-110 ring-4 ring-white/20' : ''}`}>
+              <Bot className={`w-7 h-7 text-white transition-all ${isThinking ? 'animate-pulse' : ''}`} />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                  <h2 className="font-black text-lg uppercase tracking-tighter dark:text-white leading-none">Jota 🤖</h2>
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              </div>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Inteligência JPA</p>
+              <h3 className="font-black text-xl uppercase tracking-tighter leading-none">Jota 🤖</h3>
+              <p className="text-[9px] font-black text-blue-100 uppercase tracking-widest mt-1">Jacarepaguá em tempo real</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 hover:text-gray-900 active:scale-90 transition-all"><X size={20} /></button>
-        </header>
+          <button onClick={onClose} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl text-white transition-all active:scale-90">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
-        <main ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-8 no-scrollbar pb-32">
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-3 animate-in slide-in-from-bottom-4 duration-500`}>
-              <div className={`max-w-[85%] p-5 rounded-[2.2rem] text-sm font-semibold shadow-sm border ${
-                msg.role === 'user' 
-                  ? 'bg-blue-600 text-white border-blue-500 rounded-tr-none' 
-                  : 'bg-white dark:bg-gray-900 rounded-tl-none border-gray-100 dark:border-gray-800'
-              }`}>
-                {msg.role === 'jota' ? (
-                  <JotaMessageContent message={msg} onNavigate={(v, d) => { onClose(); onNavigate(v, d); }} onSend={handleSend} />
-                ) : (
-                  msg.text
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isThinking && (
-            <div className="flex justify-start animate-in fade-in duration-300">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-2">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+        {/* Área de Mensagens */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar">
+          {messages.map((msg, idx) => {
+            // A última mensagem do modelo é substituída pelo indicador de digitação se a IA estiver pensando.
+            const isLastModelMessage = msg.role === 'model' && idx === messages.length - 1;
+            if (isThinking && isLastModelMessage) {
+              return (
+                <div key={idx} className="flex justify-start animate-in fade-in">
+                  <div className="max-w-[85%] p-4 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-tl-none">
+                    <div className="flex items-center justify-center gap-1.5 h-5">
+                      <span className="w-2 h-2 bg-blue-300 rounded-full animate-dot-bounce" style={{ animationDelay: '0s' }}></span>
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-dot-bounce" style={{ animationDelay: '0.2s' }}></span>
+                      <span className="w-2 h-2 bg-blue-500 rounded-full animate-dot-bounce" style={{ animationDelay: '0.4s' }}></span>
                     </div>
+                  </div>
                 </div>
-            </div>
-          )}
-        </main>
+              );
+            }
+            return (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                <div className={`max-w-[85%] p-4 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-[#1E5BFF] text-white rounded-tr-none' 
+                    : 'bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none'
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            );
+          })}
 
-        <footer className="p-4 pb-10 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 sticky bottom-0 z-40">
+          {/* Quick Replies (Smart Options) */}
+          {!isThinking && lastAnalysis?.smartOptions && lastAnalysis.smartOptions.length > 0 && (
+             <div className="flex flex-wrap gap-2 pt-2 animate-in fade-in slide-in-from-bottom-1 duration-500">
+                {lastAnalysis.smartOptions.map((option, i) => (
+                    <button 
+                        key={i}
+                        onClick={() => handleSend(option)}
+                        className="bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-900 px-4 py-2 rounded-full text-xs font-bold text-[#1E5BFF] shadow-sm hover:bg-blue-50 active:scale-95 transition-all"
+                    >
+                        {option}
+                    </button>
+                ))}
+             </div>
+          )}
+
+          {/* Sugestão de Ação Principal */}
+          {!isThinking && lastAnalysis?.suggestedAction && lastAnalysis.suggestedAction !== 'none' && (
+              <div className="pt-2 animate-in zoom-in duration-500">
+                  <button 
+                    onClick={() => handleAction(lastAnalysis.suggestedAction)}
+                    className="w-full bg-white dark:bg-gray-900 border-2 border-[#1E5BFF]/30 p-5 rounded-[2.5rem] flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl shadow-blue-500/5"
+                  >
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-[#1E5BFF]">
+                            {lastAnalysis.intent === 'Serviço' && <Zap size={22} />}
+                            {lastAnalysis.intent === 'Produto' && <ShoppingBag size={22} />}
+                            {lastAnalysis.intent === 'Comunidade' && <MessageSquare size={22} />}
+                            {lastAnalysis.intent === 'Outro' && <Sparkles size={22} />}
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Sugestão do Jota</p>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">
+                                {lastAnalysis.intent === 'Serviço' ? 'Solicitar Orçamento' : 
+                                 lastAnalysis.intent === 'Produto' ? 'Explorar Lojas' : 
+                                 'Ver no JPA Conversa'}
+                            </p>
+                        </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-[#1E5BFF] group-hover:translate-x-1 transition-transform" />
+                  </button>
+              </div>
+          )}
+        </div>
+
+        {/* Rodapé de Entrada */}
+        <div className="p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-            className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 p-2 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/5 transition-all"
+            className="flex items-center gap-3"
           >
-            <input 
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="O que você precisa, vizinho?"
-              className="flex-1 bg-transparent border-none outline-none px-5 py-4 text-sm font-bold dark:text-white placeholder-gray-400"
-            />
+            <div className="relative flex-1 group">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={isThinking ? "Jota está agilizando..." : "Escreva do seu jeito..."}
+                  disabled={isThinking}
+                  className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-2xl px-5 py-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 border-none shadow-inner transition-all"
+                />
+            </div>
             <button 
               type="submit"
-              disabled={!input.trim() || isThinking}
-              className="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-all disabled:opacity-50"
+              disabled={isThinking || !input.trim()}
+              className="bg-[#1E5BFF] text-white p-4 rounded-2xl disabled:opacity-50 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-90"
             >
-              <Send size={24} className="ml-1" />
+              <Send className="w-5 h-5" />
             </button>
           </form>
-        </footer>
+          <p className="text-center text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-4">Jota antecipa o que você precisa 🏠</p>
+        </div>
       </div>
     </div>
   );

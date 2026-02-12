@@ -11,7 +11,7 @@ const FALLBACK_STORE_IMAGES = [
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
   'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
   'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
   'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
 ];
@@ -97,17 +97,19 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
-  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
-  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
-  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
+  const baseClasses = `relative w-full aspect-square rounded-[25px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
+  const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
+  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white";
+  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
+  
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
+      <div className="flex-1 flex items-center justify-center">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-gray-400' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
       </div>
-      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
+      <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight pb-1 truncate w-full text-center ${textClass}`}>
+        {name}
+      </span>
     </button>
   );
 };
@@ -187,7 +189,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error) throw error;
+        if (error) {
+            if (error.code === 'PGRST116' || error.message.includes('published_banners')) {
+                setActiveBanner(null);
+                return;
+            }
+            throw error;
+        }
 
         if (data && data.length > 0) {
           setActiveBanner(data[0]);
@@ -195,7 +203,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           setActiveBanner(null);
         }
       } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        if (!e.message?.includes('published_banners')) {
+            console.error("Failed to fetch category banner:", e.message || e);
+        }
         setActiveBanner(null);
       } finally {
         setLoadingBanner(false);
@@ -265,12 +275,28 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
       </div>
       
-      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
-      <div className="mt-4">
-        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
+      {/* BANNER FIXO INSTITUCIONAL (Altura Reduzida 16/6) */}
+      <div className="mt-4 px-5">
+        <div 
+          onClick={() => onNavigate('explore')}
+          className={`relative aspect-[16/6] w-full rounded-[2rem] overflow-hidden cursor-pointer shadow-lg bg-[#1E5BFF] border border-white/5`}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" 
+            alt="Jacarepaguá" 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+          <div className="relative h-full flex flex-col justify-end p-6 text-white">
+            <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-1">
+              {category.name} <span className="opacity-70">em Jacarepaguá</span>
+            </h2>
+            <p className="text-[9px] font-bold text-blue-100 uppercase tracking-[0.2em]">O melhor do bairro em um só lugar</p>
+          </div>
+        </div>
       </div>
 
-      <div className="p-5 pt-0 space-y-8">
+      <div className="p-5 pt-6 space-y-8">
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
@@ -296,39 +322,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             </div>
           </section>
         )}
-
-        <section>
-          {loadingBanner ? (
-            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-          ) : activeBanner ? (
-            <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
-              {activeBanner.config.type === 'template' ? (
-                <TemplateBannerRender config={activeBanner.config} />
-              ) : (
-                <CustomBannerRender config={activeBanner.config} />
-              )}
-            </div>
-          ) : (
-            <div 
-              onClick={handleAdvertiseClick}
-              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
-            >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
-                
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
-                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
-                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
-                        Anunciar nesta categoria
-                    </div>
-                </div>
-            </div>
-          )}
-        </section>
 
         <section>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">

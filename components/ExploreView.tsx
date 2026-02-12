@@ -57,7 +57,7 @@ const CategoryChip: React.FC<{ label: string; active?: boolean; icon?: React.Rea
 );
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
-    <div className="flex items-center justify-between mb-3">
+    <div className="flex items-center justify-between mb-3 px-1">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
           <Icon size={18} strokeWidth={2.5} />
@@ -77,7 +77,7 @@ const NovidadesDaSemana: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
     return (
       <div className="bg-white dark:bg-gray-950 pt-2 mb-6">
         <SectionHeader icon={Sparkles} title="Novidades da Semana" subtitle="Recém chegados" onSeeMore={() => onNavigate('explore')} />
-        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
           {newArrivals.map((store) => (
             <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[170px] aspect-[4/5] rounded-[2.5rem] overflow-hidden relative snap-center shadow-2xl group active:scale-[0.98] transition-all">
               <img src={store.image || store.logoUrl || getFallbackStoreImage(store.id)} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110" />
@@ -100,7 +100,7 @@ const SugestoesParaVoce: React.FC<{ stores: Store[]; onStoreClick?: (store: Stor
   return (
     <div className="bg-white dark:bg-gray-950 py-4 mb-6">
       <SectionHeader icon={Lightbulb} title="Sugestões" subtitle="Para você" onSeeMore={() => onNavigate('explore')} />
-      <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-5 px-5">
+      <div className="flex gap-5 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
         {suggestions.map((store) => (
           <button key={store.id} onClick={() => onStoreClick && onStoreClick(store)} className="flex-shrink-0 w-[240px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden snap-center shadow-xl border border-gray-100 dark:border-gray-800 group active:scale-[0.98] transition-all text-left">
             <div className="relative h-32 overflow-hidden">
@@ -177,7 +177,7 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
 
   return (
     <section className="mb-6">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 px-0.5">
         <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h2>
           {subtitle && <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{subtitle}</p>}
@@ -189,7 +189,7 @@ const HorizontalStoreSection: React.FC<{ title: string; subtitle?: string; store
           </div>
         )}
       </div>
-      <div data-section={title} className="flex gap-3 overflow-x-auto pb-1 no-scrollbar -mx-5 px-5">
+      <div data-section={title} className="flex gap-3 overflow-x-auto pb-1 no-scrollbar -mx-0.5 px-0.5">
         {stores.map((store) => (
           <button key={store.id} onClick={() => onStoreClick(store)} className="min-w-[250px] max-w-[260px] bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden text-left hover:-translate-y-0.5 transition-all duration-200">
             <div className="relative h-24 bg-gray-100 dark:bg-gray-800 overflow-hidden">
@@ -239,14 +239,14 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, searchQuery, o
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 pb-24">
-      <div className="px-5 py-4 flex gap-2 overflow-x-auto no-scrollbar items-center">
+      <div className="px-4 py-4 flex gap-2 overflow-x-auto no-scrollbar items-center">
         <button onClick={onFilterClick} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all whitespace-nowrap flex-shrink-0 shadow-sm"><Filter className="w-3.5 h-3.5" />Filtros</button>
         {quickFilters.map((f) => (
           <CategoryChip key={f.id} label={f.label} active={sortOption === f.id} onClick={() => { if (f.id === 'top_rated') setSortOption('topRated'); }} />
         ))}
       </div>
 
-      <div className="px-5 space-y-6">
+      <div className="px-4 space-y-6">
         <NovidadesDaSemana stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />
         
         <SugestoesParaVoce stores={stores} onStoreClick={onStoreClick} onNavigate={onNavigate} />

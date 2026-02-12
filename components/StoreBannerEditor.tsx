@@ -1,11 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, Save, Palette, Type, Layout, Sparkles, 
   Image as ImageIcon, Check, Crown, ShieldCheck, 
   Rocket, Megaphone, Zap, Flame, Star, Award, 
   Maximize, MousePointer2, Layers, Monitor, AlignLeft,
-  AlignCenter, AlignRight
+  AlignCenter, AlignRight, X, AlertCircle
 } from 'lucide-react';
 
 export interface BannerDesign {
@@ -28,17 +28,56 @@ export interface BannerDesign {
   align: 'left' | 'center' | 'right';
 }
 
-const BG_LIBRARY = [
-  { id: 'mesh-blue', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop', category: 'Mesh Gradient' },
-  { id: 'dark-tech', url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop', category: 'Premium Dark' },
-  { id: 'neon-vibe', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop', category: 'Neon Glow' },
-  { id: 'soft-texture', url: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800&auto=format&fit=crop', category: 'Soft' },
-  { id: 'geometric', url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=800&auto=format&fit=crop', category: 'Geometric' },
-  { id: 'gold-luxury', url: 'https://images.unsplash.com/photo-1502239608882-93b729c6af43?q=80&w=800&auto=format&fit=crop', category: 'Premium' },
-  { id: 'abstract-red', url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop', category: 'Abstract' },
-  { id: 'minimal-white', url: 'https://images.unsplash.com/photo-1483712646219-da823524b0af?q=80&w=800&auto=format&fit=crop', category: 'Minimal' },
-  { id: 'deep-ocean', url: 'https://images.unsplash.com/photo-1554147090-e1121a5445f1?q=80&w=800&auto=format&fit=crop', category: 'Gradient' },
-  { id: 'silk-black', url: 'https://images.unsplash.com/photo-1531685250084-75a721df4990?q=80&w=800&auto=format&fit=crop', category: 'Premium' },
+// Biblioteca de imagens por subcategoria (Curadoria de Conversão)
+const CONTEXTUAL_BGS: Record<string, string[]> = {
+  'Pizzarias': [
+    'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1574126154517-d1e0d89ef734?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1541745537411-b8046dc6d66c?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1593504049359-74330189a355?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?q=80&w=800&auto=format&fit=crop'
+  ],
+  'Hambúrguerias': [
+    'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1547584323-dbca221f4963?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1586816001966-79b736744398?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format&fit=crop'
+  ],
+  'Oficinas Mecânicas': [
+    'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1530046339160-ce3e5b0c7a2f?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1498307833015-e7b400441eb8?q=80&w=800&auto=format&fit=crop'
+  ],
+  'Saúde': [
+    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1584515933487-9d317552d894?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=800&auto=format&fit=crop'
+  ],
+  'Pets': [
+    'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=800&auto=format&fit=crop'
+  ],
+  'Beleza': [
+    'https://images.unsplash.com/photo-1560066984-118c38b64a75?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1521590832167-7ce633395e39?q=80&w=800&auto=format&fit=crop'
+  ]
+};
+
+const GENERAL_BGS = [
+  { id: 'mesh-blue', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop', category: 'Moderno' },
+  { id: 'dark-tech', url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop', category: 'Premium' },
+  { id: 'silk-black', url: 'https://images.unsplash.com/photo-1531685250084-75a721df4990?q=80&w=800&auto=format&fit=crop', category: 'Luxo' },
 ];
 
 const STYLE_PRESETS: Record<string, Partial<BannerDesign>> = {
@@ -55,11 +94,13 @@ const ICON_COMPONENTS: Record<string, React.ElementType> = {
 interface StoreBannerEditorProps {
   storeName: string;
   storeLogo?: string | null;
+  storeSubcategory?: string;
   onSave: (design: BannerDesign) => void;
   onBack: () => void;
+  editsRemaining?: number; // Adicionado para feedback
 }
 
-const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
+export const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLogo?: string | null; }> = ({ config, storeName, storeLogo }) => {
   const { 
     title, subtitle, layout, bgType, bgColor, bgImage, 
     textColor, accentColor, titleFont, titleSize, animation,
@@ -77,15 +118,15 @@ const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLo
   };
 
   const layoutClasses = {
-    split: `flex-row items-center justify-between p-12 text-${align}`,
-    centered: `flex-col items-center justify-center p-12 text-${align}`,
-    footer: `flex-col items-start justify-end p-12 text-${align}`,
-    card: `flex-col items-center justify-center p-12 text-${align}`,
-    stacked: `flex-col items-start justify-start p-12 text-${align} gap-4`
+    split: `flex-row items-center justify-between p-8 text-${align}`,
+    centered: `flex-col items-center justify-center p-8 text-${align}`,
+    footer: `flex-col items-start justify-end p-8 text-${align}`,
+    card: `flex-col items-center justify-center p-8 text-${align}`,
+    stacked: `flex-col items-start justify-start p-8 text-${align} gap-4`
   };
 
   return (
-    <div className="relative group w-full h-full overflow-hidden rounded-[2.5rem] shadow-2xl border border-white/10 transition-transform duration-500 hover:scale-[1.02] hover:-rotate-1">
+    <div className="relative group w-full h-full overflow-hidden rounded-[2rem] shadow-2xl border border-white/10">
       {/* Background Layer */}
       <div className={`absolute inset-0 transition-all duration-700 ${animationClasses[animation]}`}>
         {bgType === 'image' ? (
@@ -93,7 +134,8 @@ const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLo
         ) : (
           <div className="w-full h-full" style={{ backgroundColor: bgColor }}></div>
         )}
-        <div className={`absolute inset-0 ${bgType === 'image' ? 'bg-black/40' : 'bg-transparent'}`}></div>
+        {/* Scrim Overlay para legibilidade */}
+        <div className={`absolute inset-0 bg-black/40`}></div>
       </div>
 
       {/* Content Container */}
@@ -101,42 +143,41 @@ const BannerPreview: React.FC<{ config: BannerDesign; storeName: string; storeLo
         
         {/* Logo Positioned */}
         {logoDisplay !== 'none' && storeLogo && (
-          <div className={`absolute ${logoPos === 'top' ? 'top-8' : 'bottom-8'} ${layout === 'centered' || layout === 'card' ? 'left-1/2 -translate-x-1/2' : 'left-8'} z-20`}>
-            <div className={`backdrop-blur-md bg-white/20 p-1.5 border border-white/20 shadow-xl ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-2xl'}`}>
-              <img src={storeLogo} className={`${logoSize === 'sm' ? 'w-8 h-8' : 'w-12 h-12'} object-contain ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-xl'}`} alt="Logo" />
+          <div className={`absolute ${logoPos === 'top' ? 'top-6' : 'bottom-6'} ${layout === 'centered' || layout === 'card' ? 'left-1/2 -translate-x-1/2' : 'left-6'} z-20`}>
+            <div className={`backdrop-blur-md bg-white/20 p-1 border border-white/20 shadow-xl ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-xl'}`}>
+              <img src={storeLogo} className={`${logoSize === 'sm' ? 'w-6 h-6' : 'w-10 h-10'} object-contain ${logoDisplay === 'round' ? 'rounded-full' : 'rounded-lg'}`} alt="Logo" />
             </div>
           </div>
         )}
 
         {/* Text Group */}
-        <div className={`${layout === 'card' ? 'bg-black/30 backdrop-blur-xl p-8 rounded-[2rem] border border-white/10 shadow-2xl' : ''} max-w-[80%] flex flex-col ${align === 'center' ? 'items-center' : align === 'right' ? 'items-end' : 'items-start'}`}>
-          <div className="flex items-center gap-3 mb-4 opacity-80" style={{ color: accentColor }}>
-            {IconComp && <IconComp size={24} strokeWidth={2.5} />}
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">{storeName}</span>
+        <div className={`${layout === 'card' ? 'bg-black/30 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-2xl' : ''} max-w-full flex flex-col ${align === 'center' ? 'items-center' : align === 'right' ? 'items-end' : 'items-start'}`}>
+          <div className="flex items-center gap-2 mb-2 opacity-90" style={{ color: accentColor }}>
+            {IconComp && <IconComp size={18} strokeWidth={2.5} />}
+            <span className="text-[8px] font-black uppercase tracking-[0.2em]">{storeName}</span>
           </div>
           
           <h2 
-            className={`font-black leading-[0.95] mb-4 tracking-tighter transition-all duration-500 ${
-              titleSize === 'xl' ? 'text-6xl' : titleSize === 'lg' ? 'text-5xl' : titleSize === 'md' ? 'text-4xl' : 'text-3xl'
+            className={`font-black leading-[0.95] mb-2 tracking-tighter transition-all duration-500 ${
+              titleSize === 'xl' ? 'text-3xl' : titleSize === 'lg' ? 'text-2xl' : titleSize === 'md' ? 'text-xl' : 'text-lg'
             }`} 
             style={{ fontFamily: titleFont, color: textColor }}
           >
             {title}
           </h2>
           
-          <p className="text-lg font-medium leading-relaxed opacity-70" style={{ color: textColor }}>
+          <p className="text-sm font-medium leading-relaxed opacity-80 line-clamp-3" style={{ color: textColor }}>
             {subtitle}
           </p>
         </div>
       </div>
       
-      {/* Aesthetic Border Highlight */}
-      <div className="absolute inset-0 border border-white/20 rounded-[2.5rem] pointer-events-none"></div>
+      <div className="absolute inset-0 border border-white/10 rounded-[2rem] pointer-events-none"></div>
     </div>
   );
 };
 
-export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, storeLogo, onSave, onBack }) => {
+export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName, storeLogo, storeSubcategory, onSave, onBack, editsRemaining }) => {
   const [activeTab, setActiveTab] = useState<'content' | 'layout' | 'style' | 'logo'>('content');
   const [config, setConfig] = useState<BannerDesign>({
     title: 'Sua Oferta Premium',
@@ -145,7 +186,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
     stylePreset: 'pro',
     bgType: 'image',
     bgColor: '#1E5BFF',
-    bgImage: BG_LIBRARY[0].url,
+    bgImage: GENERAL_BGS[0].url,
     textColor: '#FFFFFF',
     accentColor: '#FFFFFF',
     titleFont: "'Outfit', sans-serif",
@@ -158,36 +199,64 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
     align: 'left'
   });
 
+  // Carregar fundo sugerido baseado na subcategoria
+  useEffect(() => {
+    if (storeSubcategory && CONTEXTUAL_BGS[storeSubcategory]) {
+      setConfig(prev => ({ ...prev, bgImage: CONTEXTUAL_BGS[storeSubcategory][0] }));
+    }
+  }, [storeSubcategory]);
+
   const applyPreset = (presetId: string) => {
     const preset = STYLE_PRESETS[presetId];
     setConfig(prev => ({ ...prev, ...preset, stylePreset: presetId as any }));
   };
 
+  const suggestedBgs = useMemo(() => {
+    const nicho = storeSubcategory || '';
+    const contextual = CONTEXTUAL_BGS[nicho] || [];
+    return contextual.map((url, i) => ({ id: `context-${i}`, url, category: 'Sugerido' }));
+  }, [storeSubcategory]);
+
   return (
     <div className="fixed inset-0 bg-[#020617] text-white z-[200] flex flex-col font-sans overflow-hidden">
-      {/* Header Estilo Apple */}
-      <header className="flex-shrink-0 bg-slate-900/50 backdrop-blur-xl p-4 px-6 flex justify-between items-center border-b border-white/5">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 text-slate-400 hover:text-white transition-colors bg-white/5 rounded-xl">
+      <header className="flex-shrink-0 bg-slate-900/80 backdrop-blur-xl p-4 px-5 flex justify-between items-center border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-2 text-slate-400 hover:text-white bg-white/5 rounded-xl transition-transform active:scale-90">
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="font-black text-sm uppercase tracking-widest text-white">Editor de Banner</h1>
-            <p className="text-[10px] text-blue-400 font-bold uppercase">{storeName}</p>
+            <h1 className="font-black text-xs uppercase tracking-widest text-white">Editor de Banner</h1>
+            <p className="text-[9px] text-blue-400 font-bold uppercase">{storeName}</p>
           </div>
         </div>
-        <button 
-          onClick={() => onSave(config)} 
-          className="bg-[#1E5BFF] px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
-        >
-          <Save size={16} /> Publicar
-        </button>
+        
+        <div className="flex items-center gap-4">
+            {editsRemaining !== undefined && (
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-tighter ${editsRemaining > 0 ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-red-500/10 border-red-500/30 text-red-500'}`}>
+                    {editsRemaining === 0 ? <AlertCircle size={10}/> : <Sparkles size={10}/>}
+                    {editsRemaining} edições restantes
+                </div>
+            )}
+            <button 
+                onClick={() => onSave(config)} 
+                className="bg-[#1E5BFF] px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl active:scale-95 transition-all"
+            >
+                <Save size={14} /> Publicar
+            </button>
+        </div>
       </header>
       
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Sidebar de Ferramentas */}
-        <aside className="w-full lg:w-80 bg-slate-950/80 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col shrink-0">
-          <nav className="flex border-b border-white/5 p-2 gap-1">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Palco de Visualização (Preview Fixo no Topo para Mobile) */}
+        <main className="flex-shrink-0 w-full p-4 bg-[#020617] flex items-center justify-center border-b border-white/5">
+          <div className="w-full max-w-sm aspect-[16/10]">
+             <BannerPreview config={config} storeName={storeName} storeLogo={storeLogo} />
+          </div>
+        </main>
+
+        {/* Ferramentas de Edição (Scrollable) */}
+        <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
+          <nav className="flex-shrink-0 flex border-b border-white/5 p-2 gap-1 bg-slate-900/40">
             {[
               { id: 'content', icon: Type, label: 'Texto' },
               { id: 'layout', icon: Layout, label: 'Grade' },
@@ -197,7 +266,7 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
               <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
+                className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500'}`}
               >
                 <tab.icon size={18} />
                 <span className="text-[8px] font-black uppercase tracking-tighter">{tab.label}</span>
@@ -205,34 +274,36 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
             ))}
           </nav>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
+          <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 pb-32">
             
             {activeTab === 'content' && (
               <div className="space-y-6 animate-in fade-in duration-300">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Título Principal</label>
-                  <textarea 
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Título Principal</label>
+                  <input 
                     value={config.title} 
                     onChange={e => setConfig({...config, title: e.target.value})}
-                    className="w-full bg-slate-900 border border-white/10 rounded-xl p-4 text-sm font-bold focus:border-blue-500 outline-none resize-none h-24"
+                    className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none"
+                    placeholder="Sua oferta"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Subtítulo</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subtítulo</label>
                   <textarea 
                     value={config.subtitle} 
                     onChange={e => setConfig({...config, subtitle: e.target.value})}
-                    className="w-full bg-slate-900 border border-white/10 rounded-xl p-4 text-xs focus:border-blue-500 outline-none resize-none h-24"
+                    className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-xs focus:border-blue-500 outline-none resize-none h-24"
+                    placeholder="Descrição da oferta"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ícone de Apoio</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Ícone de Estilo</label>
                   <div className="grid grid-cols-5 gap-2">
                     {Object.keys(ICON_COMPONENTS).map(name => (
                       <button 
                         key={name}
                         onClick={() => setConfig({...config, iconName: name === config.iconName ? null : name})}
-                        className={`p-2 rounded-lg flex items-center justify-center transition-all ${config.iconName === name ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500'}`}
+                        className={`p-2 rounded-xl flex items-center justify-center transition-all ${config.iconName === name ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-white/5'}`}
                       >
                         {React.createElement(ICON_COMPONENTS[name], { size: 18 })}
                       </button>
@@ -245,19 +316,19 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
             {activeTab === 'layout' && (
               <div className="space-y-8 animate-in fade-in duration-300">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Grade Editorial</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Grade Editorial</label>
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      { id: 'split', label: 'Editorial Lado a Lado' },
+                      { id: 'split', label: 'Editorial Clássico' },
                       { id: 'centered', label: 'Impacto Central' },
-                      { id: 'footer', label: 'Revista (Base)' },
-                      { id: 'card', label: 'Floating Card' },
+                      { id: 'footer', label: 'Foco na Base' },
+                      { id: 'card', label: 'Cartão Flutuante' },
                       { id: 'stacked', label: 'Lista Dinâmica' }
                     ].map(l => (
                       <button 
                         key={l.id} 
                         onClick={() => setConfig({...config, layout: l.id as any})}
-                        className={`w-full p-4 rounded-xl border-2 text-left text-xs font-bold transition-all ${config.layout === l.id ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-white/5 bg-slate-900 text-slate-400'}`}
+                        className={`w-full p-4 rounded-2xl border-2 text-left text-xs font-bold transition-all ${config.layout === l.id ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-white/5 bg-slate-900 text-slate-400'}`}
                       >
                         {l.label}
                       </button>
@@ -265,13 +336,13 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Alinhamento</label>
-                  <div className="flex bg-slate-900 rounded-xl p-1 gap-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Alinhamento do Texto</label>
+                  <div className="flex bg-slate-900 rounded-2xl p-1 gap-1 border border-white/5">
                     {(['left', 'center', 'right'] as const).map(align => (
                         <button 
                             key={align} 
                             onClick={() => setConfig({...config, align})}
-                            className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-all ${config.align === align ? 'bg-slate-700 text-white' : 'text-slate-500'}`}
+                            className={`flex-1 flex items-center justify-center py-2.5 rounded-xl transition-all ${config.align === align ? 'bg-slate-700 text-white' : 'text-slate-500'}`}
                         >
                             {align === 'left' ? <AlignLeft size={16}/> : align === 'center' ? <AlignCenter size={16}/> : <AlignRight size={16}/>}
                         </button>
@@ -284,18 +355,18 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
             {activeTab === 'style' && (
               <div className="space-y-8 animate-in fade-in duration-300">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Presets de Estilo</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Estilo Sugerido</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { id: 'pro', label: 'Profissional' },
                       { id: 'impact', label: 'Impactante' },
-                      { id: 'dark', label: 'Premium Dark' },
-                      { id: 'offer', label: 'Oferta Direta' }
+                      { id: 'dark', label: 'Premium' },
+                      { id: 'offer', label: 'Promocional' }
                     ].map(p => (
                       <button 
                         key={p.id} 
                         onClick={() => applyPreset(p.id)}
-                        className={`p-3 rounded-xl border-2 text-[10px] font-black uppercase tracking-widest transition-all ${config.stylePreset === p.id ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}
+                        className={`p-3.5 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all ${config.stylePreset === p.id ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}
                       >
                         {p.label}
                       </button>
@@ -304,20 +375,25 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Atmosfera (Fundo)</label>
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Atmosfera (Fundo)</label>
+                    <button onClick={() => setConfig({...config, bgType: 'color'})} className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Usar cor sólida</button>
+                  </div>
+                  
+                  {/* Fundos Contextuais Baseados na Subcategoria */}
                   <div className="grid grid-cols-2 gap-3">
-                    {BG_LIBRARY.map(bg => (
+                    {[...suggestedBgs, ...GENERAL_BGS].map((bg, idx) => (
                       <button 
-                        key={bg.id}
+                        key={`${bg.id}-${idx}`}
                         onClick={() => setConfig({...config, bgType: 'image', bgImage: bg.url})}
-                        className={`relative aspect-video rounded-xl overflow-hidden border-2 transition-all ${config.bgImage === bg.url && config.bgType === 'image' ? 'border-blue-500 scale-105 shadow-lg shadow-blue-500/20' : 'border-transparent opacity-60'}`}
+                        className={`relative aspect-video rounded-2xl overflow-hidden border-2 transition-all ${config.bgImage === bg.url && config.bgType === 'image' ? 'border-blue-500 scale-[1.02] shadow-lg' : 'border-transparent opacity-60'}`}
                       >
                         <img src={bg.url} className="w-full h-full object-cover" alt={bg.category} />
+                        <div className="absolute inset-0 bg-black/20"></div>
                         <div className="absolute inset-x-0 bottom-0 bg-black/60 p-1 text-[7px] font-black uppercase tracking-widest text-center text-white">{bg.category}</div>
                       </button>
                     ))}
                   </div>
-                  <button onClick={() => setConfig({...config, bgType: 'color'})} className={`w-full py-3 rounded-xl border-2 text-[10px] font-black uppercase tracking-widest transition-all ${config.bgType === 'color' ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>Usar Cor Sólida</button>
                 </div>
               </div>
             )}
@@ -325,42 +401,24 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
             {activeTab === 'logo' && (
               <div className="space-y-8 animate-in fade-in duration-300">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Exibição da Logo</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Exibição da Logo</label>
                   <div className="grid grid-cols-3 gap-2">
                     {['round', 'square', 'none'].map(mode => (
-                      <button key={mode} onClick={() => setConfig({...config, logoDisplay: mode as any})} className={`py-3 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest ${config.logoDisplay === mode ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>{mode}</button>
+                      <button key={mode} onClick={() => setConfig({...config, logoDisplay: mode as any})} className={`py-3.5 rounded-2xl border-2 text-[9px] font-black uppercase tracking-widest ${config.logoDisplay === mode ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>{mode}</button>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Posição da Logo</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Posição da Logo</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setConfig({...config, logoPos: 'top'})} className={`py-3 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest ${config.logoPos === 'top' ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>Topo</button>
-                    <button onClick={() => setConfig({...config, logoPos: 'bottom'})} className={`py-3 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest ${config.logoPos === 'bottom' ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>Rodapé</button>
+                    <button onClick={() => setConfig({...config, logoPos: 'top'})} className={`py-3.5 rounded-2xl border-2 text-[9px] font-black uppercase tracking-widest ${config.logoPos === 'top' ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>Topo</button>
+                    <button onClick={() => setConfig({...config, logoPos: 'bottom'})} className={`py-3.5 rounded-2xl border-2 text-[9px] font-black uppercase tracking-widest ${config.logoPos === 'bottom' ? 'border-blue-500 bg-blue-500/10' : 'border-white/5 bg-slate-900 text-slate-500'}`}>Rodapé</button>
                   </div>
                 </div>
               </div>
             )}
           </div>
-        </aside>
-
-        {/* Palco de Visualização (Preview) */}
-        <main className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-[#020617] relative">
-          {/* Background Decorativo do Stage */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-          
-          <div className="w-full max-w-4xl relative perspective-1000 aspect-video">
-            <div className="relative transform transition-all duration-700 hover:rotate-0 w-full h-full">
-               <BannerPreview config={config} storeName={storeName} storeLogo={storeLogo} />
-            </div>
-            
-            {/* Etiquetas de Destaque no Preview */}
-            <div className="absolute -top-10 -left-6 bg-slate-900/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-2xl animate-bounce-slow">
-               <Sparkles size={14} className="text-amber-400" />
-               <span className="text-[10px] font-black text-white uppercase tracking-widest">Design Premium Ativo</span>
-            </div>
-          </div>
-        </main>
+        </div>
       </div>
 
       <style>{`
@@ -368,11 +426,10 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
           from { transform: scale(1); }
           to { transform: scale(1.15); }
         }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+        @keyframes slow-shimmer {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(100%); }
         }
-        .perspective-1000 { perspective: 1000px; }
       `}</style>
     </div>
   );

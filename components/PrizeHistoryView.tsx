@@ -149,7 +149,7 @@ export const PrizeHistoryView: React.FC<PrizeHistoryViewProps> = ({ userId, onBa
         </div>
       </header>
 
-      <main className="p-5 pb-24">
+      <main className="p-4 pb-24">
         {status === 'loading' && (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}

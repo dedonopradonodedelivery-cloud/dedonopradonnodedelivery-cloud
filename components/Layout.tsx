@@ -25,30 +25,28 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
   return (
     <div
-      className="h-[100dvh] bg-gray-100 dark:bg-black font-sans w-full transition-colors duration-300 relative flex justify-center overflow-hidden"
+      className="h-full bg-white dark:bg-gray-950 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
     >
-      <div className="w-full max-w-md bg-gradient-to-b from-[#1E5BFF] to-[#001D4A] shadow-2xl relative flex flex-col overflow-hidden">
-        <div
-          ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto no-scrollbar w-full relative"
-          style={{
-            paddingBottom: finalHideNav
-              ? 'env(safe-area-inset-bottom)'
-              : 'calc(100px + env(safe-area-inset-bottom))',
-            overscrollBehaviorY: 'contain',
-          }}
-        >
-          {children}
-        </div>
-
-        {!finalHideNav && (
-          <BottomNav
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            userRole={userRole}
-          />
-        )}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto no-scrollbar w-full"
+        style={{
+          paddingBottom: finalHideNav
+            ? 'env(safe-area-inset-bottom)'
+            : 'calc(100px + env(safe-area-inset-bottom))',
+          overscrollBehaviorY: 'contain',
+        }}
+      >
+        {children}
       </div>
+
+      {!finalHideNav && (
+        <BottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          userRole={userRole}
+        />
+      )}
     </div>
   );
 };

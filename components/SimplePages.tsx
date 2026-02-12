@@ -59,7 +59,7 @@ export const SupportView: React.FC<SimplePageProps> = ({ onBack }) => {
         <h1 className="font-bold text-lg text-gray-900 dark:text-white">Suporte</h1>
       </div>
       
-      <div className="p-5 flex flex-col items-center pt-12">
+      <div className="p-6 flex flex-col items-center pt-12">
         <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 text-blue-500">
             <Mail className="w-10 h-10" />
         </div>
@@ -106,7 +106,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
       </div>
 
       <div className="overflow-y-auto no-scrollbar">
-        <div className="py-12 px-5 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-950 text-center">
+        <div className="p-12 flex flex-col items-center bg-gradient-to-b from-blue-50 to-white dark:from-blue-900/10 dark:to-gray-950 text-center">
           <div className="w-24 h-24 bg-[#1E5BFF] rounded-[2.5rem] flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/20">
             <MapPin className="w-12 h-12 text-white fill-white" />
           </div>
@@ -116,7 +116,7 @@ export const AboutView: React.FC<SimplePageProps> = ({ onBack }) => {
           <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-[0.4em] mt-4">Onde o bairro conversa</p>
         </div>
 
-        <div className="px-5 space-y-12 pb-24">
+        <div className="px-6 space-y-12 pb-24">
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h3 className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] mb-4 ml-1">Manifesto</h3>
             <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
@@ -189,7 +189,7 @@ export const AboutAppView: React.FC<SimplePageProps> = ({ onBack }) => {
                 <h1 className="font-bold text-lg text-gray-900 dark:text-white uppercase tracking-tight">Como funciona</h1>
             </header>
 
-            <main className="p-5 space-y-12">
+            <main className="p-6 space-y-12">
                 {steps.map((step, idx) => (
                     <div key={idx} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${idx * 200}ms` }}>
                         <div className="aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800">
@@ -279,7 +279,7 @@ export const UserActivityView: React.FC<{ type: string; onBack: () => void }> = 
         <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{titles[type] || 'Atividade'}</h1>
       </header>
 
-      <main className="p-5 flex flex-col items-center justify-center pt-24 text-center">
+      <main className="p-6 flex flex-col items-center justify-center pt-24 text-center">
         <div className="w-24 h-24 bg-white dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-sm border border-gray-100 dark:border-gray-800">
            <Icon size={40} className="text-gray-200" />
         </div>
@@ -301,7 +301,7 @@ export const MyNeighborhoodsView: React.FC<{ onBack: () => void }> = ({ onBack }
         <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Meus Bairros</h1>
       </header>
 
-      <main className="p-5 space-y-8">
+      <main className="p-6 space-y-8">
         <section>
             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2 mb-4">Bairro Principal</h3>
             <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 flex items-center gap-4 shadow-sm">
@@ -313,7 +313,7 @@ export const MyNeighborhoodsView: React.FC<{ onBack: () => void }> = ({ onBack }
         <section>
             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2 mb-4">Interesses</h3>
             <div className="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 text-center flex flex-col items-center">
-               <Search size={32} className="text-gray-200 mb-4" />
+               <Search size={32} className="text-gray-100 mb-4" />
                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Você ainda não marcou outros bairros de interesse.</p>
             </div>
         </section>
@@ -332,7 +332,7 @@ export const PrivacyView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Privacidade</h1>
       </header>
 
-      <main className="p-5 space-y-6 overflow-y-auto pb-32 no-scrollbar">
+      <main className="p-6 space-y-6 overflow-y-auto pb-32 no-scrollbar">
          <section className="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
             <div className="flex items-center gap-3 pb-6 border-b border-gray-50 dark:border-gray-800"><ShieldCheck className="text-blue-500" size={28} /><h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter text-xl">Seus dados estão seguros</h3></div>
             

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/layout/Layout';
+import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
 import { ExploreView } from '@/components/ExploreView';
 import { StoreDetailView } from '@/components/StoreDetailView';
@@ -49,12 +49,12 @@ import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { MerchantPromotionsModule } from '@/components/MerchantPromotionsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
-import { StoreConnectModule } from '@/components/StoreConnectModule';
+import { JPAConnectSalesView } from '@/components/JPAConnectSalesView';
 import { StoreClaimFlow } from '@/components/StoreClaimFlow';
 import { AppSuggestionView } from '@/components/AppSuggestionView';
 import { CouponLandingView } from '@/components/CouponLandingView';
 import { JotaAssistant } from '@/components/GeminiAssistant';
-import { MapPin, X, Palette, Loader2 } from 'lucide-react';
+import { MapPin, X, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
@@ -95,10 +95,6 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   
-  // States do Jota
-  const [isJotaOpen, setIsJotaOpen] = useState(false);
-  const [jotaInitialQuery, setJotaInitialQuery] = useState<string | undefined>(undefined);
-  
   const [activityType, setActivityType] = useState<string>('');
   const [initialModuleView, setInitialModuleView] = useState<'sales' | 'chat' | undefined>(undefined);
 
@@ -115,6 +111,23 @@ const App: React.FC = () => {
 
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
+
+  const [isJotaOpen, setIsJotaOpen] = useState(false);
+  const [jotaInitialMessage, setJotaInitialMessage] = useState<string | undefined>(undefined);
+
+  const handleOpenJota = (query?: string) => {
+    if (query) {
+      setJotaInitialMessage(query);
+    } else {
+      setJotaInitialMessage(undefined);
+    }
+    setIsJotaOpen(true);
+  };
+
+  const handleCloseJota = () => {
+    setIsJotaOpen(false);
+    setJotaInitialMessage(undefined);
+  };
 
   useEffect(() => {
     const handleUrlRouting = () => {
@@ -134,7 +147,7 @@ const App: React.FC = () => {
   }, [isAdmin]);
 
   const handleNavigate = (view: string, data?: any) => {
-    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'store_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
+    if (view !== 'sponsor_info' && view !== 'notifications' && view !== 'patrocinador_master' && view !== 'real_estate_detail' && view !== 'job_detail' && view !== 'plan_selection' && view !== 'classified_detail' && view !== 'classified_search_results' && view !== 'user_activity' && view !== 'app_suggestion' && view !== 'designer_panel' && view !== 'jpa_connect' && view !== 'merchant_panel' && view !== 'coupon_landing') {
       setPreviousTab(activeTab);
     }
     
@@ -184,7 +197,7 @@ const App: React.FC = () => {
             handleNavigate('user_coupons');
         }
     }
-  }, [user, userRole, activeTab]);
+  }, [user, userRole]);
 
   useEffect(() => {
     if (splashStage >= 4) {
@@ -197,372 +210,361 @@ const App: React.FC = () => {
     }
     const typingTimeout = setTimeout(() => {
       setSloganText(fullSlogan.slice(0, sloganText.length + 1));
-    }, 100);
+    }, 96);
     return () => clearTimeout(typingTimeout);
   }, [sloganText, splashStage]);
 
   useEffect(() => {
     if (splashStage === 4) return;
-    const timer = setTimeout(() => {
+    const fadeOutTimer = setTimeout(() => setSplashStage(3), 4500);
+    const endSplashTimer = setTimeout(() => {
       setSplashStage(4);
       splashWasShownInSession = true;
-    }, 4500);
-    return () => clearTimeout(timer);
+    }, 5000);
+    return () => {
+      clearTimeout(fadeOutTimer);
+      clearTimeout(endSplashTimer);
+    };
   }, [splashStage]);
 
-  const handleSelectCategory = (cat: Category) => {
-    setSelectedCategory(cat);
+  const handleSelectStore = (store: Store) => { setSelectedStore(store); handleNavigate('store_detail'); };
+  const handleSelectJob = (job: Job) => { handleNavigate('job_detail', { job }); };
+  
+  const handleSelectCategory = (category: Category) => {
+    setSelectedCategory(category);
     handleNavigate('category_detail');
   };
 
-  const handleOpenJota = (query?: string) => {
-      setJotaInitialQuery(query);
-      setIsJotaOpen(true);
+  const handleSelectSubcategory = (subName: string, parentCat: Category) => {
+    setSelectedSubcategoryName(subName);
+    setSelectedCategory(parentCat);
+    handleNavigate('subcategory_detail');
   };
 
-  if (splashStage < 4) {
+  const handleClaimStore = (store: Store) => {
+    if (!user) {
+      setIsAuthOpen(true);
+      return;
+    }
+    setStoreToClaim(store);
+    setIsClaimFlowActive(true);
+  };
+
+  const handleClaimSuccess = () => {
+    setIsClaimFlowActive(false);
+    handleNavigate('profile');
+  };
+
+  const handlePlanSuccess = (plan: PlanType) => {
+      localStorage.setItem('merchant_plan', plan);
+      handleNavigate('profile');
+  };
+
+  const headerExclusionList = ['store_area', 'store_detail', 'profile', 'patrocinador_master', 'merchant_performance', 'neighborhood_posts', 'saved_posts', 'classifieds', 'services', 'services_landing', 'merchant_leads', 'service_chat', 'admin_panel', 'category_detail', 'subcategory_detail', 'sponsor_info', 'real_estate', 'jobs', 'job_detail', 'job_wizard', 'adoption', 'donations', 'desapega', 'category_banner_sales', 'banner_sales_wizard', 'weekly_reward_page', 'user_coupons', 'notifications', 'store_profile', 'about', 'support', 'favorites', 'user_statement', 'service_messages_list', 'merchant_reviews', 'merchant_coupons', 'merchant_promotions', 'store_finance', 'store_support', 'real_estate_wizard', 'real_estate_detail', 'plan_selection', 'classified_detail', 'classified_search_results', 'user_activity', 'my_neighborhoods', 'privacy_policy', 'app_suggestion', 'designer_panel', 'jpa_connect', 'merchant_panel', 'store_ads_module', 'store_sponsored', 'about_app', 'coupon_landing', 'user_profile_full', 'edit_profile_view'];
+  
+  const RoleSwitcherModal: React.FC = () => {
+    if (!isRoleSwitcherOpen) return null;
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#1E5BFF] to-[#001D4A] flex flex-col items-center justify-between py-16 px-5 text-center animate-in fade-in duration-700 relative overflow-hidden">
-        <div className="absolute top-[-10%] left-[-20%] w-[300px] h-[300px] bg-white/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute bottom-[20%] right-[-10%] w-[250px] h-[250px] bg-blue-400/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-        <div className="flex-1 flex flex-col items-center justify-center animate-logo-enter">
-          <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20">
-            <MapPin className="w-16 h-16 text-[#1E5BFF] fill-[#1E5BFF]" />
-          </div>
-          
-          <h1 className="text-4xl font-black text-white font-display tracking-tighter uppercase mb-4 drop-shadow-lg">
-            Localizei JPA
-          </h1>
-          
-          <div className="h-6 flex flex-col items-center">
-            <p className="text-lg font-medium text-white/90 font-sans tracking-tight">
-              {sloganText}{isTyping && <span className="animate-blink ml-0.5">|</span>}
-            </p>
-          </div>
-
-          {!isTyping && (
-             <div className="mt-8 animate-in fade-in duration-700">
-                <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
-             </div>
-          )}
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setIsRoleSwitcherOpen(false)}>
+            <div className="bg-[#111827] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-between items-start mb-8 px-2">
+                    <h2 className="text-xl font-black text-white uppercase">Modo de Visualização</h2>
+                    <button onClick={() => setIsRoleSwitcherOpen(false)} className="text-gray-500 hover:text-white"><X size={24} /></button>
+                </div>
+                <div className="space-y-3">
+                    {(['ADM', 'Usuário', 'Lojista', 'Visitante', 'Designer'] as RoleMode[]).map((role) => (
+                        <button 
+                          key={role} 
+                          onClick={() => { 
+                            setViewMode(role); 
+                            localStorage.setItem('admin_view_mode', role); 
+                            setIsRoleSwitcherOpen(false); 
+                            if (role === 'Lojista') setActiveTab('profile'); 
+                            else if (role === 'ADM') setActiveTab('admin_panel'); 
+                            else if (role === 'Designer') setActiveTab('designer_panel');
+                            else setActiveTab('home'); 
+                          }} 
+                          className={`w-full p-5 rounded-[1.5rem] border text-left transition-all ${viewMode === role ? 'bg-white text-black' : 'bg-white/5 border-white/5 text-white'}`}
+                        >
+                            <div className="flex items-center justify-between"><span className="font-black uppercase">{role}</span>{role === 'Designer' && <Palette size={16} className="text-indigo-400" />}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
-
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
-          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">
-            Patrocinador Master
-          </p>
-          <p className="text-lg font-display font-bold text-white tracking-wide">
-            Grupo Esquematiza
-          </p>
-        </div>
-      </div>
     );
-  }
+  };
 
   return (
-    <NeighborhoodProvider>
-      <Layout activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole}>
-        {activeTab === 'home' && (
-          <div className="bg-gradient-to-b from-[#1E5BFF] to-[#001D4A] min-h-full">
-            <Header 
-              onNotificationClick={() => handleNavigate('notifications')}
-              user={user}
+    <div className={theme === 'dark' ? 'dark' : ''}>
+      <NeighborhoodProvider>
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
+          
+          {isClaimFlowActive && storeToClaim && user && (
+            <StoreClaimFlow 
+              store={storeToClaim} 
+              userId={user.id} 
+              onBack={() => setIsClaimFlowActive(false)} 
+              onSuccess={handleClaimSuccess}
               onNavigate={handleNavigate}
-              activeTab={activeTab}
-              onOpenJota={handleOpenJota}
             />
-            <HomeFeed 
-              onNavigate={handleNavigate}
-              onSelectCategory={handleSelectCategory}
-              onStoreClick={(s) => { setSelectedStore(s); handleNavigate('store_detail'); }}
-              onOpenJota={handleOpenJota}
-              stores={STORES}
-              user={user}
-              userRole={userRole}
-              searchTerm={globalSearch}
-              onSearchChange={setGlobalSearch}
-              onOpenMoreCategories={() => setIsMoreCategoriesOpen(true)}
-            />
+          )}
+
+          <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-500 ease-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+              <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
+                  {!headerExclusionList.includes(activeTab) && (
+                    <Header isSticky={true} isDarkMode={theme === 'dark'} toggleTheme={() => {}} onAuthClick={() => setIsAuthOpen(true)} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onOpenMoreCategories={() => setIsMoreCategoriesOpen(true)} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                  )}
+                  <main className="w-full mx-auto">
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onOpenJota={handleOpenJota} />}
+                    {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
+                    
+                    {activeTab === 'services_landing' && <ServicesLandingView onBack={() => handleNavigate('home')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'services' && <ServicesView onNavigate={(view) => handleNavigate(view)} onOpenChat={(id: string) => { setActiveServiceRequestId(id); handleNavigate('service_messages_list'); }} />}
+
+                    {activeTab === 'service_messages_list' && (
+                        <ServiceMessagesListView 
+                            onBack={() => handleNavigate('home')}
+                            onOpenChat={(reqId, proId) => handleNavigate('service_chat', { requestId: reqId, professionalId: proId, role: 'resident' })}
+                        />
+                    )}
+
+                    {activeTab === 'weekly_reward_page' && (
+                        <WeeklyRewardPage 
+                            onBack={() => handleNavigate('home')} 
+                            onNavigate={handleNavigate}
+                        />
+                    )}
+                    
+                    {activeTab === 'coupon_landing' && (
+                        <CouponLandingView 
+                           onBack={() => handleNavigate('home')}
+                           onLogin={() => setIsAuthOpen(true)}
+                        />
+                    )}
+
+                    {activeTab === 'user_coupons' && (
+                        <UserCupomScreen 
+                            onBack={() => handleNavigate('profile')}
+                            onNavigate={handleNavigate}
+                            onStoreClick={handleSelectStore}
+                        />
+                    )}
+
+                    {activeTab === 'user_statement' && (
+                        <UserStatementView 
+                            onBack={() => handleNavigate('profile')}
+                            onExploreStores={() => handleNavigate('explore')}
+                        />
+                    )}
+
+                    {activeTab === 'notifications' && (
+                        <NotificationsView 
+                            onBack={() => handleNavigate('home')}
+                            onNavigate={handleNavigate}
+                            userRole={userRole as any}
+                        />
+                    )}
+
+                    {activeTab === 'banner_sales_wizard' && (
+                        <BannerSalesWizard 
+                            user={user} 
+                            onBack={() => handleNavigate('profile')} 
+                            onNavigate={handleNavigate}
+                        />
+                    )}
+                    
+                    {activeTab === 'store_ads_module' && (
+                        <StoreAdsModule 
+                           onBack={() => handleNavigate('profile')}
+                           onNavigate={handleNavigate}
+                           categoryName={undefined}
+                           user={user}
+                           viewMode={viewMode}
+                           initialView={initialModuleView}
+                        />
+                    )}
+                    
+                    {activeTab === 'store_sponsored' && (
+                        <StoreSponsoredAds 
+                           onBack={() => handleNavigate('profile')}
+                           onNavigate={handleNavigate}
+                        />
+                    )}
+
+                    {activeTab === 'category_banner_sales' && (
+                        <CategoryBannerSalesView 
+                            user={user} 
+                            onBack={() => handleNavigate('profile')} 
+                            onSuccess={() => handleNavigate('profile')}
+                        />
+                    )}
+
+                    {activeTab === 'category_detail' && selectedCategory && (
+                      <CategoryView 
+                        category={selectedCategory} 
+                        onBack={() => handleNavigate('home')} 
+                        onStoreClick={handleSelectStore} 
+                        stores={STORES} 
+                        userRole={userRole as any} 
+                        onAdvertiseInCategory={() => {}} 
+                        onNavigate={handleNavigate}
+                        onSubcategoryClick={(subName) => handleSelectSubcategory(subName, selectedCategory)}
+                      />
+                    )}
+
+                    {activeTab === 'subcategory_detail' && selectedSubcategoryName && selectedCategory && (
+                      <SubcategoryDetailView 
+                        subcategoryName={selectedSubcategoryName}
+                        categoryName={selectedCategory.name}
+                        onBack={() => handleNavigate('category_detail')}
+                        onStoreClick={handleSelectStore}
+                        stores={STORES}
+                        userRole={userRole as any}
+                        onNavigate={handleNavigate}
+                      />
+                    )}
+                    
+                    {activeTab === 'profile' && (
+                      isMerchantMode 
+                        ? <StoreAreaView 
+                            onBack={() => handleNavigate('home')} 
+                            onNavigate={handleNavigate} 
+                            user={user as any} 
+                          />
+                        : <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
+                    )}
+
+                    {activeTab === 'user_profile_full' && (
+                        <UserProfileFullView onBack={() => handleNavigate('profile')} onEdit={() => handleNavigate('edit_profile_view')} />
+                    )}
+
+                    {activeTab === 'edit_profile_view' && user && (
+                        <EditProfileView user={user} onBack={() => handleNavigate('user_profile_full')} />
+                    )}
+                    
+                    {activeTab === 'merchant_panel' && <MerchantPanel onBack={() => handleNavigate('profile')} />}
+
+                    {activeTab === 'store_profile' && (
+                      <StoreProfileEdit 
+                        onBack={() => handleNavigate('profile')} 
+                      />
+                    )}
+
+                    {activeTab === 'merchant_performance' && <MerchantPerformanceDashboard onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
+                    {activeTab === 'merchant_leads' && <MerchantLeadsView isAdmin={isAdmin} onBack={() => handleNavigate('profile')} onOpenChat={(id: string) => { handleNavigate('service_chat', { requestId: id, role: 'merchant' }); }} />}
+                    
+                    {activeTab === 'merchant_reviews' && (
+                        <MerchantReviewsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'merchant_coupons' && (
+                        <MerchantCouponsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'merchant_promotions' && (
+                        <MerchantPromotionsModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'store_finance' && (
+                        <StoreFinanceModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'store_support' && (
+                        <StoreSupportModule onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'jpa_connect' && (
+                        <JPAConnectSalesView onBack={() => handleNavigate('profile')} />
+                    )}
+
+                    {activeTab === 'service_chat' && activeServiceRequestId && (
+                        <ServiceChatView 
+                            requestId={activeServiceRequestId} 
+                            professionalId={activeProfessionalId || ''}
+                            userRole={chatRole} 
+                            onBack={() => {
+                                if (activeServiceRequestId.startsWith('DSG-') || activeServiceRequestId.startsWith('MASTER-')) {
+                                    handleNavigate('home');
+                                } else {
+                                    handleNavigate(isMerchantMode ? 'merchant_leads' : 'service_messages_list');
+                                }
+                            }} 
+                        />
+                    )}
+
+                    {activeTab === 'admin_panel' && <AdminPanel user={user as any} onLogout={signOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} onOpenMonitorChat={(id: string) => { setActiveServiceRequestId(id); setChatRole('admin'); handleNavigate('service_chat'); }} initialTab={adminInitialTab} />}
+                    
+                    {activeTab === 'designer_panel' && user && (
+                      <DesignerPanel user={user} onBack={() => handleNavigate('home')} />
+                    )}
+                    
+                    {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} onNavigate={handleNavigate} />}
+                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'classified_search_results' && <ClassifiedSearchResultsView searchTerm={classifiedSearchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate_detail' && selectedProperty && <RealEstateDetailView property={selectedProperty} onBack={() => handleNavigate('real_estate')} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'classified_detail' && selectedClassified && <ClassifiedDetailView item={selectedClassified} onBack={() => handleNavigate(previousTab)} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={handleSelectJob} onNavigate={handleNavigate} />}
+                    {activeTab === 'job_wizard' && <JobWizard user={user} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
+                    {activeTab === 'job_detail' && selectedJob && <JobDetailView job={selectedJob} onBack={() => handleNavigate('jobs')} />}
+                    {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('profile')} onSuccess={handlePlanSuccess} />}
+                    {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={user} onRequireLogin={() => setIsAuthOpen(true)} userRole={userRole} onNavigate={handleNavigate} />}
+                    {activeTab === 'saved_posts' && <SavedPostsView onBack={() => handleNavigate('profile')} onStoreClick={handleSelectStore} onRequireLogin={() => setIsAuthOpen(true)} />}
+                    
+                    {activeTab === 'sponsor_info' && <SponsorInfoView onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
+                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
+                    
+                    {activeTab === 'user_activity' && <UserActivityView type={activityType} onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'my_neighborhoods' && <MyNeighborhoodsView onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'privacy_policy' && <PrivacyView onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'app_suggestion' && <AppSuggestionView user={user as any} onBack={() => handleNavigate('profile')} />}
+
+                    {activeTab === 'about' && <AboutView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'support' && <SupportView onBack={() => handleNavigate(previousTab)} />}
+                    {activeTab === 'favorites' && <FavoritesView onBack={() => handleNavigate(previousTab)} user={user} onNavigate={handleNavigate} />}
+                    {activeTab === 'about_app' && <AboutAppView onBack={() => handleNavigate('profile')} />}
+                  </main>
+                  <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user as any} />
+              </Layout>
+              <RoleSwitcherModal />
+              <JotaAssistant 
+                isOpen={isJotaOpen}
+                onClose={handleCloseJota}
+                onNavigate={handleNavigate}
+                initialMessage={jotaInitialMessage}
+              />
+              <MoreCategoriesModal isOpen={isMoreCategoriesOpen} onClose={() => setIsMoreCategoriesOpen(false)} onSelectCategory={handleSelectCategory} />
           </div>
-        )}
-        
-        {activeTab === 'explore' && (
-          <ExploreView 
-            stores={STORES} 
-            searchQuery={globalSearch}
-            onStoreClick={(s) => { setSelectedStore(s); handleNavigate('store_detail'); }}
-            onLocationClick={() => {}}
-            onFilterClick={() => {}}
-            onOpenPlans={() => handleNavigate('plan_selection')}
-            onNavigate={handleNavigate}
-          />
-        )}
 
-        {activeTab === 'category_detail' && selectedCategory && (
-          <CategoryView 
-            category={selectedCategory} 
-            onBack={() => handleNavigate(previousTab)} 
-            onStoreClick={(s) => { setSelectedStore(s); handleNavigate('store_detail'); }}
-            stores={STORES}
-            userRole={userRole}
-            onAdvertiseInCategory={() => {}}
-            onNavigate={handleNavigate}
-            onSubcategoryClick={(subName) => { setSelectedSubcategoryName(subName); handleNavigate('subcategory_detail'); }}
-          />
-        )}
-
-        {activeTab === 'subcategory_detail' && selectedSubcategoryName && selectedCategory && (
-          <SubcategoryDetailView 
-            subcategoryName={selectedSubcategoryName}
-            categoryName={selectedCategory.name}
-            onBack={() => handleNavigate('category_detail')}
-            onStoreClick={(s) => { setSelectedStore(s); handleNavigate('store_detail'); }}
-            stores={STORES}
-            userRole={userRole}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {activeTab === 'store_detail' && selectedStore && (
-          <StoreDetailView 
-            store={selectedStore} 
-            onBack={() => handleNavigate(previousTab)} 
-            onNavigate={handleNavigate}
-            onClaim={() => { setStoreToClaim(selectedStore); setIsClaimFlowActive(true); }}
-          />
-        )}
-
-        {activeTab === 'neighborhood_posts' && (
-          <NeighborhoodPostsView 
-            onBack={() => handleNavigate('home')}
-            onStoreClick={(s) => { setSelectedStore(s); handleNavigate('store_detail'); }}
-            user={user}
-            onRequireLogin={() => setIsAuthOpen(true)}
-            userRole={userRole}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {activeTab === 'classifieds' && (
-          <ClassifiedsView 
-            onBack={() => handleNavigate('home')}
-            onNavigate={handleNavigate}
-            user={user}
-            onRequireLogin={() => setIsAuthOpen(true)}
-          />
-        )}
-
-        {activeTab === 'profile' && (
-          <MenuView 
-            user={user}
-            userRole={userRole}
-            onAuthClick={() => setIsAuthOpen(true)}
-            onNavigate={handleNavigate}
-            onBack={() => handleNavigate('home')}
-          />
-        )}
-
-        {activeTab === 'store_area' && (
-          <StoreAreaView 
-            onBack={() => handleNavigate('profile')}
-            onNavigate={handleNavigate}
-            user={user}
-          />
-        )}
-
-        {activeTab === 'admin_panel' && isAdmin && (
-          <AdminPanel 
-            onLogout={signOut}
-            viewMode={viewMode}
-            onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)}
-            onNavigateToApp={handleNavigate}
-            onOpenMonitorChat={(id: string) => handleNavigate('service_chat', { requestId: id })}
-            initialTab={adminInitialTab}
-          />
-        )}
-
-        {activeTab === 'plan_selection' && (
-          <PlanSelectionView 
-            onBack={() => handleNavigate(previousTab)}
-            onSuccess={() => handleNavigate('store_area')}
-          />
-        )}
-
-        {activeTab === 'classified_detail' && selectedClassified && (
-          <ClassifiedDetailView 
-            item={selectedClassified} 
-            onBack={() => handleNavigate(previousTab)} 
-            onRequireLogin={() => setIsAuthOpen(true)}
-            user={user}
-          />
-        )}
-
-        {activeTab === 'jobs' && (
-          <JobsView 
-            onBack={() => handleNavigate('classifieds')}
-            onJobClick={(j) => { setSelectedJob(j); handleNavigate('job_detail'); }}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {activeTab === 'job_detail' && selectedJob && (
-          <JobDetailView 
-            job={selectedJob} 
-            onBack={() => handleNavigate(previousTab)} 
-          />
-        )}
-
-        {activeTab === 'real_estate' && (
-          <RealEstateView 
-            onBack={() => handleNavigate('classifieds')}
-            user={user}
-            onRequireLogin={() => setIsAuthOpen(true)}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {activeTab === 'real_estate_detail' && selectedProperty && (
-          <RealEstateDetailView 
-            property={selectedProperty} 
-            onBack={() => handleNavigate(previousTab)} 
-            onRequireLogin={() => setIsAuthOpen(true)}
-            user={user}
-          />
-        )}
-
-        {activeTab === 'notifications' && (
-          <NotificationsView 
-            onBack={() => handleNavigate(previousTab)}
-            onNavigate={handleNavigate}
-            userRole={userRole}
-          />
-        )}
-
-        {activeTab === 'user_coupons' && (
-          <UserCupomScreen 
-            onBack={() => handleNavigate('home')}
-            onNavigate={handleNavigate}
-            onStoreClick={(s) => { setSelectedStore(s); handleNavigate('store_detail'); }}
-          />
-        )}
-
-        {activeTab === 'weekly_reward_page' && (
-          <WeeklyRewardPage 
-            onBack={() => handleNavigate('home')}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {activeTab === 'user_profile_full' && user && (
-          <UserProfileFullView 
-            onBack={() => handleNavigate('profile')}
-            onEdit={() => handleNavigate('edit_profile_view')}
-          />
-        )}
-
-        {activeTab === 'edit_profile_view' && user && (
-          <EditProfileView 
-            user={user}
-            onBack={() => handleNavigate('user_profile_full')}
-          />
-        )}
-
-        {activeTab === 'store_ads_module' && (
-            <StoreAdsModule 
-               onBack={() => handleNavigate('profile')}
-               onNavigate={handleNavigate}
-               user={user}
-               initialView={initialModuleView}
-            />
-        )}
-
-        {activeTab === 'merchant_coupons' && (
-            <MerchantCouponsModule onBack={() => handleNavigate('profile')} />
-        )}
-
-        {activeTab === 'service_chat' && activeServiceRequestId && (
-            <ServiceChatView 
-                requestId={activeServiceRequestId} 
-                professionalId={activeProfessionalId || ''}
-                userRole={chatRole} 
-                onBack={() => handleNavigate('home')} 
-            />
-        )}
-
-        {activeTab === 'patrocinador_master' && (
-            <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />
-        )}
-
-        {activeTab === 'services_landing' && (
-            <ServicesLandingView onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />
-        )}
-
-        {activeTab === 'service_messages_list' && (
-            <ServiceMessagesListView 
-                onBack={() => handleNavigate('home')}
-                onOpenChat={(reqId, proId) => handleNavigate('service_chat', { requestId: reqId, professionalId: proId, role: 'resident' })}
-            />
-        )}
-        
-        {activeTab === 'coupon_landing' && (
-            <CouponLandingView 
-               onBack={() => handleNavigate('home')}
-               onLogin={() => setIsAuthOpen(true)}
-            />
-        )}
-
-        <MoreCategoriesModal 
-          isOpen={isMoreCategoriesOpen}
-          onClose={() => setIsMoreCategoriesOpen(false)}
-          onSelectCategory={handleSelectCategory}
-        />
-      </Layout>
-
-      <JotaAssistant 
-        isOpen={isJotaOpen} 
-        onClose={() => setIsJotaOpen(false)} 
-        onNavigate={handleNavigate}
-        initialMessage={jotaInitialQuery}
-      />
-
-      <AuthModal 
-        isOpen={isAuthOpen} 
-        onClose={() => setIsAuthOpen(false)} 
-        user={user} 
-      />
-
-      {isRoleSwitcherOpen && (
-        <div className="fixed inset-0 z-[200] bg-black/60 flex items-center justify-center p-6 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 w-full max-sm rounded-[2.5rem] p-8 shadow-2xl">
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6 text-center">Alternar Visão</h2>
-            <div className="grid gap-3">
-              {(['ADM', 'Usuário', 'Lojista', 'Designer'] as RoleMode[]).map(mode => (
-                <button 
-                  key={mode}
-                  onClick={() => { setViewMode(mode); localStorage.setItem('admin_view_mode', mode); setIsRoleSwitcherOpen(false); }}
-                  className={`py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all ${viewMode === mode ? 'bg-[#1E5BFF] text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}
-                >
-                  {mode}
-                </button>
-              ))}
+          {splashStage < 4 && (
+            <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500 ease-out bg-gradient-to-br from-[#1E5BFF] to-[#001D4A] relative overflow-hidden ${splashStage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+              <div className="absolute top-0 left-0 w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent animate-bg-shine opacity-50"></div>
+              
+              <div className="flex flex-col items-center animate-splash-logo-enter text-center px-4" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+                  <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8"><MapPin className="w-16 h-16 text-brand-blue fill-brand-blue" /></div>
+                  <h1 className="text-4xl font-black font-display text-white tracking-tighter drop-shadow-md">
+                    Localizei JPA
+                  </h1>
+                  <p className="text-lg font-medium text-white/90 mt-2 h-8 flex items-center justify-center font-sans">
+                    {sloganText}
+                    {isTyping && <span className="animate-blink ml-1">|</span>}
+                  </p>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 text-center pb-12 animate-in fade-in duration-1000 delay-1000 fill-mode-backwards">
+                <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em]">Patrocinador Master</p>
+                <p className="text-base font-display font-bold text-white/70 mt-2 tracking-wide">Grupo Esquematiza</p>
+              </div>
             </div>
-            <button onClick={() => setIsRoleSwitcherOpen(false)} className="w-full mt-6 py-4 text-gray-400 font-bold uppercase text-[10px]">Cancelar</button>
-          </div>
+          )}
         </div>
-      )}
-
-      {isClaimFlowActive && storeToClaim && (
-        <StoreClaimFlow 
-          store={storeToClaim} 
-          userId={user?.id || ''} 
-          onBack={() => setIsClaimFlowActive(false)}
-          onSuccess={() => { setIsClaimFlowActive(false); handleNavigate('store_area'); }}
-          onNavigate={handleNavigate}
-        />
-      )}
-    </NeighborhoodProvider>
+      </NeighborhoodProvider>
+    </div>
   );
 };
-
 export default App;
