@@ -42,6 +42,33 @@ interface StoreProfileEditProps {
   onBack: () => void;
 }
 
+/* Added FormField component to resolve missing name error */
+const FormField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  type?: string;
+  required?: boolean;
+  icon?: React.ElementType;
+}> = ({ label, value, onChange, placeholder, type = "text", required, icon: Icon }) => (
+  <div className="space-y-1.5">
+    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <div className="relative group">
+      {Icon && <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1E5BFF]" />}
+      <input 
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full bg-blue-50/50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF] transition-all ${Icon ? 'pl-11' : ''}`}
+      />
+    </div>
+  </div>
+);
+
 const WEEK_DAYS = [
   { key: 'segunda', label: 'Segunda-feira' },
   { key: 'terca', label: 'Terça-feira' },
@@ -353,7 +380,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
 
       </div>
       
-      <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />
+      <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
 
       {showSuccess && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
