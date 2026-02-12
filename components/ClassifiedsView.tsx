@@ -149,7 +149,7 @@ interface CategoryBlockProps {
 
 const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemClick, onAnunciar, onViewAll, subtitle, ctaLabel }) => {
     return (
-        <section className="py-8 border-b border-gray-100 dark:border-gray-800 last:border-0">
+        <section className="py-8 border-b border-gray-100 dark:border-gray-800 last:border-0 px-5">
             <div className="flex items-center justify-between mb-6 px-1">
                 <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-2xl ${category.color} flex items-center justify-center text-white shadow-lg`}>
@@ -239,9 +239,9 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             <ChevronLeft size={20} />
           </button>
           
-          <div className="flex-1 min-w-0">
+          <div className="text-center flex-1 min-w-0">
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Classificados</h1>
-            <p className="text-[10px] text-blue-50 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -283,10 +283,10 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         </div>
       </header>
 
-      <main className="p-5 space-y-4">
+      <main className="pt-5 space-y-4">
         
         {/* BOTÕES DE CATEGORIA RÁPIDOS */}
-        <div className="grid grid-cols-3 gap-4 mb-8 mt-2">
+        <div className="grid grid-cols-3 gap-4 mb-8 mt-2 px-5">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton key={cat.id} category={cat} onClick={() => onNavigate(cat.slug)} />
             ))}
@@ -353,7 +353,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         />
 
         {/* BANNER PATROCINADOR MASTER FINAL */}
-        <section className="mt-8">
+        <section className="mt-8 px-5">
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
         </section>
       </main>

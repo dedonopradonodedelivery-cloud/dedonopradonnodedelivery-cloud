@@ -95,7 +95,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
   return (
     <div className="min-h-screen bg-[#F8F9FB] dark:bg-gray-950 font-sans animate-in fade-in duration-500 pb-32">
       
-      <div className="bg-white dark:bg-gray-900 px-6 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+      <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-8 border-b border-gray-100 dark:border-gray-800 shadow-sm mb-8">
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-xl overflow-hidden shrink-0">
             <img src={avatarUrl} alt={storeName} className="w-full h-full object-cover" />
@@ -117,7 +117,7 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
         </button>
       </div>
 
-      <div className="px-6 space-y-10">
+      <div className="px-5 space-y-10">
         
         <section>
           <SectionHeader title="Ações de Crescimento" icon={Sparkles} />

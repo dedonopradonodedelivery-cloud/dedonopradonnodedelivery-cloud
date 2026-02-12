@@ -138,7 +138,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
   if (step === 'form') {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 animate-in fade-in duration-500 flex flex-col">
-        <header className="px-6 pt-12 pb-4 flex items-center gap-4 border-b border-gray-50 dark:border-gray-900 bg-white dark:bg-gray-950 sticky top-0 z-40">
+        <header className="px-5 pt-12 pb-4 flex items-center gap-4 border-b border-gray-50 dark:border-gray-900 bg-white dark:bg-gray-950 sticky top-0 z-40">
           <button onClick={() => onNavigate('classifieds')} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 active:scale-90 transition-all"><ChevronLeft size={20}/></button>
           <div>
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Pedir Orçamento</h1>
@@ -146,7 +146,7 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ onNavigate, onOpenCh
           </div>
         </header>
 
-        <main className="flex-1 p-6 space-y-8 no-scrollbar overflow-y-auto">
+        <main className="flex-1 p-5 space-y-8 no-scrollbar overflow-y-auto">
           {/* Bloco Informativo Topo */}
           <section className="p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 flex gap-4">
             <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />

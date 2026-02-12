@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, Save, Palette, Type, Layout, Sparkles, 
@@ -183,9 +184,9 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </button>
       </header>
       
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Sidebar de Ferramentas */}
-        <aside className="w-80 bg-slate-950/80 border-r border-white/5 flex flex-col shrink-0">
+        <aside className="w-full lg:w-80 bg-slate-950/80 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col shrink-0">
           <nav className="flex border-b border-white/5 p-2 gap-1">
             {[
               { id: 'content', icon: Type, label: 'Texto' },
@@ -344,12 +345,12 @@ export const StoreBannerEditor: React.FC<StoreBannerEditorProps> = ({ storeName,
         </aside>
 
         {/* Palco de Visualização (Preview) */}
-        <main className="flex-1 flex items-center justify-center p-12 bg-[#020617] relative">
+        <main className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-[#020617] relative">
           {/* Background Decorativo do Stage */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
           
-          <div className="w-full max-w-4xl relative perspective-1000">
-            <div className="relative transform transition-all duration-700 hover:rotate-0">
+          <div className="w-full max-w-4xl relative perspective-1000 aspect-video">
+            <div className="relative transform transition-all duration-700 hover:rotate-0 w-full h-full">
                <BannerPreview config={config} storeName={storeName} storeLogo={storeLogo} />
             </div>
             
