@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../types';
@@ -15,13 +15,22 @@ const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
       d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z"
       fill="url(#paint0_linear_jota_avatar)"
     />
-    {/* --- NOVO AVATAR DO JOTA --- */}
+    {/* --- NOVO AVATAR DO JOTA (v2 com boca e dentes) --- */}
     <path 
-      d="M9 25 C11 19, 14 15, 20 14 L30 16 C34 17, 34 20, 31 21 L23 23 C18 26, 12 28, 9 25 Z" 
+      d="M9 22 C12 16, 15 13, 20 12 L30 14 C34 15, 35 17, 32 18 L23 20 C18 23, 12 25, 9 22 Z"
       fill="white"
     />
-    <circle cx="21" cy="17" r="2" fill="#1E5BFF"/>
-    <circle cx="21.8" cy="16.2" r="0.6" fill="white"/>
+    <path 
+      d="M10 25 C15 27, 22 28, 30 27 L31 25 C25 23, 15 23, 10 25 Z"
+      fill="white"
+    />
+    {/* Dentes sutis (preenchidos com a cor do fundo para parecerem vãos) */}
+    <path d="M18 22.5 L19 23.5 L20 22.5 Z" fill="#1E5BFF" />
+    <path d="M22 22.5 L23 23.5 L24 22.5 Z" fill="#1E5BFF" />
+    <path d="M26 22.5 L27 23.5 L28 22.5 Z" fill="#1E5BFF" />
+    {/* Olho */}
+    <circle cx="21" cy="15.5" r="2" fill="#1E5BFF"/>
+    <circle cx="21.8" cy="14.7" r="0.6" fill="white"/>
     {/* --- FIM DO NOVO AVATAR --- */}
     <defs>
       <linearGradient
@@ -42,11 +51,16 @@ const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o Jota 🐊, seu assistente virtual do bairro. Como posso te ajudar a encontrar o que precisa em Jacarepaguá hoje?' }
+    { role: 'model', text: 'Olá! Sou o Jota 🐊, seu assistente virtual do bairro. Como posso te ajudar a encontrar o que precisa em Jacarepaguá hoje?', type: 'response' }
   ]);
   const [input, setInput] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const isBotThinking = useMemo(() => {
+    if (messages.length === 0) return false;
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage.role === 'model' && (lastMessage.type === 'typing' || lastMessage.type === 'intermediate');
+  }, [messages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -54,18 +68,40 @@ export const GeminiAssistant: React.FC = () => {
     }
   }, [messages, isOpen]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    
-    const userMsg = input;
+  const handleSend = async (retryMessage?: string) => {
+    const userMsg = retryMessage || input;
+    if (!userMsg.trim()) return;
+
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    setIsThinking(true);
+    
+    const newMessages: ChatMessage[] = [];
+    if (!retryMessage) {
+      newMessages.push({ role: 'user', text: userMsg, type: 'response' });
+    }
+    newMessages.push({ role: 'model', type: 'typing' });
+    setMessages(prev => [...prev, ...newMessages]);
+
+    const intermediateTimer = setTimeout(() => {
+        setMessages(prev => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage && lastMessage.type === 'typing') {
+                const intermediateMessages = ["Boa 👍 Já entendi...", "Perfeito 😌 Só um instante...", "Deixa comigo..."];
+                const randomMsg = intermediateMessages[Math.floor(Math.random() * intermediateMessages.length)];
+                const newMessages = [...prev.slice(0, -1)];
+                newMessages.push({ role: 'model', text: randomMsg, type: 'intermediate' });
+                return newMessages;
+            }
+            return prev;
+        });
+    }, 1800);
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-    try {
-      const systemInstruction = `Você é o Jota 🐊, um assistente virtual em formato de jacaré estilizado, mascote do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
+    const apiCallPromise = ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: userMsg,
+      config: {
+        systemInstruction: `Você é o Jota 🐊, um assistente virtual em formato de jacaré estilizado, mascote do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
 
 **TOM E ESTILO (OBRIGATÓRIO):**
 - **Natural e Moderno:** Use uma linguagem fluida e atual, como um assistente digital de ponta.
@@ -100,31 +136,49 @@ export const GeminiAssistant: React.FC = () => {
   **Jota:** "Boa 👍 É para manutenção, guincho ou um orçamento?"
   
 - **Usuário:** "tem aluguel de jet ski na freguesia?"
-  **Jota:** "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?"`;
+  **Jota:** "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?"`,
+        temperature: 0.5,
+      },
+    });
+    
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 9000)
+    );
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: userMsg,
-        config: {
-          systemInstruction,
-          temperature: 0.5,
-        },
+    try {
+      const response: any = await Promise.race([apiCallPromise, timeoutPromise]);
+      clearTimeout(intermediateTimer);
+      setMessages(prev => {
+        const newMessages = [...prev.slice(0, -1)];
+        newMessages.push({ role: 'model', text: response.text || "Desculpe, não entendi.", type: 'response' });
+        return newMessages;
       });
+    } catch (error: any) {
+      clearTimeout(intermediateTimer);
+      
+      const errorMessageText = error.message === 'timeout'
+        ? "Tive uma pequena demora aqui 😕\nQuer tentar novamente?"
+        : "Ops, tive um problema técnico. Tente novamente mais tarde.";
 
-      const text = response.text;
-      setMessages(prev => [...prev, { role: 'model', text: text || "Desculpe, não entendi. Pode tentar de outra forma?" }]);
+      const errorMessage: ChatMessage = {
+        role: 'model',
+        text: errorMessageText,
+        type: 'error',
+        action: 'retry',
+        originalUserMessage: userMsg
+      };
 
-    } catch (error) {
+      setMessages(prev => {
+        const newMessages = [...prev.slice(0, -1)];
+        newMessages.push(errorMessage);
+        return newMessages;
+      });
       console.error("Gemini Assistant Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "Ops, tive um problema técnico. Tente novamente mais tarde." }]);
-    } finally {
-      setIsThinking(false);
     }
   };
 
   return (
     <>
-      {/* Bloco estático do Jota */}
       <div 
         onClick={() => setIsOpen(true)}
         className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-lg shadow-black/5 cursor-pointer transition-all active:scale-[0.99] group border border-gray-100 dark:border-gray-800 flex items-center gap-4"
@@ -139,11 +193,9 @@ export const GeminiAssistant: React.FC = () => {
         </div>
       </div>
 
-      {/* Chat Window */}
       {isOpen && (
         <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/50 p-4 pb-24 sm:pb-4">
           <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[600px] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors">
-            {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-4 flex justify-between items-center">
               <div className="flex items-center gap-3 text-white">
                 <JotaAvatar className="w-10 h-10" />
@@ -157,30 +209,41 @@ export const GeminiAssistant: React.FC = () => {
               </button>
             </div>
 
-            {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-950">
-              {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                    msg.role === 'user' 
-                      ? 'bg-blue-600 text-white rounded-br-none' 
-                      : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-              {isThinking && (
-                <div className="flex justify-start">
-                    <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Digitando...</span>
+              {messages.map((msg, idx) => {
+                if (msg.type === 'typing') {
+                    return (
+                        <div key={idx} className="flex justify-start">
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Digitando...</span>
+                            </div>
+                        </div>
+                    );
+                }
+                
+                return (
+                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+                        msg.role === 'user' 
+                          ? 'bg-blue-600 text-white rounded-br-none' 
+                          : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
+                      }`}>
+                        <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                        {msg.action === 'retry' && msg.originalUserMessage && (
+                            <button
+                                onClick={() => handleSend(msg.originalUserMessage)}
+                                className="mt-3 w-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold py-2.5 rounded-xl text-xs border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
+                            >
+                                Tentar Novamente
+                            </button>
+                        )}
+                      </div>
                     </div>
-                </div>
-              )}
+                );
+              })}
             </div>
 
-            {/* Input */}
             <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
               <form 
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
@@ -195,7 +258,7 @@ export const GeminiAssistant: React.FC = () => {
                 />
                 <button 
                   type="submit"
-                  disabled={isThinking || !input.trim()}
+                  disabled={isBotThinking || !input.trim()}
                   className="bg-blue-600 text-white p-3 rounded-full disabled:opacity-50 hover:bg-blue-700 transition-colors"
                 >
                   <Send className="w-5 h-5" />

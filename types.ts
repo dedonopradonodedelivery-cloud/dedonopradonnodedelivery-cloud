@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -145,7 +144,13 @@ export interface ServiceRequest { id: string; userId: string; userName: string; 
 export interface ServiceLead { id: string; requestId: string; merchantId: string; merchantName: string; merchantLogo?: string; status: 'new' | 'unlocked' | 'chatting' | 'finished' | 'lost' | 'pending_payment' | 'paid'; unlockedAt?: string; purchasedAt?: string; }
 export interface ServiceMessage { id: string; requestId: string; senderId: string; senderName: string; senderRole: 'resident' | 'merchant'; text: string; timestamp: string; }
 export interface Category { id: string; name: string; icon: React.ReactNode; color: string; slug: string; }
-export interface ChatMessage { role: 'user' | 'model'; text: string; }
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text?: string;
+  type?: 'typing' | 'intermediate' | 'error' | 'response';
+  action?: 'retry';
+  originalUserMessage?: string;
+}
 export interface Job { id: string; role: string; company: string; neighborhood: string; category: string; type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros'; salary?: string; description: string; requirements: string[]; benefits?: string[]; postedAt: string; isUrgentToday?: boolean; schedule?: string; contactWhatsapp?: string; isSponsored?: boolean; sponsoredUntil?: string; isUrgent?: boolean; logoUrl?: string; candidacy_method?: 'cv' | 'whatsapp'; modality?: 'Presencial' | 'Híbrido' | 'Remoto'; experience?: string; schedule_type?: 'Integral' | 'Meio período' | 'Escala'; isVerified?: boolean; isVerifiedMerchant?: boolean; }
 export interface NeighborhoodCommunity { id: string; name: string; description: string; image: string; icon: React.ReactNode; color: string; membersCount: string; type?: 'official' | 'user'; }
 export interface Story { id: string; name: string; image: string; }
