@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Header } from '@/components/Header';
@@ -115,13 +114,16 @@ const App: React.FC = () => {
 
   const [sloganText, setSloganText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullSlogan = 'Seu bairro na palma da mão. ✋';
-
-  const isAdmin = user?.email === ADMIN_EMAIL;
-  const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
+  const fullSlogan = 'Seu bairro, na sua mão.';
 
   const [isClaimFlowActive, setIsClaimFlowActive] = useState(false);
   const [storeToClaim, setStoreToClaim] = useState<Store | null>(null);
+
+  // FIX: The 'isAdmin' variable was used before it was declared.
+  // It has been moved here from the bottom of the component along with
+  // 'isMerchantMode' which depends on it.
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isMerchantMode = userRole === 'lojista' || (isAdmin && viewMode === 'Lojista');
 
   useEffect(() => {
     const handleUrlRouting = () => {
@@ -337,11 +339,10 @@ const App: React.FC = () => {
           <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${splashStage >= 3 ? 'opacity-100' : 'opacity-0'}`}>
               <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                   {!headerExclusionList.includes(activeTab) && (
-                    // FIX: Changed onAuthClick={() => onNavigate('profile')} to onAuthClick={() => handleNavigate('profile')}
-                    <Header onAuthClick={() => handleNavigate('profile')} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} />
+                    <Header onAuthClick={() => handleNavigate('profile')} onNotificationClick={() => handleNavigate('notifications')} user={user} searchTerm={globalSearch} onSearchChange={setGlobalSearch} onNavigate={handleNavigate} activeTab={activeTab} userRole={userRole as any} stores={STORES} onStoreClick={handleSelectStore} isAdmin={isAdmin} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onSelectCategory={handleSelectCategory} />
                   )}
                   <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onSelectCategory={handleSelectCategory} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
                     {activeTab === 'feature_unavailable' && <FeatureUnavailableView onBack={() => handleNavigate('home')} />}
                     
@@ -526,7 +527,6 @@ const App: React.FC = () => {
                     )}
                     
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate(previousTab)} onClaim={() => handleClaimStore(selectedStore)} onNavigate={handleNavigate} />}
-                    {/* FIX: Changed onNavigate={onNavigate} to onNavigate={handleNavigate} */}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user} onRequireLogin={() => setIsAuthOpen(true)} />}
                     {activeTab === 'classified_search_results' && <ClassifiedSearchResultsView searchTerm={classifiedSearchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
                     {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthOpen(true)} onNavigate={handleNavigate} />}

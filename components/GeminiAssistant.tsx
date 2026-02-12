@@ -4,10 +4,45 @@ import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { STORES } from '../constants';
 
+const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    className={className}
+    viewBox="0 0 40 40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z"
+      fill="url(#paint0_linear_jota_avatar)"
+    />
+    {/* --- NOVO AVATAR DO JOTA --- */}
+    <path 
+      d="M9 25 C11 19, 14 15, 20 14 L30 16 C34 17, 34 20, 31 21 L23 23 C18 26, 12 28, 9 25 Z" 
+      fill="white"
+    />
+    <circle cx="21" cy="17" r="2" fill="#1E5BFF"/>
+    <circle cx="21.8" cy="16.2" r="0.6" fill="white"/>
+    {/* --- FIM DO NOVO AVATAR --- */}
+    <defs>
+      <linearGradient
+        id="paint0_linear_jota_avatar"
+        x1="0"
+        y1="0"
+        x2="40"
+        y2="40"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#4D8BFF" />
+        <stop offset="1" stopColor="#1E5BFF" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o Jota 🤖, seu assistente virtual. Posso te ajudar a encontrar serviços, produtos ou informações da comunidade em Jacarepaguá.' }
+    { role: 'model', text: 'Olá! Sou o Jota 🐊, seu assistente virtual do bairro. Como posso te ajudar a encontrar o que precisa em Jacarepaguá hoje?' }
   ]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -30,7 +65,7 @@ export const GeminiAssistant: React.FC = () => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     try {
-      const systemInstruction = `Você é o Jota 🤖, um assistente virtual do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
+      const systemInstruction = `Você é o Jota 🐊, um assistente virtual em formato de jacaré estilizado, mascote do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
 
 **TOM E ESTILO (OBRIGATÓRIO):**
 - **Natural e Moderno:** Use uma linguagem fluida e atual, como um assistente digital de ponta.
@@ -89,29 +124,32 @@ export const GeminiAssistant: React.FC = () => {
 
   return (
     <>
-      {/* FAB */}
-      <button
+      {/* Bloco estático do Jota */}
+      <div 
         onClick={() => setIsOpen(true)}
-        className={`${isOpen ? 'hidden' : 'flex'} fixed bottom-24 right-4 z-50 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-xl transition-all duration-300 animate-bounce`}
+        className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-lg shadow-black/5 cursor-pointer transition-all active:scale-[0.99] group border border-gray-100 dark:border-gray-800 flex items-center gap-4"
       >
-        <MessageCircle className="w-8 h-8" />
-        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-        </span>
-      </button>
+        <JotaAvatar className="w-16 h-16 flex-shrink-0" />
+        <div className="flex-1">
+            <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">Olá, eu sou o Jota!</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">O que você precisa no bairro agora?</p>
+            <div className="mt-3 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                Ex: eletricista, gás, indicação, ajuda…
+            </div>
+        </div>
+      </div>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:bg-black/50 p-4 pb-24 sm:pb-4">
+        <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/50 p-4 pb-24 sm:pb-4">
           <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[600px] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-4 flex justify-between items-center">
-              <div className="flex items-center gap-2 text-white">
-                <Sparkles className="w-5 h-5" />
+              <div className="flex items-center gap-3 text-white">
+                <JotaAvatar className="w-10 h-10" />
                 <div>
-                  <h3 className="font-bold text-lg">Assistente Localizei</h3>
-                  <p className="text-xs text-blue-100">IA Inteligente de JPA</p>
+                  <h3 className="font-bold text-lg">Jota, seu Assistente</h3>
+                  <p className="text-xs text-blue-100">Inteligência Artificial do Bairro</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">

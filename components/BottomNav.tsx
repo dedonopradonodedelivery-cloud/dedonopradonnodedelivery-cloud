@@ -33,13 +33,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
   }, [user, userRole]);
 
   // Lista completa de abas possíveis com seus respectivos mapeamentos de FeatureKey do ADM
-  // Item "Menu" removido da barra inferior
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
     { id: 'explore', icon: Compass, label: 'Guia', featureKey: 'explore_guide' },
     { id: 'cupom_trigger', icon: Ticket, label: 'Cupons', featureKey: 'coupons', badge: userRole !== 'lojista' ? hasActiveCoupons : false },
     { id: 'classifieds', icon: Newspaper, label: 'Classificados', featureKey: 'classifieds' },
-    { id: 'neighborhood_posts', icon: MessageSquare, label: 'Conversa', featureKey: 'community_feed' },
   ];
 
   // FILTRAGEM REAL: Só renderiza se a funcionalidade estiver ON no ADM

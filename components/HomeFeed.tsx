@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
@@ -45,6 +44,7 @@ import { HomeBannerCarousel } from '@/components/HomeBannerCarousel';
 import { FifaBanner } from '@/components/FifaBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
+import { GeminiAssistant } from '@/components/GeminiAssistant';
 
 // Imagens de fallback realistas e variadas (Bairro, Pessoas, Comércio, Objetos)
 const FALLBACK_IMAGES = [
@@ -681,7 +681,6 @@ const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({
 
 interface HomeFeedProps {
   onNavigate: (view: string, data?: any) => void;
-  onSelectCategory: (category: Category) => void;
   onStoreClick: (store: Store) => void;
   stores: Store[];
   user: User | null;
@@ -690,7 +689,6 @@ interface HomeFeedProps {
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ 
   onNavigate, 
-  onSelectCategory, 
   onStoreClick, 
   stores, 
   user, 
@@ -699,114 +697,20 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [listFilter, setListFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
   const { currentNeighborhood } = useNeighborhood();
   const { isFeatureActive } = useFeatures();
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
-  const itemsPerPage = 8; 
-  
-  // State for the "More" modal
-  const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
-
-  const orderedCategories = useMemo(() => {
-    // Definindo as 8 categorias principais para a primeira página
-    const firstPageIds = [
-      'cat-servicos', 
-      'cat-alimentacao', 
-      'cat-restaurantes', 
-      'cat-mercados', 
-      'cat-farmacias', 
-      'cat-autos', 
-      'cat-moda', 
-      'cat-beleza'
-    ];
-    
-    const firstPage = firstPageIds.map(id => CATEGORIES.find(c => c.id === id)).filter((c): c is Category => !!c);
-    const remaining = CATEGORIES.filter(c => !firstPageIds.includes(c.id));
-    return [...firstPage, ...remaining];
-  }, []);
-
-  const categoryPages = useMemo(() => {
-    // Configurar para 2 páginas: 15 categorias + botão Mais (total 16 itens, 8 por página)
-    const visibleCategories = orderedCategories.slice(0, 15);
-    
-    // Adicionar o botão "Mais" como último item
-    const moreItem: Category = { 
-        id: 'more-trigger', 
-        name: 'Mais', 
-        slug: 'more', 
-        icon: <Plus />, 
-        color: 'bg-gray-100 dark:bg-gray-800' 
-    };
-    
-    const allItems = [...visibleCategories, moreItem];
-    
-    const pages = [];
-    for (let i = 0; i < allItems.length; i += itemsPerPage) {
-        pages.push(allItems.slice(i, i + itemsPerPage));
-    }
-    
-    return pages;
-  }, [orderedCategories]);
 
   const [wizardStep, setWizardStep] = useState(0);
   const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+      
+      {/* JOTA BLOCK */}
+      <section className="px-4 pt-4 bg-white dark:bg-gray-950">
+        <GeminiAssistant />
+      </section>
+
       {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
-      {isFeatureActive('explore_guide') && (
-        <section className="w-full bg-white dark:bg-gray-950 pt-4 pb-0 relative z-10">
-            <div ref={categoryScrollRef} className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth" onScroll={() => { if (categoryScrollRef.current) setCurrentCategoryPage(Math.round(categoryScrollRef.current.scrollLeft / categoryScrollRef.current.clientWidth)); }}>
-            {categoryPages.map((pageCategories, pageIndex) => (
-                <div key={pageIndex} className="min-w-full px-4 pb-2 snap-center">
-                <div className="grid grid-cols-4 gap-1.5">
-                    {pageCategories.map((cat, index) => {
-                        // RENDERIZAÇÃO ESPECIAL PARA O BOTÃO "MAIS"
-                        if (cat.id === 'more-trigger') {
-                            return (
-                                <button 
-                                   key={cat.id} 
-                                   onClick={() => setIsMoreCategoriesOpen(true)}
-                                   className="flex flex-col items-center group active:scale-95 transition-all w-full"
-                                >
-                                    <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700`}> 
-                                       {/* Styling to look like "Add/More" */}
-                                       <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                         <Plus className="w-9 h-9 text-gray-400 dark:text-gray-500" strokeWidth={2.5} />
-                                       </div>
-                                       <span className="block w-full text-[8.5px] font-black text-gray-500 dark:text-gray-400 text-center uppercase tracking-tighter leading-none truncate">
-                                         Mais
-                                       </span>
-                                    </div>
-                                </button>
-                            );
-                        }
-
-                        // RENDERIZAÇÃO PADRÃO DE CATEGORIA
-                        return (
-                        <button key={`${cat.id}-${pageIndex}-${index}`} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center group active:scale-95 transition-all w-full">
-                            <div className={`w-full aspect-square rounded-[22px] shadow-sm flex flex-col items-center justify-center p-3 ${cat.color || 'bg-blue-600'} border border-white/20`}>
-                              <div className="flex-1 flex items-center justify-center w-full mb-1">
-                                {React.cloneElement(cat.icon as any, { className: "w-9 h-9 text-white drop-shadow-md", strokeWidth: 2.5 })}
-                              </div>
-                              <span className="block w-full text-[8.5px] font-black text-white text-center uppercase tracking-tighter leading-none truncate">
-                                {cat.name}
-                              </span>
-                            </div>
-                        </button>
-                        );
-                    })}
-                </div>
-                </div>
-            ))}
-            </div>
-            
-            <div className="flex justify-center gap-1.5 pb-6 pt-2">
-            {categoryPages.map((_, idx) => <div key={idx} className={`rounded-full transition-all duration-300 ${idx === currentCategoryPage ? 'bg-gray-800 dark:bg-white w-1.5 h-1.5' : 'bg-gray-300 dark:bg-gray-700 w-1.5 h-1.5'}`} />)}
-            </div>
-        </section>
-      )}
-
       {isFeatureActive('banner_highlights') && (
         <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
@@ -890,16 +794,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
       <LostAndFoundDetailModal 
           item={selectedLostItem} 
           onClose={() => setSelectedLostItem(null)} 
-      />
-
-      {/* Modal de Mais Categorias */}
-      <MoreCategoriesModal 
-          isOpen={isMoreCategoriesOpen}
-          onClose={() => setIsMoreCategoriesOpen(false)}
-          onSelectCategory={(category: Category) => {
-              setIsMoreCategoriesOpen(false);
-              onSelectCategory(category);
-          }}
       />
     </div>
   );
