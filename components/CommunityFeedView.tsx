@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -205,10 +206,20 @@ const CreatePostView: React.FC<{
         </div>
 
         {userRole === 'lojista' && (
-          <div className="mt-auto pt-4">
-            <label htmlFor="showOnProfile" className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
-              <input type="checkbox" id="showOnProfile" checked={showOnStoreProfile} onChange={(e) => setShowOnStoreProfile(e.target.checked)} className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
-              <span className="font-medium text-sm text-gray-800 dark:text-gray-200">Mostrar também no perfil da minha loja</span>
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">Opções de lojista</p>
+            <label htmlFor="showOnProfile" className="flex items-center gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 cursor-pointer border border-blue-100 dark:border-blue-800/30 transition-colors">
+              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${showOnStoreProfile ? 'bg-blue-600 border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}`}>
+                {showOnStoreProfile && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <input type="checkbox" id="showOnProfile" checked={showOnStoreProfile} onChange={(e) => setShowOnStoreProfile(e.target.checked)} className="hidden" />
+              <div className="flex-1">
+                 <span className="font-bold text-sm text-gray-800 dark:text-white flex items-center gap-2">
+                    <StoreIcon size={14} className="text-blue-500" /> 
+                    Publicar também no Feed da Loja
+                 </span>
+                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">O post aparecerá na aba "Feed" do seu perfil.</p>
+              </div>
             </label>
           </div>
         )}

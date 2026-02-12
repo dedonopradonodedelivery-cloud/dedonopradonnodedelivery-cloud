@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -152,11 +153,11 @@ export const GeminiAssistant: React.FC = () => {
     );
 
     try {
-// FIX: Changed response.text() to response.text to correctly access the text property.
       const response: GenerateContentResponse = await Promise.race([apiCallPromise, timeoutPromise]);
       clearTimeout(intermediateTimer);
       setMessages(prev => {
         const newMessages = [...prev.slice(0, -1)];
+// FIX: Changed response.text() to response.text to correctly access the text property.
         newMessages.push({ role: 'model', text: response.text || "Desculpe, não entendi.", type: 'response' });
         return newMessages;
       });

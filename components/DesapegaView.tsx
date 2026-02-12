@@ -111,7 +111,7 @@ const DesapegaCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
           </div>
         </div>
 
-        <div className="mt-auto flex items-end justify-between border-t border-gray-50 dark:border-gray-800 pt-4">
+        <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-800 flex items-end justify-between">
           <div>
             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Preço</p>
             <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 italic leading-none">

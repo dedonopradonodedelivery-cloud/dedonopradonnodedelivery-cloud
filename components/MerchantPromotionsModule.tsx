@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -85,7 +86,7 @@ export const MerchantPromotionsModule: React.FC<MerchantPromotionsModuleProps> =
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      // FIX: Cast the result of Array.from to File[] to resolve 'unknown' to 'Blob' assignment error in readAsDataURL
+// FIX: Cast the result of Array.from to File[] to resolve 'unknown' to 'Blob' assignment error in readAsDataURL
       const files = Array.from(e.target.files).slice(0, 6 - images.length) as File[];
       files.forEach(file => {
         const reader = new FileReader();

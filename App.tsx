@@ -222,7 +222,7 @@ const App: React.FC = () => {
             handleNavigate('user_coupons');
         }
     }
-  }, [user, userRole]);
+  }, [user, userRole, activeTab]);
 
   useEffect(() => {
     if (splashStage >= 4) {

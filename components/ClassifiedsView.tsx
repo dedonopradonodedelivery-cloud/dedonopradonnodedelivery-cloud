@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -303,7 +304,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
         />
 
         <CategoryBlock 
-            // FIX: Corrected line 307 to remove the reference to undefined 'categoryName'.
+// FIX: Corrected line 307 to remove the reference to undefined 'categoryName'.
             category={CLASSIFIED_CATEGORIES.find(c => c.id === 'imoveis')!} 
             items={realEstate} 
             onItemClick={handleItemClick}

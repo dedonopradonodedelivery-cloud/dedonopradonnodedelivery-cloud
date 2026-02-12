@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu, User, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront, Sun } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
@@ -5,7 +6,6 @@ import { Store, Category } from '@/types';
 import { CATEGORIES } from '@/constants';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
 
-// Added missing HeaderProps interface
 interface HeaderProps {
   onNotificationClick: () => void;
   user: any;
@@ -25,7 +25,7 @@ interface HeaderProps {
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
-    const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } from useNeighborhood();
+    const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
     if (!isSelectorOpen) return null;
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
