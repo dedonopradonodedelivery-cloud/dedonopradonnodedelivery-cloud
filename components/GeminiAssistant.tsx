@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '@/types';
 import { STORES } from '@/constants';
@@ -147,12 +147,13 @@ export const GeminiAssistant: React.FC = () => {
       },
     });
     
-    const timeoutPromise = new Promise((_, reject) =>
+    const timeoutPromise = new Promise<GenerateContentResponse>((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), 9000)
     );
 
     try {
-      const response: any = await Promise.race([apiCallPromise, timeoutPromise]);
+// FIX: Changed response.text() to response.text to correctly access the text property.
+      const response: GenerateContentResponse = await Promise.race([apiCallPromise, timeoutPromise]);
       clearTimeout(intermediateTimer);
       setMessages(prev => {
         const newMessages = [...prev.slice(0, -1)];

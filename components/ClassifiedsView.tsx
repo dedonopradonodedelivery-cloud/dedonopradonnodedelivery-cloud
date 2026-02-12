@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
@@ -243,7 +242,7 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             <h1 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none truncate">Classificados</h1>
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
           </div>
-
+          
           <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={handleAnunciarHeader}

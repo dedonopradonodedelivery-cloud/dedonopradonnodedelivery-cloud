@@ -1,3 +1,2 @@
-// This file's content has been merged into /lib/supabaseClient.ts
-// It is now empty to prevent duplicate declarations and build errors.
+// This file's content has been merged into /lib/env.ts and is no longer needed.
 export {};

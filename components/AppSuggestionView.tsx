@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   ChevronLeft, 
@@ -11,7 +10,7 @@ import {
   Sparkles,
   Zap,
   HelpCircle,
-  // Fix: Imported missing Info icon from lucide-react
+// Fix: Imported missing Info icon from lucide-react
   Info
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
@@ -80,7 +79,7 @@ export const AppSuggestionView: React.FC<AppSuggestionViewProps> = ({ user, onBa
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
-        <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 transition-all active:scale-90">
+        <button onClick={onBack} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
         </button>
         <div>

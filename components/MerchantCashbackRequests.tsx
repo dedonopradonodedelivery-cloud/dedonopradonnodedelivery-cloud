@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, CheckCircle, XCircle, Clock, DollarSign, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { CashbackTransaction } from '@/types';
@@ -63,8 +62,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
                 amount_to_pay_now_cents: 14500,
-                amount_cents: 725, // Campo obrigatório
-                type: 'earn',      // Campo obrigatório
+                amount_cents: 725,
+                type: 'earn',
                 status: 'pending',
                 created_at: new Date().toISOString()
             }

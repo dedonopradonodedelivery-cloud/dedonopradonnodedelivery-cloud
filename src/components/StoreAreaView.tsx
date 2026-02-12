@@ -1,3 +1,2 @@
-// This file is a duplicate and has been removed to fix build errors.
-// The canonical component is located at /components/StoreAreaView.tsx
+// This is a duplicate file. The canonical component is at /components/StoreAreaView.tsx.
 export {};
