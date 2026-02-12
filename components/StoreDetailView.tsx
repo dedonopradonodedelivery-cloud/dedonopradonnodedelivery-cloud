@@ -26,10 +26,10 @@ import {
   ShoppingBag,
   CheckCircle2
 } from 'lucide-react';
-import { Store, BusinessHour, StorePromotion } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { trackOrganicEvent, OrganicEventType } from '../lib/analytics';
+import { Store, BusinessHour, StorePromotion } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { trackOrganicEvent, OrganicEventType } from '@/lib/analytics';
 import { TrustBlock } from './TrustBlock';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 

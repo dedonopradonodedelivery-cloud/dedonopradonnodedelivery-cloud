@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
-import { ChatMessage } from '../types';
-import { STORES } from '../constants';
+import { ChatMessage } from '@/types';
+import { STORES } from '@/constants';
 
 const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
   <svg

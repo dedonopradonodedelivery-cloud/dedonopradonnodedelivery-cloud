@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
-import { Category, Store, AdType } from '../types';
-import { SUBCATEGORIES } from '../constants';
-// FIX: Corrected supabase import path from ../../services/supabaseClient to ../../lib/supabaseClient
-import { supabase } from '../lib/supabaseClient';
+import { Category, Store, AdType } from '@/types';
+import { SUBCATEGORIES } from '@/constants';
+import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 

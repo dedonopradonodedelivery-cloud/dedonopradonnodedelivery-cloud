@@ -21,9 +21,9 @@ import {
   Building2,
   MessageSquare
 } from 'lucide-react';
-import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { ServiceRequest, ServiceUrgency, Store, AdType } from '../types';
-import { STORES } from '../constants';
+import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
+import { ServiceRequest, ServiceUrgency, Store, AdType } from '@/types';
+import { STORES } from '@/constants';
 
 type FlowStep = 'form' | 'success';
 

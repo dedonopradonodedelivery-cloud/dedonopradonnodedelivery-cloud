@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Store } from '../types';
+import { Store } from '@/types';
 import { ChevronLeft, Search, SlidersHorizontal, ShoppingCart } from 'lucide-react';
 
 interface MarketplaceViewProps {

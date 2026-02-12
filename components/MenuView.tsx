@@ -27,10 +27,10 @@ import {
   Play,
   Lock
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
-import { useNeighborhood } from '../contexts/NeighborhoodContext';
-import { useFeatures } from '../contexts/FeatureContext';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { useFeatures } from '@/contexts/FeatureContext';
 
 interface MenuViewProps {
   user: User | null;
