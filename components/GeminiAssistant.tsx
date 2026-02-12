@@ -15,23 +15,23 @@ const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
       d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z"
       fill="url(#paint0_linear_jota_avatar)"
     />
-    {/* --- NOVO AVATAR DO JOTA (v2 com boca e dentes) --- */}
+    {/* --- JOTA v3 (achatado e alongado) --- */}
     <path 
-      d="M9 22 C12 16, 15 13, 20 12 L30 14 C34 15, 35 17, 32 18 L23 20 C18 23, 12 25, 9 22 Z"
+      d="M8 21 C12 17, 18 15, 23 15 L32 16 C36 17, 37 19, 34 20 L25 22 C20 24, 12 24, 8 21 Z"
       fill="white"
     />
     <path 
-      d="M10 25 C15 27, 22 28, 30 27 L31 25 C25 23, 15 23, 10 25 Z"
+      d="M9 24 C15 26, 23 27, 32 26 L33 24 C26 23, 16 23, 9 24 Z"
       fill="white"
     />
-    {/* Dentes sutis (preenchidos com a cor do fundo para parecerem vãos) */}
-    <path d="M18 22.5 L19 23.5 L20 22.5 Z" fill="#1E5BFF" />
-    <path d="M22 22.5 L23 23.5 L24 22.5 Z" fill="#1E5BFF" />
-    <path d="M26 22.5 L27 23.5 L28 22.5 Z" fill="#1E5BFF" />
+    {/* Dentes */}
+    <path d="M20 22.5 L21 23.5 L22 22.5 Z" fill="#1E5BFF" />
+    <path d="M24 22.5 L25 23.5 L26 22.5 Z" fill="#1E5BFF" />
+    <path d="M28 22.5 L29 23.5 L30 22.5 Z" fill="#1E5BFF" />
     {/* Olho */}
-    <circle cx="21" cy="15.5" r="2" fill="#1E5BFF"/>
-    <circle cx="21.8" cy="14.7" r="0.6" fill="white"/>
-    {/* --- FIM DO NOVO AVATAR --- */}
+    <circle cx="24" cy="18" r="1.8" fill="#1E5BFF"/>
+    <circle cx="24.6" cy="17.4" r="0.5" fill="white"/>
+    {/* --- FIM DO AVATAR v3 --- */}
     <defs>
       <linearGradient
         id="paint0_linear_jota_avatar"

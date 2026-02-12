@@ -504,7 +504,7 @@ const NeighborhoodGuidesBlock: React.FC<{ onNavigate: (view: string) => void }> 
 
 const LostAndFoundSection: React.FC<{ onItemClick: (item: typeof LOST_AND_FOUND_MOCK[0]) => void }> = ({ onItemClick }) => {
     return (
-        <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+        <section className="py-6 border-b border-gray-100 dark:border-gray-800">
             <div className="px-5 mb-3 flex items-center justify-between">
                <div>
                   <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none mb-1">Achados e Perdidos</h2>
@@ -621,7 +621,7 @@ const CouponsBlock: React.FC<{ onNavigate: (view: string) => void; user: User | 
 
 const HappeningNowSection: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   return (
-    <div className="px-5 pt-4 pb-4 bg-white dark:bg-gray-950">
+    <div className="px-5 pt-4 pb-4">
       <div className="flex items-center justify-between mb-3 px-1">
         <div>
             <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
@@ -702,17 +702,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   const [selectedLostItem, setSelectedLostItem] = useState<typeof LOST_AND_FOUND_MOCK[0] | null>(null);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32 rounded-t-[2.5rem] -mt-6 relative z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
       
       {/* JOTA BLOCK */}
-      <section className="px-4 pt-4 bg-white dark:bg-gray-950">
+      <section className="px-4 pt-10">
         <GeminiAssistant />
       </section>
 
-      {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4 bg-white dark:bg-gray-950"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
+      {userRole === 'lojista' && isFeatureActive('banner_highlights') && <section className="px-4 py-4"><LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} /></section>}
       
       {isFeatureActive('banner_highlights') && (
-        <section className="bg-white dark:bg-gray-950 w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
+        <section className="w-full"><HomeBannerCarousel onStoreClick={onStoreClick} onNavigate={onNavigate} /></section>
       )}
       
       {/* CUPONS BLOCK (SUBSTITUI PARA VOCÊ) */}
@@ -723,7 +723,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       {/* NOVO POSICIONAMENTO: BLOCO DE ORÇAMENTOS */}
       {isFeatureActive('service_chat') && (
-        <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+        <section className="py-6 border-t border-b border-gray-100 dark:border-gray-800">
           <div className="px-5 mb-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-none">Receba até 5 orçamentos gratuitos</h2>
           </div>
@@ -741,7 +741,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       {/* NOVO POSICIONAMENTO: EXPLORAR BAIRRO */}
       {isFeatureActive('explore_guide') && (
-        <div className="w-full bg-white dark:bg-gray-900 pt-1 pb-10">
+        <div className="w-full pt-1 pb-10">
             <div className="px-5">
             <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="Tudo o que você precisa" onSeeMore={() => onNavigate('explore')} />
             <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit mb-4">
@@ -757,7 +757,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
 
       {/* JPA CONVERSA (MOVIDO PARA O FINAL) */}
       {isFeatureActive('community_feed') && (
-        <section className="bg-white dark:bg-gray-950 pt-2 pb-6 relative px-5">
+        <section className="pt-2 pb-6 relative px-5">
             <div className="flex items-center justify-between mb-3"><h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">JPA Conversa<div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div></h2><button onClick={() => onNavigate('neighborhood_posts')} className="text-xs font-bold text-blue-500">Ver tudo</button></div>
             <div className="relative group"><div className="flex overflow-x-auto no-scrollbar snap-x -mx-1 pb-2">{MOCK_COMMUNITY_POSTS.slice(0, 5).map((post) => <MiniPostCard key={post.id} post={post} onNavigate={onNavigate} />)}</div></div>
         </section>
