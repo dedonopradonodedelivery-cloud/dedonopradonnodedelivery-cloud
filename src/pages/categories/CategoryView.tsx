@@ -1,11 +1,30 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Car, Bike } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
+
+const FALLBACK_STORE_IMAGES = [
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600',
+  'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600',
+  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600'
+];
+
+const getFallbackStoreImage = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return FALLBACK_STORE_IMAGES[Math.abs(hash) % FALLBACK_STORE_IMAGES.length];
+};
+
+const DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800";
 
 // --- Reusable Banner Rendering Components ---
 const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
@@ -26,7 +45,7 @@ const TemplateBannerRender: React.FC<{ config: any }> = ({ config }) => {
       case 'lancamento':
         return (
           <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 flex items-end justify-between overflow-hidden relative shadow-lg">
-             <img src={product_image_url || 'https://via.placeholder.com/150'} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
+             <img src={product_image_url || DEFAULT_PLACEHOLDER} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />
              <div className="relative z-10">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">{headline || 'LANÇAMENTO'}</span>
                 <h3 className="text-2xl font-bold mt-1 max-w-[220px] leading-tight">{subheadline || 'Descrição'}</h3>
@@ -78,17 +97,19 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer overflow-hidden border`;
-  const backgroundClass = isMoreButton ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} border-transparent shadow-md`;
-  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white drop-shadow-sm";
-  const iconContainerClass = isMoreButton ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400" : "bg-white/20 text-white backdrop-blur-md border border-white/20";
-  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "hover:shadow-lg hover:-translate-y-1 hover:brightness-105";
+  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
+  const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
+  const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white";
+  const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
+  
   return (
     <button onClick={onClick} className={`${baseClasses} ${backgroundClass} ${selectionEffects}`}>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconContainerClass}`}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-5 h-5`, strokeWidth: 2.5 }) : null}
+      <div className="flex-1 flex items-center justify-center">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { className: `w-6 h-6 ${isMoreButton ? 'text-gray-400' : 'text-white drop-shadow-md'}`, strokeWidth: 3 }) : null}
       </div>
-      <span className={`text-[10px] font-bold leading-tight px-1 truncate w-full text-center tracking-tight ${textClass}`}>{name}</span>
+      <span className={`text-[8px] font-black uppercase tracking-tighter leading-tight pb-1 truncate w-full text-center ${textClass}`}>
+        {name}
+      </span>
     </button>
   );
 };
@@ -131,6 +152,19 @@ interface CategoryViewProps {
   onSubcategoryClick?: (subName: string) => void;
 }
 
+const SelectionButton: React.FC<{ label: string; icon: React.ReactNode; color: string; onClick: () => void }> = ({ label, icon, color, onClick }) => (
+    <button 
+        onClick={onClick}
+        className={`w-full aspect-[4/3] rounded-[2rem] flex flex-col items-center justify-center gap-4 ${color} text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 relative overflow-hidden group`}
+    >
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+        <div className="relative z-10 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white/20">
+            {React.cloneElement(icon as any, { size: 32, strokeWidth: 2 })}
+        </div>
+        <span className="relative z-10 font-black text-lg uppercase tracking-tight">{label}</span>
+    </button>
+);
+
 export const CategoryView: React.FC<CategoryViewProps> = ({ 
   category, 
   onBack, 
@@ -138,17 +172,64 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   stores, 
   userRole, 
   onAdvertiseInCategory, 
-  onNavigate,
+  onNavigate, 
   onSubcategoryClick
 }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [activeBanner, setActiveBanner] = useState<any | null>(null);
   const [loadingBanner, setLoadingBanner] = useState(true);
+  
+  // State for Health Category intermediate screen
+  const [healthGroup, setHealthGroup] = useState<'mulher' | 'homem' | 'pediatria' | null>(null);
+  // State for Autos Category intermediate screen
+  const [autosGroup, setAutosGroup] = useState<'carro' | 'moto' | null>(null);
 
-  const subcategories = useMemo(() => SUBCATEGORIES[category.name] || [], [category.name]);
+  const subcategories = useMemo(() => {
+    const allSubs = SUBCATEGORIES[category.name] || [];
+    
+    // Filtra subcategorias se for a categoria Saúde e um grupo estiver selecionado
+    if (category.slug === 'saude' && healthGroup) {
+        if (healthGroup === 'mulher') {
+            return allSubs.filter(s => ['Ginecologia', 'Obstetrícia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'].includes(s.name));
+        }
+        if (healthGroup === 'homem') {
+            return allSubs.filter(s => ['Urologia', 'Cardiologia', 'Psicologia', 'Nutrição', 'Fisioterapia', 'Dermatologia', 'Endocrinologia', 'Clínica médica'].includes(s.name));
+        }
+        if (healthGroup === 'pediatria') {
+             return allSubs.filter(s => ['Pediatria', 'Psicologia infantil', 'Fonoaudiologia', 'Nutrição infantil', 'Fisioterapia pediátrica', 'Odontopediatria', 'Neuropediatria', 'Clínica infantil'].includes(s.name));
+        }
+    }
+
+    // Filtra subcategorias se for a categoria Autos e um grupo estiver selecionado
+    if (category.slug === 'autos' && autosGroup) {
+        if (autosGroup === 'carro') {
+            return allSubs.filter(s => [
+                'Oficina mecânica', 'Auto elétrica', 'Funilaria e pintura', 
+                'Alinhamento e balanceamento', 'Troca de óleo', 'Suspensão e freios', 
+                'Ar-condicionado automotivo', 'Guincho e reboque'
+            ].includes(s.name));
+        }
+        if (autosGroup === 'moto') {
+             return allSubs.filter(s => [
+                'Oficina de motos', 'Elétrica de motos', 'Mecânica geral', 
+                'Injeção eletrônica', 'Peças e acessórios', 'Guincho para motos'
+             ].includes(s.name));
+        }
+    }
+    
+    return allSubs;
+  }, [category.name, healthGroup, autosGroup, category.slug]);
+
   const MAX_VISIBLE_SUBCATEGORIES = 8;
   const shouldShowMore = subcategories.length > MAX_VISIBLE_SUBCATEGORIES;
   const visibleSubcategories = shouldShowMore ? subcategories.slice(0, MAX_VISIBLE_SUBCATEGORIES - 1) : subcategories;
+
+  // Reset health/autos group when category changes
+  useEffect(() => {
+      setHealthGroup(null);
+      setAutosGroup(null);
+      setSelectedSubcategory(null);
+  }, [category.slug]);
 
   useEffect(() => {
     const fetchCategoryBanner = async () => {
@@ -166,7 +247,13 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error) throw error;
+        if (error) {
+            if (error.code === 'PGRST116' || error.message.includes('published_banners')) {
+                setActiveBanner(null);
+                return;
+            }
+            throw error;
+        }
 
         if (data && data.length > 0) {
           setActiveBanner(data[0]);
@@ -174,7 +261,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           setActiveBanner(null);
         }
       } catch (e: any) {
-        console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        if (!e.message?.includes('published_banners')) {
+            console.error("Failed to fetch category banner from Supabase:", e.message || e);
+        }
         setActiveBanner(null);
       } finally {
         setLoadingBanner(false);
@@ -235,13 +324,114 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     onNavigate('explore');
   };
 
+  const handleBack = () => {
+      if (category.slug === 'saude' && healthGroup) {
+          setHealthGroup(null);
+          setSelectedSubcategory(null);
+          return;
+      }
+      if (category.slug === 'autos' && autosGroup) {
+          setAutosGroup(null);
+          setSelectedSubcategory(null);
+          return;
+      }
+      onBack();
+  };
+
+  // INTERMEDIATE SCREEN FOR HEALTH
+  if (category.slug === 'saude' && !healthGroup) {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+                </button>
+                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                </h1>
+            </div>
+
+            <div className="p-6 space-y-6">
+                <div className="text-center mb-8 mt-4">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Para quem é o atendimento?</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Escolha uma opção para facilitar sua busca.</p>
+                </div>
+
+                <div className="grid gap-4">
+                    <SelectionButton 
+                        label="Mulher" 
+                        icon={<User />} 
+                        color="bg-pink-500" 
+                        onClick={() => setHealthGroup('mulher')} 
+                    />
+                    <SelectionButton 
+                        label="Homem" 
+                        icon={<User />} 
+                        color="bg-blue-600" 
+                        onClick={() => setHealthGroup('homem')} 
+                    />
+                    <SelectionButton 
+                        label="Pediatria" 
+                        icon={<Baby />} 
+                        color="bg-amber-500" 
+                        onClick={() => setHealthGroup('pediatria')} 
+                    />
+                </div>
+            </div>
+        </div>
+      );
+  }
+
+  // INTERMEDIATE SCREEN FOR AUTOS
+  if (category.slug === 'autos' && !autosGroup) {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
+            <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+                </button>
+                <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                    {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}
+                </h1>
+            </div>
+
+            <div className="p-6 space-y-6">
+                <div className="text-center mb-8 mt-4">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">Qual seu veículo?</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Encontre o serviço ideal para o seu automóvel.</p>
+                </div>
+
+                <div className="grid gap-4">
+                    <SelectionButton 
+                        label="Carro" 
+                        icon={<Car />} 
+                        color="bg-blue-600" 
+                        onClick={() => setAutosGroup('carro')} 
+                    />
+                    <SelectionButton 
+                        label="Moto" 
+                        icon={<Bike />} 
+                        color="bg-orange-500" 
+                        onClick={() => setAutosGroup('moto')} 
+                    />
+                </div>
+            </div>
+        </div>
+      );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
       <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+        <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
         </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
+        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+            {React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} 
+            {category.name} 
+            {healthGroup && <span className="text-xs font-normal opacity-60">/ {healthGroup === 'mulher' ? 'Mulher' : healthGroup === 'homem' ? 'Homem' : 'Pediatria'}</span>}
+            {autosGroup && <span className="text-xs font-normal opacity-60">/ {autosGroup === 'carro' ? 'Carro' : 'Moto'}</span>}
+        </h1>
       </div>
       
       {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
@@ -338,10 +528,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
 // Re-using the StoreCard internal to list for CategoryView
 const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
+  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
+
   return (
     <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
       <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={store.logoUrl || store.image || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-cover" />
+        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">

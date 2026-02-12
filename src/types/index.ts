@@ -32,8 +32,10 @@ export interface StoreReview {
 export interface Store {
   id: string;
   name: string;
-  category: string;
-  subcategory: string;
+  category: string; // Categoria Principal
+  secondary_categories?: string[]; // Categorias Secundárias (Novo)
+  subcategory: string; // Subcategoria Principal (para compatibilidade)
+  subcategories?: string[]; // Lista completa de subcategorias (Novo)
   logoUrl?: string; 
   image?: string; 
   logo_url?: string;

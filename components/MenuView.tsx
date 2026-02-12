@@ -30,6 +30,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { useNeighborhood } from '../contexts/NeighborhoodContext';
+import { useFeatures } from '../contexts/FeatureContext';
 
 interface MenuViewProps {
   user: User | null;
@@ -87,6 +88,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
 }) => {
   const { signOut } = useAuth();
   const { currentNeighborhood } = useNeighborhood();
+  const { isFeatureActive } = useFeatures();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const storageKey = `onboarding_video_user_${user?.id}`;
@@ -133,7 +135,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 pb-32 animate-in fade-in duration-300">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-300">
       {/* Header Fixo */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
         <div><h2 className="text-2xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter">Menu</h2></div>
@@ -161,7 +163,7 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
                 <div className="relative aspect-video rounded-2xl overflow-hidden bg-black group border border-white/5">
                   <video 
-                    ref={videoRef}
+                    ref={videoRef} 
                     src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
                     className="w-full h-full object-cover"
                     onEnded={handleVideoEnd}
@@ -209,43 +211,53 @@ export const MenuView: React.FC<MenuViewProps> = ({
           </div>
 
           <MenuSection title="Minha atividade no bairro">
-              <MenuItem 
-                  icon={MessageSquare} 
-                  label="Meus comentários" 
-                  sublabel="Histórico no JPA Conversa"
-                  onClick={() => onNavigate('user_activity', { type: 'comentarios' })}
-                  color="text-indigo-500"
-              />
-              <MenuItem 
-                  icon={Package} 
-                  label="Meus anúncios" 
-                  sublabel="Gerenciar seus itens nos Classificados"
-                  onClick={() => onNavigate('user_activity', { type: 'anuncios' })}
-                  color="text-amber-500"
-              />
-              <MenuItem 
-                  icon={Bell} 
-                  label="Minhas solicitações" 
-                  sublabel="Pedidos de orçamento e serviços"
-                  onClick={() => onNavigate('service_messages_list')}
-                  color="text-blue-500"
-              />
-              <MenuItem 
-                  icon={Star} 
-                  label="Avaliações que fiz" 
-                  sublabel="Sua opinião sobre os lojistas"
-                  onClick={() => onNavigate('user_activity', { type: 'avaliacoes' })}
-                  color="text-yellow-500"
-              />
+              {isFeatureActive('community_feed') && (
+                <MenuItem 
+                    icon={MessageSquare} 
+                    label="Meus comentários" 
+                    sublabel="Histórico no JPA Conversa"
+                    onClick={() => onNavigate('user_activity', { type: 'comentarios' })}
+                    color="text-indigo-500"
+                />
+              )}
+              {isFeatureActive('classifieds') && (
+                <MenuItem 
+                    icon={Package} 
+                    label="Meus anúncios" 
+                    sublabel="Gerenciar seus itens nos Classificados"
+                    onClick={() => onNavigate('user_activity', { type: 'anuncios' })}
+                    color="text-amber-500"
+                />
+              )}
+              {isFeatureActive('service_chat') && (
+                <MenuItem 
+                    icon={Bell} 
+                    label="Minhas solicitações" 
+                    sublabel="Pedidos de orçamento e serviços"
+                    onClick={() => onNavigate('service_messages_list')}
+                    color="text-blue-500"
+                />
+              )}
+              {isFeatureActive('customer_reviews') && (
+                <MenuItem 
+                    icon={Star} 
+                    label="Avaliações que fiz" 
+                    sublabel="Sua opinião sobre os lojistas"
+                    onClick={() => onNavigate('user_activity', { type: 'avaliacoes' })}
+                    color="text-yellow-500"
+                />
+              )}
           </MenuSection>
 
           <MenuSection title="Geral">
-              <MenuItem 
-                  icon={Ticket} 
-                  label="Meus Cupons" 
-                  onClick={() => onNavigate('user_coupons')}
-                  color="text-emerald-500"
-              />
+              {isFeatureActive('coupons') && (
+                <MenuItem 
+                    icon={Ticket} 
+                    label="Meus Cupons" 
+                    onClick={() => onNavigate('user_coupons')}
+                    color="text-emerald-500"
+                />
+              )}
               <MenuItem 
                   icon={Heart} 
                   label="Favoritos" 
@@ -273,18 +285,20 @@ export const MenuView: React.FC<MenuViewProps> = ({
               <MenuItem icon={LogOut} label="Sair da conta" onClick={handleLogout} isDestructive />
           </MenuSection>
 
-          <div className="mt-4 mb-10 px-2 opacity-80">
-              <div onClick={() => onNavigate('patrocinador_master')} className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group">
-                  <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400"><Crown size={18} /></div>
-                      <div>
-                          <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
-                          <p className="text-sm font-bold text-white mt-1">Grupo Esquematiza</p>
-                      </div>
-                  </div>
-                  <ArrowRight size={16} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
-              </div>
-          </div>
+          {isFeatureActive('master_sponsor') && (
+            <div className="mt-4 mb-10 px-2 opacity-80">
+                <div onClick={() => onNavigate('patrocinador_master')} className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400"><Crown size={18} /></div>
+                        <div>
+                            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
+                            <p className="text-sm font-bold text-white mt-1">Grupo Esquematiza</p>
+                        </div>
+                    </div>
+                    <ArrowRight size={16} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

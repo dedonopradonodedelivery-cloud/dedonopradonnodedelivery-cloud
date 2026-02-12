@@ -3,14 +3,12 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Store, AdType } from '@/types';
 import { STORES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BannerData {
   id: string;
   storeId: string;
   title: string;
   subtitle: string;
-  cta: string;
   image: string;
   bgColor: string;
   neighborhood: string;
@@ -24,7 +22,6 @@ const MOCK_BANNERS: BannerData[] = [
     storeId: 'fake-saude-banner',
     title: 'Clínica Bem Estar',
     subtitle: 'Cuidado completo para sua família com especialistas.',
-    cta: 'Agendar Consulta',
     image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=600&auto=format&fit=crop',
     bgColor: 'bg-emerald-700',
     neighborhood: 'Jacarepaguá (todos)',
@@ -35,7 +32,6 @@ const MOCK_BANNERS: BannerData[] = [
     storeId: 'fake-pet-banner',
     title: 'Amigão Pet Shop',
     subtitle: 'Banho, tosa e mimos para seu melhor amigo.',
-    cta: 'Ver Serviços',
     image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop',
     bgColor: 'bg-amber-600',
     neighborhood: 'Jacarepaguá (todos)',
@@ -46,7 +42,6 @@ const MOCK_BANNERS: BannerData[] = [
     storeId: 'fake-moda-banner',
     title: 'Boutique Urbana',
     subtitle: 'As tendências da estação chegaram ao bairro.',
-    cta: 'Conferir Lookbook',
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop',
     bgColor: 'bg-rose-700',
     neighborhood: 'Jacarepaguá (todos)',
@@ -57,7 +52,6 @@ const MOCK_BANNERS: BannerData[] = [
     storeId: 'fake-beleza-banner',
     title: 'Espaço Glamour',
     subtitle: 'Realce sua beleza com quem entende do assunto.',
-    cta: 'Ver Promoções',
     image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop',
     bgColor: 'bg-purple-800',
     neighborhood: 'Jacarepaguá (todos)',
@@ -246,28 +240,11 @@ export const HomeBannerCarousel: React.FC<HomeBannerCarouselProps> = ({ onStoreC
             <p className="text-[10px] font-bold text-white/90 max-w-[220px] leading-tight drop-shadow-sm mb-4">
               {currentBanner.subtitle}
             </p>
-            <div className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-xl w-fit shadow-lg">
-               <span className="text-[9px] font-black uppercase tracking-widest">{currentBanner.cta}</span>
-            </div>
           </div>
         </div>
 
         {activeBanners.length > 1 && (
           <>
-            {/* Setas de Navegação (Discretas) */}
-            <button 
-                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
-            >
-                <ChevronLeft size={20} strokeWidth={3} />
-            </button>
-            <button 
-                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 text-white/70 hover:bg-black/40 hover:text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 z-20"
-            >
-                <ChevronRight size={20} strokeWidth={3} />
-            </button>
-
             {/* Indicadores de Posição */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
               {activeBanners.map((_, idx) => (
