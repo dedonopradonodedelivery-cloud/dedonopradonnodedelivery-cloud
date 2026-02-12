@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -7,8 +8,6 @@ import {
   MessageSquare, 
   Mail, 
   CheckCircle2, 
-  AlertCircle,
-  // Added missing AlertTriangle import
   AlertTriangle,
   Loader2,
   Building2,
@@ -135,7 +134,7 @@ export const StoreClaimFlow: React.FC<StoreClaimFlowProps> = ({ store, userId, o
           <div className="space-y-8 animate-in slide-in-from-right duration-300">
             <div className="text-center">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Escolha o método</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-2">Enviaremos um código de verificação para confirmar sua identidade.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-2">Enviaremos um código de verificação para confirmar sua identidade:</p>
             </div>
 
             <div className="space-y-4">
@@ -187,7 +186,7 @@ export const StoreClaimFlow: React.FC<StoreClaimFlowProps> = ({ store, userId, o
                     required 
                     value={inputVal}
                     onChange={e => setInputVal(e.target.value)}
-                    placeholder={method === 'whatsapp' ? '(21) 99999-9999' : 'comercial@sualoja.com'}
+                    placeholder={method === 'whatsapp' ? '(21) 99999-0000' : 'comercial@sualoja.com'}
                     className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl p-5 text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-[#1E5BFF]/50 transition-all shadow-inner"
                   />
                 </div>

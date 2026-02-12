@@ -1,9 +1,8 @@
-
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Menu, User } from 'lucide-react';
-import { useNeighborhood, NEIGHBORHOODS } from '../../contexts/NeighborhoodContext';
-import { Store, Category } from '../../types';
-import { CATEGORIES } from '../../constants';
+import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
+import { Store, Category } from '@/types';
+import { CATEGORIES } from '@/constants';
 
 // Added missing HeaderProps interface
 interface HeaderProps {

@@ -55,7 +55,7 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
-                user_id: 'cust-1', // Corrigido de customer_id para user_id
+                user_id: 'cust-1',
                 customer_name: 'Maria Silva (Simulação)',
                 total_amount_cents: 15000,
                 cashback_used_cents: 500,

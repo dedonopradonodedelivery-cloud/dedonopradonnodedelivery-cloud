@@ -1,13 +1,12 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
-  // Added CheckCircle2 to fix the error on line 66
   ChevronLeft, ArrowRight, Home, LayoutGrid, Zap, MapPin, Loader2, Gem, Info, AlertTriangle, ShieldCheck, Paintbrush, CheckCircle2
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { StoreBannerEditor, BannerPreview } from '@/components/StoreBannerEditor';
-import { MandatoryVideoLock } from './MandatoryVideoLock';
+import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
 
-// FIX: Added missing StoreAdsModuleProps interface to resolve error on line 17
 interface StoreAdsModuleProps {
   onBack: () => void;
   onNavigate: (view: string, data?: any) => void;

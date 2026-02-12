@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useRef } from 'react';
-import { BottomNav } from '../BottomNav';
+import { BottomNav } from '@/components/BottomNav';
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,12 +12,14 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Reset scroll position when activeTab changes
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [activeTab]);
 
+  // Se for admin_panel, forçamos hideNav true internamente por segurança extra
   const finalHideNav = hideNav || activeTab === 'admin_panel';
 
   return (

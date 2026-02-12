@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
@@ -19,9 +18,9 @@ import {
   Palette, Printer, Book, Lightbulb, Bike, Sofa, Smartphone, Headphones,
   Wifi, MapPin, Trash2, ShieldAlert, Megaphone, ShieldCheck,
   Circle, Flower, Swords, Gamepad, Gamepad2, Church, Film, Mic, Bus,
-  Lock
+  Lock, Wind, Disc, Cpu
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '../types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '@/types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
 
@@ -100,6 +99,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Materiais Médicos', icon: <Stethoscope /> },
   ],
   'Autos': [
+    // Gerais antigos (mantidos para compatibilidade, mas filtrados na view nova)
     { name: 'Carro', icon: <CarFront /> },
     { name: 'Moto', icon: <Bike /> },
     { name: 'Oficinas', icon: <Wrench /> },
@@ -110,6 +110,21 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Peças', icon: <Settings /> },
     { name: 'Estética', icon: <Sparkles /> },
     { name: 'Acessórios', icon: <Star /> },
+    // Novos Específicos
+    { name: 'Oficina mecânica', icon: <Wrench /> },
+    { name: 'Auto elétrica', icon: <Zap /> },
+    { name: 'Funilaria e pintura', icon: <PaintRoller /> },
+    { name: 'Alinhamento e balanceamento', icon: <Scale /> },
+    { name: 'Troca de óleo', icon: <Droplets /> },
+    { name: 'Suspensão e freios', icon: <Disc /> },
+    { name: 'Ar-condicionado automotivo', icon: <Wind /> },
+    { name: 'Guincho e reboque', icon: <Truck /> },
+    { name: 'Oficina de motos', icon: <Wrench /> },
+    { name: 'Elétrica de motos', icon: <Zap /> },
+    { name: 'Mecânica geral', icon: <Settings /> },
+    { name: 'Injeção eletrônica', icon: <Cpu /> },
+    { name: 'Peças e acessórios', icon: <Package /> },
+    { name: 'Guincho para motos', icon: <Truck /> },
   ],
   'Moda': [
     { name: 'Feminina', icon: <Shirt /> },
@@ -177,10 +192,32 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode
     { name: 'Pets Perdidos', icon: <Search /> },
   ],
   'Saúde': [
-    { name: 'Saúde da Mulher', icon: <User /> },
-    { name: 'Saúde do Homem', icon: <User /> },
-    { name: 'Saúde Infantil', icon: <Baby /> },
-    { name: 'Exames e Diagnósticos', icon: <Activity /> },
+    // Gerais
+    { name: 'Clínicas', icon: <Building2 /> },
+    { name: 'Dentistas', icon: <Smile /> },
+    { name: 'Psicologia', icon: <Brain /> },
+    { name: 'Fisioterapia', icon: <Activity /> },
+    { name: 'Exames e Diagnósticos', icon: <Microscope /> },
+    { name: 'Nutrição', icon: <Apple /> },
+    { name: 'Terapias Alternativas', icon: <Sparkles /> },
+    { name: 'Saúde Preventiva', icon: <Shield /> },
+    { name: 'Vacinação', icon: <Stethoscope /> },
+    // Específicas Mulher/Homem/Pediatria
+    { name: 'Ginecologia', icon: <User /> },
+    { name: 'Obstetrícia', icon: <Baby /> },
+    { name: 'Dermatologia', icon: <Sparkles /> },
+    { name: 'Endocrinologia', icon: <Activity /> },
+    { name: 'Clínica médica', icon: <Stethoscope /> },
+    { name: 'Urologia', icon: <User /> },
+    { name: 'Cardiologia', icon: <Heart /> },
+    { name: 'Pediatria', icon: <Baby /> },
+    { name: 'Psicologia infantil', icon: <Brain /> },
+    { name: 'Fonoaudiologia', icon: <Mic /> },
+    { name: 'Nutrição infantil', icon: <Apple /> },
+    { name: 'Fisioterapia pediátrica', icon: <Activity /> },
+    { name: 'Odontopediatria', icon: <Smile /> },
+    { name: 'Neuropediatria', icon: <Brain /> },
+    { name: 'Clínica infantil', icon: <Stethoscope /> },
   ],
   'Educação': [
     { name: 'Escolas', icon: <Building2 /> },

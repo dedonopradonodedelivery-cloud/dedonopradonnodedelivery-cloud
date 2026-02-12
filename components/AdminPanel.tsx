@@ -12,7 +12,6 @@ import {
   UserCheck, ArrowRightLeft, CreditCard,
   LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
   ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight,
-  // Added Info import to resolve "Cannot find name 'Info'" error
   Info
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
