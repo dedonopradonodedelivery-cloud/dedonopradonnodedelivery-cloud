@@ -170,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {headerCategories.map(cat => (
                   <button key={cat.id} onClick={() => onSelectCategory(cat)} className="flex flex-col items-center gap-2 text-center group flex-shrink-0 w-16">
                     <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shadow-sm border border-gray-100 dark:border-gray-700">
-                      {React.cloneElement(cat.icon as React.ReactElement, { size: 18, strokeWidth: 2.5 })}
+                      {React.cloneElement(cat.icon as React.ReactElement<any>, { size: 18, strokeWidth: 2.5 })}
                     </div>
                     <span className="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{cat.name}</span>
                   </button>
