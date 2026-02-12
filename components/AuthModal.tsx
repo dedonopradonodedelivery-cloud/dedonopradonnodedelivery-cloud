@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import {
@@ -214,7 +215,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">
-            {customTitle ? customTitle : (mode === 'login' ? 'Bem-vindo de volta' : 'Criar sua conta')}
+                {customTitle ? customTitle : (mode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {customSubtitle ? customSubtitle : (mode === 'login' ? 'Acesse para continuar' : 'Escolha seu tipo de perfil')}

@@ -1,1 +1,2 @@
--- This schema file is a placeholder and was cleaned up to resolve a parsing error.
+// This file is a duplicate and has been removed to fix build errors.
+// The canonical schema is located at /backend/schema.sql

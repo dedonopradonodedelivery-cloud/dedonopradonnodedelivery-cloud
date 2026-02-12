@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Home, Users, User, QrCode } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+// FIX: Corrected import path for useAuth from root contexts folder.
+import { useAuth } from '@/contexts/AuthContext';
 
 interface BottomNavProps {
   activeTab: string;

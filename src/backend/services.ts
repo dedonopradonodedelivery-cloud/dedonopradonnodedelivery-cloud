@@ -1,3 +1,3 @@
-// This file's content has been merged into /backend/services.ts
-// It is now empty to prevent duplicate declarations and build errors.
+// This file is a duplicate and has been removed to fix build errors.
+// The canonical service functions are located at /backend/services.ts
 export {};

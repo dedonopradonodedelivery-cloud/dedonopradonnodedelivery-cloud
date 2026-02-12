@@ -23,7 +23,7 @@ import {
   Mail,
   Info,
   Globe,
-  Image as ImageIcon,
+  ImageIcon,
   Eye,
   Clock,
   CreditCard,
@@ -36,10 +36,12 @@ import {
   ListFilter
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../contexts/AuthContext';
-// FIX: Added ALL_TAGS to imports from constants
-import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '../constants';
-import { TaxonomyType, BusinessHour, TaxonomySuggestion } from '../types';
+// FIX: Corrected import path for useAuth from root contexts folder.
+import { useAuth } from '@/contexts/AuthContext';
+// FIX: Corrected import path for constants from root constants folder.
+import { CATEGORIES, SUBCATEGORIES, ALL_TAGS } from '@/constants';
+// FIX: Corrected import path for types from root types folder.
+import { TaxonomyType, BusinessHour, TaxonomySuggestion } from '@/types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
@@ -289,8 +291,9 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
   
   const logoInputRef = useRef<HTMLInputElement>(null);
 
+  // --- STATE DO FORMULÁRIO UNIFICADO (PÚBLICO + FISCAL) ---
   const [formData, setFormData] = useState({
-    // --- DADOS PÚBLICOS ---
+    // Públicos
     nome_exibido: '',
     category: '', // Categoria Principal (Obrigatória)
     secondary_categories: [] as string[], // Categorias Secundárias (Até 2)
@@ -307,6 +310,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
     banner_url: '',
     gallery: [] as string[],
     tags: [] as string[], // Tags (Até 15)
+    payment_methods: [] as string[], // Meios de pagamento (array de strings)
 
     // --- ENDEREÇO UNIDADE ---
     cep: '',
@@ -372,6 +376,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
             accepts_online_orders: data.accepts_online_orders ?? false,
             min_order_value: data.min_order_value ? String(data.min_order_value) : '',
             tags: data.tags || [],
+            payment_methods: data.payment_methods || [],
             secondary_categories: data.secondary_categories || [],
             subcategories: data.subcategories || (data.subcategory ? [data.subcategory] : [])
           }));
@@ -477,26 +482,16 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
       
       {/* HEADER */}
       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-5 h-20 flex items-center gap-4 border-b border-blue-100 dark:border-gray-800">
-        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <div className="flex-1">
-          <h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Configurar Loja</h1>
-          <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mt-0.5">Gestão do Perfil</p>
-        </div>
-        <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl shadow-blue-500/20 active:scale-90 transition-all">
-          {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-        </button>
+        <button onClick={onBack} className="p-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:bg-gray-200 transition-colors"><ChevronLeft size={20} className="text-gray-800 dark:text-white" /></button>
+        <div className="flex-1"><h1 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter">Configurar Loja</h1></div>
+        <button onClick={handleSave} disabled={isSaving} className="p-3 bg-[#1E5BFF] text-white rounded-2xl shadow-xl active:scale-90 transition-all">{isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}</button>
       </div>
 
       <div className="p-6 space-y-12 max-w-md mx-auto">
         
         {/* BLOCO 1: INFORMAÇÕES DA LOJA */}
         <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1">
-            <StoreIcon size={16} className="text-[#1E5BFF]" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja</h2>
-          </div>
+          <div className="flex items-center gap-2 px-1"><StoreIcon size={16} className="text-[#1E5BFF]" /><h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">1. Informações da Loja</h2></div>
 
           <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
              <div className="flex flex-col items-center">
@@ -532,126 +527,7 @@ export const StoreProfileEdit: React.FC<StoreProfileEditProps> = ({ onBack }) =>
              </div>
           </div>
         </section>
-
-        {/* BLOCO 2: CATEGORIZAÇÃO (NOVO) */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1">
-            <ListFilter size={16} className="text-blue-500" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">2. Categorização</h2>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-             
-             {/* Categoria Principal */}
-             <div className="space-y-2">
-                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                    Categoria Principal <span className="text-red-500">*</span>
-                 </label>
-                 <select 
-                    value={formData.category} 
-                    onChange={handleMainCategoryChange}
-                    className="w-full bg-blue-50/50 dark:bg-gray-800 border border-blue-100 dark:border-gray-700 rounded-2xl p-4 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
-                 >
-                    <option value="">Selecione a principal...</option>
-                    {allCategoryNames.map(c => <option key={c} value={c}>{c}</option>)}
-                 </select>
-                 <p className="text-[9px] text-gray-400 italic ml-1 leading-tight">
-                    Define onde sua loja aparece primeiro. Só pode ser alterada a cada 30 dias.
-                 </p>
-             </div>
-
-             {/* Categorias Secundárias (Multi-select) */}
-             <MultiSelectChips 
-                label="Categorias Secundárias (Opcional)"
-                options={allCategoryNames.filter(c => c !== formData.category)}
-                selected={formData.secondary_categories}
-                onChange={handleSecondaryCategoriesChange}
-                maxSelection={2}
-                placeholder="Adicionar categoria extra..."
-                description="Apareça em mais seções do app."
-             />
-
-             {/* Subcategorias (Multi-select) */}
-             <div className={`transition-all duration-300 ${!formData.category ? 'opacity-50 pointer-events-none' : ''}`}>
-                 <MultiSelectChips 
-                    label="Subcategorias (O que você faz)"
-                    options={availableSubcategoryOptions}
-                    selected={formData.subcategories}
-                    onChange={(selected) => setFormData(prev => ({ ...prev, subcategories: selected }))}
-                    maxSelection={5}
-                    placeholder={availableSubcategoryOptions.length === 0 ? "Selecione categorias primeiro" : "Adicionar subcategoria..."}
-                    description="Escolha subcategorias que representem exatamente seus serviços."
-                 />
-                 {formData.category && formData.subcategories.length === 0 && (
-                     <p className="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-pulse">Selecione pelo menos uma subcategoria.</p>
-                 )}
-             </div>
-
-             {/* TAGS SELECTOR */}
-             <TagSelector 
-                selectedTags={formData.tags || []} 
-                onChange={(tags) => setFormData({...formData, tags})} 
-             />
-             
-             <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30 flex gap-3">
-                 <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                 <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
-                    Tags e subcategorias ajudam clientes certos a encontrarem seu negócio na busca e nas recomendações.
-                 </p>
-             </div>
-
-          </div>
-        </section>
-
-        {/* BLOCO 3: CONFIGURAÇÕES ADICIONAIS */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 px-1">
-            <ShoppingBag size={16} className="text-emerald-500" />
-            <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">3. Pedidos & Pagamentos</h2>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-             <div onClick={() => setFormData({...formData, accepts_online_orders: !formData.accepts_online_orders})} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 cursor-pointer">
-                 <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Aceita Pedidos Online?</span>
-                 <div className={`w-12 h-6 rounded-full p-1 transition-colors ${formData.accepts_online_orders ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${formData.accepts_online_orders ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                 </div>
-             </div>
-
-             <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Valor de Pedido Mínimo</label>
-                <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
-                    <input 
-                        type="number"
-                        value={formData.min_order_value}
-                        onChange={e => setFormData({...formData, min_order_value: e.target.value})}
-                        placeholder="0,00"
-                        className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 pl-10 text-sm font-bold dark:text-white outline-none focus:border-[#1E5BFF]"
-                    />
-                </div>
-             </div>
-          </div>
-        </section>
-
-        {/* --- CONFIRMAÇÃO --- */}
-        <section className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-blue-50 dark:border-gray-800 shadow-sm">
-                <label className="flex items-center gap-4 cursor-pointer group">
-                    <div onClick={() => setFormData({...formData, confirm_correct: !formData.confirm_correct})} className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.confirm_correct ? 'bg-[#1E5BFF] border-[#1E5BFF]' : 'border-gray-200 group-hover:border-blue-400'}`}>
-                        {formData.confirm_correct && <Check size={16} className="text-white" strokeWidth={4} />}
-                    </div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 leading-tight">Confirmo que as informações acima estão corretas e atualizadas.</span>
-                </label>
-
-                <button 
-                  onClick={handleSave} 
-                  disabled={isSaving || !formData.confirm_correct}
-                  className="w-full bg-[#1E5BFF] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm mt-8 disabled:opacity-30 disabled:grayscale"
-                >
-                    {isSaving ? <Loader2 className="animate-spin" /> : <><CheckCircle2 size={20}/> Salvar Dados da Loja</>}
-                </button>
-            </div>
-        </section>
-
+        
       </div>
       
       <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'logo_url')} />

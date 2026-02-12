@@ -627,7 +627,7 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
-      <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 py-4 border-b border-white/5 flex items-center justify-between">
+      <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl px-6 py-4 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-4">
             <button onClick={view === 'sales' ? onBack : () => setView('sales')} className="p-2.5 bg-slate-800 text-slate-400 hover:text-white transition-colors border border-white/5 rounded-xl active:scale-95">
                 <ChevronLeft size={20} />
