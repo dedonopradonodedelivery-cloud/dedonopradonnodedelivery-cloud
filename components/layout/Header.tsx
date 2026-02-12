@@ -21,7 +21,6 @@ interface HeaderProps {
   isDarkMode?: boolean;
   toggleTheme?: () => void;
   userRole?: string | null;
-  onSelectCategory: (category: Category) => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -71,7 +70,6 @@ export const Header: React.FC<HeaderProps> = ({
   viewMode,
   onOpenViewSwitcher,
   userRole,
-  onSelectCategory
 }) => {
   const { currentNeighborhood, setNeighborhood, toggleSelector } = useNeighborhood();
   const [isListening, setIsListening] = useState(false);
@@ -390,7 +388,7 @@ export const Header: React.FC<HeaderProps> = ({
                           const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
                           if (!fullCat) return null;
                           return (
-                            <button key={cat.slug} onClick={() => onSelectCategory(fullCat)} className="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/10 border border-white/20">
+                            <button key={cat.slug} onClick={() => onNavigate('category_detail', { category: fullCat })} className="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/10 border border-white/20">
                               <cat.icon size={20} className="text-white" />
                               <span className="text-[10px] font-bold text-white tracking-tight">{cat.name}</span>
                             </button>
@@ -413,7 +411,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClose={() => setIsMoreCategoriesOpen(false)}
             onSelectCategory={(category: Category) => {
                 setIsMoreCategoriesOpen(false);
-                onSelectCategory(category);
+                onNavigate('category_detail', { category });
             }}
         />
         
