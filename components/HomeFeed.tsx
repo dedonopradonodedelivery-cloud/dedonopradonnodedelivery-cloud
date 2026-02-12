@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { Store, Category, CommunityPost, ServiceRequest, ServiceUrgency, Classified, AdType } from '@/types';
 import { 
@@ -233,7 +234,7 @@ const TALENTS_MOCK: Talent[] = [
     title: 'Reparos Rápidos do Jorge',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=400&auto=format&fit=crop',
     neighborName: 'Jorge Silva',
-    neighborAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
+    neighborAvatar: 'https://images.unsplash.com/photo-1507003211169-a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
     whatsapp: '5521999999999',
     category: 'Marido de Aluguel'
   },
@@ -389,7 +390,7 @@ const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | 
                     <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isLost ? 'bg-orange-500' : 'bg-emerald-500'}`}>
+                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isLost ? 'bg-orange-50' : 'bg-emerald-50'}`}>
                             {isLost ? 'Perdido' : 'Encontrado'}
                         </span>
                         <h2 className="text-2xl font-bold leading-tight">{item.title}</h2>
@@ -411,7 +412,7 @@ const LostAndFoundDetailModal: React.FC<{ item: typeof LOST_AND_FOUND_MOCK[0] | 
                     </p>
                     <button 
                         onClick={() => window.open(`https://wa.me/${item.contact}`, '_blank')}
-                        className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all ${isLost ? 'bg-orange-500 shadow-orange-500/30' : 'bg-emerald-500 shadow-emerald-500/30'}`}
+                        className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all ${isLost ? 'bg-orange-50 shadow-orange-500/30' : 'bg-emerald-50 shadow-emerald-500/30'}`}
                     >
                         <Phone size={16} /> Entrar em Contato
                     </button>
@@ -703,7 +704,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-500 overflow-x-hidden pb-32 rounded-t-[2.5rem] -mt-6 relative shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
       
-      {/* JOTA BLOCK */}
+      {/* TUCO BLOCK */}
       {isFeatureActive('home_tab') && (
         <section className="px-4 pt-10">
           <GeminiAssistant />

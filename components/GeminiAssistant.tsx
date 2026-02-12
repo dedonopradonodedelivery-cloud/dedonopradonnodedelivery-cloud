@@ -5,69 +5,65 @@ import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '@/types';
 import { STORES } from '@/constants';
 
-const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
+const TucoAvatar: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={className}
-    viewBox="0 0 40 40"
+    viewBox="0 0 100 100"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z"
-      fill="url(#paint0_linear_jota_avatar)"
-    />
-    {/* --- JOTA TUCANO v1 --- */}
-    <defs>
-      <linearGradient id="jotaToucanBeak" x1="25" y1="16" x2="40" y2="28">
-        <stop stopColor="#FBBF24" />
-        <stop offset="1" stopColor="#F97316" />
-      </linearGradient>
-    </defs>
-
-    {/* Corpo (Sombra sutil) */}
-    <path d="M13 29 C 9 21, 15 11, 25 11 C 33 11, 37 17, 37 23 C 37 33, 29 37, 21 37 C 15 37, 13 33, 13 29 Z" fill="#111827" />
-
-    {/* Bico */}
-    <path d="M26 19 C 40 17, 46 23, 39 30 C 33 36, 26 32, 26 25 V 19 Z" fill="url(#jotaToucanBeak)" />
-    <path d="M26 22 L 39 25 L 37 27 L 26 24 Z" fill="rgba(0,0,0,0.4)" />
-
-    {/* Peito Branco */}
-    <path d="M23 24 C 19 24, 17 26, 17 29 C 17 33, 19 35, 23 35 S 25 33, 25 29 C 25 26, 23 24, 23 24 Z" fill="white" />
+    {/* Background Circle with Premium Gradient */}
+    <circle cx="50" cy="50" r="48" fill="url(#tuco_bg_grad)" />
     
-    {/* Olho */}
-    <circle cx="29" cy="19" r="5" fill="#1E5BFF" />
-    <circle cx="29" cy="19" r="2" fill="#111827" />
-    <circle cx="29.8" cy="18.2" r="0.7" fill="white" />
-    {/* --- FIM DO AVATAR --- */}
     <defs>
-      <linearGradient
-        id="paint0_linear_jota_avatar"
-        x1="0"
-        y1="0"
-        x2="40"
-        y2="40"
-        gradientUnits="userSpaceOnUse"
-      >
+      <linearGradient id="tuco_bg_grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
         <stop stopColor="#4D8BFF" />
         <stop offset="1" stopColor="#1E5BFF" />
       </linearGradient>
+      
+      <linearGradient id="tuco_beak_grad" x1="55" y1="35" x2="85" y2="65" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FFCC33" />
+        <stop offset="1" stopColor="#FF8800" />
+      </linearGradient>
     </defs>
+
+    {/* Mascot Group centered to avoid cropping */}
+    <g transform="translate(5, 5)">
+      {/* Body - Clean Silhouette */}
+      <path 
+        d="M45 75C25 75 15 60 15 40C15 20 25 15 45 15C60 15 70 25 70 45C70 65 60 75 45 75Z" 
+        fill="#0F172A" 
+      />
+      
+      {/* Chest - Minimalist White */}
+      <path 
+        d="M45 70C35 70 28 62 28 50C28 38 35 30 45 30C48 30 50 32 50 35C50 38 48 40 45 40C40 40 38 45 38 50C38 55 40 60 45 60C48 60 50 62 50 65C50 68 48 70 45 70Z" 
+        fill="white" 
+        opacity="0.95"
+      />
+
+      {/* Beak - Iconic Shape, adjusted margins */}
+      <path 
+        d="M65 35C82 32 92 42 88 55C84 65 70 68 60 62L58 45C58 40 60 36 65 35Z" 
+        fill="url(#tuco_beak_grad)" 
+      />
+      
+      {/* Eye - Modern & Charismatic */}
+      <circle cx="58" cy="38" r="7" fill="#1E5BFF" />
+      <circle cx="58" cy="38" r="3" fill="#0F172A" />
+      <circle cx="59.5" cy="36.5" r="1.2" fill="white" />
+    </g>
   </svg>
 );
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá 😌 Como posso te ajudar hoje?', type: 'response' }
+    { role: 'model', text: 'Olá! Sou o Tuco 🦜 Como posso ajudar você no bairro hoje?', type: 'response' }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const isBotThinking = useMemo(() => {
-    if (messages.length === 0) return false;
-    const lastMessage = messages[messages.length - 1];
-    return lastMessage.role === 'model' && (lastMessage.type === 'typing' || lastMessage.type === 'intermediate');
-  }, [messages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -77,111 +73,78 @@ export const GeminiAssistant: React.FC = () => {
 
   const handleSend = async (retryMessage?: string) => {
     const userMsg = retryMessage || input;
-    if (!userMsg.trim()) return;
+    if (!userMsg.trim() || isLoading) return;
 
     setInput('');
+    setIsLoading(true);
     
-    const newMessages: ChatMessage[] = [];
+    // Adiciona a mensagem do usuário se não for um retry
     if (!retryMessage) {
-      newMessages.push({ role: 'user', text: userMsg, type: 'response' });
+      setMessages(prev => [...prev, { role: 'user', text: userMsg, type: 'response' }]);
     }
-    newMessages.push({ role: 'model', type: 'typing' });
-    setMessages(prev => [...prev, ...newMessages]);
+    
+    // Adiciona o placeholder de digitação
+    setMessages(prev => [...prev, { role: 'model', type: 'typing' }]);
 
-    const intermediateTimer = setTimeout(() => {
-        setMessages(prev => {
-            const lastMessage = prev[prev.length - 1];
-            if (lastMessage && lastMessage.type === 'typing') {
-                const intermediateMessages = ["Boa 👍 Já entendi...", "Perfeito 😌 Só um instante...", "Deixa comigo..."];
-                const randomMsg = intermediateMessages[Math.floor(Math.random() * intermediateMessages.length)];
-                const newMessages = [...prev.slice(0, -1)];
-                newMessages.push({ role: 'model', text: randomMsg, type: 'intermediate' });
-                return newMessages;
-            }
-            return prev;
-        });
-    }, 1800);
-
+    let intermediateTimer: ReturnType<typeof setTimeout> | null = null;
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-    const apiCallPromise = ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: userMsg,
-      config: {
-        systemInstruction: `Você é o Jota 🦜, um assistente virtual em formato de tucano estilizado, mascote do app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e prestativo.
-
-**TOM E ESTILO (OBRIGATÓRIO):**
-- **Natural e Moderno:** Use uma linguagem fluida e atual, como um assistente digital de ponta.
-- **Seguro e Prestativo:** Demonstre confiança e disposição para ajudar imediatamente.
-- **Levemente Simpático:** Seja amigável, mas nunca excessivamente informal ou caricato (evite piadas ou gírias exageradas).
-
-**DIRETRIZES DE PROGRESSÃO (ESTÁGIO INICIAL):**
-1.  **ESCOPO PRIORITÁRIO:** Sua especialidade inicial é em **[Serviços]**, **[Produtos Populares]** e **[Indicações]**. Concentre-se em resolver essas solicitações com perfeição.
-2.  **EVITAR COMPLEXIDADE:** Não tente resolver tudo. Se um pedido for muito complexo ou fora do seu escopo atual (ex: debates, informações da comunidade muito específicas), responda de forma honesta e redirecione. Ex: "Ainda estou aprendendo sobre isso. Por enquanto, posso te ajudar a encontrar um serviço ou produto no bairro. O que você busca?".
-3.  **REGRA CRÍTICA - CONFIANÇA PRIMEIRO:** Sua prioridade máxima é a taxa de acerto para construir a confiança do usuário. É melhor admitir uma limitação temporária do que errar. Minimize a frustração inicial.
-
-**DIRETRIZES DE COMPORTAMENTO:**
-1.  **RESPOSTAS ÁGEIS:** Sempre comece com frases curtas e seguras que mostrem entendimento instantâneo. Exemplos preferidos: "Boa 😌 Já entendi.", "Perfeito 👍 Vamos resolver isso.", "Deixa comigo.".
-2.  **SEGURANÇA PRIMEIRO:**
-    - Se houver **ambiguidade** ("preciso de um serviço barato"), faça uma pergunta curta e inteligente: "Entendi 👍 Qual tipo de serviço?".
-    - Se tiver **baixa confiança** na dedução, confirme: "Ok, parece que você precisa de um eletricista. Confirma?".
-    - **Nunca invente** informações ou assuma dados críticos.
-3.  **CENÁRIOS PROBLEMÁTICOS:**
-    - **Sem Resultados:** "Ainda não encontrei alguém disponível 😕 Quer ampliar a busca ou tentar outra opção?". Nunca diga "Nenhum resultado encontrado".
-    - **Categoria Inexistente:** "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?".
-4.  **ZERO FRICÇÃO:** Nunca diga "Não entendi" ou peça para o usuário "buscar em outra aba". Sua função é guiar e resolver.
-
-**FLUXO DE RESPOSTA:**
-1.  **Análise Interna:** Classifique a intenção do usuário como [Serviço], [Produto] ou [Comunidade], mas **NÃO** mencione essa classificação na sua resposta ao usuário.
-2.  **Resposta ao Usuário:** Vá direto ao ponto, começando com uma das frases de confiança e seguindo com a ação (resposta direta, pergunta de esclarecimento ou pedido de confirmação).
-
-**EXEMPLOS ATUALIZADOS:**
-- **Usuário:** "meu chuveiro queimou e preciso de alguém pra hoje!"
-  **Jota:** "Deixa comigo. Parece que você precisa de um eletricista para uma emergência, confirma?"
-
-- **Usuário:** "problema no carro"
-  **Jota:** "Boa 👍 É para manutenção, guincho ou um orçamento?"
-  
-- **Usuário:** "tem aluguel de jet ski na freguesia?"
-  **Jota:** "Boa 👍 Ainda não temos essa categoria no bairro. Quer que eu registre seu pedido?"`,
-        temperature: 0.5,
-      },
-    });
-    
-    const timeoutPromise = new Promise<GenerateContentResponse>((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 9000)
-    );
-
     try {
-      const response: GenerateContentResponse = await Promise.race([apiCallPromise, timeoutPromise]);
-      clearTimeout(intermediateTimer);
-      setMessages(prev => {
-        const newMessages = [...prev.slice(0, -1)];
-// FIX: Changed response.text() to response.text to correctly access the text property.
-        newMessages.push({ role: 'model', text: response.text || "Desculpe, não entendi.", type: 'response' });
-        return newMessages;
+      // Inicia timer para mensagem intermediária de "personalidade"
+      intermediateTimer = setTimeout(() => {
+        setMessages(prev => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage && lastMessage.type === 'typing') {
+            const intermediateMessages = ["Boa 👍 Já entendi...", "Perfeito 😌 Só um instante...", "Deixa comigo..."];
+            const randomMsg = intermediateMessages[Math.floor(Math.random() * intermediateMessages.length)];
+            return [...prev.slice(0, -1), { role: 'model', text: randomMsg, type: 'intermediate' }];
+          }
+          return prev;
+        });
+      }, 1800);
+
+      const apiCallPromise = ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: userMsg,
+        config: {
+          systemInstruction: `Você é o Tuco 🦜, um assistente virtual em formato de tucano minimalista e premium, mascote do super-app "Localizei JPA". Sua personalidade é a de um especialista local extremamente ágil, inteligente e sofisticado.
+
+**DIRETRIZES DE PERSONA:**
+- **Nome:** Tuco.
+- **Tom:** Moderno, prestativo e seguro.
+- **Estilo:** Respostas rápidas e diretas.
+
+**ESCOPO DE ATUAÇÃO:**
+1. Serviços e Orçamentos (Prioridade).
+2. Guia Local de Jacarepaguá.`,
+          temperature: 0.4,
+        },
       });
-    } catch (error: any) {
-      clearTimeout(intermediateTimer);
       
+      const timeoutPromise = new Promise<GenerateContentResponse>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 10000)
+      );
+
+      const response = await Promise.race([apiCallPromise, timeoutPromise]);
+      
+      setMessages(prev => [
+        ...prev.slice(0, -1), 
+        { role: 'model', text: response.text || "Desculpe, tive um contratempo. Pode repetir?", type: 'response' }
+      ]);
+
+    } catch (error: any) {
       const errorMessageText = error.message === 'timeout'
         ? "Tive uma pequena demora aqui 😕\nQuer tentar novamente?"
         : "Ops, tive um problema técnico. Tente novamente mais tarde.";
 
-      const errorMessage: ChatMessage = {
-        role: 'model',
-        text: errorMessageText,
-        type: 'error',
-        action: 'retry',
-        originalUserMessage: userMsg
-      };
-
-      setMessages(prev => {
-        const newMessages = [...prev.slice(0, -1)];
-        newMessages.push(errorMessage);
-        return newMessages;
-      });
-      console.error("Gemini Assistant Error:", error);
+      setMessages(prev => [
+        ...prev.slice(0, -1), 
+        { role: 'model', text: errorMessageText, type: 'error', action: 'retry', originalUserMessage: userMsg }
+      ]);
+      console.error("Tuco Assistant Error:", error);
+    } finally {
+      setIsLoading(false);
+      if (intermediateTimer) clearTimeout(intermediateTimer);
     }
   };
 
@@ -189,42 +152,49 @@ export const GeminiAssistant: React.FC = () => {
     <>
       <div 
         onClick={() => setIsOpen(true)}
-        className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-lg shadow-black/5 cursor-pointer transition-all active:scale-[0.99] group border border-gray-100 dark:border-gray-800 flex items-center gap-4"
+        className="bg-white dark:bg-slate-900 p-5 rounded-[2.5rem] shadow-xl shadow-black/5 cursor-pointer transition-all active:scale-[0.99] group border border-gray-100 dark:border-gray-800 flex items-center gap-5"
       >
-        <JotaAvatar className="w-16 h-16 flex-shrink-0" />
+        <div className="w-16 h-16 flex-shrink-0 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-1 overflow-hidden flex items-center justify-center">
+            <TucoAvatar className="w-full h-full" />
+        </div>
         <div className="flex-1">
-            <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">Olá, eu sou o Jota!</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">O que você precisa no bairro agora?</p>
-            <div className="mt-3 text-xs text-slate-400 dark:text-slate-500 font-medium">
-                Ex: eletricista, gás, indicação, ajuda…
+            <h3 className="font-black text-xl text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">Olá, eu sou o Tuco!</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 font-medium">O que você busca no bairro agora?</p>
+            <div className="mt-3 text-[10px] font-black uppercase tracking-widest text-blue-500/60">
+                Eletricista • Gás • Indicação • Ajuda
             </div>
         </div>
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/50 p-4 pb-24 sm:pb-4">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[600px] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-4 flex justify-between items-center">
-              <div className="flex items-center gap-3 text-white">
-                <JotaAvatar className="w-10 h-10" />
+        <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/60 p-4 pb-24 sm:pb-4 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[650px] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in slide-in-from-bottom duration-300">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-5 flex justify-between items-center shadow-lg relative z-10">
+              <div className="flex items-center gap-4 text-white">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl p-1">
+                    <TucoAvatar className="w-full h-full" />
+                </div>
                 <div>
-                  <h3 className="font-bold text-lg">Jota</h3>
-                  <p className="text-xs text-blue-100">Assistente do Bairro</p>
+                  <h3 className="font-black text-xl tracking-tighter">Tuco</h3>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-100">Assistente Premium</p>
+                  </div>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
-                <X className="w-6 h-6" />
+              <button onClick={() => setIsOpen(false)} className="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-white transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-950">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar">
               {messages.map((msg, idx) => {
                 if (msg.type === 'typing') {
                     return (
-                        <div key={idx} className="flex justify-start">
-                            <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                        <div key={idx} className="flex justify-start animate-in slide-in-from-bottom-2">
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-3">
                                 <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                                <span className="text-xs text-gray-500 dark:text-gray-400">Digitando...</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tuco está pensando...</span>
                             </div>
                         </div>
                     );
@@ -232,16 +202,16 @@ export const GeminiAssistant: React.FC = () => {
                 
                 return (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+                      <div className={`max-w-[85%] p-4 rounded-3xl text-sm font-medium leading-relaxed ${
                         msg.role === 'user' 
-                          ? 'bg-blue-600 text-white rounded-br-none' 
-                          : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
+                          ? 'bg-blue-600 text-white rounded-br-none shadow-lg shadow-blue-500/20' 
+                          : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
                       }`}>
                         <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
                         {msg.action === 'retry' && msg.originalUserMessage && (
                             <button
                                 onClick={() => handleSend(msg.originalUserMessage)}
-                                className="mt-3 w-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold py-2.5 rounded-xl text-xs border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
+                                className="mt-4 w-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
                             >
                                 Tentar Novamente
                             </button>
@@ -252,24 +222,24 @@ export const GeminiAssistant: React.FC = () => {
               })}
             </div>
 
-            <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+            <div className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
               <form 
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="flex gap-2"
+                className="flex gap-3"
               >
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ex: serviço, produto, ajuda…"
-                  className="flex-1 bg-gray-100 dark:bg-gray-800 dark:text-white rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:placeholder-gray-500"
+                  placeholder="O que você precisa no bairro?"
+                  className="flex-1 bg-gray-50 dark:bg-gray-800 dark:text-white rounded-2xl px-5 py-4 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/50 dark:placeholder-gray-600 transition-all"
                 />
                 <button 
                   type="submit"
-                  disabled={isBotThinking || !input.trim()}
-                  className="bg-blue-600 text-white p-3 rounded-full disabled:opacity-50 hover:bg-blue-700 transition-colors"
+                  disabled={isLoading || !input.trim()}
+                  className="bg-blue-600 text-white p-4 rounded-2xl disabled:opacity-50 disabled:grayscale hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
                 >
-                  <Send className="w-5 h-5" />
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 fill-current" />}
                 </button>
               </form>
             </div>
