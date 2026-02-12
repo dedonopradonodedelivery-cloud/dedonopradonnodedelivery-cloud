@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Header } from '@/components/layout/Header';
+import { Layout } from '@/components/Layout';
+import { Header } from '@/components/Header';
 import { HomeFeed } from '@/components/HomeFeed';
 import { ExploreView } from '@/components/ExploreView';
 import { StoreDetailView } from '@/components/StoreDetailView';
@@ -197,7 +197,7 @@ const App: React.FC = () => {
             handleNavigate('user_coupons');
         }
     }
-  }, [user, userRole]);
+  }, [user, userRole, activeTab]);
 
   useEffect(() => {
     if (splashStage >= 4) {
