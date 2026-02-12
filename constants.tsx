@@ -16,7 +16,7 @@ import {
   // Added missing icon imports
   Meh, ThumbsDown, Gift, RefreshCw
 } from 'lucide-react';
-import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from './types';
+import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '@/types';
 import { getStoreLogo } from '@/utils/mockLogos';
 
 

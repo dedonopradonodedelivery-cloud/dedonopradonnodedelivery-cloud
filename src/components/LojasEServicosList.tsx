@@ -1,8 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
-import { Store, AdType } from '../types';
-import { STORES } from '../constants';
+import { Store, AdType } from '@/types';
+import { STORES } from '@/constants';
 import { Star, BadgeCheck, ChevronRight, Crown } from 'lucide-react';
+import { getStoreLogo } from '@/utils/mockLogos';
 
 interface LojasEServicosListProps {
   onStoreClick: (store: Store) => void;

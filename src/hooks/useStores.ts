@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from 'react';
 // FIX: Corrected supabase import path from ../services/supabaseClient to ../lib/supabaseClient
-import { supabase } from '../lib/supabaseClient';
-import { Store, AdType } from '../types';
+import { supabase } from '@/lib/supabaseClient';
+import { Store, AdType } from '@/types';
 
 interface UseStoresResult {
   stores: Store[];

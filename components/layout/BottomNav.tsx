@@ -1,8 +1,7 @@
-
 import React, { useMemo } from 'react';
 import { Home, Newspaper, MessageSquare, Ticket, Compass } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useFeatures, FeatureKey } from '../../contexts/FeatureContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFeatures, FeatureKey } from '@/contexts/FeatureContext';
 
 interface BottomNavProps {
   activeTab: string;

@@ -1,6 +1,5 @@
-
-import { supabase } from '../lib/supabaseClient';
-import { Job } from '../types';
+import { supabase } from '@/lib/supabaseClient';
+import { Job } from '@/types';
 
 /**
  * Lógica de disparo de PUSH de vagas.

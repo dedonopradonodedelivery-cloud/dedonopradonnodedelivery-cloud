@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck, User, Baby, Car, Bike } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
@@ -97,7 +96,7 @@ const BigSurCard: React.FC<{
   isMoreButton?: boolean;
   categoryColor?: string;
 }> = ({ icon, name, isSelected, onClick, isMoreButton, categoryColor }) => {
-  const baseClasses = `relative w-full aspect-square rounded-[24px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
+  const baseClasses = `relative w-full aspect-square rounded-[25px] flex flex-col items-center justify-between p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/20`;
   const backgroundClass = isMoreButton ? "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" : `${categoryColor || 'bg-brand-blue'} shadow-sm`;
   const textClass = isMoreButton ? "text-gray-500 dark:text-gray-400" : "text-white";
   const selectionEffects = isSelected ? "ring-4 ring-black/10 dark:ring-white/20 scale-[0.96] brightness-110 shadow-inner" : "active:scale-95 transition-all";
@@ -116,20 +115,22 @@ const BigSurCard: React.FC<{
 
 const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
   const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
+  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
+  
   return (
-    <div onClick={onClick} className="flex items-center gap-4 p-2 rounded-2xl hover:bg-white dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
-      <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={store.logoUrl || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-contain p-1" />
+    <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
+      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
+        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
+          <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
+          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded uppercase">Ads</span>}
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
           <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-          <span className="truncate">{store.subcategory}</span>
+          <span className="truncate">{store.category}</span>
         </div>
         <div className="flex items-center gap-3 mt-1.5">
           {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
@@ -172,7 +173,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   stores, 
   userRole, 
   onAdvertiseInCategory, 
-  onNavigate, 
+  onNavigate,
   onSubcategoryClick
 }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
@@ -262,7 +263,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         }
       } catch (e: any) {
         if (!e.message?.includes('published_banners')) {
-            console.error("Failed to fetch category banner from Supabase:", e.message || e);
+            console.error("Failed to fetch category banner:", e.message || e);
         }
         setActiveBanner(null);
       } finally {
@@ -434,12 +435,28 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         </h1>
       </div>
       
-      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
-      <div className="mt-4">
-        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
+      {/* BANNER FIXO INSTITUCIONAL (Altura Reduzida 16/6) */}
+      <div className="mt-4 px-5">
+        <div 
+          onClick={() => onNavigate('explore')}
+          className={`relative aspect-[16/6] w-full rounded-[2rem] overflow-hidden cursor-pointer shadow-lg bg-[#1E5BFF] border border-white/5`}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" 
+            alt="Jacarepaguá" 
+            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+          <div className="relative h-full flex flex-col justify-end p-6 text-white">
+            <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-1">
+              {category.name} <span className="opacity-70">em Jacarepaguá</span>
+            </h2>
+            <p className="text-[9px] font-bold text-blue-100 uppercase tracking-[0.2em]">O melhor do bairro em um só lugar</p>
+          </div>
+        </div>
       </div>
 
-      <div className="p-5 pt-0 space-y-8">
+      <div className="p-5 pt-6 space-y-8">
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
@@ -465,39 +482,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             </div>
           </section>
         )}
-
-        <section>
-          {loadingBanner ? (
-            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
-          ) : activeBanner ? (
-            <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
-              {activeBanner.config.type === 'template' ? (
-                <TemplateBannerRender config={activeBanner.config} />
-              ) : (
-                <CustomBannerRender config={activeBanner.config} />
-              )}
-            </div>
-          ) : (
-            <div 
-              onClick={handleAdvertiseClick}
-              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
-            >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
-                
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
-                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
-                    </div>
-                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
-                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
-                        Anunciar nesta categoria
-                    </div>
-                </div>
-            </div>
-          )}
-        </section>
 
         <section>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">
