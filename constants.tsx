@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import { 
   Utensils, ShoppingCart, Scissors, Heart, PawPrint, Wrench, 
@@ -629,6 +631,7 @@ export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
     neighborhood: 'Freguesia', price: 8000, transaction: 'aluguel', area: 100, postedAt: 'Há 3 dias',
     propertyTypeCom: 'Loja', hasBathroom: true, parkingSpaces: 0,
   },
+// FIX: Added missing 'type' property to the RealEstateProperty object.
   {
     id: 'com-3', type: 'Comercial', title: 'Galpão na Taquara', description: 'Galpão com 500m², pé-direito de 8m e acesso para caminhões. Ideal para logística ou pequena indústria.', image: 'https://images.unsplash.com/photo-1587022205345-66b3e6486d3b?q=80&w=800',
     neighborhood: 'Taquara', price: 12000, transaction: 'aluguel', area: 500, postedAt: 'Há 2 semanas',
