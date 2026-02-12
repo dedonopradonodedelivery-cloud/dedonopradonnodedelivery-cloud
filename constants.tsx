@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { 
-  Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
+  Utensils, ShoppingCart, Scissors, Heart, PawPrint, Wrench, 
   Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, 
   Store as StoreIcon,
   LayoutGrid, Pill, Briefcase, Plane, Zap,
@@ -478,8 +477,6 @@ export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { image: string
     ]
   }
 };
-
-// --- FIX: Added missing exported members from constants/index.tsx ---
 
 export const EDITORIAL_SERVICES: EditorialCollection[] = [
   {

@@ -51,7 +51,7 @@ const JotaAvatar: React.FC<{ className?: string }> = ({ className }) => (
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o Jota 🐊, seu assistente virtual do bairro. Como posso te ajudar a encontrar o que precisa em Jacarepaguá hoje?', type: 'response' }
+    { role: 'model', text: 'Olá 😌 Como posso te ajudar hoje?', type: 'response' }
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -200,8 +200,8 @@ export const GeminiAssistant: React.FC = () => {
               <div className="flex items-center gap-3 text-white">
                 <JotaAvatar className="w-10 h-10" />
                 <div>
-                  <h3 className="font-bold text-lg">Jota, seu Assistente</h3>
-                  <p className="text-xs text-blue-100">Inteligência Artificial do Bairro</p>
+                  <h3 className="font-bold text-lg">Jota</h3>
+                  <p className="text-xs text-blue-100">Assistente do Bairro</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
@@ -253,7 +253,7 @@ export const GeminiAssistant: React.FC = () => {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Pergunte sobre lojas, serviços..."
+                  placeholder="Ex: serviço, produto, ajuda…"
                   className="flex-1 bg-gray-100 dark:bg-gray-800 dark:text-white rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:placeholder-gray-500"
                 />
                 <button 

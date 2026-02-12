@@ -25,7 +25,7 @@ interface HeaderProps {
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
-    const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
+    const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } from useNeighborhood();
     if (!isSelectorOpen) return null;
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
