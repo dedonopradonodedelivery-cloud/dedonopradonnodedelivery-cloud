@@ -64,7 +64,8 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
       onAdvertiseInCategory(category.name);
       onNavigate('store_ads_module');
     } else {
-      alert("Apenas lojistas podem anunciar aqui. Crie ou acesse sua conta de lojista.");
+      // Redireciona para o módulo de anúncios mesmo para não lojistas para gerar interesse (funil de conversão)
+      onNavigate('store_ads_module');
     }
   };
 

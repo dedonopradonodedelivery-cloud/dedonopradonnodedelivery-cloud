@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
 import { ExploreView } from '@/components/ExploreView';
-import { CategoryView } from '@/pages/categories/CategoryView';
+import { CategoryView } from '@/components/CategoryView';
 import { StoreDetailView } from '@/components/StoreDetailView';
 import { MenuView } from '@/components/MenuView';
 import { UserProfileFullView } from '@/components/UserProfileFullView';
