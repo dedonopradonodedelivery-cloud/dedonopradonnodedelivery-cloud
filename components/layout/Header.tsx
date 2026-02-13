@@ -109,4 +109,150 @@ const TucoMascot: React.FC = () => (
         <circle cx="94" cy="82" r="18" fill="white" /> 
         <circle cx="99" cy="82" r="9.5" fill="#0F172A" /> 
         <circle cx="103" cy="77" r="3.5" fill="white" /> 
-        <path d="M115 60C155 48 220 70 230 100C235 125 185 
+        <path d="M115 60C155 48 220 70 230 100C235 125 185 150 155 145C135 140 115 115 106 88C104 78 108 60 115 60Z" fill="url(#tuco_beak_grad)" />
+        <path d="M65 175C65 188 63 194 55 194" stroke="#FF9F00" strokeWidth="7" strokeLinecap="round" fill="none" />
+        <path d="M95 175C95 188 97 194 105 194" stroke="#FF9F00" strokeWidth="7" strokeLinecap="round" fill="none" />
+    </g>
+  </svg>
+);
+
+export const Header: React.FC<HeaderProps> = ({
+  onNotificationClick, 
+  user,
+  activeTab,
+  isAdmin,
+  viewMode,
+  onOpenViewSwitcher,
+}) => {
+  const { currentNeighborhood, toggleSelector } = useNeighborhood();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const isHome = activeTab === 'home';
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+
+  useEffect(() => {
+    const checkNotifs = () => {
+      let saved = localStorage.getItem('app_notifications');
+      if (!saved) {
+          // Fallback para popular o sino no primeiro acesso
+          const initial = [
+            { id: 'notif-1', title: 'Bem-vindo! 🧡', type: 'system', read: false, createdAt: new Date().toISOString() },
+            { id: 'notif-2', title: 'Dica do Tuco 🦜', type: 'system', read: false, createdAt: new Date().toISOString() },
+            { id: 'notif-3', title: 'Novo Cupom! 🎟️', type: 'coupon', read: false, createdAt: new Date().toISOString() },
+            { id: 'notif-4', title: 'JPA Conversa 🔥', type: 'ad', read: false, createdAt: new Date().toISOString() }
+          ];
+          localStorage.setItem('app_notifications', JSON.stringify(initial));
+          saved = JSON.stringify(initial);
+      }
+      const notifs = JSON.parse(saved);
+      setUnreadCount(notifs.filter((n: any) => !n.read).length);
+    };
+    checkNotifs();
+    const interval = setInterval(checkNotifs, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const greetingName = useMemo(() => {
+    if (!user) return "Visitante";
+    if (isAdmin && viewMode === 'ADM') return "Admin";
+    const fullName = user.user_metadata?.full_name;
+    return fullName ? fullName.split(' ')[0] : (user.email?.split('@')[0] || "Morador");
+  }, [user, isAdmin, viewMode]);
+
+  return (
+    <>
+        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-10 bg-brand-blue pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
+                
+                <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isHome ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
+                            <MapPin size={22} className="text-white fill-white" />
+                        </div>
+                        <h1 className={`text-lg font-black uppercase tracking-tighter leading-none ${isHome ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                            Localizei <span className={isHome ? 'opacity-50' : 'text-blue-600'}>JPA</span>
+                        </h1>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        {isAdmin && (
+                            <button onClick={onOpenViewSwitcher} className={`transition-all active:scale-90 ${isHome ? 'text-amber-400' : 'text-amber-600'}`}>
+                                <ShieldCheck size={20} />
+                            </button>
+                        )}
+
+                        <button 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleSelector();
+                            }}
+                            className={`relative z-50 flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer pointer-events-auto ${
+                                isHome 
+                                ? 'text-white' 
+                                : 'text-slate-700 dark:text-slate-200'
+                            }`}
+                        >
+                            <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[80px]">
+                                {currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}
+                            </span>
+                            <ChevronDown size={10} strokeWidth={3} className="opacity-40" />
+                        </button>
+
+                        <button 
+                            onClick={onNotificationClick}
+                            className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
+                                isHome 
+                                ? 'text-white' 
+                                : 'text-gray-500'
+                            }`}
+                        >
+                            <Bell size={22} />
+                            {unreadCount > 0 && (
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
+                                    <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                </span>
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {isHome && (
+                    <div className="relative pt-1 animate-in fade-in slide-in-from-top-1 duration-700">
+                        <div className="absolute bottom-[32px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
+                             <TucoMascot />
+                        </div>
+
+                        <button 
+                            onClick={() => setIsAssistantOpen(true)}
+                            className="w-full flex flex-col gap-4 transition-all active:scale-[0.99] group text-left relative cursor-pointer"
+                        >
+                            <div className="flex flex-col relative z-10">
+                                <h2 className="text-2xl font-display text-white leading-tight">
+                                    Olá, <span className="font-black">{greetingName}</span> 👋
+                                </h2>
+                                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.25em] mt-1.5">
+                                    Sua inteligência local
+                                </p>
+                            </div>
+
+                            <div className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 group-hover:bg-white/20 transition-all shadow-inner relative z-10">
+                                <Search size={18} className="text-white/40" />
+                                <span className="text-white/40 text-sm font-medium tracking-tight">
+                                    Como o Tuco pode te ajudar?
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        <NeighborhoodSelectorModal />
+
+        <GeminiAssistant 
+          isExternalOpen={isAssistantOpen} 
+          onClose={() => setIsAssistantOpen(false)} 
+        />
+    </>
+  );
+};
