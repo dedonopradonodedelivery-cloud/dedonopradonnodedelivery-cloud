@@ -33,6 +33,7 @@ import { FashionSelectionView } from '@/components/FashionSelectionView';
 import { FashionWomenView } from '@/components/FashionWomenView';
 import { FashionMenView } from '@/components/FashionMenView';
 import { FashionKidsView } from '@/components/FashionKidsView';
+import { NotificationsView } from '@/components/NotificationsView';
 import { STORES } from '@/constants';
 import { Store, Category } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -112,7 +113,7 @@ export const App: React.FC = () => {
 
   const headerExclusionList = [
     'store_detail', 'category_detail', 'user_coupons', 'coupon_landing', 
-    'admin_panel', 'services', 'service_chat', 
+    'admin_panel', 'services', 'service_chat', 'notifications',
     'adoption', 'donations', 'desapega', 'real_estate', 'job_wizard', 
     'real_estate_wizard', 'about_app', 'privacy_policy', 'support',
     'health_selection', 'health_women', 'health_pediatrics', 'services_selection',
@@ -146,6 +147,7 @@ export const App: React.FC = () => {
                     <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
+                    {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={userRole} />}
                     {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
                     {activeTab === 'health_selection' && (
                         <HealthSelectionView 
