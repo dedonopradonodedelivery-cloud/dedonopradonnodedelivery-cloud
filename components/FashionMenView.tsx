@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, Shirt, User, Tie, Watch, Zap, LayoutGrid } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Shirt, User, Watch, Zap, LayoutGrid } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
 
 interface SpecialtyItem {

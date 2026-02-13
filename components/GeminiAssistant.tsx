@@ -61,7 +61,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     
     // Add user message to chat only if it's a new message
     // This prevents duplicating the message if voice input is auto-sending and the text is already in state
-    if (messages.length === 0 || messages.at(-1)?.text !== userMsg || messages.at(-1)?.role !== 'user') {
+    if (messages.length === 0 || messages[messages.length - 1]?.text !== userMsg || messages[messages.length - 1]?.role !== 'user') {
       setMessages(prev => [...prev, currentUserMsg]);
     }
     

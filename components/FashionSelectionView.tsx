@@ -5,7 +5,7 @@ import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import 
 
 interface FashionSelectionViewProps {
   onBack: () => void;
-  onSelect: (intent: string) => void;
+  onSelect: (type: string) => void;
   onNavigate: (view: string) => void; // Added for the MasterSponsorBadge
 }
 
@@ -72,18 +72,21 @@ export const FashionSelectionView: React.FC<FashionSelectionViewProps> = ({ onBa
           <SelectionCard 
             icon={User} 
             label="Feminino" 
+            sublabel="Moda Feminina"
             color="bg-rose-500" 
             onClick={() => onSelect('Feminino')} 
           />
           <SelectionCard 
             icon={User} 
             label="Masculino" 
+            sublabel="Moda Masculina"
             color="bg-blue-500" 
             onClick={() => onSelect('Masculino')} 
           />
           <SelectionCard 
             icon={Baby} 
             label="Infantil" 
+            sublabel="Moda Infantil"
             color="bg-amber-500" 
             onClick={() => onSelect('Infantil')} 
           />

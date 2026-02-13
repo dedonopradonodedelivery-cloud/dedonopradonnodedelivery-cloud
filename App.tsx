@@ -153,6 +153,7 @@ export const App: React.FC = () => {
                             handleNavigate('category_detail');
                         }
                       }} 
+                      onNavigate={handleNavigate}
                     />
                   )}
                   {activeTab === 'fashion_selection' && (
@@ -170,6 +171,7 @@ export const App: React.FC = () => {
                             handleNavigate('category_detail');
                         }
                       }}
+                      onNavigate={handleNavigate}
                     />
                   )}
                   {activeTab === 'fashion_women' && (
@@ -204,7 +206,7 @@ export const App: React.FC = () => {
                   )}
                   {activeTab === 'pets_selection' && (
                     <PetsSelectionView 
-                      onBack={() => handleNavigate('home')}
+                      onBack={() => handleNavigate('home')} 
                       onSelect={(intent) => {
                         setPetIntent(intent);
                         if (intent === 'Cães') {
@@ -217,6 +219,7 @@ export const App: React.FC = () => {
                             handleNavigate('category_detail');
                         }
                       }}
+                      onNavigate={handleNavigate}
                     />
                   )}
                   {activeTab === 'pets_dogs' && (
@@ -251,7 +254,7 @@ export const App: React.FC = () => {
                   )}
                   {activeTab === 'services_selection' && (
                     <ServicesSelectionView 
-                      onBack={() => handleNavigate('home')}
+                      onBack={() => handleNavigate('home')} 
                       onSelect={(intent) => {
                         setServiceIntent(intent);
                         if (intent === 'Manuais') {
@@ -262,6 +265,7 @@ export const App: React.FC = () => {
                             handleNavigate('category_detail');
                         }
                       }}
+                      onNavigate={handleNavigate}
                     />
                   )}
                   {activeTab === 'services_manual' && (
