@@ -52,24 +52,28 @@ export const App: React.FC = () => {
   const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    // 5 SEGUNDOS DE SPLASH CINEMATOGRÁFICO
+    // TIMER DE 4 SEGUNDOS EXATOS PARA O SPLASH CINEMATOGRÁFICO
     if (!authLoading) {
       const timer = setTimeout(() => {
         const splash = document.getElementById('app-splash');
         if (splash) {
+          // Inicia o fade-out do splash (1s definido no CSS)
           splash.style.opacity = '0';
           splash.style.visibility = 'hidden';
-          // Tempo sincronizado com o fade-out do CSS (1s)
+          
+          // IMEDIATAMENTE libera a Home por trás para um cross-fade ultra fluido
+          setAppReady(true);
+          document.body.style.overflow = 'auto';
+          
+          // Remove fisicamente após o término da transição de opacidade
           setTimeout(() => {
             splash.remove();
-            setAppReady(true);
-            document.body.style.overflow = 'auto';
           }, 1000);
         } else {
           setAppReady(true);
           document.body.style.overflow = 'auto';
         }
-      }, 5000); 
+      }, 4000); 
       return () => clearTimeout(timer);
     }
   }, [authLoading]);

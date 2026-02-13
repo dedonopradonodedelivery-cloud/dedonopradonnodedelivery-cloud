@@ -156,7 +156,7 @@ export const HomeFeed: React.FC<{
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-x-hidden pb-32 rounded-t-[3.5rem] mt-[260px] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.12)] border-t border-white/10">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 rounded-t-[3.5rem] mt-[260px] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
       
       {/* 1. UTILITY ROW */}
       <section className="px-8 pt-6 pb-2">
@@ -282,7 +282,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 4. CUPOM DO DIA (Movido para baixo de Acontecendo Agora) */}
+      {/* 4. CUPOM DO DIA */}
       {isFeatureActive('coupons') && (
         <section className="space-y-4 py-4">
           <div className="px-6 flex items-center justify-between">
