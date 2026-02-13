@@ -32,13 +32,20 @@ import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
 import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
-// Imagens de fallback variadas para manter o padrão visual de "sempre ter imagem"
+// FIX: Added missing interface definition for ClassifiedsViewProps
+interface ClassifiedsViewProps {
+  onBack: () => void;
+  user: User | null;
+  onRequireLogin: () => void;
+  onNavigate: (view: string, data?: any) => void;
+}
+
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800', // Objetos
-  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800', // Serviços
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800', // Imóveis
-  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800', // Pets
-  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800', // Genérico
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=800',
+  'https://images.unsplash.com/photo-1581578731522-745d05cb9704?q=80&w=800',
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800',
+  'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800',
+  'https://images.unsplash.com/photo-1534723452202-428aae1ad99d?q=80&w=800',
 ];
 
 const getFallbackImage = (id: string) => {
@@ -50,11 +57,11 @@ const getFallbackImage = (id: string) => {
 };
 
 const CLASSIFIED_CATEGORIES = [
-  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue', bentoClass: 'col-span-3 aspect-[3/0.95]' }, // Mais largo
-  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue', bentoClass: 'col-span-1 row-span-2 h-full' }, // Mais alto
-  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.9]' }, // Quase quadrado
-  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.7]' }, // Mais compacto
-  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[0.8/1]' }, // Mais estreito
+  { id: 'servicos', name: 'Orçamento de Serviços', slug: 'services_landing', icon: <Wrench />, color: 'bg-brand-blue', bentoClass: 'col-span-3 aspect-[3/0.95]' },
+  { id: 'imoveis', name: 'Imóveis Comerciais', slug: 'real_estate', icon: <Building2 />, color: 'bg-brand-blue', bentoClass: 'col-span-1 row-span-2 h-full' },
+  { id: 'emprego', name: 'Vaga de emprego', slug: 'jobs', icon: <Briefcase />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.9]' },
+  { id: 'doacoes', name: 'Doações', slug: 'donations', icon: <Heart />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[1/0.7]' },
+  { id: 'desapega', name: 'Desapega', slug: 'desapega', icon: <Tag />, color: 'bg-brand-blue', bentoClass: 'col-span-1 aspect-[0.8/1]' },
 ];
 
 const ClassifiedCategoryButton: React.FC<{ category: any; onClick: () => void }> = ({ category, onClick }) => (
@@ -83,8 +90,6 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     const isJob = item.category === 'Empregos';
     const isService = item.category === 'Orçamento de Serviços';
     const hasPrice = !!item.price && !isDonation && !isAdoption && item.category !== 'Empregos' && item.category !== 'Orçamento de Serviços';
-
-    // Garante uma imagem mesmo se o item não tiver
     const displayImage = item.imageUrl || getFallbackImage(item.id);
 
     return (
@@ -138,17 +143,7 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     );
 };
 
-interface CategoryBlockProps {
-    category: typeof CLASSIFIED_CATEGORIES[0];
-    items: Classified[];
-    onItemClick: (item: Classified) => void;
-    onAnunciar: (catName: string) => void;
-    onViewAll: (slug: string) => void;
-    subtitle?: string;
-    ctaLabel: string;
-}
-
-const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemClick, onAnunciar, onViewAll, subtitle, ctaLabel }) => {
+const CategoryBlock: React.FC<any> = ({ category, items, onItemClick, onAnunciar, onViewAll, subtitle, ctaLabel }) => {
     return (
         <section className="py-8 border-b border-gray-100 dark:border-gray-800 last:border-0">
             <div className="flex items-center justify-between mb-6 px-1">
@@ -169,7 +164,7 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
             {items.length > 0 ? (
                 <div className="space-y-4">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x">
-                        {items.map(item => <ClassifiedCard key={item.id} item={item} onClick={() => onItemClick(item)} />)}
+                        {items.map((item: any) => <ClassifiedCard key={item.id} item={item} onClick={() => onItemClick(item)} />)}
                     </div>
                     <div className="px-1">
                         <button 
@@ -195,13 +190,6 @@ const CategoryBlock: React.FC<CategoryBlockProps> = ({ category, items, onItemCl
     );
 };
 
-interface ClassifiedsViewProps {
-  onBack: () => void;
-  onNavigate: (view: string, data?: any) => void;
-  user: User | null;
-  onRequireLogin: () => void;
-}
-
 export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavigate, user, onRequireLogin }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
@@ -215,16 +203,11 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
   const desapega = useMemo(() => MOCK_CLASSIFIEDS.filter(item => item.category === 'Desapega JPA').slice(0, 5), []);
 
   const handleAnunciarHeader = () => {
-    if (!user) {
-        onRequireLogin();
-        return;
-    }
+    if (!user) { onRequireLogin(); return; }
     setIsSelectionOpen(true);
   };
 
-  const handleItemClick = (item: Classified) => {
-    onNavigate('classified_detail', { item });
-  };
+  const handleItemClick = (item: Classified) => { onNavigate('classified_detail', { item }); };
 
   const handleSearchSubmit = () => {
     if (!searchTerm.trim()) return;
@@ -244,10 +227,10 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1 truncate">Oportunidades em {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</p>
           </div>
           
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-4 shrink-0">
             <button 
               onClick={handleAnunciarHeader}
-              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
+              className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/20 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
             >
               <Plus size={12} strokeWidth={4} />
               Anunciar
@@ -255,9 +238,9 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             
             <button 
               onClick={() => setIsFilterOpen(true)} 
-              className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all"
+              className="text-gray-400 active:scale-90 transition-all"
             >
-              <SlidersHorizontal size={20}/>
+              <SlidersHorizontal size={22}/>
             </button>
           </div>
         </div>
@@ -270,8 +253,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-                    placeholder="Busque anúncios: vaga, sala comercial, doação, item…"
-                    className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3.5 pl-11 pr-32 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
+                    placeholder="Busque anúncios..."
+                    className="w-full bg-gray-50 dark:bg-gray-900 border-none py-3.5 pl-11 pr-32 rounded-2xl text-sm font-medium outline-none focus:ring-2 focus:ring-[#1E5BFF]/30 transition-all shadow-inner dark:text-white"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-lg border border-blue-100 dark:border-blue-800">
                     <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Classificados</span>
@@ -281,8 +264,6 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
       </header>
 
       <main className="p-5 space-y-4">
-        
-        {/* BENTO GRID DE CATEGORIAS ORGÂNICO E ASSIMÉTRICO */}
         <div className="grid grid-cols-4 gap-3 mb-8 mt-2">
             {CLASSIFIED_CATEGORIES.map(cat => (
                 <ClassifiedCategoryButton 
@@ -297,19 +278,18 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES[0]} 
             items={services} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => onNavigate('services_landing')}
-            onViewAll={(slug) => onNavigate(slug)}
+            onAnunciar={(name: any) => onNavigate('services_landing')}
+            onViewAll={(slug: any) => onNavigate(slug)}
             ctaLabel="Pedir Orçamento Grátis"
             subtitle="Profissionais verificados do bairro"
         />
 
         <CategoryBlock 
-// FIX: Corrected line 307 to remove the reference to undefined 'categoryName'.
             category={CLASSIFIED_CATEGORIES.find(c => c.id === 'imoveis')!} 
             items={realEstate} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => onNavigate('real_estate_wizard')}
-            onViewAll={(slug) => onNavigate(slug)}
+            onAnunciar={(name: any) => onNavigate('real_estate_wizard')}
+            onViewAll={(slug: any) => onNavigate(slug)}
             ctaLabel="Anunciar Ponto Comercial"
             subtitle="Oportunidades imobiliárias"
         />
@@ -318,8 +298,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES.find(c => c.id === 'emprego')!} 
             items={jobs} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => onNavigate('job_wizard')}
-            onViewAll={(slug) => onNavigate(slug)}
+            onAnunciar={(name: any) => onNavigate('job_wizard')}
+            onViewAll={(slug: any) => onNavigate(slug)}
             ctaLabel="Divulgar Vaga no Bairro"
             subtitle="Encontre talentos locais"
         />
@@ -328,8 +308,8 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES.find(c => c.id === 'doacoes')!} 
             items={donations} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => onNavigate('donations')}
-            onViewAll={(slug) => onNavigate(slug)}
+            onAnunciar={(name: any) => onNavigate('donations')}
+            onViewAll={(slug: any) => onNavigate(slug)}
             ctaLabel="Divulgar Doação ou Adoção"
             subtitle="Ações sociais e pets no bairro"
         />
@@ -338,36 +318,27 @@ export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavi
             category={CLASSIFIED_CATEGORIES.find(c => c.id === 'desapega')!} 
             items={desapega} 
             onItemClick={handleItemClick}
-            onAnunciar={(name) => onNavigate('desapega')}
-            onViewAll={(slug) => onNavigate(slug)}
+            onAnunciar={(name: any) => onNavigate('desapega')}
+            onViewAll={(slug: any) => onNavigate(slug)}
             ctaLabel="Anunciar Desapego"
             subtitle="Venda o que você não usa mais"
         />
 
-        {/* BANNER PATROCINADOR MASTER FINAL */}
         <section className="mt-8">
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Classificados JPA" />
         </section>
       </main>
 
-      {/* MODAL DE SELEÇÃO O QUE ANUNCIAR */}
       <ClassifiedsSelectionModal 
         isOpen={isSelectionOpen}
         onClose={() => setIsSelectionOpen(false)}
-        onSelect={(slug) => {
-            setIsSelectionOpen(false);
-            onNavigate(slug);
-        }}
+        onSelect={(slug) => { setIsSelectionOpen(false); onNavigate(slug); }}
       />
 
-      {/* MODAL DE FILTROS GLOBAIS */}
       <ClassifiedsFilterModal 
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
-        onApply={(filters) => {
-            console.log("Filtros aplicados:", filters);
-            setIsFilterOpen(false);
-        }}
+        onApply={(filters) => { setIsFilterOpen(false); }}
       />
     </div>
   );

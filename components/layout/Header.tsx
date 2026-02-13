@@ -164,10 +164,10 @@ export const Header: React.FC<HeaderProps> = ({
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-4">
                         {isAdmin && (
-                            <button onClick={onOpenViewSwitcher} className={`p-1.5 rounded-lg border ${isHome ? 'bg-white/10 border-white/20 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-600'}`}>
-                                <ShieldCheck size={16} />
+                            <button onClick={onOpenViewSwitcher} className={`transition-all active:scale-90 ${isHome ? 'text-amber-400' : 'text-amber-600'}`}>
+                                <ShieldCheck size={20} />
                             </button>
                         )}
 
@@ -191,15 +191,15 @@ export const Header: React.FC<HeaderProps> = ({
 
                         <button 
                             onClick={onNotificationClick}
-                            className={`relative w-11 h-11 flex items-center justify-center rounded-lg transition-all active:scale-90 border border-transparent cursor-pointer ${
+                            className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
                                 isHome 
-                                ? 'bg-white/10 border-white/20 text-white' 
-                                : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-gray-500'
+                                ? 'text-white' 
+                                : 'text-gray-500'
                             }`}
                         >
-                            <Bell size={18} />
+                            <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className={`absolute top-2 right-2 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-brand-blue`}>
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border-2 ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
                                     <span className="text-[7px] font-black text-white">{unreadCount}</span>
                                 </span>
                             )}
@@ -209,12 +209,10 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {isHome && (
                     <div className="relative pt-6 animate-in fade-in slide-in-from-top-1 duration-700">
-                        {/* Mascote Solto */}
-                        <div className="absolute bottom-[52px] right-[-8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
+                        <div className="absolute bottom-[42px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
                              <TucoMascot />
                         </div>
 
-                        {/* Elementos integrados diretamente ao header */}
                         <button 
                             onClick={() => setIsAssistantOpen(true)}
                             className="w-full flex flex-col gap-6 transition-all active:scale-[0.99] group text-left relative cursor-pointer"
@@ -228,7 +226,6 @@ export const Header: React.FC<HeaderProps> = ({
                                 </p>
                             </div>
 
-                            {/* Barra de Busca mantida como elemento interativo */}
                             <div className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 group-hover:bg-white/20 transition-all shadow-inner relative z-10">
                                 <Search size={18} className="text-white/40" />
                                 <span className="text-white/40 text-sm font-medium tracking-tight">

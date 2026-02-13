@@ -110,7 +110,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
           <p className="text-[10px] text-[#1E5BFF] font-black uppercase tracking-widest mt-1">Talentos Locais</p>
         </div>
         
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-4 shrink-0">
           <button 
             onClick={handleStartAnnouncement}
             className="px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 uppercase tracking-widest text-[9px] border border-white/10 active:scale-95 transition-all h-9"
@@ -119,10 +119,10 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
             Anunciar
           </button>
           
-          <button onClick={() => setIsFilterOpen(true)} className="relative p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-400 shadow-sm active:scale-90 transition-all">
-            <SlidersHorizontal size={20}/>
+          <button onClick={() => setIsFilterOpen(true)} className="relative text-gray-400 active:scale-90 transition-all">
+            <SlidersHorizontal size={22}/>
             {(filters.hireTypes.length + filters.neighborhoods.length + filters.shifts.length) > 0 && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm animate-in zoom-in">
+              <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm">
                 {filters.hireTypes.length + filters.neighborhoods.length + filters.shifts.length}
               </div>
             )}
@@ -131,7 +131,6 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
       </header>
 
       <main className="p-5 space-y-10">
-        {/* LISTAGEM GERAL */}
         <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Vagas Recentes</h2>
