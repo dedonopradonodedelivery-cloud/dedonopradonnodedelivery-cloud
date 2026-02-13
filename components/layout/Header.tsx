@@ -131,14 +131,23 @@ export const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     const checkNotifs = () => {
-      const saved = localStorage.getItem('app_notifications');
-      if (saved) {
-        const notifs = JSON.parse(saved);
-        setUnreadCount(notifs.filter((n: any) => !n.read).length);
+      let saved = localStorage.getItem('app_notifications');
+      if (!saved) {
+          // Fallback para popular o sino no primeiro acesso
+          const initial = [
+            { id: 'notif-1', title: 'Bem-vindo! 🧡', type: 'system', read: false, createdAt: new Date().toISOString() },
+            { id: 'notif-2', title: 'Dica do Tuco 🦜', type: 'system', read: false, createdAt: new Date().toISOString() },
+            { id: 'notif-3', title: 'Novo Cupom! 🎟️', type: 'coupon', read: false, createdAt: new Date().toISOString() },
+            { id: 'notif-4', title: 'JPA Conversa 🔥', type: 'ad', read: false, createdAt: new Date().toISOString() }
+          ];
+          localStorage.setItem('app_notifications', JSON.stringify(initial));
+          saved = JSON.stringify(initial);
       }
+      const notifs = JSON.parse(saved);
+      setUnreadCount(notifs.filter((n: any) => !n.read).length);
     };
     checkNotifs();
-    const interval = setInterval(checkNotifs, 5000);
+    const interval = setInterval(checkNotifs, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -199,8 +208,8 @@ export const Header: React.FC<HeaderProps> = ({
                         >
                             <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border-2 ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
-                                    <span className="text-[7px] font-black text-white">{unreadCount}</span>
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
+                                    <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
                         </button>
