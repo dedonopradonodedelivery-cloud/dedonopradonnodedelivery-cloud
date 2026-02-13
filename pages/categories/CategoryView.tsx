@@ -1,11 +1,13 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, Search, Star, BadgeCheck, ChevronRight, X, AlertCircle, Grid, Filter, Megaphone, ArrowUpRight, Info, Image as ImageIcon, Sparkles, ShieldCheck } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { SUBCATEGORIES } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import { CategoryTopCarousel } from '@/components/CategoryTopCarousel';
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
+// FIX: Imported StoreCard from LojasEServicosList for consistent component usage.
+import { StoreCard } from '@/components/LojasEServicosList';
 
 const FALLBACK_STORE_IMAGES = [
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600',
@@ -114,34 +116,8 @@ const BigSurCard: React.FC<{
   );
 };
 
-const StoreListItem: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
-  const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
-  
-  return (
-    <div onClick={onClick} className="flex items-center gap-4 p-2 rounded-2xl hover:bg-white dark:hover:bg-gray-800 active:scale-[0.99] transition-all cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
-      <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative shadow-sm border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={storeImage} alt={store.name} className="w-full h-full object-cover p-0" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-          <span className="truncate">{store.category}</span>
-        </div>
-        <div className="flex items-center gap-3 mt-1.5">
-          {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
-          {store.verified && <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" /> Verificado</span>}
-        </div>
-      </div>
-      <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300"><ChevronRight className="w-4 h-4" /></div>
-    </div>
-  );
-};
+// FIX: Removed the duplicate StoreListItem definition from here.
+// The canonical StoreCard is imported from @/components/LojasEServicosList.
 
 interface CategoryViewProps {
   category: Category;
@@ -268,35 +244,23 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 animate-in slide-in-from-right duration-300">
-      <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800`}>
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
-        </button>
-        <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
+      <div className={`sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-5 h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800`}>
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
+          </button>
+          <h1 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">{React.cloneElement(category.icon as any, {className: 'w-5 h-5'})} {category.name}</h1>
+        </div>
+        {/* MasterSponsorBadge fixed at top right */}
+        <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </div>
       
-      {/* BANNER FIXO INSTITUCIONAL (Altura Reduzida 16/6) */}
-      <div className="mt-4 px-5">
-        <div 
-          onClick={() => onNavigate('explore')}
-          className={`relative aspect-[16/6] w-full rounded-[2rem] overflow-hidden cursor-pointer shadow-lg bg-[#1E5BFF] border border-white/5`}
-        >
-          <img 
-            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" 
-            alt="Jacarepaguá" 
-            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-          <div className="relative h-full flex flex-col justify-end p-6 text-white">
-            <h2 className="text-xl font-black uppercase tracking-tighter leading-none mb-1">
-              {category.name} <span className="opacity-70">em Jacarepaguá</span>
-            </h2>
-            <p className="text-[9px] font-bold text-blue-100 uppercase tracking-[0.2em]">O melhor do bairro em um só lugar</p>
-          </div>
-        </div>
+      {/* BANNER DE TOPO REDIRECIONANDO PARA PERFIL */}
+      <div className="mt-4">
+        <CategoryTopCarousel categoriaSlug={category.slug} onStoreClick={onStoreClick} />
       </div>
 
-      <div className="p-5 pt-6 space-y-8">
+      <div className="p-5 pt-0 space-y-8">
         {visibleSubcategories.length > 0 && (
           <section>
             <div className="grid grid-cols-4 gap-3">
@@ -324,12 +288,46 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         )}
 
         <section>
+          {loadingBanner ? (
+            <div className="w-full aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse"></div>
+          ) : activeBanner ? (
+            <div onClick={() => handleBannerClick(activeBanner)} className="cursor-pointer active:scale-[0.99] transition-transform">
+              {activeBanner.config.type === 'template' ? (
+                <TemplateBannerRender config={activeBanner.config} />
+              ) : (
+                <CustomBannerRender config={activeBanner.config} />
+              )}
+            </div>
+          ) : (
+            <div 
+              onClick={handleAdvertiseClick}
+              className="w-full aspect-video rounded-2xl bg-slate-900 flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden shadow-2xl border border-white/5 group"
+            >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="p-3 bg-white/5 backdrop-blur-md rounded-2xl mb-4 border border-white/10 shadow-xl group-hover:scale-110 transition-transform">
+                      <ShieldCheck className="w-8 h-8 text-[#1E5BFF]" />
+                    </div>
+                    <h3 className="font-black text-2xl text-white uppercase tracking-tighter leading-tight">Serviços de <span className="text-[#1E5BFF]">Confiança</span></h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2 mb-6">Os melhores profissionais da região</p>
+                    <div className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">
+                        Patrocinar nesta categoria
+                    </div>
+                </div>
+            </div>
+          )}
+        </section>
+
+        <section>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">
                 {selectedSubcategory || `Destaques em ${category.name}`}
             </h3>
             {filteredStores.length > 0 ? (
                 <div className="flex flex-col gap-2">
                     {filteredStores.map(store => (
+                        // FIX: Replaced StoreListItem with StoreCard for consistency and to resolve build errors.
                         <StoreCard key={store.id} store={store} onClick={() => onStoreClick(store)} />
                     ))}
                 </div>
@@ -345,36 +343,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
           <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
         </section>
       </div>
-    </div>
-  );
-};
-
-// Re-using the StoreCard internal to list for CategoryView
-const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ store, onClick }) => {
-  const isSponsored = store.isSponsored || store.adType === AdType.PREMIUM;
-  const storeImage = store.logoUrl || store.image || getFallbackStoreImage(store.id);
-
-  return (
-    <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]">
-      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden relative border border-gray-100 dark:border-gray-700 shrink-0">
-        <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[8px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-          <span className="truncate">{store.category}</span>
-        </div>
-        <div className="flex items-center gap-3 mt-1.5">
-          {store.distance && <span className="text-[10px] text-gray-400 font-medium">{store.distance}</span>}
-          {store.verified && <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" /> Verificado</span>}
-        </div>
-      </div>
-      <div className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300"><ChevronRight className="w-4 h-4" /></div>
     </div>
   );
 };

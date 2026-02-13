@@ -8,10 +8,8 @@ import {
   Heart, 
   HelpCircle, 
   LogOut, 
-  Loader2, 
   Info, 
   MessageSquare, 
-  Tag, 
   Bookmark, 
   Ticket, 
   Package, 
@@ -19,13 +17,14 @@ import {
   MapPin, 
   ShieldCheck, 
   Moon, 
-  CheckCircle2, 
+  Sun, 
   Crown,
   ArrowRight,
-  Lightbulb,
   Smartphone,
   Play,
-  Lock
+  Lock,
+  Zap,
+  Tag
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -57,13 +56,14 @@ const MenuItem: React.FC<{
   onClick: () => void; 
   isDestructive?: boolean;
   color?: string;
-}> = ({ icon: Icon, label, sublabel, badge, onClick, isDestructive, color = "text-gray-500" }) => (
+  isSpecial?: boolean;
+}> = ({ icon: Icon, label, sublabel, badge, onClick, isDestructive, color = "text-gray-500", isSpecial }) => (
   <button 
     onClick={onClick} 
-    className={`w-full p-4 flex items-center justify-between bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-all group`}
+    className={`w-full p-4 flex items-center justify-between bg-white dark:bg-gray-900 rounded-2xl border transition-all active:scale-[0.98] group shadow-sm ${isSpecial ? 'border-blue-100 dark:border-blue-900/30' : 'border-gray-100 dark:border-gray-800'}`}
   >
     <div className="flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDestructive ? 'bg-red-50 text-red-500' : `bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-50 ${color}`}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDestructive ? 'bg-red-50 text-red-500' : isSpecial ? 'bg-blue-50 dark:bg-blue-900/20 text-[#1E5BFF]' : `bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-50 ${color}`}`}>
         <Icon size={20} />
       </div>
       <div className="text-left">
@@ -121,8 +121,8 @@ export const MenuView: React.FC<MenuViewProps> = ({
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 flex flex-col">
         <div className="bg-white dark:bg-gray-900 px-4 pt-10 pb-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Menu</h2>
-          {onBack && (<button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500"><X className="w-5 h-5" /></button>)}
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display uppercase tracking-tight">Menu</h2>
+          {onBack && (<button onClick={onBack} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500"><X size={24} /></button>)}
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-sm border border-gray-100 transform -rotate-6"><UserIcon className="w-10 h-10 text-[#1E5BFF]" /></div>
@@ -136,7 +136,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-300">
-      {/* Header Fixo */}
       <div className="bg-white dark:bg-gray-900 px-5 pt-12 pb-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 flex items-center justify-between">
         <div><h2 className="text-2xl font-black text-gray-900 dark:text-white font-display uppercase tracking-tighter">Menu</h2></div>
         {onBack && (<button onClick={onBack} className="p-2.5 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 active:scale-90 transition-all"><X className="w-6 h-6" /></button>)}
@@ -144,7 +143,6 @@ export const MenuView: React.FC<MenuViewProps> = ({
 
       <div className="px-5">
         
-        {/* BANNER DE ONBOARDING - SÓ APARECE SE NÃO ASSISTIDO */}
         {!hasWatchedVideo && (
           <section className="mt-6">
             <div className="relative bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl border border-blue-500/30 ring-4 ring-blue-500/5">
@@ -179,19 +177,13 @@ export const MenuView: React.FC<MenuViewProps> = ({
                     </div>
                   )}
                 </div>
-                <div className="mt-4 flex items-center justify-center gap-2 py-2 bg-white/5 rounded-xl border border-white/5 animate-pulse">
-                  <Lock size={12} className="text-amber-500" />
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ações limitadas até o fim do vídeo</span>
-                </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* CONTEÚDO DO PAINEL */}
         <div className={`relative transition-all duration-700 ${!hasWatchedVideo ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
           
-          {/* 1. TOPO DO MENU: Perfil */}
           <div 
             onClick={() => onNavigate('user_profile_full')} 
             className="mt-6 bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-5 cursor-pointer active:scale-[0.98] mb-8 group transition-all"
@@ -210,11 +202,32 @@ export const MenuView: React.FC<MenuViewProps> = ({
             </div>
           </div>
 
-          <MenuSection title="Minha atividade no bairro">
+          {/* SEÇÃO DE BENEFÍCIOS (MAIOR DESTAQUE) */}
+          {isFeatureActive('coupons') && (
+            <MenuSection title="Meus Benefícios">
+                <MenuItem 
+                    icon={Tag} 
+                    label="Cupons e Ofertas" 
+                    sublabel="Descontos resgatados no bairro"
+                    onClick={() => onNavigate('user_coupons')}
+                    isSpecial
+                    badge="Novo"
+                />
+                <MenuItem 
+                    icon={Heart} 
+                    label="Lojas Favoritas" 
+                    sublabel="Estabelecimentos que você segue"
+                    onClick={() => onNavigate('favorites')}
+                    color="text-rose-500"
+                />
+            </MenuSection>
+          )}
+
+          <MenuSection title="Minha Atividade">
               {isFeatureActive('community_feed') && (
                 <MenuItem 
                     icon={MessageSquare} 
-                    label="Meus comentários" 
+                    label="Minhas Participações" 
                     sublabel="Histórico no JPA Conversa"
                     onClick={() => onNavigate('user_activity', { type: 'comentarios' })}
                     color="text-indigo-500"
@@ -223,82 +236,45 @@ export const MenuView: React.FC<MenuViewProps> = ({
               {isFeatureActive('classifieds') && (
                 <MenuItem 
                     icon={Package} 
-                    label="Meus anúncios" 
-                    sublabel="Gerenciar seus itens nos Classificados"
+                    label="Meus Anúncios" 
+                    sublabel="Itens à venda ou doações"
                     onClick={() => onNavigate('user_activity', { type: 'anuncios' })}
                     color="text-amber-500"
                 />
               )}
               {isFeatureActive('service_chat') && (
                 <MenuItem 
-                    icon={Bell} 
-                    label="Minhas solicitações" 
-                    sublabel="Pedidos de orçamento e serviços"
+                    icon={Zap} 
+                    label="Solicitações de Serviço" 
+                    sublabel="Pedidos de orçamento enviados"
                     onClick={() => onNavigate('service_messages_list')}
                     color="text-blue-500"
                 />
               )}
-              {isFeatureActive('customer_reviews') && (
-                <MenuItem 
-                    icon={Star} 
-                    label="Avaliações que fiz" 
-                    sublabel="Sua opinião sobre os lojistas"
-                    onClick={() => onNavigate('user_activity', { type: 'avaliacoes' })}
-                    color="text-yellow-500"
-                />
-              )}
-          </MenuSection>
-
-          <MenuSection title="Geral">
-              {isFeatureActive('coupons') && (
-                <MenuItem 
-                    icon={Ticket} 
-                    label="Meus Cupons" 
-                    onClick={() => onNavigate('user_coupons')}
-                    color="text-emerald-500"
-                />
-              )}
-              <MenuItem 
-                  icon={Heart} 
-                  label="Favoritos" 
-                  sublabel="Lojas e anúncios marcados"
-                  onClick={() => onNavigate('favorites')}
-                  color="text-rose-500"
-              />
-              <MenuItem 
-                  icon={Bookmark} 
-                  label="Postagens Salvas" 
-                  onClick={() => onNavigate('saved_posts')}
-                  color="text-blue-400"
-              />
           </MenuSection>
 
           <MenuSection title="Institucional">
-              <MenuItem icon={Smartphone} label="Como funciona o app" onClick={() => onNavigate('about_app')} color="text-blue-500" />
-              <MenuItem icon={Info} label="Quem Somos" onClick={() => onNavigate('about')} color="text-slate-500" />
-              <MenuItem icon={HelpCircle} label="Suporte" onClick={() => onNavigate('support')} color="text-indigo-400" />
-              <MenuItem icon={Lightbulb} label="Sugerir melhoria" onClick={() => onNavigate('app_suggestion')} color="text-amber-500" />
+              <MenuItem icon={Smartphone} label="Sobre o Super-App" onClick={() => onNavigate('about_app')} color="text-blue-500" />
+              <MenuItem icon={HelpCircle} label="Suporte e Ajuda" onClick={() => onNavigate('support')} color="text-indigo-400" />
           </MenuSection>
 
           <MenuSection title="Configurações">
-              <MenuItem icon={ShieldCheck} label="Privacidade" onClick={() => onNavigate('privacy_policy')} color="text-emerald-600" />
-              <MenuItem icon={LogOut} label="Sair da conta" onClick={handleLogout} isDestructive />
+              <MenuItem icon={ShieldCheck} label="Privacidade e Termos" onClick={() => onNavigate('privacy_policy')} color="text-emerald-600" />
+              <MenuItem icon={LogOut} label="Sair da Conta" onClick={handleLogout} isDestructive />
           </MenuSection>
 
-          {isFeatureActive('master_sponsor') && (
-            <div className="mt-4 mb-10 px-2 opacity-80">
-                <div onClick={() => onNavigate('patrocinador_master')} className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400"><Crown size={18} /></div>
-                        <div>
-                            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
-                            <p className="text-sm font-bold text-white mt-1">Grupo Esquematiza</p>
-                        </div>
-                    </div>
-                    <ArrowRight size={16} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                </div>
-            </div>
-          )}
+          <div className="mt-4 mb-10 px-2 opacity-80">
+              <div onClick={() => onNavigate('patrocinador_master')} className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group shadow-xl">
+                  <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400"><Crown size={18} /></div>
+                      <div>
+                          <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
+                          <p className="text-sm font-bold text-white mt-1">Grupo Esquematiza</p>
+                      </div>
+                  </div>
+                  <ArrowRight size={16} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+              </div>
+          </div>
         </div>
       </div>
     </div>

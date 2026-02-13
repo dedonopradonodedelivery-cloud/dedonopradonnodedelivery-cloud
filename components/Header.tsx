@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, ChevronDown, Check, Bell, X, Mic, Sun, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront, Plus, ShieldCheck } from 'lucide-react';
+// Added missing icons: Heart, Wrench, PawPrint, Shirt, Scissors, CarFront
+import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Sun, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
 import { CATEGORIES } from '@/constants';
@@ -30,7 +31,7 @@ const NeighborhoodSelectorModal: React.FC = () => {
     return (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-6" onClick={toggleSelector}>
             <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 relative" onClick={e => e.stopPropagation()}>
-                <div className="w-12 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto mb-8"></div>
+                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-8"></div>
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-[1.25rem]">
                         <MapPin className="w-6 h-6 text-[#1E5BFF]" />
@@ -148,7 +149,6 @@ export const Header: React.FC<HeaderProps> = ({
                     </h2>
                 </div>
 
-                {/* GRUPO DE AÇÕES PREMIUM (BAIRRO + SINO) */}
                 <div className="flex items-center gap-2.5">
                     {isAdmin && (
                         <button onClick={onOpenViewSwitcher} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-1.5 rounded-xl flex items-center gap-2 active:scale-95 shadow-sm">
@@ -217,45 +217,24 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
 
                 {isHome && (
-                  <>
-                    <div className="px-5 pb-3 pt-2">
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2.5 flex items-center justify-around text-white/90 text-[10px] font-bold border border-white/20">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin size={12} />
-                          <span>{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
-                        </div>
-                        <div className="w-px h-4 bg-white/20"></div>
-                        <div className="flex items-center gap-1.5">
-                          <Sun size={12} />
-                          <span>28°C</span>
-                        </div>
-                        <div className="w-px h-4 bg-white/20"></div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                          <span>Trânsito Livre</span>
-                        </div>
-                      </div>
+                  <div className="w-full overflow-x-auto no-scrollbar">
+                    <div className="max-w-md mx-auto flex items-center gap-3 px-5 pt-2 pb-5">
+                      {QUICK_CATEGORIES.map(cat => {
+                        const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
+                        if (!fullCat) return null;
+                        return (
+                          <button key={cat.slug} onClick={() => onSelectCategory(fullCat)} className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-[1.5rem] w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/10 border border-white/20">
+                            <cat.icon size={20} className="text-white" />
+                            <span className="text-[9px] font-black text-white uppercase tracking-tighter">{cat.name}</span>
+                          </button>
+                        )
+                      })}
+                      <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center justify-center gap-1 p-2 rounded-[1.5rem] w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/5 border-2 border-dashed border-white/20">
+                        <Plus size={20} className="text-white/60" />
+                        <span className="text-[9px] font-bold text-white/70 uppercase tracking-tighter">Mais</span>
+                      </button>
                     </div>
-                    
-                    <div className="w-full overflow-x-auto no-scrollbar">
-                      <div className="max-w-md mx-auto flex items-center gap-3 px-5 pb-5">
-                        {QUICK_CATEGORIES.map(cat => {
-                          const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
-                          if (!fullCat) return null;
-                          return (
-                            <button key={cat.slug} onClick={() => onSelectCategory(fullCat)} className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-[1.5rem] w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/10 border border-white/20">
-                              <cat.icon size={20} className="text-white" />
-                              <span className="text-[9px] font-black text-white uppercase tracking-tighter">{cat.name}</span>
-                            </button>
-                          )
-                        })}
-                        <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center justify-center gap-1 p-2 rounded-[1.5rem] w-16 h-16 flex-shrink-0 transition-all active:scale-95 bg-white/5 border-2 border-dashed border-white/20">
-                          <Plus size={20} className="text-white/70" />
-                          <span className="text-[9px] font-bold text-white/70 uppercase tracking-tighter">Mais</span>
-                        </button>
-                      </div>
-                    </div>
-                  </>
+                  </div>
                 )}
             </div>
         </div>
