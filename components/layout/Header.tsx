@@ -151,8 +151,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-10 bg-brand-blue pb-16' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
-            <div className="max-w-md mx-auto px-6 pt-6 space-y-0.5">
+        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-10 bg-brand-blue pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
                 <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
@@ -177,10 +177,10 @@ export const Header: React.FC<HeaderProps> = ({
                                 e.stopPropagation();
                                 toggleSelector();
                             }}
-                            className={`relative z-50 flex items-center gap-1.5 px-3 h-11 rounded-lg transition-all active:scale-95 border border-transparent cursor-pointer pointer-events-auto ${
+                            className={`relative z-50 flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer pointer-events-auto ${
                                 isHome 
-                                ? 'bg-white/10 border-white/20 text-white' 
-                                : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-slate-700 dark:text-slate-200'
+                                ? 'text-white' 
+                                : 'text-slate-700 dark:text-slate-200'
                             }`}
                         >
                             <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[80px]">
@@ -208,14 +208,14 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {isHome && (
-                    <div className="relative pt-6 animate-in fade-in slide-in-from-top-1 duration-700">
-                        <div className="absolute bottom-[42px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
+                    <div className="relative pt-1 animate-in fade-in slide-in-from-top-1 duration-700">
+                        <div className="absolute bottom-[32px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
                              <TucoMascot />
                         </div>
 
                         <button 
                             onClick={() => setIsAssistantOpen(true)}
-                            className="w-full flex flex-col gap-6 transition-all active:scale-[0.99] group text-left relative cursor-pointer"
+                            className="w-full flex flex-col gap-4 transition-all active:scale-[0.99] group text-left relative cursor-pointer"
                         >
                             <div className="flex flex-col relative z-10">
                                 <h2 className="text-2xl font-display text-white leading-tight">
