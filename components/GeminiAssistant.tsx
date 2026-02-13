@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { X, Send, Loader2, Mic, RefreshCw, AlertCircle } from 'lucide-react';
@@ -55,19 +54,31 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     const textToSend = (messageOverride || input).trim();
     if (!textToSend || isLoading) return;
 
-    // 1. Limpar input e remover estados temporários anteriores (erros/typing)
-    if (!messageOverride) setInput('');
-    setMessages(prev => prev.filter(m => m.type !== 'typing' && m.type !== 'error'));
+    // LOG: onSendClick
+    console.log("[Tuco Debug] onSendClick:", textToSend);
 
-    // 2. Adicionar mensagem do usuário
+    // 1. Limpar input e adicionar mensagem do usuário imediatamente
+    if (!messageOverride) setInput('');
+    
     const userMsg: ChatMessage = { role: 'user', text: textToSend, type: 'response' };
-    setMessages(prev => [...prev, userMsg, { role: 'model', type: 'typing' }]);
+    
+    // LOG: appendUserMessage
+    console.log("[Tuco Debug] appendUserMessage:", userMsg);
+    
+    setMessages(prev => [
+        ...prev.filter(m => m.type !== 'error'), // Remove erros anteriores ao tentar de novo
+        userMsg, 
+        { role: 'model', type: 'typing' }
+    ]);
+    
     setIsLoading(true);
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
     try {
-      // 3. Preparar contexto (últimas 6 mensagens para economia de tokens e precisão)
+      // LOG: sendMessage.start
+      console.log("[Tuco Debug] sendMessage.start - Initializing Gemini API");
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
+      // Preparar contexto defensivo
       const context = messages
         .filter(m => m.type === 'response' && m.text)
         .slice(-6)
@@ -75,7 +86,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
 
       const payload = [...context, { role: 'user', parts: [{ text: textToSend }] }];
 
-      // Timeout de segurança de 15 segundos
+      // Timeout de segurança de 15 segundos para evitar travamento da UI
       const responsePromise = ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: payload,
@@ -89,26 +100,48 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
       });
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 15000)
+        setTimeout(() => reject(new Error('TIMEOUT_LIMIT_EXCEEDED')), 15000)
       );
 
-      const response: any = await Promise.race([responsePromise, timeoutPromise]);
+      // LOG: disparando request real
+      const result: any = await Promise.race([responsePromise, timeoutPromise]);
       
-      const modelText = response.text || "Pode repetir de outra forma? Não consegui processar essa informação.";
+      // LOG: sendMessage.response
+      console.log("[Tuco Debug] sendMessage.response:", result);
+
+      // Parse Defensivo
+      const modelText = result.text || result.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!modelText) {
+          console.warn("[Tuco Debug] Resposta sem conteúdo detectada no body:", result);
+          throw new Error("EMPTY_RESPONSE_CONTENT");
+      }
 
       // 4. Sucesso: Substituir typing pela resposta real
       setMessages(prev => [
         ...prev.filter(m => m.type !== 'typing'),
         { role: 'model', text: modelText, type: 'response' }
       ]);
+
     } catch (error: any) {
-      console.error("Tuco Chat Error:", error);
+      // LOG: sendMessage.error
+      console.error("[Tuco Debug] sendMessage.error:", {
+          message: error.message,
+          stack: error.stack,
+          code: error.code
+      });
+
+      let errorMessage = "Tive um problema técnico para te responder agora.";
+      if (error.message === 'TIMEOUT_LIMIT_EXCEEDED') {
+          errorMessage = "Opa, demorei demais para pensar. Pode tentar novamente?";
+      }
+
       // 5. Erro: Substituir typing por mensagem de erro com retry
       setMessages(prev => [
         ...prev.filter(m => m.type !== 'typing'),
         { 
           role: 'model', 
-          text: "Ops! Tive um soluço técnico aqui. Pode tentar enviar de novo?", 
+          text: errorMessage, 
           type: 'error',
           action: 'retry',
           originalUserMessage: textToSend
@@ -116,6 +149,8 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
       ]);
     } finally {
       setIsLoading(false);
+      // LOG: finalização do ciclo
+      console.log("[Tuco Debug] Flow complete. isLoading set to false.");
     }
   }, [input, isLoading, messages]);
 
@@ -182,7 +217,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
                 msg.role === 'user' 
                   ? 'bg-blue-600 text-white rounded-br-none shadow-lg' 
                   : msg.type === 'error'
-                    ? 'bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/30 text-red-700 dark:text-red-400 rounded-bl-none'
+                    ? 'bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/30 text-red-700 dark:text-red-400 rounded-bl-none shadow-sm'
                     : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
               }`}>
                 {msg.type === 'typing' ? (
@@ -195,19 +230,32 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
                     <div className="space-y-3">
                       <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
                       {msg.type === 'error' && msg.action === 'retry' && (
-                        <button 
-                          onClick={() => handleSend(msg.originalUserMessage)}
-                          className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 transition-all"
-                        >
-                          <RefreshCw size={14} /> Tentar novamente
-                        </button>
+                        <div className="flex flex-col gap-2 pt-2">
+                             <button 
+                                onClick={() => handleSend(msg.originalUserMessage)}
+                                className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm"
+                            >
+                                <RefreshCw size={14} /> Tentar novamente
+                            </button>
+                            {/* FIX: Replaced undefined 'error' variable with 'msg.text' to enable copying of the error message. */}
+                            <button 
+                                onClick={() => {
+                                    navigator.clipboard.writeText(`Erro Tuco: ${msg.text}`);
+                                    alert("Logs copiados!");
+                                }}
+                                className="text-[9px] text-red-400 uppercase font-black tracking-widest hover:underline"
+                            >
+                                Copiar logs de erro
+                            </button>
+                        </div>
                       )}
                     </div>
                 )}
               </div>
             </div>
           ))}
-          {isLoading && messages[messages.length - 1]?.role !== 'model' && (
+          {/* Indicador persistente de loading caso o array ainda não tenha atualizado */}
+          {isLoading && messages[messages.length - 1]?.type !== 'typing' && (
              <div className="flex justify-start animate-in fade-in duration-300">
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800">
                     <div className="flex gap-1 py-1">
@@ -229,7 +277,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
-                    placeholder={isLoading ? "Tuco está pensando..." : "Como o Tuco pode te ajudar?"}
+                    placeholder={isLoading ? "Tuco está processando..." : "Como o Tuco pode te ajudar?"}
                     className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-2xl px-5 py-4 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                 />
                 <button
