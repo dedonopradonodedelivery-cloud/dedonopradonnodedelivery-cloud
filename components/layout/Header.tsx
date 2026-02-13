@@ -205,8 +205,8 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {isHome && (
                     <div className="relative pt-6 animate-in fade-in slide-in-from-top-1 duration-700">
-                        {/* Mascote Solto - Reduzido de w-36 h-36 para w-32 h-32 para maior elegância */}
-                        <div className="absolute top-[-30px] right-[-15px] w-32 h-32 z-20 pointer-events-none transform -scale-x-100">
+                        {/* Mascote Solto - Escala reduzida em 20% (w-28) e pousado na barra de busca (bottom-52px) */}
+                        <div className="absolute bottom-[52px] right-[-8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
                              <TucoMascot />
                         </div>
 
