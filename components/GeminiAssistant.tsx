@@ -1,31 +1,30 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { X, Send, Loader2, Mic, RefreshCw, AlertCircle } from 'lucide-react';
 import { ChatMessage } from '@/types';
 
 const TucoAvatarLarge: React.FC = () => (
-    <svg viewBox="0 0 100 100" className="w-full h-full">
-      <rect width="100" height="100" rx="30" fill="url(#assist_tuco_bg)" />
-      <defs>
-        <linearGradient id="assist_tuco_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop stopColor="#2D6DF6" />
-          <stop offset="1" stopColor="#1E5BFF" />
+  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-white/20">
+    <svg viewBox="0 0 240 200" className="w-8 h-8">
+        <defs>
+        <linearGradient id="tuco_body_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#1E293B" />
+            <stop offset="100%" stopColor="#0F172A" />
         </linearGradient>
-        <linearGradient id="assist_beak" x1="60%" y1="30%" x2="95%" y2="60%">
-          <stop stopColor="#FFD233" />
-          <stop offset="0.6" stopColor="#FF9F00" />
-          <stop offset="1" stopColor="#FF6B00" />
+        <linearGradient id="tuco_beak_grad" x1="0%" y1="0%" x2="100%" y2="20%">
+            <stop offset="0%" stopColor="#FFD233" />
+            <stop offset="45%" stopColor="#FF9F00" />
+            <stop offset="100%" stopColor="#FF4D00" />
         </linearGradient>
-      </defs>
-      <g transform="translate(10, 10) scale(0.8)">
-        <path d="M50 85C25 85 10 70 10 45C10 20 25 10 50 10C75 10 90 25 90 50C90 75 75 85 50 85Z" fill="#0F172A" />
-        <path d="M50 80C35 80 25 68 25 50C25 32 35 20 50 20C55 20 58 22 58 28C58 35 55 40 50 40C42 40 38 45 38 50C38 55 42 60 50 60C55 60 58 65 58 72C58 78 55 80 50 80Z" fill="white" opacity="0.95" />
-        <path d="M75 35C95 30 115 45 110 65C105 78 85 82 70 70L65 45C65 38 68 35 75 35Z" fill="url(#assist_beak)" />
-        <circle cx="65" cy="40" r="8" fill="#1E5BFF" />
-        <circle cx="65" cy="40" r="3.5" fill="#0F172A" />
-      </g>
+        </defs>
+        <path d="M75 175C35 175 15 145 20 95C25 45 55 25 90 25C120 25 145 50 145 100C145 150 115 175 80 175Z" fill="url(#tuco_body_grad)" />
+        <path d="M88 162C72 162 64 148 64 108C64 68 76 48 94 48C102 48 110 58 114 78C118 98 114 144 104 156C100 160 94 162 88 162Z" fill="white" />
+        <circle cx="94" cy="82" r="18" fill="white" /> 
+        <circle cx="99" cy="82" r="9.5" fill="#0F172A" /> 
+        <circle cx="103" cy="77" r="3.5" fill="white" /> 
+        <path d="M115 60C155 48 220 70 230 100C235 125 185 140 145 140Z" fill="url(#tuco_beak_grad)" />
     </svg>
+  </div>
 );
 
 interface AssistantProps {
@@ -34,8 +33,10 @@ interface AssistantProps {
 }
 
 export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onClose }) => {
+  const INITIAL_GREETING = 'Olá! Sou o Tuco 🦜 Como posso ajudar você no bairro hoje?';
+  
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', text: 'Olá! Sou o Tuco 🦜 Como posso ajudar você no bairro hoje?', type: 'response' }
+    { role: 'model', text: INITIAL_GREETING, type: 'response' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,13 +44,12 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Auto-scroll para manter a conversa visível
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
-      const { scrollHeight, clientHeight } = scrollRef.current;
-      scrollRef.current.scrollTo({ top: scrollHeight - clientHeight, behavior: 'smooth' });
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isLoading, isExternalOpen]);
+  }, [messages, isLoading]);
 
   const handleSend = useCallback(async (messageOverride?: string) => {
     const textToSend = (messageOverride || input).trim();
@@ -61,87 +61,53 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     
     setMessages(prev => [
         ...prev.filter(m => m.type !== 'error'), 
-        userMsg, 
-        { role: 'model', type: 'typing' }
+        userMsg
     ]);
     
     setIsLoading(true);
 
     try {
-      // Diagnóstico: Verificar presença da chave (sem logar a chave real por segurança)
-      const hasApiKey = !!process.env.API_KEY;
-      console.log("[Tuco Debug] API Key presente:", hasApiKey);
-
-      // Instanciação imediata antes do uso
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Preparação do histórico de contexto (limitado a 6 turnos para economia de tokens)
-      const history = messages
-        .filter(m => m.type === 'response' && m.text)
-        .slice(-6)
+      // Filtramos o histórico para garantir que:
+      // 1. Comece sempre com uma mensagem do usuário (Regra da API Gemini para histórico)
+      // 2. Não inclua a saudação inicial se ela for a única mensagem do modelo antes do primeiro user input
+      const chatHistory = messages
+        .filter(m => m.type === 'response' && m.text && m.text !== INITIAL_GREETING)
         .map(m => ({ 
           role: m.role, 
           parts: [{ text: m.text || '' }] 
         }));
 
-      const payload = {
+      // Usamos a API de Chat que é mais robusta para conversação
+      const chat = ai.chats.create({
         model: 'gemini-3-flash-preview',
-        contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
         config: {
           systemInstruction: `Você é Tuco, o assistente inteligente oficial do Localizei JPA. 
-          Jacarepaguá é um bairro enorme no Rio de Janeiro. Sua missão é ajudar moradores a encontrar lojas, 
-          serviços (como eletricistas, encanadores), cupons e vagas de emprego. 
-          Personalidade: Útil, rápido, amigável e conhece bem as sub-regiões (Freguesia, Taquara, Pechincha, Anil, etc).`,
+          Sua missão é ajudar moradores a encontrar lojas, serviços, cupons e vagas de emprego em Jacarepaguá/RJ. 
+          Bairros de atuação: Freguesia, Taquara, Pechincha, Anil, Tanque, Curicica, etc.
+          Personalidade: Extremamente útil, rápido, amigável, usa emojis de vez em quando e conhece o Rio de Janeiro.`,
           temperature: 0.7,
         },
-      };
+        history: chatHistory
+      });
 
-      console.log("[Tuco Request]", payload);
-
-      const responsePromise = ai.models.generateContent(payload);
-
-      // Timeout aumentado para 20s para conexões lentas
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('TIMEOUT_LIMIT_EXCEEDED')), 20000)
-      );
-
-      const result: any = await Promise.race([responsePromise, timeoutPromise]);
-      
-      console.log("[Tuco Response Raw]", result);
-
-      // Extração de texto usando a propriedade .text garantida pelo SDK
+      const result = await chat.sendMessage({ message: textToSend });
       const modelText = result.text;
       
-      if (!modelText) {
-          console.error("[Tuco Debug] Resposta sem texto:", result);
-          throw new Error("EMPTY_RESPONSE_CONTENT");
-      }
+      if (!modelText) throw new Error("EMPTY_RESPONSE");
 
       setMessages(prev => [
-        ...prev.filter(m => m.type !== 'typing'),
+        ...prev,
         { role: 'model', text: modelText, type: 'response' }
       ]);
 
     } catch (error: any) {
-      // Log detalhado do erro para o engenheiro
-      console.error("[Tuco Error Details]", {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-          raw: error
-      });
-
+      console.error("[Tuco Error]", error);
       let errorMessage = "Tive um problema técnico para te responder agora.";
-      if (error.message === 'TIMEOUT_LIMIT_EXCEEDED') {
-          errorMessage = "Opa, demorei demais para pensar. Pode tentar novamente?";
-      } else if (error.message?.includes('429')) {
-          errorMessage = "Muitas pessoas falando comigo ao mesmo tempo! Tenta de novo em 1 minuto?";
-      } else if (error.message?.includes('403') || error.message?.includes('401')) {
-          errorMessage = "Erro de autorização na minha inteligência. Avise o suporte!";
-      }
-
+      
       setMessages(prev => [
-        ...prev.filter(m => m.type !== 'typing'),
+        ...prev,
         { 
           role: 'model', 
           text: errorMessage, 
@@ -157,19 +123,12 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
 
   const startVoiceInput = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Seu navegador não suporta entrada de voz.");
-        return;
-    }
+    if (!SpeechRecognition) return;
 
-    if (recognitionRef.current) {
-        recognitionRef.current.stop();
-    }
+    if (recognitionRef.current) recognitionRef.current.stop();
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
     recognitionRef.current = recognition;
 
     recognition.onstart = () => setIsListening(true);
@@ -177,87 +136,73 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
         const transcript = event.results[0][0].transcript;
         if (transcript.trim()) handleSend(transcript);
     };
-    recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
-
     recognition.start();
   }, [handleSend]);
 
   if (!isExternalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/60 p-4 pb-24 sm:pb-4 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[650px] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in slide-in-from-bottom duration-500">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-sm h-[80vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
         
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-5 flex justify-between items-center shadow-lg relative z-10">
-          <div className="flex items-center gap-4 text-white">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl p-1">
-                <TucoAvatarLarge />
-            </div>
+        {/* Header - Identical to Image */}
+        <div className="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] p-5 flex justify-between items-center shadow-md relative z-10">
+          <div className="flex items-center gap-3">
+            <TucoAvatarLarge />
             <div>
-              <h3 className="font-black text-xl tracking-tighter uppercase leading-none">Tuco</h3>
+              <h3 className="font-black text-white text-xl tracking-tight leading-none">TUCO</h3>
               <div className="flex items-center gap-1.5 mt-1">
-                <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}></div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-100">
-                  {isLoading ? 'Pensando...' : 'Pronto para ajudar'}
-                </p>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]"></div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">Pronto para ajudar</p>
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-white transition-colors">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="bg-white/20 hover:bg-white/30 p-2 rounded-xl text-white transition-colors active:scale-90">
+            <X size={20} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Chat Body */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar scroll-smooth">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar scroll-smooth">
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-              <div className={`max-w-[85%] p-4 rounded-3xl text-sm font-medium leading-relaxed ${
+              <div className={`max-w-[85%] p-4 rounded-[1.75rem] text-sm font-semibold leading-relaxed shadow-sm ${
                 msg.role === 'user' 
-                  ? 'bg-blue-600 text-white rounded-br-none shadow-lg' 
+                  ? 'bg-[#2563EB] text-white rounded-br-none shadow-blue-500/10' 
                   : msg.type === 'error'
-                    ? 'bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/30 text-red-700 dark:text-red-400 rounded-bl-none shadow-sm'
-                    : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
+                    ? 'bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 rounded-bl-none text-center'
+                    : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-none border border-gray-100 dark:border-gray-700'
               }`}>
-                {msg.type === 'typing' ? (
-                    <div className="flex gap-1 py-1">
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                    </div>
+                {msg.type === 'error' ? (
+                  <div className="space-y-4 py-1">
+                    <p>{msg.text}</p>
+                    <button 
+                      onClick={() => handleSend(msg.originalUserMessage)}
+                      className="w-full flex items-center justify-center gap-2 bg-[#EF4444] text-white px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-md"
+                    >
+                      <RefreshCw size={14} strokeWidth={3} /> Tentar Novamente
+                    </button>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(`Erro Tuco: ${msg.text}`);
+                        alert("Instruções copiadas!");
+                      }}
+                      className="text-[8px] text-rose-400 uppercase font-black tracking-widest hover:underline"
+                    >
+                      Copiar instruções de erro
+                    </button>
+                  </div>
                 ) : (
-                    <div className="space-y-3">
-                      <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
-                      {msg.type === 'error' && msg.action === 'retry' && (
-                        <div className="flex flex-col gap-2 pt-2">
-                             <button 
-                                onClick={() => handleSend(msg.originalUserMessage)}
-                                className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm"
-                            >
-                                <RefreshCw size={14} /> Tentar novamente
-                            </button>
-                            <button 
-                                onClick={() => {
-                                    navigator.clipboard.writeText(`Erro Tuco: ${msg.text}\nLogs técnicos no console (F12)`);
-                                    alert("Instruções de erro copiadas! Verifique o console do desenvolvedor para a causa raiz.");
-                                }}
-                                className="text-[9px] text-red-400 uppercase font-black tracking-widest hover:underline"
-                            >
-                                Copiar instruções de erro
-                            </button>
-                        </div>
-                      )}
-                    </div>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
                 )}
               </div>
             </div>
           ))}
-          {isLoading && messages[messages.length - 1]?.type !== 'typing' && (
+          {isLoading && (
              <div className="flex justify-start animate-in fade-in duration-300">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800">
-                    <div className="flex gap-1 py-1">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-[1.75rem] rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="flex gap-1.5 py-1">
                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
                         <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
@@ -267,24 +212,24 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-3">
-            <div className="relative flex-1">
+        {/* Input Area - Identical to Image */}
+        <div className="p-5 bg-white dark:bg-gray-900 border-t border-gray-50 dark:border-gray-800">
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-3">
+            <div className="relative flex-1 group">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
-                    placeholder={isLoading ? "Tuco está processando..." : "Como o Tuco pode te ajudar?"}
-                    className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-2xl px-5 py-4 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
+                    placeholder="Como o Tuco pode te ajudar?"
+                    className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-[1.25rem] px-5 py-4 pr-12 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/30 border border-blue-100/50 dark:border-gray-700 placeholder-gray-400 transition-all disabled:opacity-50"
                 />
                 <button
                     type="button"
                     onClick={startVoiceInput}
                     disabled={isLoading}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all active:scale-95
-                                ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-blue-500'}`}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-xl transition-all active:scale-95
+                                ${isListening ? 'text-[#EF4444] animate-pulse' : 'text-gray-400 hover:text-blue-500'}`}
                 >
                     <Mic className="w-5 h-5 fill-current" />
                 </button>
@@ -292,12 +237,12 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
             <button 
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-blue-600 text-white p-4 rounded-2xl disabled:opacity-50 hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center justify-center min-w-[56px]"
+              className="bg-[#3B82F6] text-white p-4 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-90 transition-all flex items-center justify-center shrink-0 disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 fill-current" />}
+              <Send className="w-5 h-5 fill-current transform rotate-[-15deg]" />
             </button>
           </form>
-          <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest mt-4 opacity-50">
+          <p className="text-[8px] text-center text-gray-400 font-black uppercase tracking-[0.1em] mt-4 opacity-70">
             Powered by Google Gemini • JPA Intelligence
           </p>
         </div>
