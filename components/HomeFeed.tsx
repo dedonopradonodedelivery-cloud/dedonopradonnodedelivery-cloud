@@ -222,49 +222,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. CUPOM DO DIA */}
-      {isFeatureActive('coupons') && (
-        <section className="space-y-4 py-4">
-          <div className="px-6 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
-                <Ticket size={16} strokeWidth={2.5} />
-              </div>
-              <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Cupons do dia</h2>
-            </div>
-            <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4 snap-x">
-            {MOCK_COUPONS.map(coupon => (
-              <button 
-                key={coupon.id}
-                onClick={() => onNavigate('coupon_landing')}
-                className="flex-shrink-0 w-[240px] relative bg-slate-50 dark:bg-gray-900 rounded-3xl border border-slate-200/50 dark:border-gray-800 flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all snap-center group overflow-hidden"
-              >
-                <div className="absolute left-[64px] -top-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[64px] -bottom-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
-
-                <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <Sparkles size={14} className="mb-0.5 opacity-60" />
-                  <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
-                </div>
-
-                <div className="text-left min-w-0 flex-1 pl-6 pr-4">
-                  <p className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate">{coupon.category}</p>
-                  <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">{coupon.discount}</h4>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{coupon.store}</p>
-                </div>
-
-                <ChevronRight size={14} className="text-gray-200 group-hover:text-blue-500 transition-colors mr-3" strokeWidth={3} />
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 4. ACONTECENDO AGORA */}
+      {/* 3. ACONTECENDO AGORA */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Flame} 
@@ -324,6 +282,48 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
+      {/* 4. CUPOM DO DIA (Movido para baixo de Acontecendo Agora) */}
+      {isFeatureActive('coupons') && (
+        <section className="space-y-4 py-4">
+          <div className="px-6 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
+                <Ticket size={16} strokeWidth={2.5} />
+              </div>
+              <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Cupons do dia</h2>
+            </div>
+            <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4 snap-x">
+            {MOCK_COUPONS.map(coupon => (
+              <button 
+                key={coupon.id}
+                onClick={() => onNavigate('coupon_landing')}
+                className="flex-shrink-0 w-[240px] relative bg-slate-50 dark:bg-gray-900 rounded-3xl border border-slate-200/50 dark:border-gray-800 flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all snap-center group overflow-hidden"
+              >
+                <div className="absolute left-[64px] -top-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
+                <div className="absolute left-[64px] -bottom-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
+                <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+
+                <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
+                  <Sparkles size={14} className="mb-0.5 opacity-60" />
+                  <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
+                </div>
+
+                <div className="text-left min-w-0 flex-1 pl-6 pr-4">
+                  <p className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate">{coupon.category}</p>
+                  <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">{coupon.discount}</h4>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{coupon.store}</p>
+                </div>
+
+                <ChevronRight size={14} className="text-gray-200 group-hover:text-blue-500 transition-colors mr-3" strokeWidth={3} />
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 5. ACHADOS & PERDIDOS */}
       <section className="px-6 py-4 space-y-5">
         <SectionHeader 
@@ -370,7 +370,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 6. TRABALHE PERTO DE VOCÊ (NEW PREMIUM SECTION) */}
+      {/* 6. TRABALHE PERTO DE VOCÊ */}
       {isFeatureActive('classifieds') && (
         <section className="px-6 py-8 space-y-5">
             <SectionHeader 
