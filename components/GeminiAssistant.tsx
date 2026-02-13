@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { X, Send, Loader2, Mic, RefreshCw, AlertCircle } from 'lucide-react';
@@ -7,11 +8,11 @@ const TucoAvatarLarge: React.FC = () => (
     <svg viewBox="0 0 100 100" className="w-full h-full">
       <rect width="100" height="100" rx="30" fill="url(#assist_tuco_bg)" />
       <defs>
-        <linearGradient id="assist_tuco_bg" x1="0" y1="0" x2="100" y2="100">
+        <linearGradient id="assist_tuco_bg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop stopColor="#2D6DF6" />
           <stop offset="1" stopColor="#1E5BFF" />
         </linearGradient>
-        <linearGradient id="assist_beak" x1="60" y1="30" x2="95" y2="60">
+        <linearGradient id="assist_beak" x1="60%" y1="30%" x2="95%" y2="60%">
           <stop stopColor="#FFD233" />
           <stop offset="0.6" stopColor="#FF9F00" />
           <stop offset="1" stopColor="#FF6B00" />
@@ -42,7 +43,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Auto-scroll sempre que as mensagens mudarem ou o estado de loading mudar
+  // Auto-scroll para manter a conversa visível
   useEffect(() => {
     if (scrollRef.current) {
       const { scrollHeight, clientHeight } = scrollRef.current;
@@ -54,19 +55,12 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     const textToSend = (messageOverride || input).trim();
     if (!textToSend || isLoading) return;
 
-    // LOG: onSendClick
-    console.log("[Tuco Debug] onSendClick:", textToSend);
-
-    // 1. Limpar input e adicionar mensagem do usuário imediatamente
     if (!messageOverride) setInput('');
     
     const userMsg: ChatMessage = { role: 'user', text: textToSend, type: 'response' };
     
-    // LOG: appendUserMessage
-    console.log("[Tuco Debug] appendUserMessage:", userMsg);
-    
     setMessages(prev => [
-        ...prev.filter(m => m.type !== 'error'), // Remove erros anteriores ao tentar de novo
+        ...prev.filter(m => m.type !== 'error'), 
         userMsg, 
         { role: 'model', type: 'typing' }
     ]);
@@ -74,22 +68,25 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     setIsLoading(true);
 
     try {
-      // LOG: sendMessage.start
-      console.log("[Tuco Debug] sendMessage.start - Initializing Gemini API");
+      // Diagnóstico: Verificar presença da chave (sem logar a chave real por segurança)
+      const hasApiKey = !!process.env.API_KEY;
+      console.log("[Tuco Debug] API Key presente:", hasApiKey);
+
+      // Instanciação imediata antes do uso
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Preparar contexto defensivo
-      const context = messages
+      // Preparação do histórico de contexto (limitado a 6 turnos para economia de tokens)
+      const history = messages
         .filter(m => m.type === 'response' && m.text)
         .slice(-6)
-        .map(m => ({ role: m.role, parts: [{ text: m.text || '' }] }));
+        .map(m => ({ 
+          role: m.role, 
+          parts: [{ text: m.text || '' }] 
+        }));
 
-      const payload = [...context, { role: 'user', parts: [{ text: textToSend }] }];
-
-      // Timeout de segurança de 15 segundos para evitar travamento da UI
-      const responsePromise = ai.models.generateContent({
+      const payload = {
         model: 'gemini-3-flash-preview',
-        contents: payload,
+        contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
         config: {
           systemInstruction: `Você é Tuco, o assistente inteligente oficial do Localizei JPA. 
           Jacarepaguá é um bairro enorme no Rio de Janeiro. Sua missão é ajudar moradores a encontrar lojas, 
@@ -97,46 +94,52 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
           Personalidade: Útil, rápido, amigável e conhece bem as sub-regiões (Freguesia, Taquara, Pechincha, Anil, etc).`,
           temperature: 0.7,
         },
-      });
+      };
 
+      console.log("[Tuco Request]", payload);
+
+      const responsePromise = ai.models.generateContent(payload);
+
+      // Timeout aumentado para 20s para conexões lentas
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('TIMEOUT_LIMIT_EXCEEDED')), 15000)
+        setTimeout(() => reject(new Error('TIMEOUT_LIMIT_EXCEEDED')), 20000)
       );
 
-      // LOG: disparando request real
       const result: any = await Promise.race([responsePromise, timeoutPromise]);
       
-      // LOG: sendMessage.response
-      console.log("[Tuco Debug] sendMessage.response:", result);
+      console.log("[Tuco Response Raw]", result);
 
-      // Parse Defensivo
-      const modelText = result.text || result.candidates?.[0]?.content?.parts?.[0]?.text;
+      // Extração de texto usando a propriedade .text garantida pelo SDK
+      const modelText = result.text;
       
       if (!modelText) {
-          console.warn("[Tuco Debug] Resposta sem conteúdo detectada no body:", result);
+          console.error("[Tuco Debug] Resposta sem texto:", result);
           throw new Error("EMPTY_RESPONSE_CONTENT");
       }
 
-      // 4. Sucesso: Substituir typing pela resposta real
       setMessages(prev => [
         ...prev.filter(m => m.type !== 'typing'),
         { role: 'model', text: modelText, type: 'response' }
       ]);
 
     } catch (error: any) {
-      // LOG: sendMessage.error
-      console.error("[Tuco Debug] sendMessage.error:", {
+      // Log detalhado do erro para o engenheiro
+      console.error("[Tuco Error Details]", {
           message: error.message,
+          name: error.name,
           stack: error.stack,
-          code: error.code
+          raw: error
       });
 
       let errorMessage = "Tive um problema técnico para te responder agora.";
       if (error.message === 'TIMEOUT_LIMIT_EXCEEDED') {
           errorMessage = "Opa, demorei demais para pensar. Pode tentar novamente?";
+      } else if (error.message?.includes('429')) {
+          errorMessage = "Muitas pessoas falando comigo ao mesmo tempo! Tenta de novo em 1 minuto?";
+      } else if (error.message?.includes('403') || error.message?.includes('401')) {
+          errorMessage = "Erro de autorização na minha inteligência. Avise o suporte!";
       }
 
-      // 5. Erro: Substituir typing por mensagem de erro com retry
       setMessages(prev => [
         ...prev.filter(m => m.type !== 'typing'),
         { 
@@ -149,8 +152,6 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
       ]);
     } finally {
       setIsLoading(false);
-      // LOG: finalização do ciclo
-      console.log("[Tuco Debug] Flow complete. isLoading set to false.");
     }
   }, [input, isLoading, messages]);
 
@@ -237,15 +238,14 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
                             >
                                 <RefreshCw size={14} /> Tentar novamente
                             </button>
-                            {/* FIX: Replaced undefined 'error' variable with 'msg.text' to enable copying of the error message. */}
                             <button 
                                 onClick={() => {
-                                    navigator.clipboard.writeText(`Erro Tuco: ${msg.text}`);
-                                    alert("Logs copiados!");
+                                    navigator.clipboard.writeText(`Erro Tuco: ${msg.text}\nLogs técnicos no console (F12)`);
+                                    alert("Instruções de erro copiadas! Verifique o console do desenvolvedor para a causa raiz.");
                                 }}
                                 className="text-[9px] text-red-400 uppercase font-black tracking-widest hover:underline"
                             >
-                                Copiar logs de erro
+                                Copiar instruções de erro
                             </button>
                         </div>
                       )}
@@ -254,7 +254,6 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
               </div>
             </div>
           ))}
-          {/* Indicador persistente de loading caso o array ainda não tenha atualizado */}
           {isLoading && messages[messages.length - 1]?.type !== 'typing' && (
              <div className="flex justify-start animate-in fade-in duration-300">
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800">

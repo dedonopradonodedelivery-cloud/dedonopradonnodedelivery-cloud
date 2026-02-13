@@ -5,6 +5,7 @@ import App from './App';
 import { AuthProvider } from './contexts/AuthContext'; 
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FeatureProvider } from './contexts/FeatureContext';
+import { NeighborhoodProvider } from './contexts/NeighborhoodContext';
 import './index.css';
 
 const rootElement = document.getElementById('root');
@@ -15,7 +16,9 @@ if (rootElement) {
       <AuthProvider>
         <ThemeProvider>
           <FeatureProvider>
-            <App />
+            <NeighborhoodProvider>
+              <App />
+            </NeighborhoodProvider>
           </FeatureProvider>
         </ThemeProvider>
       </AuthProvider>

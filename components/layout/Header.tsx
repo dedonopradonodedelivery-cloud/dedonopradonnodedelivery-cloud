@@ -172,8 +172,12 @@ export const Header: React.FC<HeaderProps> = ({
                         )}
 
                         <button 
-                            onClick={toggleSelector}
-                            className={`flex items-center gap-1.5 px-3 h-11 rounded-lg transition-all active:scale-95 border border-transparent cursor-pointer ${
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleSelector();
+                            }}
+                            className={`relative z-50 flex items-center gap-1.5 px-3 h-11 rounded-lg transition-all active:scale-95 border border-transparent cursor-pointer pointer-events-auto ${
                                 isHome 
                                 ? 'bg-white/10 border-white/20 text-white' 
                                 : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-slate-700 dark:text-slate-200'
@@ -205,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {isHome && (
                     <div className="relative pt-6 animate-in fade-in slide-in-from-top-1 duration-700">
-                        {/* Mascote Solto - Escala reduzida em 20% (w-28) e pousado na barra de busca (bottom-52px) */}
+                        {/* Mascote Solto */}
                         <div className="absolute bottom-[52px] right-[-8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
                              <TucoMascot />
                         </div>
