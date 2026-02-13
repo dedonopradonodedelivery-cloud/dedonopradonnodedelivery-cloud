@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -20,15 +20,16 @@
             },
             colors: {
               primary: {
-                DEFAULT: '#2D6DF6',
+                DEFAULT: '#1E5BFF',
                 50: '#F0F5FF',
                 100: '#E0EBFF',
-                500: '#2D6DF6',
+                500: '#1E5BFF',
                 600: '#1B54D9',
                 700: '#1540AD',
               },
               brand: {
                 blue: '#1E5BFF',
+                orange: '#FF6501'
               }
             }
           }
@@ -39,50 +40,137 @@
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
-      /* Estilos Críticos do Splash */
+      /* Splash Screen Cinematográfica com Proteção de Marca */
       #app-splash {
         position: fixed;
         inset: 0;
-        background: linear-gradient(135deg, #1E5BFF 0%, #1749CC 100%);
+        background: radial-gradient(circle at center, #2D6DF6 0%, #0A3BBF 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+        transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s;
+        overflow: hidden;
       }
       
-      .splash-logo {
-        width: 140px;
-        height: 140px;
-        animation: splashPop 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        filter: drop-shadow(0 20px 40px rgba(0,0,0,0.2));
-      }
-      
-      .splash-text {
-        color: white;
-        font-family: 'Outfit', sans-serif;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: -0.05em;
-        font-size: 24px;
-        margin-top: 20px;
-        opacity: 0;
-        animation: fadeIn 0.8s ease-out 0.4s forwards;
+      /* Aura de Tecnologia */
+      .tech-glow {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        animation: pulseAura 4s ease-in-out infinite;
+        pointer-events: none;
       }
 
-      @keyframes splashPop {
-        0% { transform: scale(0.5); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
+      .main-branding {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        z-index: 10;
+        transform: translateY(-40px);
+      }
+
+      .official-pin-white {
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+        transform: scale(0.8);
+        filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
+        animation: pinEntrance 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
       
+      .app-name-premium {
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 900;
+        font-size: 38px;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: -0.04em;
+        margin-top: 20px;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: textEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+      }
+
+      .app-slogan-premium {
+        color: rgba(255, 255, 255, 0.6);
+        font-family: 'Outfit', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-top: 10px;
+        opacity: 0;
+        animation: fadeIn 1s ease-out 0.8s forwards;
+      }
+
+      /* Sponsor Island - Proteção da Marca */
+      .sponsor-island {
+        position: absolute;
+        bottom: 60px;
+        background: white;
+        padding: 14px 32px;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.05);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: islandEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+      }
+
+      .sponsor-label {
+        color: #94A3B8;
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 2px;
+      }
+
+      .sponsor-brand-orange {
+        color: #FF6501; /* Laranja Oficial Atual Clube */
+        font-family: 'Outfit', sans-serif;
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      /* Animações Premium */
+      @keyframes pinEntrance {
+        0% { transform: scale(0.7) translateY(20px); opacity: 0; filter: blur(10px); }
+        100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+      }
+      
+      @keyframes textEntrance {
+        0% { transform: translateY(15px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+      }
+
+      @keyframes islandEntrance {
+        0% { transform: translateY(30px) scale(0.95); opacity: 0; }
+        100% { transform: translateY(0) scale(1); opacity: 1; }
+      }
+
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes pulseAura {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
       }
 
       body {
-        background-color: #1E5BFF; /* Previne flash branco se o CSS demorar */
+        background-color: #1E5BFF;
         margin: 0;
         overflow: hidden;
       }
@@ -107,19 +195,30 @@
 }
 </script>
 </head>
-  <body class="bg-brand-blue">
-    <!-- Splash Screen Nativo (Removido via JS pelo App.tsx) -->
+  <body>
+    <!-- Splash Screen Premium -->
     <div id="app-splash">
-      <div class="splash-logo">
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M50 85C25 85 10 70 10 45C10 20 25 10 50 10C75 10 90 25 90 50C90 75 75 85 50 85Z" fill="#0F172A" />
-          <path d="M50 80C35 80 25 68 25 50C25 32 35 20 50 20C55 20 58 22 58 28C58 35 55 40 50 40C42 40 38 45 38 50C38 55 42 60 50 60C55 60 58 65 58 72C58 78 55 80 50 80Z" fill="white" opacity="0.95" />
-          <path d="M75 35C95 30 115 45 110 65C105 78 85 82 70 70L65 45C65 38 68 35 75 35Z" fill="#FF9F00" />
-          <circle cx="65" cy="40" r="8" fill="#1E5BFF" />
-          <circle cx="65" cy="40" r="3.5" fill="#0F172A" />
-        </svg>
+      <div class="tech-glow"></div>
+      
+      <div class="main-branding">
+        <!-- Logo Oficial (Pino) em Branco -->
+        <div class="official-pin-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" fill="white" fill-opacity="0.15" />
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" fill="white" />
+          </svg>
+        </div>
+
+        <div class="app-name-premium">LOCALIZEI JPA</div>
+        <div class="app-slogan-premium">Seu bairro, na sua mão</div>
       </div>
-      <div class="splash-text">Localizei JPA</div>
+
+      <!-- Sponsor Island (Proteção de Branding para Atual Clube) -->
+      <div class="sponsor-island">
+        <span class="sponsor-label">Patrocinador Master</span>
+        <span class="sponsor-brand-orange">Atual Clube</span>
+      </div>
     </div>
 
     <div id="root"></div>

@@ -13,11 +13,6 @@ import { UserCupomScreen } from '@/components/UserCupomScreen';
 import { CouponLandingView } from '@/components/CouponLandingView';
 import { StoreAdsModule } from '@/components/StoreAdsModule';
 import { AdminPanel } from '@/components/AdminPanel';
-import { ServicesLandingView } from '@/components/ServicesLandingView';
-import { ServiceMessagesListView } from '@/components/ServiceMessagesListView';
-import { ServiceChatView } from '@/components/ServiceChatView';
-import { ClassifiedsView } from '@/components/ClassifiedsView';
-import { SupportView } from '@/components/SimplePages';
 import { MerchantReviewsModule } from '@/components/MerchantReviewsModule';
 import { MerchantPromotionsModule } from '@/components/MerchantPromotionsModule';
 import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
@@ -57,24 +52,24 @@ export const App: React.FC = () => {
   const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    // Só inicia a transição para a Home após o auth estar resolvido
+    // 5 SEGUNDOS DE SPLASH CINEMATOGRÁFICO
     if (!authLoading) {
       const timer = setTimeout(() => {
         const splash = document.getElementById('app-splash');
         if (splash) {
           splash.style.opacity = '0';
           splash.style.visibility = 'hidden';
-          // Remove do DOM após a animação de fade
+          // Tempo sincronizado com o fade-out do CSS (1s)
           setTimeout(() => {
             splash.remove();
             setAppReady(true);
             document.body.style.overflow = 'auto';
-          }, 600);
+          }, 1000);
         } else {
           setAppReady(true);
           document.body.style.overflow = 'auto';
         }
-      }, 1000); // Garante visibilidade mínima da marca
+      }, 5000); 
       return () => clearTimeout(timer);
     }
   }, [authLoading]);
@@ -124,7 +119,7 @@ export const App: React.FC = () => {
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
       <div className="min-h-screen bg-brand-blue flex justify-center relative transition-colors duration-300">
-        <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-700 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
                 <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                     {!headerExclusionList.includes(activeTab) && (
