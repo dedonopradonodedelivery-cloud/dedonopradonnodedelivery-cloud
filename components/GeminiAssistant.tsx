@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
-import { X, Send, Loader2, Mic } from 'lucide-react'; // Import Mic icon
+import { X, Send, Loader2, Mic, RefreshCw, AlertCircle } from 'lucide-react';
 import { ChatMessage } from '@/types';
 
 const TucoAvatarLarge: React.FC = () => (
@@ -39,66 +39,85 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false); // State for mic listening
+  const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null); // Ref for SpeechRecognition instance
+  const recognitionRef = useRef<any>(null);
 
+  // Auto-scroll sempre que as mensagens mudarem ou o estado de loading mudar
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const { scrollHeight, clientHeight } = scrollRef.current;
+      scrollRef.current.scrollTo({ top: scrollHeight - clientHeight, behavior: 'smooth' });
     }
-  }, [messages, isExternalOpen]);
+  }, [messages, isLoading, isExternalOpen]);
 
-  // Modified handleSend to accept an optional message to send
-  const handleSend = useCallback(async (messageToSend?: string) => {
-    const userMsg = messageToSend || input;
-    if (!userMsg.trim() || isLoading) return;
+  const handleSend = useCallback(async (messageOverride?: string) => {
+    const textToSend = (messageOverride || input).trim();
+    if (!textToSend || isLoading) return;
 
-    // Clear any previous typing/error messages from the end of the chat
-    setMessages(prev => prev.filter(m => m.type === 'response'));
+    // 1. Limpar input e remover estados temporários anteriores (erros/typing)
+    if (!messageOverride) setInput('');
+    setMessages(prev => prev.filter(m => m.type !== 'typing' && m.type !== 'error'));
 
-    const currentUserMsg: ChatMessage = { role: 'user', text: userMsg, type: 'response' };
-    
-    // Add user message to chat only if it's a new message
-    // This prevents duplicating the message if voice input is auto-sending and the text is already in state
-    if (messages.length === 0 || messages[messages.length - 1]?.text !== userMsg || messages[messages.length - 1]?.role !== 'user') {
-      setMessages(prev => [...prev, currentUserMsg]);
-    }
-    
-    // Clear input field if it was a manual send or if the voice transcript was consumed
-    if (!messageToSend || (messageToSend && input === messageToSend)) {
-      setInput('');
-    }
-
+    // 2. Adicionar mensagem do usuário
+    const userMsg: ChatMessage = { role: 'user', text: textToSend, type: 'response' };
+    setMessages(prev => [...prev, userMsg, { role: 'model', type: 'typing' }]);
     setIsLoading(true);
-    setMessages(prev => [...prev, { role: 'model', type: 'typing' }]); // Add typing indicator
 
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
     try {
-      // Build conversation context from previous response messages
-      const conversationContext = messages
+      // 3. Preparar contexto (últimas 6 mensagens para economia de tokens e precisão)
+      const context = messages
         .filter(m => m.type === 'response' && m.text)
+        .slice(-6)
         .map(m => ({ role: m.role, parts: [{ text: m.text || '' }] }));
 
-      const payload = [...conversationContext, { role: 'user', parts: [{ text: userMsg }] }];
+      const payload = [...context, { role: 'user', parts: [{ text: textToSend }] }];
 
-      const response = await ai.models.generateContent({
+      // Timeout de segurança de 15 segundos
+      const responsePromise = ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: payload,
         config: {
-          systemInstruction: `Você é Tuco, assistente premium do Localizei JPA. Personalidade: Amigável, Natural, Sofisticada. Nunca repita saudações iniciais. Foco: Ajudar a encontrar serviços, comércios e classificados em Jacarepaguá.`,
+          systemInstruction: `Você é Tuco, o assistente inteligente oficial do Localizei JPA. 
+          Jacarepaguá é um bairro enorme no Rio de Janeiro. Sua missão é ajudar moradores a encontrar lojas, 
+          serviços (como eletricistas, encanadores), cupons e vagas de emprego. 
+          Personalidade: Útil, rápido, amigável e conhece bem as sub-regiões (Freguesia, Taquara, Pechincha, Anil, etc).`,
           temperature: 0.7,
         },
       });
+
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 15000)
+      );
+
+      const response: any = await Promise.race([responsePromise, timeoutPromise]);
       
-      // Replace typing indicator with model's response
-      setMessages(prev => [...prev.slice(0, -1), { role: 'model', text: response.text || "Pode repetir?", type: 'response' }]);
+      const modelText = response.text || "Pode repetir de outra forma? Não consegui processar essa informação.";
+
+      // 4. Sucesso: Substituir typing pela resposta real
+      setMessages(prev => [
+        ...prev.filter(m => m.type !== 'typing'),
+        { role: 'model', text: modelText, type: 'response' }
+      ]);
     } catch (error: any) {
-      setMessages(prev => [...prev.slice(0, -1), { role: 'model', text: "Ops, tive um problema técnico.", type: 'error' }]);
+      console.error("Tuco Chat Error:", error);
+      // 5. Erro: Substituir typing por mensagem de erro com retry
+      setMessages(prev => [
+        ...prev.filter(m => m.type !== 'typing'),
+        { 
+          role: 'model', 
+          text: "Ops! Tive um soluço técnico aqui. Pode tentar enviar de novo?", 
+          type: 'error',
+          action: 'retry',
+          originalUserMessage: textToSend
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages]); // Dependencies for useCallback
+  }, [input, isLoading, messages]);
 
   const startVoiceInput = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -107,67 +126,46 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
         return;
     }
 
-    // Stop any ongoing recognition before starting a new one
     if (recognitionRef.current) {
         recognitionRef.current.stop();
-        recognitionRef.current = null;
     }
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
-    recognition.interimResults = false; // We only care about the final result
+    recognition.interimResults = false;
     recognition.maxAlternatives = 1;
-    recognitionRef.current = recognition; // Store instance to manage it
+    recognitionRef.current = recognition;
 
-    recognition.onstart = () => {
-        setIsListening(true);
-        setInput(''); // Clear input when starting voice capture
-        setMessages(prev => prev.filter(m => m.type === 'response')); // Clear temporary UI messages
-    };
-
+    recognition.onstart = () => setIsListening(true);
     recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        setInput(transcript); // Display transcribed text in the input field
-        // Automatically trigger sending the message if text is detected
-        if (transcript.trim()) {
-            handleSend(transcript); // Pass the transcript directly to handleSend
-        }
+        if (transcript.trim()) handleSend(transcript);
     };
-
-    recognition.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-        setIsListening(false);
-        if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-            alert('Permissão de microfone negada. Por favor, habilite o acesso ao microfone nas configurações do seu navegador.');
-        } else {
-            // Only add a specific error message if it's not a permission issue
-            setMessages(prev => [...prev, { role: 'model', text: "Não entendi. Pode repetir?", type: 'error' }]);
-        }
-    };
-
-    recognition.onend = () => {
-        setIsListening(false);
-        recognitionRef.current = null; // Clear the ref
-    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
 
     recognition.start();
-  }, [handleSend, setInput, setMessages]); // Dependencies for useCallback
+  }, [handleSend]);
 
   if (!isExternalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/60 p-4 pb-24 sm:pb-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[650px] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in slide-in-from-bottom duration-300">
+    <div className="fixed inset-0 z-[1002] flex items-end justify-center sm:items-center sm:bg-black/60 p-4 pb-24 sm:pb-4 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-md h-[80vh] sm:h-[650px] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in slide-in-from-bottom duration-500">
+        
+        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-5 flex justify-between items-center shadow-lg relative z-10">
           <div className="flex items-center gap-4 text-white">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl p-1">
                 <TucoAvatarLarge />
             </div>
             <div>
-              <h3 className="font-black text-xl tracking-tighter uppercase">Tuco</h3>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-100">Assistente Inteligente</p>
+              <h3 className="font-black text-xl tracking-tighter uppercase leading-none">Tuco</h3>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-100">
+                  {isLoading ? 'Pensando...' : 'Pronto para ajudar'}
+                </p>
               </div>
             </div>
           </div>
@@ -176,40 +174,66 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
           </button>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar">
+        {/* Chat Body */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-950 no-scrollbar scroll-smooth">
           {messages.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
               <div className={`max-w-[85%] p-4 rounded-3xl text-sm font-medium leading-relaxed ${
                 msg.role === 'user' 
                   ? 'bg-blue-600 text-white rounded-br-none shadow-lg' 
-                  : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
+                  : msg.type === 'error'
+                    ? 'bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/30 text-red-700 dark:text-red-400 rounded-bl-none'
+                    : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 shadow-sm rounded-bl-none'
               }`}>
                 {msg.type === 'typing' ? (
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 py-1">
                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
                         <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                     </div>
                 ) : (
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                    <div className="space-y-3">
+                      <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                      {msg.type === 'error' && msg.action === 'retry' && (
+                        <button 
+                          onClick={() => handleSend(msg.originalUserMessage)}
+                          className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 transition-all"
+                        >
+                          <RefreshCw size={14} /> Tentar novamente
+                        </button>
+                      )}
+                    </div>
                 )}
               </div>
             </div>
           ))}
+          {isLoading && messages[messages.length - 1]?.role !== 'model' && (
+             <div className="flex justify-start animate-in fade-in duration-300">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div className="flex gap-1 py-1">
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                    </div>
+                </div>
+             </div>
+          )}
         </div>
 
+        {/* Input Area */}
         <div className="p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-3">
-            <div className="relative flex-1"> {/* Wrapper for input and mic icon */}
+            <div className="relative flex-1">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="O que você precisa no bairro?"
-                    className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-2xl px-5 py-4 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                    disabled={isLoading}
+                    placeholder={isLoading ? "Tuco está pensando..." : "Como o Tuco pode te ajudar?"}
+                    className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-2xl px-5 py-4 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                 />
                 <button
-                    type="button" // Important: keep as type="button" to prevent form submission
+                    type="button"
                     onClick={startVoiceInput}
                     disabled={isLoading}
                     className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all active:scale-95
@@ -221,11 +245,14 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
             <button 
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-blue-600 text-white p-4 rounded-2xl disabled:opacity-50 hover:bg-blue-700 transition-all shadow-lg active:scale-95"
+              className="bg-blue-600 text-white p-4 rounded-2xl disabled:opacity-50 hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center justify-center min-w-[56px]"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 fill-current" />}
             </button>
           </form>
+          <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest mt-4 opacity-50">
+            Powered by Google Gemini • JPA Intelligence
+          </p>
         </div>
       </div>
     </div>

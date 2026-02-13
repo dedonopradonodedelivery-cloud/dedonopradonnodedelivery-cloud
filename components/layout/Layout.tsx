@@ -33,7 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         style={{
           paddingBottom: finalHideNav
             ? 'env(safe-area-inset-bottom)'
-            : 'calc(100px + env(safe-area-inset-bottom))',
+            : 'calc(80px + env(safe-area-inset-bottom))',
           overscrollBehaviorY: 'contain',
         }}
       >
