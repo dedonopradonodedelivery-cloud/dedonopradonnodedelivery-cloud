@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
@@ -34,6 +33,19 @@ import { FashionWomenView } from '@/components/FashionWomenView';
 import { FashionMenView } from '@/components/FashionMenView';
 import { FashionKidsView } from '@/components/FashionKidsView';
 import { NotificationsView } from '@/components/NotificationsView';
+import { ClassifiedsView } from '@/components/ClassifiedsView';
+import { JobsView } from '@/components/JobsView';
+import { RealEstateView } from '@/components/RealEstateView';
+import { AdoptionView } from '@/components/AdoptionView';
+import { DonationsView } from '@/components/DonationsView';
+import { DesapegaView } from '@/components/DesapegaView';
+import { JobWizard } from '@/components/JobWizard';
+import { RealEstateWizard } from '@/components/RealEstateWizard';
+import { ClassifiedDetailView } from '@/components/ClassifiedDetailView';
+import { JobDetailView } from '@/components/JobDetailView';
+import { RealEstateDetailView } from '@/components/RealEstateDetailView';
+import { ClassifiedSearchResultsView } from '@/components/ClassifiedSearchResultsView';
+import { PlanSelectionView } from '@/components/PlanSelectionView';
 import { STORES } from '@/constants';
 import { Store, Category } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,26 +59,21 @@ export const App: React.FC = () => {
   const [globalSearch, setGlobalSearch] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedData, setSelectedData] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [viewMode, setViewMode] = useState<any>('Visitante');
   const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    // TIMER DE 4 SEGUNDOS EXATOS PARA O SPLASH CINEMATOGRÁFICO
     if (!authLoading) {
       const timer = setTimeout(() => {
         const splash = document.getElementById('app-splash');
         if (splash) {
-          // Inicia o fade-out do splash (1s definido no CSS)
           splash.style.opacity = '0';
           splash.style.visibility = 'hidden';
-          
-          // IMEDIATAMENTE libera a Home por trás para um cross-fade ultra fluido
           setAppReady(true);
           document.body.style.overflow = 'auto';
-          
-          // Remove fisicamente após o término da transição de opacidade
           setTimeout(() => {
             splash.remove();
           }, 1000);
@@ -81,7 +88,8 @@ export const App: React.FC = () => {
 
   const isAdmin = user?.email === 'dedonopradonodedelivery@gmail.com';
 
-  const handleNavigate = (view: string) => {
+  const handleNavigate = (view: string, data?: any) => {
+    if (data) setSelectedData(data);
     setActiveTab(view);
     window.scrollTo(0, 0);
   };
@@ -114,11 +122,12 @@ export const App: React.FC = () => {
   const headerExclusionList = [
     'store_detail', 'category_detail', 'user_coupons', 'coupon_landing', 
     'admin_panel', 'services', 'service_chat', 'notifications',
-    'adoption', 'donations', 'desapega', 'real_estate', 'job_wizard', 
+    'adoption', 'donations', 'desapega', 'real_estate', 'jobs', 'job_wizard', 
     'real_estate_wizard', 'about_app', 'privacy_policy', 'support',
     'health_selection', 'health_women', 'health_pediatrics', 'services_selection',
     'services_manual', 'services_specialized', 'pets_selection', 'pets_dogs', 
-    'pets_cats', 'pets_others', 'fashion_selection', 'fashion_women', 'fashion_men', 'fashion_kids'
+    'pets_cats', 'pets_others', 'fashion_selection', 'fashion_women', 'fashion_men', 'fashion_kids',
+    'classified_detail', 'job_detail', 'real_estate_detail', 'classified_search_results', 'plan_selection'
   ];
 
   return (
@@ -147,6 +156,22 @@ export const App: React.FC = () => {
                     <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} searchQuery={globalSearch} onStoreClick={handleSelectStore} onLocationClick={() => {}} onFilterClick={() => {}} onOpenPlans={() => {}} onNavigate={handleNavigate} />}
+                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('classifieds')} onJobClick={(job) => handleNavigate('job_detail', { job })} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    
+                    {activeTab === 'job_wizard' && <JobWizard user={user as any} onBack={() => handleNavigate('jobs')} onComplete={() => handleNavigate('jobs')} />}
+                    {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user as any} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
+                    {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('home')} onSuccess={() => handleNavigate('home')} />}
+                    
+                    {activeTab === 'classified_detail' && selectedData?.item && <ClassifiedDetailView item={selectedData.item} onBack={() => window.history.back()} user={user} onRequireLogin={() => setIsAuthModalOpen(true)} />}
+                    {activeTab === 'job_detail' && selectedData?.job && <JobDetailView job={selectedData.job} onBack={() => handleNavigate('jobs')} />}
+                    {activeTab === 'real_estate_detail' && selectedData?.property && <RealEstateDetailView property={selectedData.property} onBack={() => handleNavigate('real_estate')} onRequireLogin={() => setIsAuthModalOpen(true)} user={user} />}
+                    {activeTab === 'classified_search_results' && selectedData?.searchTerm && <ClassifiedSearchResultsView searchTerm={selectedData.searchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
+
                     {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={userRole} />}
                     {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
                     {activeTab === 'health_selection' && (
