@@ -397,10 +397,13 @@ export const HomeFeed: React.FC<{
                 <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-purple-500 shadow-sm border border-black/10 dark:border-white/5">
                     <Repeat size={24} strokeWidth={2.5} />
                 </div>
-                <div>
+                <div className="flex flex-col">
                     <h2 className="text-[12px] font-black uppercase tracking-[0.15em] leading-none text-gray-900 dark:text-white mt-1">
                         Troca-Troca do Bairro
                     </h2>
+                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 leading-none mt-1.5">
+                        Transforme coisas paradas em algo novo
+                    </p>
                 </div>
             </div>
         </div>
