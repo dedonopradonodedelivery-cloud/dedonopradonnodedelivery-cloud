@@ -58,7 +58,6 @@ const QUICK_CATEGORIES: { name: string, icon: React.ElementType, slug: string }[
   { name: 'Pet', icon: PawPrint, slug: 'pets' },
   { name: 'Moda', icon: Shirt, slug: 'moda' },
   { name: 'Beleza', icon: Scissors, slug: 'beleza' },
-  { name: 'Auto', icon: CarFront, slug: 'autos' },
 ];
 
 const MOCK_COUPONS = [
@@ -214,48 +213,15 @@ export const HomeFeed: React.FC<{
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-full">
       
       {/* 
-        A MÁGICA VISUAL CORRIGIDA: 
-        O z-40 garante que este container BRANCO sobreponha a cor AZUL do Header.
-        O -mt-16 puxa o conteúdo para cima criando a curva.
+        Ajuste Crítico de Overlap:
+        O container branco sobrepõe o fundo azul do Header.
+        Padding superior ajustado (pt-12) para compensar a Linha Informativa que agora está no Header.
       */}
-      <div className="flex-1 bg-[#F8F9FC] dark:bg-gray-950 rounded-t-[3.5rem] -mt-16 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-[#F8F9FC] dark:bg-gray-950 rounded-t-[3.5rem] -mt-10 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
-        {/* 1. UTILITY ROW - Padding superior ajustado para o overlap perfeito */}
-        <section className="px-8 pt-12 pb-2">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />
-                    <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">
-                        {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-                    </span>
-                </div>
-                
-                <div className="w-[1px] h-3 bg-gray-100 dark:bg-gray-800"></div>
-                
-                <div className="flex items-center gap-1.5">
-                    <Sun size={14} className="text-amber-500" strokeWidth={2.5} />
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums lowercase">
-                        sol <span className="mx-0.5 opacity-30">•</span> 28°C
-                    </span>
-                </div>
-                
-                <div className="w-[1px] h-3 bg-gray-100 dark:bg-gray-800"></div>
-                
-                <div className="flex items-center gap-2">
-                    <div className="relative flex">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping absolute opacity-40"></div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 relative"></div>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 lowercase leading-none">
-                        trânsito livre
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        {/* 2. ICON CATEGORY GRID */}
+        {/* 1. ICON CATEGORY GRID - REFINADO PARA 6 ITENS (BIG APP STYLE) */}
         <section className="w-full overflow-x-auto no-scrollbar scroll-smooth">
-            <div className="flex items-center gap-5 px-6 py-6">
+            <div className="flex items-center gap-5 px-6 py-10">
             {QUICK_CATEGORIES.map(cat => {
                 const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
                 if (!fullCat) return null;
@@ -272,19 +238,21 @@ export const HomeFeed: React.FC<{
                 </button>
                 )
             })}
+            
+            {/* GATEWAY + MAIS - CONSISTENTE COM O PADRÃO VISUAL */}
             <button 
                 onClick={() => setIsMoreCategoriesOpen(true)} 
                 className="flex flex-col items-center gap-3 flex-shrink-0 active:scale-95 transition-all"
             >
-                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-gray-900 border-2 border-dashed border-slate-200 dark:border-gray-800 flex items-center justify-center text-slate-300">
-                <Plus size={26} strokeWidth={3} />
+                <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 shadow-sm flex items-center justify-center text-blue-600">
+                    <Plus size={26} strokeWidth={3} />
                 </div>
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mais</span>
+                <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">+ Mais</span>
             </button>
             </div>
         </section>
 
-        {/* 3. ACONTECENDO AGORA */}
+        {/* 2. ACONTECENDO AGORA */}
         <section className="py-4 space-y-4">
             <div className="px-6">
                 <SectionHeader 
@@ -319,7 +287,7 @@ export const HomeFeed: React.FC<{
             </div>
         </section>
 
-        {/* 4. CUPOM DO DIA */}
+        {/* 3. CUPOM DO DIA - REFINADO COM CTA PREMIUM */}
         {isFeatureActive('coupons') && (
             <section className="space-y-6 py-12 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
             <div className="px-6 flex items-center justify-between">
@@ -340,21 +308,26 @@ export const HomeFeed: React.FC<{
                 <button 
                     key={coupon.id}
                     onClick={() => onNavigate('coupon_landing')}
-                    className="flex-shrink-0 w-[185px] relative bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 flex items-center shadow-sm active:scale-[0.98] transition-all snap-start group overflow-hidden h-32"
+                    className="flex-shrink-0 w-[185px] relative bg-white dark:bg-gray-900 rounded-[2.2rem] border border-slate-200/60 dark:border-gray-800 flex flex-col shadow-lg shadow-blue-900/5 active:scale-[0.98] transition-all snap-start group overflow-hidden h-[180px]"
                 >
-                    <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                    <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                    <div className="absolute left-[52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
-
-                    <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                    <Sparkles size={12} className="mb-1 opacity-60" />
-                    <span className="text-[7px] font-black leading-none uppercase tracking-tighter vertical-text transform -rotate-180" style={{ writingMode: 'vertical-rl' }}>Ticket</span>
+                    {/* Header do Card (Loja + Categoria) */}
+                    <div className={`w-full h-1/2 bg-gradient-to-br ${coupon.color} p-4 flex flex-col justify-center items-center text-center relative`}>
+                        <div className="absolute top-0 right-0 p-3 opacity-10">
+                            <Sparkles size={48} className="text-white" />
+                        </div>
+                        <p className="text-[9px] font-black text-white/70 uppercase tracking-tighter truncate mb-1">{coupon.category}</p>
+                        <h4 className="text-xl font-black text-white leading-tight drop-shadow-md">{coupon.discount}</h4>
                     </div>
 
-                    <div className="text-left min-w-0 flex-1 pl-4 pr-3">
-                    <p className="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate mb-1">{coupon.category}</p>
-                    <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight mb-1.5">{coupon.discount}</h4>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter truncate">{coupon.store}</p>
+                    {/* Footer do Card (Info + CTA) */}
+                    <div className="flex-1 w-full bg-white dark:bg-gray-900 p-4 flex flex-col justify-between items-center text-center">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter truncate max-w-full">{coupon.store}</p>
+                        
+                        <div className="w-full mt-[10px]">
+                            <div className="w-full bg-blue-600 text-white text-[11px] font-semibold py-2.5 rounded-xl text-center shadow-md active:bg-blue-700 transition-colors">
+                                Resgatar Cupom
+                            </div>
+                        </div>
                     </div>
                 </button>
                 ))}

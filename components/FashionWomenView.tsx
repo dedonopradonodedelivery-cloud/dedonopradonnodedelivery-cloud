@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, Heart, ShoppingBag, Gem, Zap, Star, LayoutGrid, Shirt } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyItem {
   name: string;
@@ -18,6 +19,7 @@ interface FashionWomenViewProps {
   onBack: () => void;
   onSelect: (category: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -79,7 +81,17 @@ const CategoryCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({ 
   </button>
 );
 
-export const FashionWomenView: React.FC<FashionWomenViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const FashionWomenView: React.FC<FashionWomenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Boutique Elegance JPA',
+      category: 'Moda',
+      subcategory: 'Feminino',
+      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200',
+      description: 'Tendências da estação selecionadas para a mulher moderna de Jacarepaguá. Peças exclusivas e atendimento diferenciado.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -99,16 +111,19 @@ export const FashionWomenView: React.FC<FashionWomenViewProps> = ({ onBack, onSe
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Inspiração */}
-        <div className="p-8 bg-rose-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        {/* Banner de Inspiração - Clicável */}
+        <div 
+            onClick={handleHeroClick}
+            className="p-8 bg-rose-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-10 flex flex-col gap-4">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
                     <Sparkles size={24} className="text-white" />
                 </div>
                 <div>
                     <h3 className="font-black text-xl uppercase tracking-tighter leading-tight mb-1">O seu estilo, <br/>perto de você.</h3>
-                    <p className="text-rose-100 text-xs font-medium leading-relaxed max-w-[220px]">Encontre as melhores lojas de moda feminina de Jacarepaguá selecionadas para você.</p>
+                    <p className="text-rose-100 text-xs font-medium leading-relaxed max-w-[220px]">Encontre as melhores lojas de moda feminina de Jacarepaguá. <span className="underline ml-1">Ver</span></p>
                 </div>
             </div>
         </div>

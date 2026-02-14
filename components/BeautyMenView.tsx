@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, User, Scissors, Smile, Heart, Droplets, Award, Sparkles } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyGroup {
   title: string;
@@ -13,6 +14,7 @@ interface BeautyMenViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -36,7 +38,17 @@ const SpecialtyCard: React.FC<{ item: {name: string, isPopular?: boolean}; onCli
   </button>
 );
 
-export const BeautyMenView: React.FC<BeautyMenViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const BeautyMenView: React.FC<BeautyMenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Barbearia Freguesia Club',
+      category: 'Beleza',
+      subcategory: 'Barbearia',
+      image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1200',
+      description: 'O ponto de encontro do homem de Jacarepaguá. Barba, cabelo e cerveja gelada no melhor estilo clássico.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -56,14 +68,17 @@ export const BeautyMenView: React.FC<BeautyMenViewProps> = ({ onBack, onSelect, 
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        <div className="flex items-start gap-4 p-5 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30">
-          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+        <div 
+            onClick={handleHeroClick}
+            className="flex items-start gap-4 p-5 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+        >
+          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
             <Sparkles className="text-blue-500" size={20} />
           </div>
           <div>
             <h4 className="text-xs font-black text-blue-900 dark:text-blue-200 uppercase tracking-widest mb-1">Estilo & Cuidado</h4>
             <p className="text-[11px] text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
-              Encontre barbearias e profissionais especializados no seu visual.
+              Encontre barbearias e profissionais especializados no seu visual. <span className="underline ml-1">Ver Destaque</span>
             </p>
           </div>
         </div>

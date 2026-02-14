@@ -2,9 +2,15 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Key, Wrench, Package, Sparkles, Zap, Siren } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyGroup { title: string; icon: React.ElementType; items: { name: string }[]; }
-interface AutosMotosViewProps { onBack: () => void; onSelect: (specialty: string) => void; onNavigate: (view: string) => void; }
+interface AutosMotosViewProps { 
+  onBack: () => void; 
+  onSelect: (specialty: string) => void; 
+  onNavigate: (view: string) => void; 
+  onStoreClick: (store: Store) => void;
+}
 
 const GROUPS: SpecialtyGroup[] = [
     { title: "Compra & Venda", icon: Key, items: [{ name: "Concessionária de motos" }, { name: "Loja de motos seminovas" }] },
@@ -16,13 +22,23 @@ const GROUPS: SpecialtyGroup[] = [
 ];
 
 const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, onClick }) => (
-  <button onClick={onClick} className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm mb-2">
+  <button onClick={onClick} className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm mb-2" >
     <span className="text-sm font-bold text-gray-800 dark:text-gray-200 tracking-tight">{name}</span>
     <ChevronRight size={16} className="text-gray-300 group-hover:text-slate-500 transition-colors" />
   </button>
 );
 
-export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Moto Force JPA',
+      category: 'Autos',
+      subcategory: 'Oficina de Motos',
+      image: 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=1200',
+      description: 'Especialistas em alta cilindrada e manutenção preventiva para todas as marcas. Peças e acessórios exclusivos.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -36,10 +52,26 @@ export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
+        <div 
+            onClick={handleHeroClick}
+            className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-105 transition-transform duration-700"></div>
+            <div className="relative z-10 flex items-start gap-4">
+                <div className="p-3 bg-amber-500 rounded-2xl shadow-lg">
+                    <Zap size={24} className="text-white" />
+                </div>
+                <div>
+                    <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Paixão por Duas Rodas</h3>
+                    <p className="text-slate-400 text-xs font-medium leading-relaxed">As melhores oficinas e lojas de acessórios para sua moto. <span className="underline ml-1">Ver</span></p>
+                </div>
+            </div>
+        </div>
+
         {GROUPS.map((group, idx) => (
           <section key={idx} className="space-y-3">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-slate-500"><group.icon size={20} strokeWidth={2.5}/></div>
+              <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-slate-500"><group.icon size={20} strokeWidth={2.5}/></div>
               <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{group.title}</h3>
             </div>
             {group.items.map((item, itemIdx) => <SpecialtyCard key={itemIdx} name={item.name} onClick={() => onSelect(item.name)} />)}

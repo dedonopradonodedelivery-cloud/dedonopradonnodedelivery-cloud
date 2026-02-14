@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Stethoscope, ShoppingBag, Scissors, Home, Bird, Turtle, Fish, MousePointer2, Star, Sparkles, Zap, Heart } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyItem {
   name: string;
@@ -19,6 +20,7 @@ interface PetsOthersViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -88,7 +90,17 @@ const SpecialtyCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({
   </button>
 );
 
-export const PetsOthersView: React.FC<PetsOthersViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const PetsOthersView: React.FC<PetsOthersViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Reino Exótico JPA',
+      category: 'Pets',
+      subcategory: 'Especialista em Exóticos',
+      image: 'https://images.unsplash.com/photo-1548767791-5147bea8f96e?q=80&w=1200',
+      description: 'Especialistas em répteis, aves e pequenos roedores. Tudo o que você precisa para seu pet não convencional.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -108,16 +120,19 @@ export const PetsOthersView: React.FC<PetsOthersViewProps> = ({ onBack, onSelect
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Autoridade */}
-        <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        {/* Banner de Autoridade - Clicável */}
+        <div 
+            onClick={handleHeroClick}
+            className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-105 transition-transform duration-700"></div>
             <div className="relative z-10 flex items-start gap-4">
                 <div className="p-3 bg-emerald-600 rounded-2xl shadow-lg">
                     <Sparkles size={24} className="text-white" />
                 </div>
                 <div>
                     <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Cuidados Especializados</h3>
-                    <p className="text-slate-400 text-xs font-medium leading-relaxed">Conectamos você aos raros especialistas em animais exóticos de Jacarepaguá.</p>
+                    <p className="text-slate-400 text-xs font-medium leading-relaxed">Conectamos você aos raros especialistas em animais exóticos de Jacarepaguá. <span className="underline ml-1">Ver Destaque</span></p>
                 </div>
             </div>
         </div>
