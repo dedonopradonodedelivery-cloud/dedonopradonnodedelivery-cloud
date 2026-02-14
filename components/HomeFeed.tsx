@@ -353,7 +353,10 @@ export const HomeFeed: React.FC<{
               <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
                 <Ticket size={16} strokeWidth={2.5} />
               </div>
-              <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Cupons do dia</h2>
+              <div className="flex flex-col">
+                <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest leading-none mb-1">Cupons do dia</h2>
+                <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 leading-none">Ofertas exclusivas esperando por você no seu bairro</p>
+              </div>
             </div>
             <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
           </div>
@@ -367,7 +370,7 @@ export const HomeFeed: React.FC<{
               >
                 <div className="absolute left-[64px] -top-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
                 <div className="absolute left-[64px] -bottom-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left(72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+                <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
                 <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
                   <Sparkles size={14} className="mb-0.5 opacity-60" />

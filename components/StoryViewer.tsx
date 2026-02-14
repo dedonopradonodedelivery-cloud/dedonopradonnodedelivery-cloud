@@ -181,8 +181,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialIndex,
         <div className="w-[70%] h-full cursor-pointer" title="Próximo"></div>
       </div>
 
-      {/* Footer Interface */}
-      <div className="mt-auto relative z-10 p-6 pb-10 space-y-6">
+      {/* Footer Interface - Ajustado para ficar acima da BottomNav (80px + safe area) */}
+      <div 
+        className="mt-auto relative z-10 p-6 space-y-6"
+        style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
+      >
         <div className="flex items-center gap-3">
             <div className="flex-1 relative group">
                 <input 
