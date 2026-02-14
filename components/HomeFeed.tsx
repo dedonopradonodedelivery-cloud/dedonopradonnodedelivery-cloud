@@ -37,7 +37,8 @@ import {
   X,
   FileText,
   CloudLightning,
-  Sparkle
+  Sparkle,
+  Cpu
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -137,7 +138,7 @@ const SectionHeader: React.FC<{
             <Icon size={20} strokeWidth={2.5} />
         </div>
         <div>
-            <h2 className={`text-[12px] font-black uppercase tracking-[0.15em] leading-none mb-1 ${titleClassName}`}>{title}</h2>
+            <h2 className={`text-[12px] font-black uppercase tracking-[0.15em] mb-1 ${titleClassName}`}>{title}</h2>
             {subtitle && <p className={`text-[10px] font-bold uppercase tracking-widest leading-none ${subtitleClassName}`}>{subtitle}</p>}
         </div>
     </div>
@@ -173,12 +174,26 @@ const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], onCli
 
 
 const InstitutionalBanner: React.FC = () => (
-  <section className="px-6 pt-8 pb-2">
-    <div className="bg-brand-blue rounded-xl p-5 flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20">
-      <Sparkles size={16} className="text-white" />
-      <p className="text-sm font-black text-white uppercase tracking-widest">
-        Acreditamos que a vida acontece perto.
-      </p>
+  <section className="px-6 py-6">
+    <div className="relative bg-gradient-to-br from-[#1E5BFF] via-[#1E5BFF] to-[#0A3BBF] rounded-2xl py-5 px-6 shadow-[0_10px_30px_rgba(30,91,255,0.15)] overflow-hidden group border border-white/10 transition-all active:scale-[0.99]">
+        
+        {/* Camada de Micro-Motion / Glow Suave */}
+        <div className="absolute top-[-50%] right-[-10%] w-[200px] h-[200px] bg-white/5 rounded-full blur-[60px] animate-premium-glow pointer-events-none"></div>
+        
+        {/* Flare de luz passando suavemente */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-flare pointer-events-none"></div>
+
+        <div className="relative z-10 flex items-center justify-center gap-4">
+            {/* Logo Compacto com Glassmorphism */}
+            <div className="w-10 h-10 bg-white/10 backdrop-blur-lg rounded-xl flex items-center justify-center shrink-0 border border-white/20 shadow-sm transition-transform group-hover:scale-105 duration-700">
+                <MapPin size={20} className="text-white fill-white/20" strokeWidth={2.5} />
+            </div>
+
+            {/* Texto Manifesto - Alinhado ao meio */}
+            <p className="text-sm font-display font-black text-white leading-tight tracking-tight text-center">
+                Acreditamos que a vida acontece perto. 💙
+            </p>
+        </div>
     </div>
   </section>
 );
@@ -467,35 +482,41 @@ export const HomeFeed: React.FC<{
         </button>
       </section>
 
-      {/* 6. VAGAS PERTO DE VOCÊ - AJUSTE DE SUBTÍTULO CONFORME SOLICITADO */}
-      <section className="px-6 py-8 space-y-6">
+      {/* 6. VAGAS PERTO DE VOCÊ - BLOCO REDESENHADO PREMIUM */}
+      <section className="px-6 py-10 space-y-6">
         <SectionHeader 
             icon={Briefcase} 
             title="💼 Oportunidades no Bairro" 
-            subtitle="Nossa IA conecta talentos e empresas com precisão inteligente" 
+            subtitle="IA conectando talentos e empresas locais" 
             iconColor="text-emerald-500" 
-            onSeeMore={() => onNavigate('jobs')}
+            subtitleClassName="text-[9px] font-black text-emerald-600/60"
         />
         
         <div 
           onClick={() => onNavigate('jobs')}
-          className="w-full bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
+          className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse"
         >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl -mr-12 -mt-12"></div>
-            
+            {/* Efeitos de Glow e Flare */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 animate-premium-glow"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-flare pointer-events-none"></div>
+
             <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="flex items-center gap-2 mb-4 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800">
-                    <Sparkle size={12} className="text-emerald-600 dark:text-emerald-400 fill-current" />
-                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">IA-Driven Connect</span>
+                <div className="flex items-center gap-2 mb-6 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg">
+                    <Cpu size={14} className="text-white fill-emerald-200" />
+                    <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA-Driven Match</span>
                 </div>
                 
-                <p className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-8 leading-relaxed max-w-[240px]">
-                    Empresas próximas estão buscando perfis compatíveis
+                <h3 className="text-2xl font-display font-black text-white leading-tight mb-2 tracking-tighter uppercase">
+                    Oportunidades <br/> Reais Perto de Você
+                </h3>
+                
+                <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[240px] opacity-90">
+                    Nossa inteligência encontrou vagas compatíveis com seu perfil na região.
                 </p>
                 
-                <div className="w-full bg-[#1E5BFF] text-white font-black py-4 px-8 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 group-hover:bg-blue-600">
-                    Ver oportunidades
-                    <ArrowRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                <div className="w-full bg-white text-emerald-700 font-black py-5 px-8 rounded-2xl shadow-2xl active:scale-95 transition-all text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 group-hover:bg-emerald-50">
+                    Explorar Agora
+                    <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
                 </div>
             </div>
         </div>

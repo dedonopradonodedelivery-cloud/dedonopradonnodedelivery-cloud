@@ -5,123 +5,183 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Users, 
-  Building2, 
   Phone, 
   MessageSquare, 
-  Globe, 
-  Instagram, 
-  Award,
-  CheckCircle2,
   ExternalLink,
-  MapPin,
   Car,
-  Heart
+  Heart,
+  FileText,
+  Clock,
+  Zap,
+  CheckCircle2,
+  Navigation2,
+  MapPin,
+  Smartphone,
+  ShieldAlert,
+  // Added missing Building icon
+  Building
 } from 'lucide-react';
 
 interface PatrocinadorMasterScreenProps {
   onBack: () => void;
 }
 
+const BenefitCard: React.FC<{ icon: React.ElementType, title: string, color: string }> = ({ icon: Icon, title, color }) => (
+  <div className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center gap-3 active:scale-95 transition-all cursor-pointer">
+    <div className={`w-12 h-12 rounded-2xl ${color} bg-opacity-10 flex items-center justify-center ${color.replace('bg-', 'text-')}`}>
+      <Icon size={24} />
+    </div>
+    <span className="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-tight">{title}</span>
+  </div>
+);
+
+const ContactCard: React.FC<{ city: string, phone: string, isWhatsApp?: boolean }> = ({ city, phone, isWhatsApp }) => (
+  <div className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between group active:scale-[0.98] transition-all">
+    <div className="flex items-center gap-4">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isWhatsApp ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-[#FF6501]'}`}>
+        {isWhatsApp ? <MessageSquare size={18} /> : <Phone size={18} />}
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{city}</p>
+        <p className="text-sm font-bold text-gray-900 dark:text-white">{phone}</p>
+      </div>
+    </div>
+    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300 group-hover:text-[#FF6501] transition-colors">
+      <ChevronLeft size={16} className="rotate-180" />
+    </div>
+  </div>
+);
+
 export const PatrocinadorMasterScreen: React.FC<PatrocinadorMasterScreenProps> = ({ onBack }) => {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-32 animate-in slide-in-from-bottom duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-gray-950 font-sans pb-32 animate-in fade-in duration-500 overflow-x-hidden">
       
-      {/* Hero Header */}
-      <div className="relative h-[45vh] w-full bg-[#1e293b] overflow-hidden">
-        <img 
-          src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1200&auto=format&fit=crop" 
-          alt="Clube de Benefícios" 
-          className="w-full h-full object-cover opacity-40 mix-blend-luminosity scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-        
-        {/* Navigation */}
-        <div className="absolute top-12 left-6 z-20">
-          <button 
-            onClick={onBack}
-            className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white active:scale-90 transition-all"
-          >
-            <ChevronLeft size={24} />
-          </button>
+      {/* 1️⃣ HEADER PREMIUM */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 h-20 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+        <button 
+          onClick={onBack}
+          className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-500 active:scale-90 transition-all"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <div className="flex flex-col items-center">
+          <span className="text-[#FF6501] font-black text-lg tracking-tighter uppercase">Atual Clube</span>
         </div>
+        <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/20 rounded-xl flex items-center justify-center">
+            <ShieldCheck size={20} className="text-[#FF6501]" />
+        </div>
+      </header>
 
-        {/* Floating Brand Card */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center">
-            <div className="w-24 h-24 bg-white rounded-[2.5rem] p-4 shadow-2xl mb-6 border-4 border-[#FF6501] flex items-center justify-center">
-                <span className="text-[#FF6501] font-black text-3xl">AC</span>
-            </div>
-            <h1 className="text-4xl font-black text-white text-center uppercase tracking-tighter leading-none mb-2">
-                Atual Clube
+      <main className="p-6 space-y-12 max-w-md mx-auto">
+        
+        {/* 2️⃣ HERO SECTION */}
+        <section className="text-center pt-4 animate-in slide-in-from-bottom-4 duration-700">
+            <h1 className="text-3xl font-display font-black text-gray-900 dark:text-white leading-[1.1] tracking-tighter uppercase mb-3">
+                Aconteceu um imprevisto <br/> na estrada?
             </h1>
-            <div className="flex items-center gap-2 px-3 py-1 bg-[#FF6501] rounded-full text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
-                <Award size={12} /> Patrocinador Master Localizei
-            </div>
-        </div>
-      </div>
-
-      <div className="px-6 py-12 space-y-12">
-        
-        {/* Sobre Section */}
-        <section className="space-y-4">
-            <h2 className="text-[10px] font-black text-[#FF6501] uppercase tracking-[0.3em] ml-1">Quem Somos</h2>
-            <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
-                <ShieldCheck className="absolute -right-8 -bottom-8 w-40 h-40 text-orange-100 dark:text-gray-800 opacity-20 transform -rotate-12" />
-                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed font-medium relative z-10">
-                    O <strong>Atual Clube</strong> é a maior associação de benefícios de Jacarepaguá, focada em entregar tranquilidade e economia para você e sua família. <br/><br/>
-                    Especialistas em proteção veicular e parcerias estratégicas, oferecemos uma rede completa de vantagens que transformam o dia a dia dos nossos associados.
-                </p>
-            </div>
+            <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                Nossa Assistência 24h vai te ajudar! 🚀
+            </p>
         </section>
 
-        {/* Pilares de Atuação */}
-        <section className="space-y-6">
-            <h2 className="text-[10px] font-black text-[#FF6501] uppercase tracking-[0.3em] ml-1">Nossos Diferenciais</h2>
-            <div className="grid gap-4">
-                {[
-                    { title: 'Proteção Veicular 24h', desc: 'Assistência completa e socorro em qualquer lugar.', icon: Car },
-                    { title: 'Clube de Vantagens', desc: 'Descontos reais em mais de 500 estabelecimentos.', icon: Heart },
-                    { title: 'Atendimento Humanizado', desc: 'Suporte local e ágil para todas as suas necessidades.', icon: Users }
-                ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-5 p-6 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                        <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/20 rounded-2xl flex items-center justify-center text-[#FF6501] shrink-0">
-                            <item.icon size={24} />
+        {/* 3️⃣ BLOCO DE CONTATO / AÇÃO RÁPIDA */}
+        <section className="space-y-4 animate-in slide-in-from-bottom-6 duration-700 delay-100">
+            <div className="bg-gradient-to-br from-[#FF6501] to-[#FF8C00] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-orange-500/20 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 animate-premium-glow"></div>
+                
+                <div className="relative z-10 space-y-6">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between border-b border-white/20 pb-4">
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Assistência Principal</span>
+                            <Phone size={16} className="opacity-60" />
                         </div>
-                        <div>
-                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">{item.title}</h4>
-                            <p className="text-xs text-gray-500 font-medium">{item.desc}</p>
+                        <div className="space-y-1">
+                            <p className="text-3xl font-black tracking-tighter">0800 729 0130</p>
+                            <p className="text-3xl font-black tracking-tighter">0800 20 20 123</p>
                         </div>
                     </div>
-                ))}
+
+                    <button className="w-full bg-white text-[#FF6501] font-black py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-sm active:scale-[0.98] transition-all">
+                        Ligar agora
+                        <ArrowRight size={18} strokeWidth={3} />
+                    </button>
+                </div>
             </div>
         </section>
 
-        {/* Contato Section */}
-        <section className="space-y-6">
-            <h2 className="text-[10px] font-black text-[#FF6501] uppercase tracking-[0.3em] ml-1">Seja um Associado</h2>
-            <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center justify-center p-8 bg-emerald-50 dark:bg-emerald-950/20 rounded-[2.5rem] border border-emerald-100 dark:border-emerald-800 text-emerald-600 active:scale-95 transition-all">
-                    <MessageSquare size={32} className="mb-3" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">WhatsApp</span>
-                </button>
-                <button className="flex flex-col items-center justify-center p-8 bg-orange-50 dark:bg-orange-950/20 rounded-[2.5rem] border border-orange-100 dark:border-orange-800 text-[#FF6501] active:scale-95 transition-all">
-                    <Phone size={32} className="mb-3" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Ligar</span>
-                </button>
+        {/* 4️⃣ BLOCO SOBRE NÓS */}
+        <section className="space-y-6 animate-in fade-in duration-1000 delay-200">
+            <div className="flex items-center gap-3 px-1">
+                <div className="w-1.5 h-4 bg-[#FF6501] rounded-full"></div>
+                <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Sobre a Atual Clube</h2>
             </div>
             
-            <button className="w-full py-5 rounded-[2rem] bg-[#FF6501] text-white font-black text-sm uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 active:scale-95">
-                <Globe size={18} />
-                Conhecer Planos
-            </button>
+            <div className="space-y-6">
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                        Somos uma <strong>Associação de Benefícios</strong> sem fins lucrativos. Diferente de uma seguradora, nosso modelo se baseia no mutualismo: a união de pessoas em prol de proteção coletiva e economia.
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 mt-8">
+                        <div className="flex items-center gap-4">
+                            <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+                            <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Respaldo Jurídico & Legalidade</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+                            <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Conformidade com a SUSEP</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+                            <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Transparência Total nos Processos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-      </div>
+        {/* 5️⃣ BLOCO DE BENEFÍCIOS */}
+        <section className="space-y-6 animate-in fade-in duration-1000 delay-300">
+            <div className="flex items-center gap-3 px-1">
+                <div className="w-1.5 h-4 bg-[#FF6501] rounded-full"></div>
+                <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Como podemos te ajudar</h2>
+            </div>
 
-      <div className="mt-12 text-center opacity-30 px-10">
-        <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] leading-relaxed">
-          Atual Clube • Clube de Benefícios <br/> Patrocinador Estratégico Localizei JPA
-        </p>
-      </div>
+            <div className="grid grid-cols-2 gap-4">
+                <BenefitCard icon={FileText} title="2ª Via de Boleto" color="bg-blue-500" />
+                <BenefitCard icon={Car} title="Reboque" color="bg-orange-500" />
+                <BenefitCard icon={ShieldAlert} title="Informe seu Evento" color="bg-rose-500" />
+                <BenefitCard icon={Heart} title="Atual Saúde" color="bg-emerald-500" />
+            </div>
+        </section>
+
+        {/* 6️⃣ BLOCO FALE CONOSCO */}
+        <section className="space-y-6 animate-in fade-in duration-1000 delay-400">
+            <div className="flex items-center gap-3 px-1">
+                <div className="w-1.5 h-4 bg-[#FF6501] rounded-full"></div>
+                <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Fale Conosco</h2>
+            </div>
+
+            <div className="space-y-4">
+                <ContactCard city="Rio de Janeiro" phone="(21) 3268-3069" />
+                <ContactCard city="Belo Horizonte" phone="(31) 3360-1550" />
+                <ContactCard city="WhatsApp Oficial" phone="55 21 99999-9999" isWhatsApp />
+            </div>
+        </section>
+
+        {/* 7️⃣ RODAPÉ PREMIUM */}
+        <footer className="pt-10 pb-8 text-center border-t border-gray-100 dark:border-gray-800">
+            <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
+                <Building size={16} className="text-[#FF6501]" />
+            </div>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">
+                Atual Clube de Benefícios
+            </p>
+            <p className="text-[8px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest">
+                CNPJ: 26.198.696/0001-04
+            </p>
+        </footer>
+
+      </main>
     </div>
   );
 };
