@@ -287,8 +287,8 @@ export const HomeFeed: React.FC<{
 
   return (
     <div 
-        className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-10 rounded-t-[2.5rem] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]"
-        style={{ marginTop: '200px' }}
+        className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-12 rounded-t-[2.5rem] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]"
+        style={{ marginTop: '145px' }}
     >
       
       {/* 1. UTILITY ROW */}
@@ -389,7 +389,7 @@ export const HomeFeed: React.FC<{
                     <Repeat size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                    <h2 className="text-[12px] font-black uppercase tracking-[0.15em] leading-none text-gray-900 dark:text-white mt-1">
+                    <h2 className="text-[12px] font-black uppercase tracking-[0.15em] lineage-none text-gray-900 dark:text-white mt-1">
                         Troca-Troca do Bairro
                     </h2>
                 </div>
