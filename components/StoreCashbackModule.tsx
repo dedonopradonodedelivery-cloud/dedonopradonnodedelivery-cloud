@@ -16,14 +16,15 @@ import {
   X,
   Check,
   Lock,
-  Play
+  Play,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 interface StoreCashbackModuleProps {
   onBack: () => void;
 }
 
-// Mock Transactions
 const TRANSACTIONS = [
   { id: 1, date: '12/11 - 14:30', client: 'Ana S.', purchase: 150.00, cashback: 7.50, status: 'confirmado' },
   { id: 2, date: '12/11 - 10:15', client: 'Carlos M.', purchase: 85.00, cashback: 4.25, status: 'pendente' },
@@ -32,10 +33,8 @@ const TRANSACTIONS = [
 ];
 
 export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack }) => {
-  // Mock Store ID
   const STORE_ID = 'store_123_freguesia';
   
-  // Tutorial State
   const [isTutorialCompleted, setIsTutorialCompleted] = useState(() => {
     return localStorage.getItem(`tutorial_completed_${STORE_ID}`) === 'true';
   });
@@ -58,7 +57,7 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
     }
   }, [isActive]);
 
-  const handleTutorialEnd = () => {
+  const handleSimulateTutorialEnd = () => {
     localStorage.setItem(`tutorial_completed_${STORE_ID}`, 'true');
     setIsTutorialCompleted(true);
   };
@@ -100,8 +99,7 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     } catch (err) {
-        console.error("Error downloading QR", err);
-        alert("Erro ao baixar QR Code. Tente novamente.");
+        alert("Erro ao baixar QR Code.");
     }
   };
 
@@ -110,43 +108,38 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
     setTimeout(() => setIsSaving(false), 1500);
   };
 
-  // --- BLOQUEIO POR VÍDEO ---
   if (!isTutorialCompleted) {
     return (
       <div className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
         <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
-                <Play className="w-8 h-8 text-white fill-white ml-1" />
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30 border-4 border-white/10">
+                <Sparkles className="w-8 h-8 text-white fill-white" />
             </div>
             <h2 className="text-2xl font-black text-white font-display uppercase tracking-tight mb-2">
-                Treinamento Obrigatório
+                Guia de Cashback
             </h2>
             <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
-                Para garantir o sucesso da sua campanha, assista ao vídeo explicativo sobre como o cashback funciona.
+                Clique no card abaixo para concluir o guia e liberar as configurações da sua loja.
             </p>
         </div>
 
-        <div className="w-full max-w-md aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative group">
-            <video
-                src="https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4" 
-                className="w-full h-full object-cover"
-                autoPlay
-                playsInline
-                onEnded={handleTutorialEnd}
-                controls={false} // CONTROLES DESABILITADOS (Regra 5)
-                onContextMenu={(e) => e.preventDefault()} // BLOQUEIO DE MENU (Regra 5)
-                disablePictureInPicture
-                controlsList="nodownload noplaybackrate"
-            />
-            
-            {/* Overlay de Bloqueio Visual */}
-            <div className="absolute inset-0 bg-transparent pointer-events-none border-2 border-slate-800/50 rounded-2xl"></div>
+        <div 
+            onClick={handleSimulateTutorialEnd}
+            className="w-full max-w-md aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-800 relative group cursor-pointer active:scale-[0.98] transition-all"
+        >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="w-20 h-20 bg-white text-blue-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                    <Play size={32} fill="currentColor" className="ml-1" />
+                </div>
+                <p className="mt-4 text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">Toque para concluir guia</p>
+            </div>
         </div>
 
         <div className="mt-8 flex items-center gap-2 px-4 py-2 bg-yellow-500/10 rounded-full border border-yellow-500/20 animate-pulse">
             <Lock className="w-4 h-4 text-yellow-500" />
             <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
-                Painel bloqueado até o fim do vídeo
+                Painel bloqueado até concluir o guia
             </span>
         </div>
       </div>
@@ -155,8 +148,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans animate-in slide-in-from-right duration-300 pb-20 relative">
-      
-      {/* Header */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-5 h-16 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <ChevronLeft className="w-6 h-6 text-gray-800 dark:text-white" />
@@ -165,8 +156,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
       </div>
 
       <div className="p-5 space-y-6">
-        
-        {/* Status & QR Code Section */}
         <div className={`rounded-3xl p-6 transition-all duration-300 ${isActive ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-xl shadow-indigo-500/20' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700'}`}>
             <div className="flex items-center justify-between mb-2">
                 <span className={`font-bold text-lg ${isActive ? 'text-white' : 'text-gray-700 dark:text-gray-200'}`}>
@@ -212,16 +201,13 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
             )}
         </div>
 
-        {/* Configuration Rules */}
         <section className={`bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-opacity duration-300 ${!isActive ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
             <div className="flex items-center gap-2 mb-6 text-gray-900 dark:text-white">
                 <Settings className="w-5 h-5 text-gray-400" />
-                <h3 className="font-bold text-lg">Configurar Cashback da Minha Loja</h3>
+                <h3 className="font-bold text-lg">Configurar Cashback</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-6 mb-6">
-                
-                {/* SLIDER FOR PERCENTAGE */}
                 <div>
                     <div className="flex justify-between items-end mb-3">
                         <label className="text-xs font-bold text-gray-500 uppercase ml-1">Porcentagem de Volta</label>
@@ -246,10 +232,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                             style={{ left: `calc(${((percent - 3) / 47) * 100}% - 10px)` }}
                         ></div>
                     </div>
-                    <div className="flex justify-between text-[10px] text-gray-400 font-medium px-1">
-                        <span>3%</span>
-                        <span>50%</span>
-                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -261,7 +243,7 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                                 type="number" 
                                 value={maxValue}
                                 onChange={(e) => setMaxValue(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-3 pl-8 text-gray-900 dark:text-white font-bold outline-none focus:ring-2 focus:ring-indigo-500/50" 
+                                className="w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-3 pl-8 text-gray-900 dark:text-white font-bold outline-none" 
                             />
                         </div>
                     </div>
@@ -271,28 +253,10 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                             type="number" 
                             value={validity}
                             onChange={(e) => setValidity(e.target.value)}
-                            className="w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-3 text-gray-900 dark:text-white font-bold outline-none focus:ring-2 focus:ring-indigo-500/50" 
+                            className="w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-3 text-gray-900 dark:text-white font-bold outline-none" 
                         />
                     </div>
                 </div>
-            </div>
-
-            {/* Advanced Options Toggle */}
-            <div className="border-t border-gray-100 dark:border-gray-700 pt-4 mb-6">
-                <button 
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="flex items-center justify-between w-full text-sm font-semibold text-gray-600 dark:text-gray-300"
-                >
-                    <span>Regras avançadas por categoria</span>
-                    {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-                
-                {showAdvanced && (
-                    <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-center">
-                        <p className="text-xs text-gray-500">Funcionalidade disponível no plano PRO.</p>
-                        <button className="mt-2 text-indigo-600 font-bold text-xs">Saiba mais</button>
-                    </div>
-                )}
             </div>
 
             <button 
@@ -305,11 +269,9 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
             </button>
         </section>
 
-        {/* Results & Reports */}
         <section>
             <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-4 px-1">Resultados</h3>
             
-            {/* KPI Cards */}
             <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm col-span-2">
                     <div className="flex items-center gap-2 mb-2 text-green-600">
@@ -317,7 +279,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                         <span className="text-xs font-bold uppercase tracking-wide">Vendas Influenciadas</span>
                     </div>
                     <p className="text-2xl font-black text-gray-900 dark:text-white">R$ 12.450,00</p>
-                    <p className="text-xs text-gray-400 mt-1">+15% em relação ao mês anterior</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <div className="flex items-center gap-2 mb-2 text-[#1E5BFF]">
@@ -335,7 +296,6 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                 </div>
             </div>
 
-            {/* Transactions Table */}
             <div>
                 <h4 className="font-bold text-sm text-gray-700 dark:text-gray-200 mb-3 px-1">Últimas Transações</h4>
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -350,23 +310,16 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
                                 <div className="flex items-center justify-end gap-1.5 mt-0.5">
                                     <span className="text-[10px] font-bold text-[#1E5BFF]">+ R$ {t.cashback.toFixed(2)}</span>
                                     {t.status === 'confirmado' && <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>}
-                                    {t.status === 'pendente' && <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>}
-                                    {t.status === 'expirado' && <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>}
                                 </div>
                             </div>
                         </div>
                     ))}
-                    <button className="w-full py-3 text-xs font-bold text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        Ver histórico completo
-                    </button>
                 </div>
             </div>
-
         </section>
 
       </div>
 
-      {/* TERMS MODAL */}
       {showTermsModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300">
             <div 
@@ -375,44 +328,21 @@ export const StoreCashbackModule: React.FC<StoreCashbackModuleProps> = ({ onBack
             >
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">Termos de Adesão</h2>
-                    <button 
-                        onClick={() => setShowTermsModal(false)}
-                        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    >
-                        <X className="w-5 h-5 text-gray-500" />
-                    </button>
+                    <button onClick={() => setShowTermsModal(false)} className="p-1 rounded-full hover:bg-gray-100"><X className="w-5 h-5 text-gray-500" /></button>
                 </div>
-
-                <div className="flex-1 overflow-y-auto bg-[#EAF0FF] dark:bg-gray-800 rounded-xl p-4 text-xs text-gray-600 dark:text-gray-300 mb-4 border border-blue-100 dark:border-gray-700 leading-relaxed">
+                <div className="flex-1 overflow-y-auto bg-[#EAF0FF] dark:bg-gray-800 rounded-xl p-4 text-xs text-gray-600 dark:text-gray-300 mb-4 border border-blue-100 leading-relaxed">
                     <p className="font-bold mb-2">1. Programa de Cashback</p>
-                    <p className="mb-2">Ao ativar o programa de cashback, o estabelecimento concorda em conceder o desconto percentual definido sobre o valor total da compra realizada pelo usuário do aplicativo Localizei Freguesia.</p>
-                    
+                    <p className="mb-2">Ao ativar o programa de cashback, o estabelecimento concorda em conceder o desconto definido sobre o valor total da compra.</p>
                     <p className="font-bold mb-2">2. Responsabilidade do Lojista</p>
-                    <p className="mb-2">O lojista é responsável por honrar o cashback prometido e realizar a leitura do QR Code do cliente ou permitir que o cliente leia o QR Code da loja para validação da transação.</p>
-                    
-                    <p className="font-bold mb-2">3. Taxas e Pagamentos</p>
-                    <p className="mb-2">O valor do cashback é descontado do saldo da carteira do lojista ou cobrado mensalmente conforme o plano contratado. A Localizei Freguesia atua como intermediadora tecnológica.</p>
-                    
-                    <p className="font-bold mb-2">4. Cancelamento</p>
-                    <p>O lojista pode desativar o programa a qualquer momento, porém deve honrar os cashbacks de transações já iniciadas ou pendentes.</p>
+                    <p>O lojista é responsável por honrar o cashback prometido e validar a transação.</p>
                 </div>
-
                 <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => setTermsCheck(!termsCheck)}>
-                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${termsCheck ? 'bg-green-500 border-green-500' : 'border-gray-400 bg-white dark:bg-gray-800'}`}>
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${termsCheck ? 'bg-green-500 border-green-500' : 'border-gray-400'}`}>
                         {termsCheck && <Check className="w-3.5 h-3.5 text-white" />}
                     </div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200 select-none">
-                        Li e aceito os termos do programa
-                    </span>
+                    <span className="text-sm font-medium">Li e aceito os termos</span>
                 </div>
-
-                <button 
-                    onClick={handleAcceptTerms}
-                    disabled={!termsCheck}
-                    className="w-full bg-[#1E5BFF] disabled:bg-gray-300 disabled:dark:bg-gray-700 disabled:text-gray-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 disabled:shadow-none active:scale-[0.98] transition-all"
-                >
-                    Ativar Cashback
-                </button>
+                <button onClick={handleAcceptTerms} disabled={!termsCheck} className="w-full bg-[#1E5BFF] text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-[0.98] disabled:opacity-50">Ativar Cashback</button>
             </div>
         </div>
       )}
