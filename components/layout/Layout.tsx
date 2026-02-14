@@ -8,10 +8,9 @@ interface LayoutProps {
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | null;
   hideNav?: boolean;
-  onScroll?: (scrollY: number) => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false, onScroll }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position when activeTab changes
@@ -21,23 +20,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     }
   }, [activeTab]);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (onScroll) {
-      onScroll(e.currentTarget.scrollTop);
-    }
-  };
-
   // Se for admin_panel, forçamos hideNav true internamente por segurança extra
   const finalHideNav = hideNav || activeTab === 'admin_panel';
 
   return (
     <div
-      className="h-[100dvh] bg-brand-blue font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
+      className="h-[100dvh] bg-brand-blue dark:bg-gray-950 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
     >
       <div
         ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto no-scrollbar w-full relative z-10"
+        className="flex-1 overflow-y-auto no-scrollbar w-full"
         style={{
           paddingBottom: finalHideNav
             ? 'env(safe-area-inset-bottom)'

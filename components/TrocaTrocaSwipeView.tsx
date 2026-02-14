@@ -4,14 +4,13 @@ import { X, Heart, MapPin, Repeat, RefreshCw, Star, MessageSquare } from 'lucide
 import { useAuth } from '@/contexts/AuthContext';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { TradeItem } from '@/types';
-import { TradeOnboardingView } from './TradeOnboardingView';
 
 // New mock data structure: Item as Profile
 const MOCK_TRADE_ITEMS: Omit<TradeItem, 'userId' | 'userRole'>[] = [
   { id: 't1', title: 'Violão Acústico Yamaha', imageUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=800', category: 'Instrumentos', description: 'Em ótimo estado, usado poucas vezes. Cordas novas.', wants: 'Headphone Bluetooth, Cadeira Gamer', neighborhood: 'Freguesia', status: 'Disponível' },
   { id: 't2', title: 'Bicicleta Aro 29', imageUrl: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800', category: 'Esportes', description: 'Bike em ótimo estado, buscando cadeira para setup.', wants: 'Cadeira Gamer, Monitor 24"', neighborhood: 'Taquara', status: 'Disponível' },
   { id: 't3', title: 'Playstation 4', imageUrl: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=800', category: 'Eletrônicos', description: 'PS4 funcionando perfeitamente, com 2 controles.', wants: 'Smart TV 42", Nintendo Switch', neighborhood: 'Pechincha', status: 'Disponível' },
-  { id: 't4', title: 'Tênis de Corrida Nike nº 42', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400', category: 'Vestuário', description: 'Tênis novo, usado 2 vezes. Busco relógio para monitorar treinos.', wants: 'Relógio Smart, Fone de ouvido sem fio', neighborhood: 'Anil', status: 'Disponível' },
+  { id: 't4', title: 'Tênis de Corrida Nike nº 42', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800', category: 'Vestuário', description: 'Tênis novo, usado 2 vezes. Busco relógio para monitorar treinos.', wants: 'Relógio Smart, Fone de ouvido sem fio', neighborhood: 'Anil', status: 'Disponível' },
   { id: 't5', title: 'Mochila de Viagem 60L', imageUrl: 'https://images.unsplash.com/photo-1553062407-98eeb68c6a62?q=80&w=800', category: 'Acessórios', description: 'Mochila grande, ideal para viagens. Pouco uso.', wants: 'Jaqueta de Couro M, Bota de trilha', neighborhood: 'Freguesia', status: 'Disponível' },
 ];
 
@@ -84,7 +83,6 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
     const [feedback, setFeedback] = useState<'like' | 'dislike' | 'superlike' | null>(null);
     const [animation, setAnimation] = useState('');
     const [showMatch, setShowMatch] = useState<SwipeCardData | null>(null);
-    const [hasLoaded, setHasLoaded] = useState(false);
 
     // Hardcoded user's item for match simulation
     const myItemForMatch: SwipeCardData = { 
@@ -122,6 +120,7 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
 
         let combinedDeck: SwipeCardData[] = [...userItemsMapped, ...mockItemsMapped];
         
+        // Remove duplicates and filter by neighborhood
         const uniqueIds = new Set();
         const uniqueDeck = combinedDeck.filter(element => {
             const isDuplicate = uniqueIds.has(element.id);
@@ -129,15 +128,14 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
             return !isDuplicate;
         });
 
-        // Filtragem por bairro
         const neighborhoodFilteredDeck = uniqueDeck.filter(item => 
             item.status === 'Disponível' && 
             (currentNeighborhood === 'Jacarepaguá (todos)' || item.neighborhood === currentNeighborhood)
         );
         
+        // Shuffle the deck
         setDeck(neighborhoodFilteredDeck.sort(() => Math.random() - 0.5));
         setCurrentIndex(0);
-        setHasLoaded(true);
 
     }, [user, currentNeighborhood]);
 
@@ -171,18 +169,6 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
         setShowMatch(null);
         setCurrentIndex(prev => prev + 1);
     };
-
-    if (!hasLoaded) return null;
-
-    // Se o bairro não tiver itens cadastrados, exibe o Onboarding Educacional
-    if (deck.length === 0) {
-        return (
-            <TradeOnboardingView 
-                onBack={onBack} 
-                onRegisterItem={() => onNavigate('user_trade_items')} 
-            />
-        );
-    }
 
     const currentItem = deck[currentIndex];
 

@@ -1,4 +1,3 @@
-
 {
   "name": "localizei-freguesia-app",
   "private": true,
@@ -17,9 +16,7 @@
     "@google/genai": "^1.30.0",
     "firebase": "^12.6.0",
     "@supabase/supabase-js": "^2.84.0",
-    "jsqr": "^1.4.0",
-    "mammoth": "^1.8.0",
-    "pdfjs-dist": "^4.4.168"
+    "jsqr": "^1.4.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

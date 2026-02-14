@@ -40,27 +40,26 @@
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
-      /* Splash Screen Cinematográfica com Proteção de Marca */
+      /* Splash Screen Cinematográfica */
       #app-splash {
         position: fixed;
         inset: 0;
-        background: radial-gradient(circle at center, #2D6DF6 0%, #0A3BBF 100%);
+        background: radial-gradient(circle at center, #1E5BFF 0%, #0A3BBF 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s;
+        transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
         overflow: hidden;
       }
       
-      /* Aura de Tecnologia */
       .tech-glow {
         position: absolute;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-        animation: pulseAura 4s ease-in-out infinite;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulseAura 6s ease-in-out infinite;
         pointer-events: none;
       }
 
@@ -70,90 +69,99 @@
         align-items: center;
         text-align: center;
         z-index: 10;
-        transform: translateY(-40px);
+        transform: translateY(-20px);
       }
 
       .official-pin-white {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
         opacity: 0;
-        transform: scale(0.8);
-        filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
-        animation: pinEntrance 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        transform: scale(0.9);
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        animation: pinEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
       
       .app-name-premium {
         color: white;
         font-family: 'Outfit', sans-serif;
         font-weight: 900;
-        font-size: 38px;
+        font-size: 36px;
         line-height: 1;
         text-transform: uppercase;
-        letter-spacing: -0.04em;
-        margin-top: 20px;
+        letter-spacing: -0.02em;
+        margin-top: 24px;
         opacity: 0;
         transform: translateY(10px);
-        animation: textEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+        animation: textEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+      }
+
+      /* Efeito de Digitação no Slogan */
+      .app-slogan-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 12px;
+        height: 20px;
+        overflow: hidden;
       }
 
       .app-slogan-premium {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.7);
         font-family: 'Outfit', sans-serif;
         font-weight: 500;
-        font-size: 14px;
+        font-size: 13px;
         letter-spacing: 0.15em;
         text-transform: uppercase;
-        margin-top: 10px;
-        /* Typing animation properties */
-        display: inline-block;
-        overflow: hidden;
         white-space: nowrap;
+        overflow: hidden;
         width: 0;
-        border-right: 2px solid rgba(255, 101, 1, 0.75);
-        box-sizing: border-box;
-        animation: 
-          typing 1.5s steps(21, end) 1.2s forwards,
-          blink .75s step-end infinite 1.2s;
+        animation: typingSlogan 1.8s steps(30, end) 0.8s forwards;
       }
 
-      /* Sponsor Island - Proteção da Marca (Design Premium) */
+      /* Sponsor Island Premium - Branco/Cinza/Laranja */
       .sponsor-island {
         position: absolute;
         bottom: 60px;
-        background: #FFFFFF; /* Fundo BRANCO */
-        padding: 14px 32px;
-        border-radius: 24px;
+        background: #FFFFFF;
+        padding: 16px 32px;
+        border-radius: 32px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); /* Sombra CINZA sutil */
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.05);
         opacity: 0;
-        transform: translateY(20px);
-        animation: islandEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) 2.9s forwards; /* Atraso de 2.9s */
+        transform: translateY(30px) scale(0.95);
+        animation: sponsorEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) 2.4s forwards;
       }
 
       .sponsor-label {
-        color: #9CA3AF; /* CINZA suave */
+        color: #94A3B8; /* Cinza Light */
         font-family: 'Outfit', sans-serif;
         font-size: 9px;
-        font-weight: 700;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 2px;
+        letter-spacing: 0.2em;
+        margin-bottom: 4px;
       }
 
-      .sponsor-brand-orange {
-        color: #FF6501; /* LARANJA da marca */
+      .sponsor-brand {
+        display: flex;
+        align-items: center;
+        gap: 6px;
         font-family: 'Outfit', sans-serif;
         font-size: 20px;
         font-weight: 900;
         letter-spacing: -0.02em;
         line-height: 1;
+        color: #1F2937; /* Cinza Escuro */
       }
 
-      /* Animações Premium */
+      .brand-accent {
+        color: #FF6501; /* Laranja Atual */
+      }
+
+      /* Animações */
       @keyframes pinEntrance {
-        0% { transform: scale(0.7) translateY(20px); opacity: 0; filter: blur(10px); }
+        0% { transform: scale(0.8) translateY(20px); opacity: 0; filter: blur(5px); }
         100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
       }
       
@@ -161,25 +169,20 @@
         0% { transform: translateY(15px); opacity: 0; }
         100% { transform: translateY(0); opacity: 1; }
       }
-      
-      @keyframes typing {
+
+      @keyframes typingSlogan {
         from { width: 0; }
-        to { width: 17.5em; } /* Largura aproximada do slogan */
+        to { width: 100%; }
       }
 
-      @keyframes blink {
-        from, to { border-color: transparent }
-        50% { border-color: rgba(255, 101, 1, 0.75); }
-      }
-
-      @keyframes islandEntrance {
+      @keyframes sponsorEntrance {
         0% { transform: translateY(30px) scale(0.95); opacity: 0; }
         100% { transform: translateY(0) scale(1); opacity: 1; }
       }
 
       @keyframes pulseAura {
-        0%, 100% { opacity: 0.4; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(1.1); }
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.15); }
       }
 
       body {
@@ -217,23 +220,28 @@
       <div class="tech-glow"></div>
       
       <div class="main-branding">
-        <!-- Logo Oficial (Pino) em Branco -->
         <div class="official-pin-white">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" fill="white" fill-opacity="0.15" />
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" fill="white" fill-opacity="0.2" />
             <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
             <circle cx="12" cy="10" r="3" fill="white" />
           </svg>
         </div>
 
         <div class="app-name-premium">LOCALIZEI JPA</div>
-        <div class="app-slogan-premium">Seu bairro, na sua mão</div>
+        
+        <div class="app-slogan-container">
+          <div class="app-slogan-premium">Seu bairro, na sua mão</div>
+        </div>
       </div>
 
-      <!-- Sponsor Island (Proteção de Branding para Atual Clube) -->
+      <!-- Sponsor Island Premium (White / Gray / Orange) -->
       <div class="sponsor-island">
         <span class="sponsor-label">Patrocinador Master</span>
-        <span class="sponsor-brand-orange">Atual Clube</span>
+        <div class="sponsor-brand">
+          <span>ATUAL</span>
+          <span class="brand-accent">CLUBE</span>
+        </div>
       </div>
     </div>
 

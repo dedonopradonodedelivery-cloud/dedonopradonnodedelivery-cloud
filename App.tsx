@@ -66,40 +66,6 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { UserTradeItemsView } from '@/components/UserTradeItemsView';
 import { JobsSwipeView } from '@/components/JobsSwipeView';
 import { UserResumeView } from '@/components/UserResumeView';
-import { X, User as UserIcon, Store as StoreIcon, ShieldCheck, Palette } from 'lucide-react';
-
-const RoleSwitcherModal: React.FC<{ isOpen: boolean; onClose: () => void; currentMode: string; onSelect: (mode: string) => void }> = ({ isOpen, onClose, currentMode, onSelect }) => {
-    if (!isOpen) return null;
-    const modes = [
-        { id: 'Visitante', icon: UserIcon, color: 'text-gray-500' },
-        { id: 'Lojista', icon: StoreIcon, color: 'text-blue-500' },
-        { id: 'ADM', icon: ShieldCheck, color: 'text-amber-500' },
-        { id: 'Designer', icon: Palette, color: 'text-purple-500' },
-    ];
-
-    return (
-        <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-xl font-black uppercase tracking-tighter dark:text-white">Trocar Visão</h2>
-                    <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><X size={20}/></button>
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                    {modes.map(mode => (
-                        <button 
-                            key={mode.id}
-                            onClick={() => { onSelect(mode.id); onClose(); }}
-                            className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${currentMode === mode.id ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-                        >
-                            <mode.icon className={`w-6 h-6 ${mode.color}`} />
-                            <span className={`font-bold uppercase text-sm tracking-widest ${currentMode === mode.id ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>{mode.id}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 export const App: React.FC = () => {
   const { user, userRole, loading: authLoading, signOut } = useAuth();
@@ -114,25 +80,26 @@ export const App: React.FC = () => {
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [viewMode, setViewMode] = useState<any>('Visitante');
   const [appReady, setAppReady] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     if (!authLoading) {
+      // Duração da Splash aumentada para 5 segundos conforme solicitado
       const timer = setTimeout(() => {
         const splash = document.getElementById('app-splash');
         if (splash) {
           splash.style.opacity = '0';
+          splash.style.transform = 'scale(1.05)';
           splash.style.visibility = 'hidden';
           setAppReady(true);
           document.body.style.overflow = 'auto';
           setTimeout(() => {
             splash.remove();
-          }, 1000);
+          }, 800);
         } else {
           setAppReady(true);
           document.body.style.overflow = 'auto';
         }
-      }, 4000); 
+      }, 5000); 
       return () => clearTimeout(timer);
     }
   }, [authLoading]);
@@ -142,7 +109,6 @@ export const App: React.FC = () => {
   const handleNavigate = (view: string, data?: any) => {
     if (data) setSelectedData(data);
     setActiveTab(view);
-    setScrollY(0); // Reset scroll on navigation
     window.scrollTo(0, 0);
   };
 
@@ -191,16 +157,10 @@ export const App: React.FC = () => {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-brand-blue flex justify-center relative transition-colors duration-300">
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
         <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
-                <Layout 
-                  activeTab={activeTab} 
-                  setActiveTab={handleNavigate} 
-                  userRole={userRole} 
-                  hideNav={false}
-                  onScroll={setScrollY}
-                >
+                <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                     {!headerExclusionList.includes(activeTab) && (
                     <Header 
                         onNotificationClick={() => handleNavigate('notifications')} 
@@ -216,10 +176,9 @@ export const App: React.FC = () => {
                         viewMode={viewMode} 
                         onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
                         onSelectCategory={handleSelectCategory} 
-                        scrollY={scrollY}
                     />
                     )}
-                    <main className="w-full mx-auto relative z-0">
+                    <main className="w-full mx-auto">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
@@ -356,17 +315,6 @@ export const App: React.FC = () => {
             )}
         </div>
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} user={user as any} />
-        <RoleSwitcherModal 
-            isOpen={isRoleSwitcherOpen} 
-            onClose={() => setIsRoleSwitcherOpen(false)} 
-            currentMode={viewMode}
-            onSelect={(mode) => {
-                setViewMode(mode);
-                if (mode === 'ADM') handleNavigate('admin_panel');
-                else if (mode === 'Lojista') handleNavigate('store_area');
-                else handleNavigate('home');
-            }}
-        />
       </div>
     </div>
   );

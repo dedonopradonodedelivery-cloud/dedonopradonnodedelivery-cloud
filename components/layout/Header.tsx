@@ -21,7 +21,6 @@ interface HeaderProps {
   toggleTheme?: () => void;
   userRole?: string | null;
   onSelectCategory: (category: Category) => void;
-  scrollY?: number;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -124,28 +123,17 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
-  scrollY = 0
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
   const isHome = activeTab === 'home';
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
-  // Lógica de interpolação de animação premium
-  const threshold = 120;
-  
-  // Opacidade dos elementos que somem
-  const contentOpacity = Math.max(0, 1 - (scrollY / 80));
-  const topRowOpacity = Math.max(0, 1 - (scrollY / 60));
-  
-  // Transformação da barra de busca
-  const searchTranslateY = Math.max(-148, -scrollY * 1.15);
-  const dockedSearchY = isHome ? (scrollY > 120 ? -148 : searchTranslateY) : 0;
-
   useEffect(() => {
     const checkNotifs = () => {
       let saved = localStorage.getItem('app_notifications');
       if (!saved) {
+          // Fallback para popular o sino no primeiro acesso
           const initial = [
             { id: 'notif-1', title: 'Bem-vindo! 🧡', type: 'system', read: false, createdAt: new Date().toISOString() },
             { id: 'notif-2', title: 'Dica do Tuco 🦜', type: 'system', read: false, createdAt: new Date().toISOString() },
@@ -172,33 +160,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div 
-          className="w-full transition-colors duration-300 pointer-events-none"
-          style={isHome ? { height: Math.max(80, 240 - scrollY) } : {}}
-        >
-            {/* CAMADA 1: FUNDO AZUL (BASE - SEMPRE ABAIXO DO CARD) */}
-            {isHome && (
-                <div 
-                    className="fixed top-0 left-0 right-0 z-10 bg-brand-blue"
-                    style={{ 
-                        height: Math.max(80, 240 - scrollY),
-                        boxShadow: scrollY > 160 ? '0 10px 30px rgba(10, 59, 191, 0.15)' : 'none'
-                    }}
-                />
-            )}
-
-            {/* CAMADA 2: CONTEÚDO DO HEADER (ACIMA DE TUDO) */}
-            <div className={`max-w-md mx-auto px-6 pt-5 space-y-0.5 relative h-full ${isHome ? 'fixed top-0 left-0 right-0 z-50' : 'z-40 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6'}`}>
+        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-10 bg-brand-blue pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
-                {/* LINHA SUPERIOR (LOGO, BAIRRO, NOTIF) */}
-                <div 
-                  className="flex items-center justify-between py-2 transition-all duration-200 relative pointer-events-auto"
-                  style={isHome ? { 
-                    opacity: topRowOpacity, 
-                    transform: `translateY(${-scrollY * 0.5}px)`,
-                    pointerEvents: topRowOpacity < 0.1 ? 'none' : 'auto'
-                  } : {}}
-                >
+                <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isHome ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
                             <MapPin size={22} className="text-white fill-white" />
@@ -210,13 +175,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                     <div className="flex items-center gap-4">
                         {isAdmin && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (onOpenViewSwitcher) onOpenViewSwitcher();
-                              }} 
-                              className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer relative ${isHome ? 'text-amber-400 bg-white/5' : 'text-amber-600 bg-amber-50'}`}
-                            >
+                            <button onClick={onOpenViewSwitcher} className={`transition-all active:scale-90 ${isHome ? 'text-amber-400' : 'text-amber-600'}`}>
                                 <ShieldCheck size={20} />
                             </button>
                         )}
@@ -227,7 +186,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 e.stopPropagation();
                                 toggleSelector();
                             }}
-                            className={`relative flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer ${
+                            className={`relative z-50 flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer pointer-events-auto ${
                                 isHome 
                                 ? 'text-white' 
                                 : 'text-slate-700 dark:text-slate-200'
@@ -240,10 +199,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </button>
 
                         <button 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onNotificationClick();
-                            }}
+                            onClick={onNotificationClick}
                             className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
                                 isHome 
                                 ? 'text-white' 
@@ -252,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
                         >
                             <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
                                     <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
@@ -261,17 +217,15 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {isHome && (
-                    <div className="relative pt-1">
-                        {/* SAUDAÇÃO E TUCO */}
-                        <div 
-                          className="transition-all duration-300 pointer-events-none"
-                          style={{ opacity: contentOpacity, transform: `translateY(${-scrollY * 0.3}px)` }}
-                        >
-                            {/* AJUSTE DO TUCO: bottom -12px para cruzar visualmente a barra de busca e parecer pousado nela */}
-                            <div className="absolute bottom-[-12px] right-[-4px] w-28 h-28 z-[60] transform -scale-x-100">
-                                 <TucoMascot />
-                            </div>
+                    <div className="relative pt-1 animate-in fade-in slide-in-from-top-1 duration-700">
+                        <div className="absolute bottom-[32px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
+                             <TucoMascot />
+                        </div>
 
+                        <button 
+                            onClick={() => setIsAssistantOpen(true)}
+                            className="w-full flex flex-col gap-4 transition-all active:scale-[0.99] group text-left relative cursor-pointer"
+                        >
                             <div className="flex flex-col relative z-10">
                                 <h2 className="text-2xl font-display text-white leading-tight">
                                     Olá, <span className="font-black">{greetingName}</span> 👋
@@ -280,23 +234,14 @@ export const Header: React.FC<HeaderProps> = ({
                                     Sua inteligência local
                                 </p>
                             </div>
-                        </div>
 
-                        {/* BARRA DE BUSCA - FIXA NO TOPO APÓS SCROLL */}
-                        <div 
-                          className="absolute left-0 right-0 z-50 transition-transform duration-75 ease-out pointer-events-auto"
-                          style={{ transform: `translateY(${dockedSearchY}px)` }}
-                        >
-                          <button 
-                              onClick={() => setIsAssistantOpen(true)}
-                              className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner cursor-pointer backdrop-blur-sm"
-                          >
-                              <Search size={18} className="text-white/40" />
-                              <span className="text-white/40 text-sm font-medium tracking-tight">
-                                  Como o Tuco pode te ajudar?
-                              </span>
-                          </button>
-                        </div>
+                            <div className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 group-hover:bg-white/20 transition-all shadow-inner relative z-10">
+                                <Search size={18} className="text-white/40" />
+                                <span className="text-white/40 text-sm font-medium tracking-tight">
+                                    Como o Tuco pode te ajudar?
+                                </span>
+                            </div>
+                        </button>
                     </div>
                 )}
             </div>

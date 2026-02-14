@@ -20,16 +20,22 @@ import {
   Construction,
   AlertTriangle,
   Clock,
+  ShieldCheck,
   BadgeCheck,
   Zap,
   Info,
   Search,
   Package,
   Key,
+  Camera,
   Briefcase,
+  Building2,
+  TrendingUp,
   Repeat,
+  Settings,
   X,
-  FileText
+  FileText,
+  CloudLightning
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -40,6 +46,7 @@ import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
 import { calculateCompatibility, MOCK_JOBS_FOR_TESTING, MOCK_CANDIDATE_PROFILES } from '@/utils/compatibilityEngine';
 import { MerchantJob } from './MerchantJobsModule';
+import { StoryViewer } from './StoryViewer';
 
 const QUICK_CATEGORIES: { name: string, icon: React.ElementType, slug: string }[] = [
   { name: 'Saúde', icon: Heart, slug: 'saude' },
@@ -59,42 +66,44 @@ const MOCK_COUPONS = [
 const ACONTECENDO_AGORA_FEED = [
   { 
     id: 1, 
-    type: 'EVENTO',
-    title: 'Música ao vivo no Bar do Zeca', 
-    subtitle: 'Noite de Jazz', 
-    time: '20 min', 
-    icon: Music, 
-    color: 'text-indigo-400', 
-    bg: 'bg-indigo-500',
-    source: 'Lojista Parceiro',
-    isVerified: true,
-    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800'
+    type: 'EVENTOS',
+    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800',
+    authorName: 'Bar do Zé',
+    authorAvatar: 'https://i.pravatar.cc/150?u=ze',
+    timestamp: 'há 2h'
   },
   { 
     id: 2, 
     type: 'TRÂNSITO',
-    title: 'Obra na Geremário Dantas', 
-    subtitle: 'Interdição parcial', 
-    time: 'Agora', 
-    icon: Construction, 
-    color: 'text-amber-400', 
-    bg: 'bg-amber-50',
-    source: 'Fonte Oficial',
-    isVerified: true,
-    image: 'https://images.unsplash.com/photo-1581094371996-518296a8f15b?q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1581094371996-518296a8f15b?q=80&w=800',
+    videoUrl: 'https://videos.pexels.com/video-files/3129957/3129957-sd_540_960_30fps.mp4',
+    authorName: 'JPA Alertas',
+    authorAvatar: 'https://i.pravatar.cc/150?u=alerts',
+    timestamp: 'agora'
   },
   { 
     id: 3, 
+    type: 'PET PERDIDO',
+    image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=400&auto=format&fit=crop',
+    authorName: 'Mariana Silva',
+    authorAvatar: 'https://i.pravatar.cc/150?u=mariana',
+    timestamp: 'há 1h'
+  },
+  { 
+    id: 4, 
+    type: 'ALERTA CLIMA',
+    image: 'https://images.unsplash.com/photo-1561484930-998b6a7b22e8?q=80&w=800',
+    authorName: 'Defesa Civil',
+    authorAvatar: 'https://i.pravatar.cc/150?u=defesa',
+    timestamp: 'há 3h'
+  },
+  { 
+    id: 5, 
     type: 'UTILIDADE',
-    title: 'Feira Livre na Praça', 
-    subtitle: 'Produtos frescos', 
-    time: '2h', 
-    icon: Zap, 
-    color: 'text-emerald-400', 
-    bg: 'bg-emerald-500',
-    source: 'Morador Verificado',
-    isVerified: true,
-    image: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=800'
+    image: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=800',
+    authorName: 'Prefeitura Rio',
+    authorAvatar: 'https://i.pravatar.cc/150?u=pref',
+    timestamp: 'há 5h'
   }
 ];
 
@@ -166,36 +175,27 @@ const SectionHeader: React.FC<{
   </div>
 );
 
-const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], className?: string, onClick: () => void }> = ({ item, className = '', onClick }) => (
+const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], onClick: () => void }> = ({ item, onClick }) => (
     <div
       onClick={onClick}
-      className={`relative rounded-3xl overflow-hidden shadow-lg group cursor-pointer transition-all active:scale-[0.98] bg-slate-900 ${className}`}
+      className="relative flex-shrink-0 w-36 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg group cursor-pointer transition-all active:scale-[0.97] bg-slate-900 snap-start"
     >
-        <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        {/* Background Image */}
+        <img 
+          src={item.image} 
+          alt={item.type} 
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+        />
         
-        <div className="relative z-10 p-5 flex flex-col justify-between h-full">
-            <div>
-                <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${item.bg} text-white`}>
+        {/* Subtle Dark Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+        
+        {/* Top Tag Label */}
+        <div className="absolute top-3 left-3 right-3">
+            <div className="inline-flex bg-black/40 backdrop-blur-md border border-white/20 px-2 py-1 rounded-full">
+                <span className="text-[7px] font-black text-white uppercase tracking-[0.15em] whitespace-nowrap">
                     {item.type}
                 </span>
-            </div>
-
-            <div>
-                <h3 className="font-black text-white text-lg leading-tight uppercase tracking-tight drop-shadow-md">
-                    {item.title}
-                </h3>
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 rounded-full flex items-center justify-center bg-black/30">
-                            <BadgeCheck size={10} className="text-blue-400" />
-                        </div>
-                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
-                            {item.source}
-                        </span>
-                    </div>
-                    <ChevronRight size={14} className="text-slate-400 group-hover:text-white transition-colors" strokeWidth={3} />
-                </div>
             </div>
         </div>
     </div>
@@ -253,6 +253,9 @@ export const HomeFeed: React.FC<{
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   const [candidateProfile, setCandidateProfile] = useState<any | null>(null);
   const [jobRecommendations, setJobRecommendations] = useState<{ job: Job; compatibility: CompatibilityResult }[]>([]);
+  
+  // Controle do Visualizador de Stories
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setCandidateProfile(MOCK_CANDIDATE_PROFILES[0]);
@@ -286,13 +289,10 @@ export const HomeFeed: React.FC<{
   }, [candidateProfile]);
 
   return (
-    <div 
-        className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-12 rounded-t-[2.5rem] relative z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.15)]"
-        style={{ marginTop: '-120px' }}
-    >
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 rounded-t-[3.5rem] mt-[215px] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
       
       {/* 1. UTILITY ROW */}
-      <section className="px-8 pt-4 pb-2">
+      <section className="px-8 pt-6 pb-2">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />
@@ -355,33 +355,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. ACONTECENDO AGORA */}
-      <section className="px-6 py-8 space-y-5">
-        <SectionHeader 
-            icon={Flame} 
-            title="Acontecendo agora" 
-            subtitle="Informação verificada no bairro" 
-            iconColor="text-amber-500" 
-            onSeeMore={() => onNavigate('neighborhood_posts')}
-        />
-        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[200px]">
-            <HappeningNowCard 
-                item={ACONTECENDO_AGORA_FEED[0]} 
-                className="col-span-2"
-                onClick={() => onNavigate('neighborhood_posts')}
-            />
-            <HappeningNowCard 
-                item={ACONTECENDO_AGORA_FEED[1]} 
-                onClick={() => onNavigate('neighborhood_posts')}
-            />
-            <HappeningNowCard 
-                item={ACONTECENDO_AGORA_FEED[2]} 
-                onClick={() => onNavigate('neighborhood_posts')}
-            />
-        </div>
-      </section>
-
-      {/* 4. TROCA-TROCA DO BAIRRO - Hero Card */}
+      {/* 🔥 TROCA-TROCA DO BAIRRO - Hero Card */}
       <section className="px-6 py-8 space-y-5">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -419,15 +393,24 @@ export const HomeFeed: React.FC<{
               </p>
 
               <div className="flex items-center justify-center gap-5 my-4">
-                  <div className="w-14 h-14 bg-slate-800/60 rounded-full border border-slate-700 text-slate-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60 hover:text-white">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); alert('Passar (Não tenho interesse)'); }}
+                    className="w-14 h-14 bg-slate-800/60 rounded-full border border-slate-700 text-slate-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60 hover:text-white"
+                  >
                     <X size={28} strokeWidth={2.5} />
-                  </div>
-                  <div className="w-10 h-10 bg-slate-800/60 rounded-full border border-slate-700 text-blue-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60">
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); alert('Talvez (Pular)'); }}
+                    className="w-10 h-10 bg-slate-800/60 rounded-full border border-slate-700 text-blue-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60"
+                  >
                     <Repeat size={20} strokeWidth={2.5} />
-                  </div>
-                  <div className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-rose-500/20 hover:bg-rose-600">
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); alert('Gostei (Tenho interesse)'); }}
+                    className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-rose-500/20 hover:bg-rose-600"
+                  >
                     <Heart size={28} fill="currentColor" />
-                  </div>
+                  </button>
               </div>
               
               <div className="w-full max-w-xs">
@@ -439,7 +422,60 @@ export const HomeFeed: React.FC<{
         </button>
       </section>
 
-      {/* 6. CUPOM DO DIA */}
+
+      {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
+      <section className="py-8 space-y-5">
+        <div className="px-6">
+            <SectionHeader 
+                icon={Flame} 
+                title="Acontecendo agora" 
+                subtitle="Stories do seu bairro" 
+                iconColor="text-amber-500" 
+                onSeeMore={() => onNavigate('neighborhood_posts')}
+            />
+        </div>
+        
+        <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-4">
+            {ACONTECENDO_AGORA_FEED.map((item, index) => (
+                <HappeningNowCard 
+                    key={item.id}
+                    item={item} 
+                    onClick={() => setSelectedStoryIndex(index)}
+                />
+            ))}
+        </div>
+      </section>
+      
+      {/* 💼 VAGAS PERTO DE VOCÊ */}
+      <section className="px-6 py-8 space-y-5">
+        <SectionHeader 
+            icon={Briefcase} 
+            title="Vagas perto de você" 
+            subtitle={candidateProfile ? "Recomendadas pela IA" : "Conectando talentos locais"} 
+            iconColor="text-emerald-500" 
+            onSeeMore={() => onNavigate('jobs')}
+        />
+        {candidateProfile ? (
+            <div className="space-y-4">
+              {jobRecommendations.map(({ job, compatibility }) => (
+                <JobCard key={job.id} job={job} compatibility={compatibility} onClick={() => onNavigate('job_detail', { job, compatibility })} />
+              ))}
+            </div>
+        ) : (
+          <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
+              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
+                <FileText size={28} />
+              </div>
+              <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>
+              <p className="text-sm text-slate-400 mb-6">Envie seu currículo e deixe nossa IA encontrar a vaga perfeita para você no bairro.</p>
+              <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30">
+                Enviar currículo agora
+              </div>
+          </div>
+        )}
+      </section>
+
+      {/* 4. CUPOM DO DIA */}
       {isFeatureActive('coupons') && (
         <section className="space-y-4 py-4">
           <div className="px-6 flex items-center justify-between">
@@ -481,7 +517,7 @@ export const HomeFeed: React.FC<{
         </section>
       )}
 
-      {/* 7. ACHADOS & PERDIDOS */}
+      {/* 5. ACHADOS & PERDIDOS */}
       <section className="px-6 py-4 space-y-5">
         <SectionHeader 
             icon={Search} 
@@ -527,45 +563,16 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 8. LANÇAMENTO / ADS SECTION */}
+      {/* 7. LANÇAMENTO / ADS SECTION */}
       {userRole === 'lojista' && isFeatureActive('sponsored_ads') && (
         <section className="px-6 py-6 animate-in slide-in-from-bottom-4 duration-700">
           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
 
-      {/* 5. VAGAS PERTO DE VOCÊ (REORDERED) */}
-      <section className="px-6 py-8 space-y-5">
-        <SectionHeader 
-            icon={Briefcase} 
-            title="Vagas perto de você" 
-            subtitle={candidateProfile ? "Recomendadas pela IA" : "Conectando talentos locais"} 
-            iconColor="text-emerald-500" 
-            onSeeMore={() => onNavigate('jobs')}
-        />
-        {candidateProfile ? (
-            <div className="space-y-4">
-              {jobRecommendations.map(({ job, compatibility }) => (
-                <JobCard key={job.id} job={job} compatibility={compatibility} onClick={() => onNavigate('job_detail', { job, compatibility })} />
-              ))}
-            </div>
-        ) : (
-          <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
-              <div className="w-16 h-16 bg-blue-50/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
-                <FileText size={28} />
-              </div>
-              <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>
-              <p className="text-sm text-slate-400 mb-6">Envie seu currículo e deixe nossa IA encontrar a vaga perfeita para você no bairro.</p>
-              <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30">
-                Enviar currículo agora
-              </div>
-          </div>
-        )}
-      </section>
-
       <InstitutionalBanner />
       
-      {/* 9. EXPLORE GUIDE SECTION */}
+      {/* 8. EXPLORE GUIDE SECTION */}
       {isFeatureActive('explore_guide') && (
         <div className="w-full pt-8 pb-10">
             <div className="px-6">
@@ -591,6 +598,15 @@ export const HomeFeed: React.FC<{
           onClose={() => setIsMoreCategoriesOpen(false)}
           onSelectCategory={onSelectCategory}
       />
+
+      {/* Story Viewer Overlay */}
+      {selectedStoryIndex !== null && (
+        <StoryViewer 
+          stories={ACONTECENDO_AGORA_FEED} 
+          initialIndex={selectedStoryIndex} 
+          onClose={() => setSelectedStoryIndex(null)} 
+        />
+      )}
     </div>
   );
 };
