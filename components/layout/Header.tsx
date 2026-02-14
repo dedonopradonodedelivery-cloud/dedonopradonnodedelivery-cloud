@@ -133,7 +133,6 @@ export const Header: React.FC<HeaderProps> = ({
     const checkNotifs = () => {
       let saved = localStorage.getItem('app_notifications');
       if (!saved) {
-          // Fallback para popular o sino no primeiro acesso
           const initial = [
             { id: 'notif-1', title: 'Bem-vindo! 🧡', type: 'system', read: false, createdAt: new Date().toISOString() },
             { id: 'notif-2', title: 'Dica do Tuco 🦜', type: 'system', read: false, createdAt: new Date().toISOString() },
@@ -152,16 +151,26 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const greetingName = useMemo(() => {
+    if (viewMode === 'Visitante') return "Visitante";
+    if (viewMode === 'ADM') return "Admin";
+    if (viewMode === 'Lojista') return "Parceiro";
+    if (viewMode === 'Usuário') return user?.user_metadata?.full_name?.split(' ')[0] || "Morador";
+    
     if (!user) return "Visitante";
-    if (isAdmin && viewMode === 'ADM') return "Admin";
     const fullName = user.user_metadata?.full_name;
     return fullName ? fullName.split(' ')[0] : (user.email?.split('@')[0] || "Morador");
   }, [user, isAdmin, viewMode]);
 
   return (
     <>
-        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-10 bg-brand-blue pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
-            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
+        {/* Camada Visual (Fundo) */}
+        {isHome && (
+            <div className="fixed top-0 left-0 right-0 z-10 bg-brand-blue h-[320px] pointer-events-none transition-all duration-500"></div>
+        )}
+
+        {/* Camada Interativa (Conteúdo) */}
+        <div className={`w-full transition-all duration-500 pointer-events-none ${isHome ? 'fixed top-0 left-0 right-0 z-50 pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5 pointer-events-auto">
                 
                 <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
@@ -174,11 +183,19 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {isAdmin && (
-                            <button onClick={onOpenViewSwitcher} className={`transition-all active:scale-90 ${isHome ? 'text-amber-400' : 'text-amber-600'}`}>
-                                <ShieldCheck size={20} />
-                            </button>
-                        )}
+                        {/* BOTÃO ALTERAR MODO - AGORA 100% CLICÁVEL COM Z-INDEX 50+ */}
+                        <button 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (onOpenViewSwitcher) onOpenViewSwitcher();
+                            }}
+                            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] transition-all active:scale-90 cursor-pointer ${isHome ? 'text-amber-400' : 'text-amber-600'}`}
+                            title="Alternar Modo de Visualização"
+                        >
+                            <ShieldCheck size={24} />
+                            <span className="text-[7px] font-black uppercase tracking-tighter mt-0.5 opacity-80">{viewMode}</span>
+                        </button>
 
                         <button 
                             onClick={(e) => {
@@ -186,7 +203,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 e.stopPropagation();
                                 toggleSelector();
                             }}
-                            className={`relative z-50 flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer pointer-events-auto ${
+                            className={`relative flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer ${
                                 isHome 
                                 ? 'text-white' 
                                 : 'text-slate-700 dark:text-slate-200'

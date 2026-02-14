@@ -66,6 +66,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { UserTradeItemsView } from '@/components/UserTradeItemsView';
 import { JobsSwipeView } from '@/components/JobsSwipeView';
 import { UserResumeView } from '@/components/UserResumeView';
+import { RoleSwitcherModal } from '@/components/RoleSwitcherModal';
 
 export const App: React.FC = () => {
   const { user, userRole, loading: authLoading, signOut } = useAuth();
@@ -156,8 +157,8 @@ export const App: React.FC = () => {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-white dark:bg-gray-950 flex justify-center relative transition-colors duration-300">
-        <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="min-h-screen bg-[#F5F5F5] dark:bg-slate-950 flex justify-center relative transition-colors duration-300">
+        <div className={`w-full max-w-md h-[100dvh] bg-white dark:bg-gray-900 transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
                 <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
                     {!headerExclusionList.includes(activeTab) && (
@@ -314,6 +315,7 @@ export const App: React.FC = () => {
             )}
         </div>
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} user={user as any} />
+        <RoleSwitcherModal isOpen={isRoleSwitcherOpen} onClose={() => setIsRoleSwitcherOpen(false)} currentMode={viewMode} onModeChange={setViewMode} />
       </div>
     </div>
   );
