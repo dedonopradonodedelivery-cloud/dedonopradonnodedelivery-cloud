@@ -104,28 +104,36 @@
         letter-spacing: 0.15em;
         text-transform: uppercase;
         margin-top: 10px;
-        opacity: 0;
-        animation: fadeIn 1s ease-out 0.8s forwards;
+        /* Typing animation properties */
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 0;
+        border-right: 2px solid rgba(255, 101, 1, 0.75);
+        box-sizing: border-box;
+        animation: 
+          typing 1.5s steps(21, end) 1.2s forwards,
+          blink .75s step-end infinite 1.2s;
       }
 
-      /* Sponsor Island - Proteção da Marca */
+      /* Sponsor Island - Proteção da Marca (Design Premium) */
       .sponsor-island {
         position: absolute;
         bottom: 60px;
-        background: #FF6501; /* Fundo Laranja */
+        background: #FFFFFF; /* Fundo BRANCO */
         padding: 14px 32px;
         border-radius: 24px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        box-shadow: 0 15px 35px rgba(255,101,1,0.2), 0 5px 15px rgba(255,101,1,0.1); /* Sombra Laranja */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); /* Sombra CINZA sutil */
         opacity: 0;
         transform: translateY(20px);
-        animation: islandEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+        animation: islandEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) 2.9s forwards; /* Atraso de 2.9s */
       }
 
       .sponsor-label {
-        color: rgba(255, 255, 255, 0.7); /* Letra Branca Translúcida */
+        color: #9CA3AF; /* CINZA suave */
         font-family: 'Outfit', sans-serif;
         font-size: 9px;
         font-weight: 700;
@@ -135,7 +143,7 @@
       }
 
       .sponsor-brand-orange {
-        color: white; /* Letra Branca */
+        color: #FF6501; /* LARANJA da marca */
         font-family: 'Outfit', sans-serif;
         font-size: 20px;
         font-weight: 900;
@@ -153,15 +161,20 @@
         0% { transform: translateY(15px); opacity: 0; }
         100% { transform: translateY(0); opacity: 1; }
       }
+      
+      @keyframes typing {
+        from { width: 0; }
+        to { width: 17.5em; } /* Largura aproximada do slogan */
+      }
+
+      @keyframes blink {
+        from, to { border-color: transparent }
+        50% { border-color: rgba(255, 101, 1, 0.75); }
+      }
 
       @keyframes islandEntrance {
         0% { transform: translateY(30px) scale(0.95); opacity: 0; }
         100% { transform: translateY(0) scale(1); opacity: 1; }
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
       }
 
       @keyframes pulseAura {
@@ -170,7 +183,7 @@
       }
 
       body {
-        background-color: #1E5BFF;
+        background-color: #FFFFFF;
         margin: 0;
         overflow: hidden;
       }

@@ -41,6 +41,15 @@ import { MoreCategoriesModal } from './MoreCategoriesModal';
 import { calculateCompatibility, MOCK_JOBS_FOR_TESTING, MOCK_CANDIDATE_PROFILES } from '@/utils/compatibilityEngine';
 import { MerchantJob } from './MerchantJobsModule';
 
+const QUICK_CATEGORIES: { name: string, icon: React.ElementType, slug: string }[] = [
+  { name: 'Saúde', icon: Heart, slug: 'saude' },
+  { name: 'Serviços', icon: Wrench, slug: 'servicos' },
+  { name: 'Pet', icon: PawPrint, slug: 'pets' },
+  { name: 'Moda', icon: Shirt, slug: 'moda' },
+  { name: 'Beleza', icon: Scissors, slug: 'beleza' },
+  { name: 'Auto', icon: CarFront, slug: 'autos' },
+];
+
 const MOCK_COUPONS = [
   { id: 1, store: 'Bibi Lanches', discount: '20% OFF', category: 'Alimentação', color: 'from-orange-500 to-rose-500' },
   { id: 2, store: 'Studio Hair', discount: 'R$ 15 OFF', category: 'Beleza', color: 'from-blue-600 to-indigo-700' },
@@ -196,7 +205,7 @@ const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], class
 const InstitutionalBanner: React.FC = () => (
   <section className="px-6 pt-8 pb-2">
     <div className="bg-brand-blue rounded-xl p-5 flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20">
-      <sparkles size={16} className="text-white" />
+      <Sparkles size={16} className="text-white" />
       <p className="text-sm font-black text-white uppercase tracking-widest">
         Acreditamos que a vida acontece perto.
       </p>
@@ -278,8 +287,8 @@ export const HomeFeed: React.FC<{
 
   return (
     <div 
-        className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-8 rounded-t-[2.5rem] relative z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.1)]"
-        style={{ marginTop: '-40px' }}
+        className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-12 rounded-t-[2.5rem] relative z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.15)]"
+        style={{ marginTop: '-120px' }}
     >
       
       {/* 1. UTILITY ROW */}
@@ -315,18 +324,35 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 2. MAIS CATEGORIAS (TRIGGER) */}
-      <section className="px-6 py-4">
+      {/* 2. ICON CATEGORY GRID */}
+      <section className="w-full overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex items-center gap-5 px-6 py-6">
+          {QUICK_CATEGORIES.map(cat => {
+            const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
+            if (!fullCat) return null;
+            return (
+              <button 
+                key={cat.slug} 
+                onClick={() => onSelectCategory(fullCat)} 
+                className="flex flex-col items-center gap-3 flex-shrink-0 group active:scale-95 transition-all"
+              >
+                <div className="w-16 h-16 rounded-full bg-brand-blue shadow-[0_10px_25px_rgba(30,91,255,0.25)] flex items-center justify-center text-white border border-white/10 group-hover:brightness-110 transition-all">
+                  <cat.icon size={26} strokeWidth={2} />
+                </div>
+                <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">{cat.name}</span>
+              </button>
+            )
+          })}
           <button 
-            onClick={() => setIsMoreCategoriesOpen(true)}
-            className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 group active:scale-[0.99] transition-all"
+            onClick={() => setIsMoreCategoriesOpen(true)} 
+            className="flex flex-col items-center gap-3 flex-shrink-0 active:scale-95 transition-all"
           >
-              <div className="flex items-center gap-3">
-                  <Plus size={16} className="text-[#1E5BFF]" strokeWidth={3} />
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Explorar todas as categorias</span>
-              </div>
-              <ChevronRight size={14} className="text-gray-300" />
+            <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-gray-900 border-2 border-dashed border-slate-200 dark:border-gray-800 flex items-center justify-center text-slate-300">
+              <Plus size={26} strokeWidth={3} />
+            </div>
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mais</span>
           </button>
+        </div>
       </section>
 
       {/* 3. ACONTECENDO AGORA */}
@@ -438,7 +464,7 @@ export const HomeFeed: React.FC<{
                 <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
                 <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <sparkles size={14} className="mb-0.5 opacity-60" />
+                  <Sparkles size={14} className="mb-0.5 opacity-60" />
                   <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
                 </div>
 

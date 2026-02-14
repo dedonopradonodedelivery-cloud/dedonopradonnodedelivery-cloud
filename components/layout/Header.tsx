@@ -1,9 +1,8 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X, Plus, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront } from 'lucide-react';
+import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
-import { CATEGORIES } from '@/constants';
 import { GeminiAssistant } from '@/components/GeminiAssistant';
 
 interface HeaderProps {
@@ -24,15 +23,6 @@ interface HeaderProps {
   onSelectCategory: (category: Category) => void;
   scrollY?: number;
 }
-
-const QUICK_CATEGORIES: { name: string, icon: React.ElementType, slug: string }[] = [
-  { name: 'Saúde', icon: Heart, slug: 'saude' },
-  { name: 'Serviços', icon: Wrench, slug: 'servicos' },
-  { name: 'Pet', icon: PawPrint, slug: 'pets' },
-  { name: 'Moda', icon: Shirt, slug: 'moda' },
-  { name: 'Beleza', icon: Scissors, slug: 'beleza' },
-  { name: 'Auto', icon: CarFront, slug: 'autos' },
-];
 
 const NeighborhoodSelectorModal: React.FC = () => {
     const { currentNeighborhood, setNeighborhood, isSelectorOpen, toggleSelector } = useNeighborhood();
@@ -134,7 +124,6 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
-  onSelectCategory,
   scrollY = 0
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
@@ -142,16 +131,16 @@ export const Header: React.FC<HeaderProps> = ({
   const isHome = activeTab === 'home';
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
-  // Altura base ajustada para caber categorias (340px)
-  const headerHeight = isHome ? Math.max(80, 340 - scrollY) : 80;
+  // Lógica de interpolação de animação premium
+  const threshold = 120;
   
   // Opacidade dos elementos que somem
   const contentOpacity = Math.max(0, 1 - (scrollY / 80));
   const topRowOpacity = Math.max(0, 1 - (scrollY / 60));
   
-  // Posição da barra de busca
-  const searchTranslateY = Math.max(-250, -scrollY * 1.15);
-  const dockedSearchY = isHome ? (scrollY > 160 ? -250 : searchTranslateY) : 0;
+  // Transformação da barra de busca
+  const searchTranslateY = Math.max(-148, -scrollY * 1.15);
+  const dockedSearchY = isHome ? (scrollY > 120 ? -148 : searchTranslateY) : 0;
 
   useEffect(() => {
     const checkNotifs = () => {
@@ -185,23 +174,23 @@ export const Header: React.FC<HeaderProps> = ({
     <>
         <div 
           className="w-full transition-colors duration-300 pointer-events-none"
-          style={{ height: headerHeight }}
+          style={isHome ? { height: Math.max(80, 240 - scrollY) } : {}}
         >
-            {/* CAMADA 1: FUNDO AZUL (BASE) */}
+            {/* CAMADA 1: FUNDO AZUL (BASE - SEMPRE ABAIXO DO CARD) */}
             {isHome && (
                 <div 
                     className="fixed top-0 left-0 right-0 z-10 bg-brand-blue"
                     style={{ 
-                        height: headerHeight,
-                        boxShadow: scrollY > 200 ? '0 10px 30px rgba(10, 59, 191, 0.15)' : 'none'
+                        height: Math.max(80, 240 - scrollY),
+                        boxShadow: scrollY > 160 ? '0 10px 30px rgba(10, 59, 191, 0.15)' : 'none'
                     }}
                 />
             )}
 
-            {/* CAMADA 2: CONTEÚDO DO HEADER */}
+            {/* CAMADA 2: CONTEÚDO DO HEADER (ACIMA DE TUDO) */}
             <div className={`max-w-md mx-auto px-6 pt-5 space-y-0.5 relative h-full ${isHome ? 'fixed top-0 left-0 right-0 z-50' : 'z-40 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6'}`}>
                 
-                {/* LINHA SUPERIOR */}
+                {/* LINHA SUPERIOR (LOGO, BAIRRO, NOTIF) */}
                 <div 
                   className="flex items-center justify-between py-2 transition-all duration-200 relative pointer-events-auto"
                   style={isHome ? { 
@@ -278,6 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
                           className="transition-all duration-300 pointer-events-none"
                           style={{ opacity: contentOpacity, transform: `translateY(${-scrollY * 0.3}px)` }}
                         >
+                            {/* AJUSTE DO TUCO: bottom -12px para cruzar visualmente a barra de busca e parecer pousado nela */}
                             <div className="absolute bottom-[-12px] right-[-4px] w-28 h-28 z-[60] transform -scale-x-100">
                                  <TucoMascot />
                             </div>
@@ -292,7 +282,7 @@ export const Header: React.FC<HeaderProps> = ({
                             </div>
                         </div>
 
-                        {/* BARRA DE BUSCA */}
+                        {/* BARRA DE BUSCA - FIXA NO TOPO APÓS SCROLL */}
                         <div 
                           className="absolute left-0 right-0 z-50 transition-transform duration-75 ease-out pointer-events-auto"
                           style={{ transform: `translateY(${dockedSearchY}px)` }}
@@ -306,31 +296,6 @@ export const Header: React.FC<HeaderProps> = ({
                                   Como o Tuco pode te ajudar?
                               </span>
                           </button>
-                        </div>
-
-                        {/* CATEGORIAS (FIXAS NO AZUL) */}
-                        <div 
-                          className="absolute top-[130px] left-[-24px] right-[-24px] z-40 transition-all duration-300 pointer-events-auto overflow-x-auto no-scrollbar"
-                          style={{ opacity: contentOpacity, transform: `translateY(${-scrollY * 0.1}px)` }}
-                        >
-                           <div className="flex items-center gap-5 px-6 py-6">
-                            {QUICK_CATEGORIES.map(cat => {
-                              const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
-                              if (!fullCat) return null;
-                              return (
-                                <button 
-                                  key={cat.slug} 
-                                  onClick={() => onSelectCategory(fullCat)} 
-                                  className="flex flex-col items-center gap-3 flex-shrink-0 group active:scale-95 transition-all"
-                                >
-                                  <div className="w-16 h-16 rounded-full bg-white/10 shadow-lg flex items-center justify-center text-white border border-white/20 group-hover:bg-white/20 transition-all">
-                                    <cat.icon size={26} strokeWidth={2.5} />
-                                  </div>
-                                  <span className="text-[9px] font-black text-white/70 uppercase tracking-widest">{cat.name}</span>
-                                </button>
-                              )
-                            })}
-                          </div>
                         </div>
                     </div>
                 )}
