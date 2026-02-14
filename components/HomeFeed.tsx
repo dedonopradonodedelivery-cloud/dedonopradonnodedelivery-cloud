@@ -348,9 +348,9 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 4. CUPOM DO DIA - AJUSTADO: FUNDO PREMIUM E CARDS COMPACTOS */}
+      {/* 4. CUPOM DO DIA - AJUSTADO: MAIOR PRESENÇA VISUAL (py-12 e h-32) */}
       {isFeatureActive('coupons') && (
-        <section className="space-y-4 py-8 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
+        <section className="space-y-6 py-12 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
           <div className="px-6 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
@@ -369,24 +369,27 @@ export const HomeFeed: React.FC<{
               <button 
                 key={coupon.id}
                 onClick={() => onNavigate('coupon_landing')}
-                className="flex-shrink-0 w-[165px] relative bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 flex items-center shadow-sm active:scale-[0.98] transition-all snap-start group overflow-hidden h-20"
+                className="flex-shrink-0 w-[185px] relative bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 flex items-center shadow-sm active:scale-[0.98] transition-all snap-start group overflow-hidden h-32"
               >
-                {/* Perfurações de ticket ajustadas para escala menor */}
+                {/* Perfurações de ticket */}
                 <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
                 <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[52px] top-3 bottom-3 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+                <div className="absolute left-[52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
-                {/* Parte visual do ticket reduzida */}
+                {/* Parte visual do ticket */}
                 <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <Sparkles size={10} className="mb-0.5 opacity-60" />
-                  <span className="text-[6px] font-black leading-none uppercase tracking-tighter">Ticket</span>
+                  <Sparkles size={12} className="mb-1 opacity-60" />
+                  <span className="text-[7px] font-black leading-none uppercase tracking-tighter vertical-text transform -rotate-180" style={{ writingMode: 'vertical-rl' }}>Ticket</span>
                 </div>
 
-                {/* Conteúdo de texto compacto */}
-                <div className="text-left min-w-0 flex-1 pl-4 pr-2">
-                  <p className="text-[7px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate mb-0.5">{coupon.category}</p>
-                  <h4 className="text-sm font-black text-slate-900 dark:text-white leading-none mb-1">{coupon.discount}</h4>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter truncate">{coupon.store}</p>
+                {/* Conteúdo de texto */}
+                <div className="text-left min-w-0 flex-1 pl-4 pr-3">
+                  <p className="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate mb-1">{coupon.category}</p>
+                  <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight mb-1.5">{coupon.discount}</h4>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter truncate">{coupon.store}</p>
+                  <div className="mt-3 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded text-[7px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                    Resgatar
+                  </div>
                 </div>
               </button>
             ))}
