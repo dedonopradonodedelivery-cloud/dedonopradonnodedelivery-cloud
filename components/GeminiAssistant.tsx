@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
-import { X, Send, Loader2, Mic, RefreshCw, AlertCircle } from 'lucide-react';
+import { X, Send, Loader2, Mic, RefreshCw, AlertCircle, Copy, Check } from 'lucide-react';
 import { ChatMessage } from '@/types';
 import { TUCO_MASCOT_BASE64 } from '@/constants';
 
@@ -24,6 +25,9 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [lastError, setLastError] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -33,6 +37,22 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isLoading]);
+
+  const copyErrorDetails = () => {
+    if (!lastError) return;
+    const errorLog = `
+--- LOCALIZEI JPA - ERRO IA ---
+Timestamp: ${new Date().toISOString()}
+Message: ${lastError.message || 'Erro desconhecido'}
+Status: ${lastError.status || 'N/A'}
+Model: gemini-3-flash-preview
+Endpoint: generateContent
+    `.trim();
+    
+    navigator.clipboard.writeText(errorLog);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleSend = useCallback(async (messageOverride?: string) => {
     const textToSend = (messageOverride || input).trim();
@@ -48,37 +68,37 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     ]);
     
     setIsLoading(true);
+    setLastError(null);
 
     try {
+      // Inicialização conforme diretrizes obrigatórias
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Filtramos o histórico para garantir que:
-      // 1. Comece sempre com uma mensagem do usuário (Regra da API Gemini para histórico)
-      // 2. Não inclua a saudação inicial se ela for a única mensagem do modelo antes do primeiro user input
-      const chatHistory = messages
+      // Construção do histórico para o modelo
+      const history = messages
         .filter(m => m.type === 'response' && m.text && m.text !== INITIAL_GREETING)
         .map(m => ({ 
           role: m.role, 
           parts: [{ text: m.text || '' }] 
         }));
 
-      // Usamos a API de Chat que é mais robusta para conversação
-      const chat = ai.chats.create({
+      // Chamada direta conforme diretrizes: ai.models.generateContent
+      const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
+        contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
         config: {
           systemInstruction: `Você é Tuco, o assistente inteligente oficial do Localizei JPA. 
           Sua missão é ajudar moradores a encontrar lojas, serviços, cupons e vagas de emprego em Jacarepaguá/RJ. 
           Bairros de atuação: Freguesia, Taquara, Pechincha, Anil, Tanque, Curicica, etc.
-          Personalidade: Extremamente útil, rápido, amigável, usa emojis de vez em quando e conhece o Rio de Janeiro.`,
+          Personalidade: Extremamente útil, rápido, amigável, usa emojis e conhece Jacarepaguá como ninguém.`,
           temperature: 0.7,
+          topP: 0.95,
         },
-        history: chatHistory
       });
 
-      const result = await chat.sendMessage({ message: textToSend });
-      const modelText = result.text;
+      const modelText = response.text;
       
-      if (!modelText) throw new Error("EMPTY_RESPONSE");
+      if (!modelText) throw new Error("A API retornou uma resposta vazia (Empty Response).");
 
       setMessages(prev => [
         ...prev,
@@ -86,14 +106,14 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
       ]);
 
     } catch (error: any) {
-      console.error("[Tuco Error]", error);
-      let errorMessage = "Tive um problema técnico para te responder agora.";
+      console.error("[Tuco API Error]", error);
+      setLastError(error);
       
       setMessages(prev => [
         ...prev,
         { 
           role: 'model', 
-          text: errorMessage, 
+          text: "Tive um problema técnico para te responder agora. Pode ser a conexão ou um ajuste no sistema.", 
           type: 'error',
           action: 'retry',
           originalUserMessage: textToSend
@@ -129,15 +149,15 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-white dark:bg-gray-900 w-full max-w-sm h-[80vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
         
-        {/* Header - Identical to Image */}
+        {/* Header */}
         <div className="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] p-5 flex justify-between items-center shadow-md relative z-10">
           <div className="flex items-center gap-3">
             <TucoAvatarLarge />
             <div>
-              <h3 className="font-black text-white text-xl tracking-tight leading-none">TUCO</h3>
+              <h3 className="font-black text-white text-xl tracking-tight leading-none uppercase">TUCO</h3>
               <div className="flex items-center gap-1.5 mt-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]"></div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">Pronto para ajudar</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">Inteligência Local Ativa</p>
               </div>
             </div>
           </div>
@@ -154,27 +174,29 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
                 msg.role === 'user' 
                   ? 'bg-[#2563EB] text-white rounded-br-none shadow-blue-500/10' 
                   : msg.type === 'error'
-                    ? 'bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 rounded-bl-none text-center'
+                    ? 'bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 rounded-bl-none'
                     : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-none border border-gray-100 dark:border-gray-700'
               }`}>
                 {msg.type === 'error' ? (
-                  <div className="space-y-4 py-1">
+                  <div className="space-y-4 py-1 flex flex-col items-center text-center">
+                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-black uppercase text-[10px] tracking-widest">
+                        <AlertCircle size={14} /> Ops! Algo deu errado
+                    </div>
                     <p>{msg.text}</p>
-                    <button 
-                      onClick={() => handleSend(msg.originalUserMessage)}
-                      className="w-full flex items-center justify-center gap-2 bg-[#EF4444] text-white px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-md"
-                    >
-                      <RefreshCw size={14} strokeWidth={3} /> Tentar Novamente
-                    </button>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(`Erro Tuco: ${msg.text}`);
-                        alert("Instruções copiadas!");
-                      }}
-                      className="text-[8px] text-rose-400 uppercase font-black tracking-widest hover:underline"
-                    >
-                      Copiar instruções de erro
-                    </button>
+                    <div className="grid grid-cols-1 gap-2 w-full">
+                        <button 
+                          onClick={() => handleSend(msg.originalUserMessage)}
+                          className="w-full flex items-center justify-center gap-2 bg-[#EF4444] text-white px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-md"
+                        >
+                          <RefreshCw size={14} strokeWidth={3} /> Tentar Novamente
+                        </button>
+                        <button 
+                          onClick={copyErrorDetails}
+                          className="flex items-center justify-center gap-2 text-[8px] text-rose-400 uppercase font-black tracking-widest hover:underline"
+                        >
+                          {copied ? <><Check size={10}/> Copiado</> : <><Copy size={10}/> Copiar detalhes do erro</>}
+                        </button>
+                    </div>
                   </div>
                 ) : (
                   <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
@@ -195,7 +217,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
           )}
         </div>
 
-        {/* Input Area - Identical to Image */}
+        {/* Input Area */}
         <div className="p-5 bg-white dark:bg-gray-900 border-t border-gray-50 dark:border-gray-800">
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-3">
             <div className="relative flex-1 group">
@@ -226,7 +248,7 @@ export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onCl
             </button>
           </form>
           <p className="text-[8px] text-center text-gray-400 font-black uppercase tracking-[0.1em] mt-4 opacity-70">
-            Powered by Google Gemini • JPA Intelligence
+            Powered by Google Gemini • Vercel Ready v1.1
           </p>
         </div>
       </div>
