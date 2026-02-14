@@ -196,7 +196,7 @@ export const App: React.FC = () => {
                     {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('home')} onSuccess={() => handleNavigate('home')} />}
                     
                     {activeTab === 'classified_detail' && selectedData?.item && <ClassifiedDetailView item={selectedData.item} onBack={() => window.history.back()} user={user} onRequireLogin={() => setIsAuthModalOpen(true)} />}
-                    {activeTab === 'job_detail' && selectedData?.job && <JobDetailView user={user as any} job={selectedData.job} compatibility={selectedData.compatibility} onBack={() => window.history.back()} />}
+                    {activeTab === 'job_detail' && selectedData?.job && <JobDetailView job={selectedData.job} compatibility={selectedData.compatibility} onBack={() => window.history.back()} />}
                     {activeTab === 'real_estate_detail' && selectedData?.property && <RealEstateDetailView property={selectedData.property} onBack={() => handleNavigate('real_estate')} onRequireLogin={() => setIsAuthModalOpen(true)} user={user} />}
                     {activeTab === 'classified_search_results' && selectedData?.searchTerm && <ClassifiedSearchResultsView searchTerm={selectedData.searchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
 
