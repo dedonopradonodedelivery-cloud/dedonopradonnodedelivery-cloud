@@ -4,6 +4,7 @@ import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X, ChevronLeft }
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
 import { GeminiAssistant } from '@/components/GeminiAssistant';
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface HeaderProps {
   onNotificationClick: () => void;
@@ -184,73 +185,90 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
                 <div className="flex items-center justify-between py-2">
-                    <div className="flex items-center gap-3">
+                    {/* 1️⃣ NAVEGAÇÃO E TÍTULO (Hierarquia #1) */}
+                    <div className="flex items-center gap-3 min-w-0">
                         {!isHome ? (
                             <button 
                                 onClick={() => window.history.back()}
-                                className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all"
+                                className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0"
                             >
                                 <ChevronLeft size={20} strokeWidth={3} />
                             </button>
                         ) : (
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isBlueHeader ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all shrink-0 ${isBlueHeader ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
                                 <MapPin size={22} className="text-white fill-white" />
                             </div>
                         )}
-                        <h1 className={`text-lg font-black uppercase tracking-tighter leading-none ${isBlueHeader ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                            {isHome ? 'Localizei ' : viewTitles[activeTab] || 'Localizei '} 
+                        <h1 className={`text-lg font-black uppercase tracking-tighter leading-none truncate ${isBlueHeader ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                            {isHome ? 'Localizei ' : (viewTitles[activeTab] || 'Localizei ')} 
                             <span className={isBlueHeader ? 'opacity-50' : 'text-blue-600'}>{isHome ? 'JPA' : ''}</span>
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button 
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (onOpenViewSwitcher) onOpenViewSwitcher();
-                            }}
-                            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] transition-all active:scale-90 cursor-pointer ${isBlueHeader ? 'text-amber-400' : 'text-amber-600'}`}
-                            title="Alternar Modo de Visualização"
-                        >
-                            <ShieldCheck size={24} />
-                            <span className="text-[7px] font-black uppercase tracking-tighter mt-0.5 opacity-80">{viewMode}</span>
-                        </button>
+                    {/* 2️⃣ ÁREA INSTITUCIONAL À DIREITA (Apenas em telas internas) */}
+                    {!isHome && isBlueHeader && (
+                        <div className="flex-1 flex justify-end">
+                            <MasterSponsorBadge 
+                                onClick={() => onNavigate('patrocinador_master')}
+                                className="animate-in fade-in duration-700" 
+                            />
+                        </div>
+                    )}
 
-                        <button 
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleSelector();
-                            }}
-                            className={`relative flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer ${
-                                isBlueHeader 
-                                ? 'text-white' 
-                                : 'text-slate-700 dark:text-slate-200'
-                            }`}
-                        >
-                            <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[80px]">
-                                {currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}
-                            </span>
-                            <ChevronDown size={10} strokeWidth={3} className="opacity-40" />
-                        </button>
-
-                        <button 
-                            onClick={onNotificationClick}
-                            className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
-                                isBlueHeader 
-                                ? 'text-white' 
-                                : 'text-gray-500'
-                            }`}
-                        >
-                            <Bell size={22} />
-                            {unreadCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isBlueHeader ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
-                                    <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    {/* 3️⃣ UTILIDADES (Apenas na Home) */}
+                    {isHome && (
+                        <div className="flex items-center gap-2.5 shrink-0">
+                            {/* Bairro Selector */}
+                            <button 
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    toggleSelector();
+                                }}
+                                className={`relative flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer ${
+                                    isBlueHeader 
+                                    ? 'text-white/80' 
+                                    : 'text-slate-700 dark:text-slate-200'
+                                }`}
+                            >
+                                <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[80px]">
+                                    {currentNeighborhood === "Jacarepaguá (todos)" ? "JPA" : currentNeighborhood}
                                 </span>
+                                <ChevronDown size={10} strokeWidth={3} className="opacity-40" />
+                            </button>
+
+                            {/* Notificações */}
+                            <button 
+                                onClick={onNotificationClick}
+                                className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
+                                    isBlueHeader 
+                                    ? 'text-white/80' 
+                                    : 'text-gray-500'
+                                }`}
+                            >
+                                <Bell size={20} />
+                                {unreadCount > 0 && (
+                                    <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isBlueHeader ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
+                                        <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Admin/Mode Switcher - Reduzido visualmente */}
+                            {isAdmin && (
+                                <button 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (onOpenViewSwitcher) onOpenViewSwitcher();
+                                    }}
+                                    className={`p-1 transition-all active:scale-90 cursor-pointer ${isBlueHeader ? 'text-amber-400/50' : 'text-amber-600/50'}`}
+                                >
+                                    <ShieldCheck size={16} />
+                                </button>
                             )}
-                        </button>
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 {isHome && (

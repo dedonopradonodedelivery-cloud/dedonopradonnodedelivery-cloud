@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight, Construction, Zap, Hammer, Key, Shovel, Sparkles, Droplets, Trash2, Star, Clock } from 'lucide-react';
-import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface SpecialtyItem {
   name: string;
@@ -18,7 +18,7 @@ interface SpecialtyGroup {
 interface ServicesManualViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
-  onNavigate: (view: string) => void; // Added for the MasterSponsorBadge
+  onNavigate: (view: string) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -121,36 +121,33 @@ const SpecialtyCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({
 export const ServicesManualView: React.FC<ServicesManualViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 pt-12 pb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack} 
-            className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-500 active:scale-90 transition-all"
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Serviços — Manuais</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Jacarepaguá • Qualidade Local</p>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Serviços — Manuais</h1>
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Jacarepaguá • Qualidade Local</p>
           </div>
         </div>
-        {/* MasterSponsorBadge fixed at top right */}
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Removed the absolute positioned badge from main */}
-
         {/* Bloco de Urgência Psicológica */}
-        <div className="p-6 bg-blue-600 rounded-[2.5rem] text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        <div className="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
             <div className="relative z-10 flex items-start gap-4">
-                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                    <Star size={24} fill="currentColor" />
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
+                    <Star size={24} fill="#1E5BFF" className="text-[#1E5BFF]" />
                 </div>
                 <div>
-                    <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Mão de Obra de Confiança</h3>
-                    <p className="text-blue-100 text-xs font-medium leading-relaxed">Profissionais avaliados por seus vizinhos na Freguesia e região.</p>
+                    <h3 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Mão de Obra de Confiança</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-medium leading-relaxed">Profissionais avaliados por seus vizinhos na Freguesia e região.</p>
                 </div>
             </div>
         </div>

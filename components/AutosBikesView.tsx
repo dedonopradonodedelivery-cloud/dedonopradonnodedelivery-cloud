@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Settings, Bike, Package, Palette, Repeat } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
@@ -24,12 +25,12 @@ const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, 
 export const AutosBikesView: React.FC<AutosBikesViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 pt-12 pb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-500 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
+          <button onClick={onBack} className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"><ChevronLeft size={24} /></button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Autos — Bikes</h1>
-            <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Lojas e Manutenção</p>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Autos — Bikes</h1>
+            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Lojas e Manutenção</p>
           </div>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
@@ -38,7 +39,7 @@ export const AutosBikesView: React.FC<AutosBikesViewProps> = ({ onBack, onSelect
         {GROUPS.map((group, idx) => (
           <section key={idx} className="space-y-3">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-emerald-500"><group.icon size={20} strokeWidth={2.5}/></div>
+              <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-emerald-500"><group.icon size={20} strokeWidth={2.5}/></div>
               <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{group.title}</h3>
             </div>
             {group.items.map((item, itemIdx) => <SpecialtyCard key={itemIdx} name={item.name} onClick={() => onSelect(item.name)} />)}

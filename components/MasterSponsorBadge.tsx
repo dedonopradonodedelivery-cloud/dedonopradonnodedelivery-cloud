@@ -10,10 +10,21 @@ export const MasterSponsorBadge: React.FC<MasterSponsorBadgeProps> = ({ onClick,
   return (
     <div 
       onClick={onClick}
-      className={`flex flex-col items-end ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`flex flex-col items-end transition-all active:scale-95 group ${onClick ? 'cursor-pointer' : ''} ${className}`}
     >
-      <p className="text-[8px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-0.5">Patrocinador Master</p>
-      <p className="text-sm font-black tracking-tighter text-[#FF6501] uppercase">Atual Clube</p>
+      <div className="text-right animate-premium-breathing select-none">
+        {/* Label: Ultra minimal, sophisticated transparency */}
+        <p className="text-[6px] font-black uppercase tracking-[0.45em] text-white/40 mb-1 leading-none">
+          Patrocinador Master
+        </p>
+        
+        {/* Brand Name: Pure White, Bold, with Layered Depth Glow */}
+        <div className="relative">
+            <p className="text-[12px] font-black tracking-tighter text-white uppercase leading-none drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]">
+                Atual Clube
+            </p>
+        </div>
+      </div>
     </div>
   );
 };

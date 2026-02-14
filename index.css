@@ -33,31 +33,59 @@ html, body {
   scrollbar-width: none;
 }
 
-/* Animação AI Pulse - Extremamente suave */
+/* 
+   PREMIUM BREATHING ANIMATION
+   Ciclo ultra suave de opacidade e glow para chancelas de marca.
+*/
+@keyframes premium-breathing {
+  0%, 100% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.45));
+    transform: scale(1.015);
+  }
+}
+
+.animate-premium-breathing {
+  animation: premium-breathing 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Utilitários de Gradiente e Flare */
+@keyframes flare {
+  0% { transform: translateX(-150%) skewX(-25deg); }
+  100% { transform: translateX(250%) skewX(-25deg); }
+}
+
+.animate-flare {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-flare::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  animation: flare 4s infinite linear;
+}
+
 @keyframes ai-pulse {
-  0%, 100% { opacity: 0.8; transform: scale(1); filter: brightness(1); }
-  50% { opacity: 1; transform: scale(1.02); filter: brightness(1.1); }
+  0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
 }
 
 .animate-ai-pulse {
   animation: ai-pulse 4s ease-in-out infinite;
-}
-
-/* Brilho de fundo para o card premium */
-@keyframes premium-glow {
-  0%, 100% { opacity: 0.3; transform: translate(0, 0); }
-  50% { opacity: 0.5; transform: translate(10px, -10px); }
-}
-
-.animate-premium-glow {
-  animation: premium-glow 6s ease-in-out infinite;
-}
-
-@keyframes flare-slide {
-  0% { transform: translateX(-150%) skewX(-20deg); }
-  100% { transform: translateX(250%) skewX(-20deg); }
-}
-
-.animate-flare {
-  animation: flare-slide 6s ease-in-out infinite;
 }

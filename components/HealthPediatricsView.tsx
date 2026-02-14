@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight, Baby, Stethoscope, Brain, ShieldPlus, Activity, Heart, Thermometer, Microscope, Syringe, Sparkles } from 'lucide-react';
-import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface SpecialtyItem {
   name: string;
@@ -16,7 +16,7 @@ interface SpecialtyGroup {
 interface HealthPediatricsViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
-  onNavigate: (view: string) => void; // Added for the MasterSponsorBadge
+  onNavigate: (view: string) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -84,26 +84,23 @@ const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, 
 export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 pt-12 pb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack} 
-            className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-500 active:scale-90 transition-all"
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Saúde — Pediatria</h1>
-            <p className="text-[9px] text-amber-500 font-bold uppercase tracking-widest mt-1">Cuidado Infantil Especializado</p>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Pediatria</h1>
+            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Cuidado Infantil Especializado</p>
           </div>
         </div>
-        {/* MasterSponsorBadge fixed at top right */}
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        {/* Removed the absolute positioned badge from main */}
-
         <div className="flex items-start gap-4 p-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30">
           <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
             <Baby className="text-amber-500" size={20} />

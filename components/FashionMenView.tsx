@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, Shirt, User, Watch, Zap, LayoutGrid } from 'lucide-react';
-import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface SpecialtyItem {
   name: string;
@@ -17,7 +17,7 @@ interface SpecialtyGroup {
 interface FashionMenViewProps {
   onBack: () => void;
   onSelect: (category: string) => void;
-  onNavigate: (view: string) => void; // Added for the MasterSponsorBadge
+  onNavigate: (view: string) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -87,26 +87,23 @@ const CategoryCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({ 
 export const FashionMenView: React.FC<FashionMenViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 pt-12 pb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack} 
-            className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-500 active:scale-90 transition-all"
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Moda — Homem</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Estilo & Tendência ✨</p>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Moda — Homem</h1>
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Estilo & Tendência ✨</p>
           </div>
         </div>
-        {/* MasterSponsorBadge fixed at top right */}
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Removed the absolute positioned badge from main */}
-
         {/* Banner de Inspiração */}
         <div className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>

@@ -1,144 +1,112 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Activity, Heart, Baby, Microscope, ShieldCheck, Sparkles, Zap } from 'lucide-react';
-import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
+import { 
+  ChevronLeft, 
+  Heart, 
+  Baby, 
+  Activity, 
+  ShieldCheck, 
+  Zap, 
+  Wind, 
+  Sparkles, 
+  Microscope,
+  Stethoscope,
+  Droplets
+} from 'lucide-react';
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
-interface SpecialtyItem {
+interface SubcategoryItem {
   name: string;
-  icon?: React.ElementType;
-}
-
-interface SpecialtyGroup {
-  title: string;
-  items: SpecialtyItem[];
+  icon: React.ElementType;
   color: string;
 }
 
 interface HealthWomenViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
-  onNavigate: (view: string) => void; // Added for the MasterSponsorBadge
+  onNavigate: (view: string) => void;
 }
 
-const GROUPS: SpecialtyGroup[] = [
-  {
-    title: "Atendimento Geral",
-    color: "text-rose-500 bg-rose-50",
-    items: [
-      { name: "Ginecologia", icon: Heart },
-      { name: "Obstetrícia", icon: Baby },
-      { name: "Mastologia", icon: Activity },
-      { name: "Uroginecologia", icon: ShieldCheck },
-    ]
-  },
-  {
-    title: "Hormonal / Ciclos / Fases",
-    color: "text-purple-500 bg-purple-50",
-    items: [
-      { name: "Endocrinologia feminina" },
-      { name: "Climatério" },
-      { name: "Menopausa" },
-      { name: "Ginecologia endócrina" },
-    ]
-  },
-  {
-    title: "Gestação / Reprodução",
-    color: "text-blue-500 bg-blue-50",
-    items: [
-      { name: "Reprodução humana" },
-      { name: "Fertilidade feminina" },
-      { name: "Planejamento familiar" },
-      { name: "Medicina fetal" },
-      { name: "Pré-natal de alto risco" },
-    ]
-  },
-  {
-    title: "Diagnóstico / Procedimentos",
-    color: "text-emerald-500 bg-emerald-50",
-    items: [
-      { name: "Colposcopia" },
-      { name: "Patologia do trato genital inferior" },
-      { name: "Ginecologia oncológica" },
-    ]
-  },
-  {
-    title: "Condições Específicas",
-    color: "text-amber-500 bg-amber-50",
-    items: [
-      { name: "Dor pélvica crônica" },
-      { name: "Saúde sexual feminina" },
-      { name: "Saúde íntima feminina" },
-    ]
-  }
+const SUBCATEGORIES_DATA: SubcategoryItem[] = [
+  { name: "Ginecologia", icon: Stethoscope, color: "bg-rose-500" },
+  { name: "Obstetrícia", icon: Baby, color: "bg-pink-500" },
+  { name: "Mastologia", icon: ShieldCheck, color: "bg-rose-600" },
+  { name: "Uroginecologia", icon: Droplets, color: "bg-blue-400" },
+  { name: "Endocrinologia Feminina", icon: Zap, color: "bg-amber-500" },
+  { name: "Climatério", icon: Wind, color: "bg-indigo-400" },
+  { name: "Menopausa", icon: Sparkles, color: "bg-purple-500" },
+  { name: "Reprodução Humana", icon: Microscope, color: "bg-emerald-500" },
 ];
 
-const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, onClick }) => (
-  <button
-    onClick={onClick}
-    className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm mb-2"
-  >
-    <span className="text-sm font-bold text-gray-800 dark:text-gray-200 tracking-tight">{name}</span>
-    <ChevronRight size={16} className="text-gray-300 group-hover:text-rose-500 transition-colors" />
-  </button>
-);
+const SubcategoryCard: React.FC<{ item: SubcategoryItem; onClick: () => void }> = ({ item, onClick }) => {
+  const Icon = item.icon;
+  return (
+    <button
+      onClick={onClick}
+      className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+    >
+      <div className={`w-16 h-16 rounded-[1.5rem] ${item.color} bg-opacity-10 flex items-center justify-center ${item.color.replace('bg-', 'text-')} group-hover:scale-110 transition-transform duration-500`}>
+        <Icon size={32} strokeWidth={2.5} />
+      </div>
+      <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-tight px-1">
+        {item.name}
+      </span>
+    </button>
+  );
+};
 
 export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 pt-12 pb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+      {/* Header Sticky Premium Azul */}
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack} 
-            className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-500 active:scale-90 transition-all"
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Saúde — Mulher</h1>
-            <p className="text-[9px] text-rose-500 font-bold uppercase tracking-widest mt-1">Especialidades femininas</p>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Mulher</h1>
+            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Especialidades femininas</p>
           </div>
         </div>
-        {/* MasterSponsorBadge fixed at top right */}
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        {/* Removed the absolute positioned badge from main */}
-
-        <div className="flex items-start gap-4 p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30">
-          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
-            <Sparkles className="text-rose-500" size={20} />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-rose-900 dark:text-rose-200 uppercase tracking-widest mb-1">Cuidado Especializado</h4>
-            <p className="text-[11px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
-              Selecione uma área abaixo para encontrar os melhores profissionais de Jacarepaguá.
-            </p>
-          </div>
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32 space-y-8">
+        {/* Intro Banner Sutil */}
+        <div className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            <div className="relative z-10 flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
+                    <Heart size={24} fill="white" className="text-white" />
+                </div>
+                <div>
+                    <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Cuidado Especializado</h3>
+                    <p className="text-rose-100 text-xs font-medium leading-relaxed">Os melhores profissionais para cada fase da sua vida.</p>
+                </div>
+            </div>
         </div>
 
-        {GROUPS.map((group, idx) => (
-          <section key={idx} className="space-y-3">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-4 bg-rose-500 rounded-full"></div>
-              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                {group.title}
-              </h3>
-            </div>
-            <div className="flex flex-col">
-              {group.items.map((item, itemIdx) => (
-                <SpecialtyCard 
-                  key={itemIdx} 
-                  name={item.name} 
-                  onClick={() => onSelect(item.name)} 
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+        {/* Grid de Subcategorias - A Nova Experiência */}
+        <section>
+          <div className="grid grid-cols-2 gap-4">
+            {SUBCATEGORIES_DATA.map((item, idx) => (
+              <SubcategoryCard 
+                key={idx} 
+                item={item} 
+                onClick={() => onSelect(item.name)} 
+              />
+            ))}
+          </div>
+        </section>
 
-        <div className="py-10 text-center opacity-20">
-          <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Health Ecosystem</p>
+        {/* Info de Rodapé sutil */}
+        <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
+            <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Health Ecosystem</p>
         </div>
       </main>
     </div>

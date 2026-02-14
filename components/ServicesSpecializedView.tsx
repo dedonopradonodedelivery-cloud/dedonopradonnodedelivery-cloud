@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight, Scale, Stethoscope, Home, HardHat, Palette, Monitor, Target, Award, ShieldCheck, Zap, Star } from 'lucide-react';
-import { MasterSponsorBadge } from '@/components/MasterSponsorBadge'; // Import the new badge component
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface SpecialtyItem {
   name: string;
@@ -18,7 +18,7 @@ interface SpecialtyGroup {
 interface ServicesSpecializedViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
-  onNavigate: (view: string) => void; // Added for the MasterSponsorBadge
+  onNavigate: (view: string) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -132,26 +132,23 @@ const SpecialtyCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({
 export const ServicesSpecializedView: React.FC<ServicesSpecializedViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 pt-12 pb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack} 
-            className="p-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-500 active:scale-90 transition-all"
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Serviços — Especializados</h1>
-            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Profissionais de alto nível</p>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Serviços — Especializados</h1>
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Profissionais de alto nível</p>
           </div>
         </div>
-        {/* MasterSponsorBadge fixed at top right */}
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Removed the absolute positioned badge from main */}
-
         {/* Bloco de Autoridade */}
         <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
@@ -172,7 +169,7 @@ export const ServicesSpecializedView: React.FC<ServicesSpecializedViewProps> = (
               <div className={`p-2 rounded-xl ${group.color} shrink-0`}>
                 <group.icon size={18} />
               </div>
-              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
+              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em]">
                 {group.title}
               </h3>
             </div>
