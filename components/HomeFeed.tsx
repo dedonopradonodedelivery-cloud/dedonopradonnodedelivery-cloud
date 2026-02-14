@@ -107,39 +107,6 @@ const ACONTECENDO_AGORA_FEED = [
   }
 ];
 
-const ACHADOS_PERDIDOS_MOCK = [
-  {
-    id: 1,
-    status: 'ACHADO',
-    item: 'Cachorro Beagle',
-    location: 'Próximo à Praça da Freguesia',
-    time: 'Há 1h',
-    image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=400&auto=format&fit=crop',
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-500'
-  },
-  {
-    id: 2,
-    status: 'PERDIDO',
-    item: 'Chaves de Carro (BMW)',
-    location: 'Estrada do Pau-Ferro',
-    time: 'Há 3h',
-    image: 'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop',
-    color: 'text-amber-600',
-    bg: 'bg-amber-500'
-  },
-  {
-    id: 3,
-    status: 'ACHADO',
-    item: 'Carteira de Couro',
-    location: 'Condomínio Rio Shopping',
-    time: 'Ontem',
-    image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=400&auto=format&fit=crop',
-    color: 'text-blue-600',
-    bg: 'bg-blue-500'
-  }
-];
-
 const SectionHeader: React.FC<{ 
   icon: React.ElementType; 
   title: string; 
@@ -355,7 +322,72 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 🔥 TROCA-TROCA DO BAIRRO - Hero Card */}
+      {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
+      <section className="py-4 space-y-5">
+        <div className="px-6">
+            <SectionHeader 
+                icon={Flame} 
+                title="Acontecendo agora" 
+                subtitle="Stories do seu bairro" 
+                iconColor="text-amber-500" 
+                onSeeMore={() => onNavigate('neighborhood_posts')}
+            />
+        </div>
+        
+        <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-4">
+            {ACONTECENDO_AGORA_FEED.map((item, index) => (
+                <HappeningNowCard 
+                    key={item.id}
+                    item={item} 
+                    onClick={() => setSelectedStoryIndex(index)}
+                />
+            ))}
+        </div>
+      </section>
+
+      {/* 4. CUPOM DO DIA - MOVIDO PARA BAIXO DOS STORIES */}
+      {isFeatureActive('coupons') && (
+        <section className="space-y-4 py-4">
+          <div className="px-6 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
+                <Ticket size={16} strokeWidth={2.5} />
+              </div>
+              <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Cupons do dia</h2>
+            </div>
+            <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4 snap-x">
+            {MOCK_COUPONS.map(coupon => (
+              <button 
+                key={coupon.id}
+                onClick={() => onNavigate('coupon_landing')}
+                className="flex-shrink-0 w-[240px] relative bg-slate-50 dark:bg-gray-900 rounded-3xl border border-slate-200/50 dark:border-gray-800 flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all snap-center group overflow-hidden"
+              >
+                <div className="absolute left-[64px] -top-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
+                <div className="absolute left-[64px] -bottom-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
+                <div className="absolute left(72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+
+                <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
+                  <Sparkles size={14} className="mb-0.5 opacity-60" />
+                  <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
+                </div>
+
+                <div className="text-left min-w-0 flex-1 pl-6 pr-4">
+                  <p className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate">{coupon.category}</p>
+                  <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">{coupon.discount}</h4>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{coupon.store}</p>
+                </div>
+
+                <ChevronRight size={14} className="text-gray-200 group-hover:text-blue-500 transition-colors mr-3" strokeWidth={3} />
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 5. TROCA-TROCA DO BAIRRO - Hero Card */}
       <section className="px-6 py-8 space-y-5">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -407,7 +439,7 @@ export const HomeFeed: React.FC<{
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); alert('Gostei (Tenho interesse)'); }}
-                    className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-rose-500/20 hover:bg-rose-600"
+                    className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 shadow-lg shadow-rose-500/20 hover:bg-rose-600"
                   >
                     <Heart size={28} fill="currentColor" />
                   </button>
@@ -422,31 +454,7 @@ export const HomeFeed: React.FC<{
         </button>
       </section>
 
-
-      {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
-      <section className="py-8 space-y-5">
-        <div className="px-6">
-            <SectionHeader 
-                icon={Flame} 
-                title="Acontecendo agora" 
-                subtitle="Stories do seu bairro" 
-                iconColor="text-amber-500" 
-                onSeeMore={() => onNavigate('neighborhood_posts')}
-            />
-        </div>
-        
-        <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-4">
-            {ACONTECENDO_AGORA_FEED.map((item, index) => (
-                <HappeningNowCard 
-                    key={item.id}
-                    item={item} 
-                    onClick={() => setSelectedStoryIndex(index)}
-                />
-            ))}
-        </div>
-      </section>
-      
-      {/* 💼 VAGAS PERTO DE VOCÊ */}
+      {/* 6. VAGAS PERTO DE VOCÊ */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Briefcase} 
@@ -473,94 +481,6 @@ export const HomeFeed: React.FC<{
               </div>
           </div>
         )}
-      </section>
-
-      {/* 4. CUPOM DO DIA */}
-      {isFeatureActive('coupons') && (
-        <section className="space-y-4 py-4">
-          <div className="px-6 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
-                <Ticket size={16} strokeWidth={2.5} />
-              </div>
-              <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest">Cupons do dia</h2>
-            </div>
-            <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4 snap-x">
-            {MOCK_COUPONS.map(coupon => (
-              <button 
-                key={coupon.id}
-                onClick={() => onNavigate('coupon_landing')}
-                className="flex-shrink-0 w-[240px] relative bg-slate-50 dark:bg-gray-900 rounded-3xl border border-slate-200/50 dark:border-gray-800 flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all snap-center group overflow-hidden"
-              >
-                <div className="absolute left-[64px] -top-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[64px] -bottom-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
-
-                <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <Sparkles size={14} className="mb-0.5 opacity-60" />
-                  <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
-                </div>
-
-                <div className="text-left min-w-0 flex-1 pl-6 pr-4">
-                  <p className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate">{coupon.category}</p>
-                  <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">{coupon.discount}</h4>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{coupon.store}</p>
-                </div>
-
-                <ChevronRight size={14} className="text-gray-200 group-hover:text-blue-500 transition-colors mr-3" strokeWidth={3} />
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 5. ACHADOS & PERDIDOS */}
-      <section className="px-6 py-4 space-y-5">
-        <SectionHeader 
-            icon={Search} 
-            title="Achados & Perdidos" 
-            subtitle="Identificação visual imediata" 
-            iconColor="text-[#1E5BFF]" 
-            onSeeMore={() => onNavigate('classifieds')}
-        />
-
-        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-4 snap-x">
-          {ACHADOS_PERDIDOS_MOCK.map(item => (
-            <div 
-              key={item.id}
-              onClick={() => onNavigate('classifieds')}
-              className="bg-white dark:bg-gray-900 rounded-[2.2rem] border border-gray-100 dark:border-gray-800 w-[220px] shadow-sm flex flex-col snap-center active:scale-[0.98] transition-all overflow-hidden cursor-pointer group"
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                <img 
-                    src={item.image} 
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" 
-                    alt={item.item}
-                />
-                <div className="absolute top-3 left-3">
-                    <span className={`text-[8px] font-black px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 text-white shadow-lg ${item.bg}`}>
-                    {item.status}
-                    </span>
-                </div>
-              </div>
-              
-              <div className="p-4 flex flex-col gap-1">
-                <h4 className="text-[13px] font-black text-gray-900 dark:text-white leading-tight truncate">{item.item}</h4>
-                <div className="flex items-center gap-1.5 text-gray-400 mt-1">
-                  <MapPin size={10} className="text-[#1E5BFF]" />
-                  <span className="text-[9px] font-bold uppercase tracking-tight truncate flex-1">{item.location}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-300 mt-1">
-                  <Clock size={10} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">{item.time}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* 7. LANÇAMENTO / ADS SECTION */}
