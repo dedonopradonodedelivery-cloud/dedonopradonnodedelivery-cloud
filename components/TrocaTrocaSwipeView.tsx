@@ -4,6 +4,7 @@ import { X, Heart, MapPin, Repeat, RefreshCw, Star, MessageSquare } from 'lucide
 import { useAuth } from '@/contexts/AuthContext';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { TradeItem } from '@/types';
+import { TradeOnboardingView } from './TradeOnboardingView';
 
 // New mock data structure: Item as Profile
 const MOCK_TRADE_ITEMS: Omit<TradeItem, 'userId' | 'userRole'>[] = [
@@ -83,6 +84,7 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
     const [feedback, setFeedback] = useState<'like' | 'dislike' | 'superlike' | null>(null);
     const [animation, setAnimation] = useState('');
     const [showMatch, setShowMatch] = useState<SwipeCardData | null>(null);
+    const [hasLoaded, setHasLoaded] = useState(false);
 
     // Hardcoded user's item for match simulation
     const myItemForMatch: SwipeCardData = { 
@@ -128,14 +130,17 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
             return !isDuplicate;
         });
 
+        // Simulação: Se o bairro for um onde não temos mocks ou itens do usuário, a lista ficará vazia
+        // Para este MVP, vamos permitir que se estiver em "Todos", sempre haja itens.
+        // Se estiver em um bairro específico sem itens, mostramos o onboarding.
         const neighborhoodFilteredDeck = uniqueDeck.filter(item => 
             item.status === 'Disponível' && 
             (currentNeighborhood === 'Jacarepaguá (todos)' || item.neighborhood === currentNeighborhood)
         );
         
-        // Shuffle the deck
         setDeck(neighborhoodFilteredDeck.sort(() => Math.random() - 0.5));
         setCurrentIndex(0);
+        setHasLoaded(true);
 
     }, [user, currentNeighborhood]);
 
@@ -169,6 +174,18 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
         setShowMatch(null);
         setCurrentIndex(prev => prev + 1);
     };
+
+    if (!hasLoaded) return null;
+
+    // REGRA: Se a lista estiver vazia ao carregar, mostrar onboarding premium
+    if (deck.length === 0) {
+        return (
+            <TradeOnboardingView 
+                onBack={onBack} 
+                onRegisterItem={() => onNavigate('user_trade_items')} 
+            />
+        );
+    }
 
     const currentItem = deck[currentIndex];
 
