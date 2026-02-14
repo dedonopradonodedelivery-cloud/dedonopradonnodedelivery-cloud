@@ -141,8 +141,6 @@ export const Header: React.FC<HeaderProps> = ({
   
   // Transformação da barra de busca
   const searchTranslateY = Math.max(-148, -scrollY * 1.15);
-  // No ponto final (após 148px de scroll), a barra de busca "atraca" no topo.
-  // Usamos um valor calculado para garantir que ela fique centralizada no novo header encolhido.
   const dockedSearchY = isHome ? (scrollY > 120 ? -148 : searchTranslateY) : 0;
 
   useEffect(() => {
@@ -182,9 +180,14 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5 relative h-full">
                 
                 {/* LINHA SUPERIOR (LOGO, BAIRRO, NOTIF) - DESAPARECE NO SCROLL */}
+                {/* ADICIONADO: z-[110] e pointer-events-auto para garantir clique em dispositivos mobile */}
                 <div 
-                  className="flex items-center justify-between py-2 transition-all duration-200"
-                  style={isHome ? { opacity: topRowOpacity, transform: `translateY(${-scrollY * 0.5}px)` } : {}}
+                  className="flex items-center justify-between py-2 transition-all duration-200 relative z-[110] pointer-events-auto"
+                  style={isHome ? { 
+                    opacity: topRowOpacity, 
+                    transform: `translateY(${-scrollY * 0.5}px)`,
+                    pointerEvents: topRowOpacity < 0.1 ? 'none' : 'auto'
+                  } : {}}
                 >
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isHome ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
@@ -195,9 +198,16 @@ export const Header: React.FC<HeaderProps> = ({
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 pointer-events-auto">
+                        {/* BOTÃO DE MODO (ADMIN SWITCHER) - CORREÇÃO DE CLIQUE */}
                         {isAdmin && (
-                            <button onClick={onOpenViewSwitcher} className={`transition-all active:scale-90 ${isHome ? 'text-amber-400' : 'text-amber-600'}`}>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onOpenViewSwitcher) onOpenViewSwitcher();
+                              }} 
+                              className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer relative z-[120] ${isHome ? 'text-amber-400 bg-white/5' : 'text-amber-600 bg-amber-50'}`}
+                            >
                                 <ShieldCheck size={20} />
                             </button>
                         )}
@@ -208,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 e.stopPropagation();
                                 toggleSelector();
                             }}
-                            className={`relative z-50 flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer pointer-events-auto ${
+                            className={`relative flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer ${
                                 isHome 
                                 ? 'text-white' 
                                 : 'text-slate-700 dark:text-slate-200'
@@ -221,7 +231,10 @@ export const Header: React.FC<HeaderProps> = ({
                         </button>
 
                         <button 
-                            onClick={onNotificationClick}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onNotificationClick();
+                            }}
                             className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
                                 isHome 
                                 ? 'text-white' 

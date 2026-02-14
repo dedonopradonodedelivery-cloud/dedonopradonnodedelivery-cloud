@@ -66,6 +66,40 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { UserTradeItemsView } from '@/components/UserTradeItemsView';
 import { JobsSwipeView } from '@/components/JobsSwipeView';
 import { UserResumeView } from '@/components/UserResumeView';
+import { X, User as UserIcon, Store as StoreIcon, ShieldCheck, Palette } from 'lucide-react';
+
+const RoleSwitcherModal: React.FC<{ isOpen: boolean; onClose: () => void; currentMode: string; onSelect: (mode: string) => void }> = ({ isOpen, onClose, currentMode, onSelect }) => {
+    if (!isOpen) return null;
+    const modes = [
+        { id: 'Visitante', icon: UserIcon, color: 'text-gray-500' },
+        { id: 'Lojista', icon: StoreIcon, color: 'text-blue-500' },
+        { id: 'ADM', icon: ShieldCheck, color: 'text-amber-500' },
+        { id: 'Designer', icon: Palette, color: 'text-purple-500' },
+    ];
+
+    return (
+        <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-xl font-black uppercase tracking-tighter dark:text-white">Trocar Visão</h2>
+                    <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500"><X size={20}/></button>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                    {modes.map(mode => (
+                        <button 
+                            key={mode.id}
+                            onClick={() => { onSelect(mode.id); onClose(); }}
+                            className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${currentMode === mode.id ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                        >
+                            <mode.icon className={`w-6 h-6 ${mode.color}`} />
+                            <span className={`font-bold uppercase text-sm tracking-widest ${currentMode === mode.id ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>{mode.id}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export const App: React.FC = () => {
   const { user, userRole, loading: authLoading, signOut } = useAuth();
@@ -322,6 +356,17 @@ export const App: React.FC = () => {
             )}
         </div>
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} user={user as any} />
+        <RoleSwitcherModal 
+            isOpen={isRoleSwitcherOpen} 
+            onClose={() => setIsRoleSwitcherOpen(false)} 
+            currentMode={viewMode}
+            onSelect={(mode) => {
+                setViewMode(mode);
+                if (mode === 'ADM') handleNavigate('admin_panel');
+                else if (mode === 'Lojista') handleNavigate('store_area');
+                else handleNavigate('home');
+            }}
+        />
       </div>
     </div>
   );
