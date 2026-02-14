@@ -163,14 +163,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* Camada Visual (Fundo) */}
-        {isHome && (
-            <div className="fixed top-0 left-0 right-0 z-10 bg-brand-blue h-[320px] pointer-events-none transition-all duration-500"></div>
-        )}
-
-        {/* Camada Interativa (Conteúdo) */}
-        <div className={`w-full transition-all duration-500 pointer-events-none ${isHome ? 'fixed top-0 left-0 right-0 z-50 pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
-            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5 pointer-events-auto">
+        {/* Container do Header - Rola com o conteúdo */}
+        <div className={`w-full transition-all duration-500 relative ${isHome ? 'bg-brand-blue pb-12 z-50' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
                 <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
@@ -183,7 +178,6 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* BOTÃO ALTERAR MODO - AGORA 100% CLICÁVEL COM Z-INDEX 50+ */}
                         <button 
                             onClick={(e) => {
                                 e.preventDefault();

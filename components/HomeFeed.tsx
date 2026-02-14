@@ -259,7 +259,7 @@ export const HomeFeed: React.FC<{
   }, [candidateProfile]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 rounded-t-[3.5rem] mt-[215px] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 relative z-20">
       
       {/* 1. UTILITY ROW */}
       <section className="px-8 pt-6 pb-2">
@@ -348,7 +348,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 4. CUPOM DO DIA - AJUSTADO: MAIOR PRESENÇA VISUAL (py-12 e h-32) */}
+      {/* 4. CUPOM DO DIA */}
       {isFeatureActive('coupons') && (
         <section className="space-y-6 py-12 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
           <div className="px-6 flex items-center justify-between">
@@ -467,12 +467,12 @@ export const HomeFeed: React.FC<{
         </button>
       </section>
 
-      {/* 6. VAGAS PERTO DE VOCÊ - REDESIGN COMPACTO E MODERNO */}
+      {/* 6. VAGAS PERTO DE VOCÊ - AJUSTE DE SUBTÍTULO CONFORME SOLICITADO */}
       <section className="px-6 py-8 space-y-6">
         <SectionHeader 
             icon={Briefcase} 
             title="💼 Oportunidades no Bairro" 
-            subtitle="Conexões inteligentes entre talentos e empresas locais" 
+            subtitle="Nossa IA conecta talentos e empresas com precisão inteligente" 
             iconColor="text-emerald-500" 
             onSeeMore={() => onNavigate('jobs')}
         />
