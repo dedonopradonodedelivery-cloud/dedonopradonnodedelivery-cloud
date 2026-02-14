@@ -438,35 +438,6 @@ export const HomeFeed: React.FC<{
           </div>
         </button>
       </section>
-      
-      {/* 5. VAGAS PERTO DE VOCÊ */}
-      <section className="px-6 py-8 space-y-5">
-        <SectionHeader 
-            icon={Briefcase} 
-            title="Vagas perto de você" 
-            subtitle={candidateProfile ? "Recomendadas pela IA" : "Conectando talentos locais"} 
-            iconColor="text-emerald-500" 
-            onSeeMore={() => onNavigate('jobs')}
-        />
-        {candidateProfile ? (
-            <div className="space-y-4">
-              {jobRecommendations.map(({ job, compatibility }) => (
-                <JobCard key={job.id} job={job} compatibility={compatibility} onClick={() => onNavigate('job_detail', { job, compatibility })} />
-              ))}
-            </div>
-        ) : (
-          <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
-              <div className="w-16 h-16 bg-blue-50/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
-                <FileText size={28} />
-              </div>
-              <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>
-              <p className="text-sm text-slate-400 mb-6">Envie seu currículo e deixe nossa IA encontrar a vaga perfeita para você no bairro.</p>
-              <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30">
-                Enviar currículo agora
-              </div>
-          </div>
-        )}
-      </section>
 
       {/* 6. CUPOM DO DIA */}
       {isFeatureActive('coupons') && (
@@ -562,6 +533,35 @@ export const HomeFeed: React.FC<{
           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
+
+      {/* 5. VAGAS PERTO DE VOCÊ (REORDERED) */}
+      <section className="px-6 py-8 space-y-5">
+        <SectionHeader 
+            icon={Briefcase} 
+            title="Vagas perto de você" 
+            subtitle={candidateProfile ? "Recomendadas pela IA" : "Conectando talentos locais"} 
+            iconColor="text-emerald-500" 
+            onSeeMore={() => onNavigate('jobs')}
+        />
+        {candidateProfile ? (
+            <div className="space-y-4">
+              {jobRecommendations.map(({ job, compatibility }) => (
+                <JobCard key={job.id} job={job} compatibility={compatibility} onClick={() => onNavigate('job_detail', { job, compatibility })} />
+              ))}
+            </div>
+        ) : (
+          <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
+              <div className="w-16 h-16 bg-blue-50/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
+                <FileText size={28} />
+              </div>
+              <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>
+              <p className="text-sm text-slate-400 mb-6">Envie seu currículo e deixe nossa IA encontrar a vaga perfeita para você no bairro.</p>
+              <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30">
+                Enviar currículo agora
+              </div>
+          </div>
+        )}
+      </section>
 
       <InstitutionalBanner />
       
