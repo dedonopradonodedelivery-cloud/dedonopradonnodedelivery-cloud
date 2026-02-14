@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Job, CompatibilityResult } from '../types';
+import { User } from '@supabase/supabase-js';
 import { 
   ChevronLeft, 
   MapPin, 
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 interface JobDetailViewProps {
+  user: User | null;
   job: Job;
   compatibility?: CompatibilityResult;
   onBack: () => void;
@@ -63,7 +65,7 @@ const CompatibilityDetails: React.FC<{ analysis: CompatibilityResult }> = ({ ana
     );
 };
 
-export const JobDetailView: React.FC<JobDetailViewProps> = ({ job, compatibility, onBack }) => {
+export const JobDetailView: React.FC<JobDetailViewProps> = ({ user, job, compatibility, onBack }) => {
   const handleApply = () => {
     if (!job.contactWhatsapp) {
       alert("Informações de contato não disponíveis.");
@@ -93,7 +95,7 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({ job, compatibility
             </div>
             <div>
               {job.isVerified && (
-                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest mb-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-full w-fit">
+                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest mb-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-full w-fit">
                     <CheckCircle2 size={12} /> Vaga verificada
                 </div>
               )}
