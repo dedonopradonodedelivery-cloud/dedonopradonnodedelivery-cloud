@@ -286,10 +286,13 @@ export const HomeFeed: React.FC<{
   }, [candidateProfile]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-[220px] rounded-t-[2.5rem] relative z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.1)]">
+    <div 
+        className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-10 rounded-t-[2.5rem] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]"
+        style={{ marginTop: '200px' }}
+    >
       
       {/* 1. UTILITY ROW */}
-      <section className="px-8 pt-8 pb-2">
+      <section className="px-8 pt-4 pb-2">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />

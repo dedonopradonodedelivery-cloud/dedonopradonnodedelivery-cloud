@@ -32,7 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
   return (
     <div
-      className="h-[100dvh] bg-brand-blue dark:bg-gray-950 font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
+      className="h-[100dvh] bg-brand-blue font-sans w-full transition-colors duration-300 relative flex flex-col overflow-hidden"
     >
       <div
         ref={scrollContainerRef}

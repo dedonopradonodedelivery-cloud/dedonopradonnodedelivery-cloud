@@ -174,15 +174,26 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
         <div 
-          className={`w-full transition-colors duration-300 ${isHome ? 'fixed top-0 left-0 right-0 z-[100] bg-brand-blue shadow-lg shadow-blue-900/10' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}
+          className="w-full transition-colors duration-300"
           style={isHome ? { height: Math.max(80, 240 - scrollY) } : {}}
         >
-            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5 relative h-full">
-                
-                {/* LINHA SUPERIOR (LOGO, BAIRRO, NOTIF) - DESAPARECE NO SCROLL */}
-                {/* ADICIONADO: z-[110] e pointer-events-auto para garantir clique em dispositivos mobile */}
+            {/* CAMADA 1: FUNDO AZUL (POR TRÁS DO CARD) */}
+            {isHome && (
                 <div 
-                  className="flex items-center justify-between py-2 transition-all duration-200 relative z-[110] pointer-events-auto"
+                    className="fixed top-0 left-0 right-0 z-10 bg-brand-blue"
+                    style={{ 
+                        height: Math.max(80, 240 - scrollY),
+                        boxShadow: scrollY > 160 ? '0 10px 30px rgba(10, 59, 191, 0.15)' : 'none'
+                    }}
+                />
+            )}
+
+            {/* CAMADA 2: CONTEÚDO DO HEADER (ACIMA DO CARD) */}
+            <div className={`max-w-md mx-auto px-6 pt-5 space-y-0.5 relative h-full ${isHome ? 'fixed top-0 left-0 right-0 z-30 pointer-events-none' : 'z-40 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6'}`}>
+                
+                {/* LINHA SUPERIOR (LOGO, BAIRRO, NOTIF) */}
+                <div 
+                  className="flex items-center justify-between py-2 transition-all duration-200 relative pointer-events-auto"
                   style={isHome ? { 
                     opacity: topRowOpacity, 
                     transform: `translateY(${-scrollY * 0.5}px)`,
@@ -198,15 +209,14 @@ export const Header: React.FC<HeaderProps> = ({
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-4 pointer-events-auto">
-                        {/* BOTÃO DE MODO (ADMIN SWITCHER) - CORREÇÃO DE CLIQUE */}
+                    <div className="flex items-center gap-4">
                         {isAdmin && (
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (onOpenViewSwitcher) onOpenViewSwitcher();
                               }} 
-                              className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer relative z-[120] ${isHome ? 'text-amber-400 bg-white/5' : 'text-amber-600 bg-amber-50'}`}
+                              className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer relative ${isHome ? 'text-amber-400 bg-white/5' : 'text-amber-600 bg-amber-50'}`}
                             >
                                 <ShieldCheck size={20} />
                             </button>
@@ -253,7 +263,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {isHome && (
                     <div className="relative pt-1">
-                        {/* SAUDAÇÃO E TUCO - DESAPARECEM NO SCROLL */}
+                        {/* SAUDAÇÃO E TUCO */}
                         <div 
                           className="transition-all duration-300 pointer-events-none"
                           style={{ opacity: contentOpacity, transform: `translateY(${-scrollY * 0.3}px)` }}
@@ -272,14 +282,14 @@ export const Header: React.FC<HeaderProps> = ({
                             </div>
                         </div>
 
-                        {/* BARRA DE BUSCA - SOBE E FICA FIXA */}
+                        {/* BARRA DE BUSCA - FIXA NO TOPO APÓS SCROLL */}
                         <div 
-                          className="absolute left-0 right-0 z-30 transition-transform duration-75 ease-out"
+                          className="absolute left-0 right-0 z-30 transition-transform duration-75 ease-out pointer-events-auto"
                           style={{ transform: `translateY(${dockedSearchY}px)` }}
                         >
                           <button 
                               onClick={() => setIsAssistantOpen(true)}
-                              className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner cursor-pointer"
+                              className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner cursor-pointer backdrop-blur-sm"
                           >
                               <Search size={18} className="text-white/40" />
                               <span className="text-white/40 text-sm font-medium tracking-tight">
