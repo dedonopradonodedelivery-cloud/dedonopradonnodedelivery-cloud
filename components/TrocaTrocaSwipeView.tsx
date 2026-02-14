@@ -122,7 +122,6 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
 
         let combinedDeck: SwipeCardData[] = [...userItemsMapped, ...mockItemsMapped];
         
-        // Remove duplicates and filter by neighborhood
         const uniqueIds = new Set();
         const uniqueDeck = combinedDeck.filter(element => {
             const isDuplicate = uniqueIds.has(element.id);
@@ -130,9 +129,7 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
             return !isDuplicate;
         });
 
-        // Simulação: Se o bairro for um onde não temos mocks ou itens do usuário, a lista ficará vazia
-        // Para este MVP, vamos permitir que se estiver em "Todos", sempre haja itens.
-        // Se estiver em um bairro específico sem itens, mostramos o onboarding.
+        // REGRA: Se estiver em um bairro sem itens (ex: Tanque ou Anil), a lista ficará vazia para forçar o onboarding
         const neighborhoodFilteredDeck = uniqueDeck.filter(item => 
             item.status === 'Disponível' && 
             (currentNeighborhood === 'Jacarepaguá (todos)' || item.neighborhood === currentNeighborhood)
@@ -177,7 +174,7 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
 
     if (!hasLoaded) return null;
 
-    // REGRA: Se a lista estiver vazia ao carregar, mostrar onboarding premium
+    // NOVO: Se o deck estiver vazio, mostrar onboarding educacional em vez de "vazio"
     if (deck.length === 0) {
         return (
             <TradeOnboardingView 

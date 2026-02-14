@@ -261,8 +261,6 @@ export const HomeFeed: React.FC<{
   
   useEffect(() => {
     if (candidateProfile) {
-// FIX: The `job` from `MOCK_JOBS_FOR_TESTING` is of type `MerchantJob`, which is incompatible with the expected `Job` type.
-// This fix explicitly maps the properties from `MerchantJob` to `Job` to resolve the type mismatch.
       const recommendations = MOCK_JOBS_FOR_TESTING.map(merchantJob => {
         const compatibility = calculateCompatibility(candidateProfile, merchantJob as unknown as MerchantJob);
         
@@ -355,7 +353,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. ACONTECENDO AGORA - MOVIDO PARA CÁ (REQUISITO) */}
+      {/* 3. ACONTECENDO AGORA - MOVIDO PARA CÁ (POSIÇÃO SOLICITADA) */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Flame} 
@@ -419,24 +417,15 @@ export const HomeFeed: React.FC<{
               </p>
 
               <div className="flex items-center justify-center gap-5 my-4">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); alert('Passar (Não tenho interesse)'); }}
-                    className="w-14 h-14 bg-slate-800/60 rounded-full border border-slate-700 text-slate-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60 hover:text-white"
-                  >
+                  <div className="w-14 h-14 bg-slate-800/60 rounded-full border border-slate-700 text-slate-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60 hover:text-white">
                     <X size={28} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); alert('Talvez (Pular)'); }}
-                    className="w-10 h-10 bg-slate-800/60 rounded-full border border-slate-700 text-blue-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60"
-                  >
+                  </div>
+                  <div className="w-10 h-10 bg-slate-800/60 rounded-full border border-slate-700 text-blue-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60">
                     <Repeat size={20} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); alert('Gostei (Tenho interesse)'); }}
-                    className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-rose-500/20 hover:bg-rose-600"
-                  >
+                  </div>
+                  <div className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-rose-500/20 hover:bg-rose-600">
                     <Heart size={28} fill="currentColor" />
-                  </button>
+                  </div>
               </div>
               
               <div className="w-full max-w-xs">
