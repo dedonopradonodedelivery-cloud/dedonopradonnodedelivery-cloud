@@ -352,7 +352,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. ACONTECENDO AGORA */}
+      {/* 3. ACONTECENDO AGORA - POSIÇÃO ATUALIZADA */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Flame} 

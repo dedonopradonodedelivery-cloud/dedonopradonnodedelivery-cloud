@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, Plus, Sparkles, Handshake, Recycle, Lightbulb, ArrowRight, Check } from 'lucide-react';
+import { ChevronLeft, Check, Lightbulb, ArrowRight, Sparkles } from 'lucide-react';
 
 interface TradeOnboardingViewProps {
   onBack: () => void;
@@ -9,7 +9,7 @@ interface TradeOnboardingViewProps {
 
 export const TradeOnboardingView: React.FC<TradeOnboardingViewProps> = ({ onBack, onRegisterItem }) => {
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans animate-in fade-in duration-500 overflow-hidden">
+    <div className="min-h-screen bg-white flex flex-col font-sans animate-in fade-in duration-500 overflow-x-hidden">
       {/* Header Minimalista */}
       <header className="px-6 pt-12 pb-4 flex items-center shrink-0">
         <button 
@@ -22,7 +22,7 @@ export const TradeOnboardingView: React.FC<TradeOnboardingViewProps> = ({ onBack
 
       <main className="flex-1 overflow-y-auto no-scrollbar px-8 pb-32">
         {/* Cabeçalho Emocional */}
-        <div className="mb-10">
+        <div className="mb-10 text-left">
           <h1 className="text-3xl font-black text-slate-900 leading-tight tracking-tighter uppercase font-display">
             Troque o que você <br/> 
             não usa mais 🤝
@@ -57,7 +57,6 @@ export const TradeOnboardingView: React.FC<TradeOnboardingViewProps> = ({ onBack
                 <rect x="110" y="95" width="25" height="18" rx="3" fill="#1E5BFF" opacity="0.6" /> {/* Objeto sendo recebido */}
             </g>
             
-            {/* Ícones de Movimento */}
             <path d="M90 60 Q 100 50 110 60" stroke="#1E5BFF" strokeWidth="2" fill="none" strokeLinecap="round" className="animate-pulse" />
             <path d="M90 120 Q 100 130 110 120" stroke="#FF6501" strokeWidth="2" fill="none" strokeLinecap="round" className="opacity-40" />
           </svg>
@@ -65,7 +64,7 @@ export const TradeOnboardingView: React.FC<TradeOnboardingViewProps> = ({ onBack
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
              <div className="bg-white/95 backdrop-blur-md px-4 py-2 rounded-full border border-blue-100 shadow-lg flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Comunidade Viva</span>
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Economia do Bairro</span>
              </div>
           </div>
         </div>
@@ -77,47 +76,27 @@ export const TradeOnboardingView: React.FC<TradeOnboardingViewProps> = ({ onBack
           </h3>
           
           <div className="grid gap-6">
-            <div className="flex items-center gap-5">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 shadow-sm">
-                <Check size={20} strokeWidth={3} />
+            {[
+              "Cadastrar algo que você não usa mais",
+              "Veja o que vizinhos oferecem",
+              "Troque sem gastar dinheiro",
+              "Dar nova vida a objetos"
+            ].map((text, i) => (
+              <div key={i} className="flex items-center gap-5">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 shadow-sm border border-blue-100/50">
+                  <Check size={20} strokeWidth={3} />
+                </div>
+                <p className="text-sm font-bold text-slate-700 leading-tight">
+                  {text}
+                </p>
               </div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">
-                Cadastrar algo que você não usa mais
-              </p>
-            </div>
-
-            <div className="flex items-center gap-5">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 shadow-sm">
-                <Check size={20} strokeWidth={3} />
-              </div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">
-                Descobrir itens oferecidos por vizinhos
-              </p>
-            </div>
-
-            <div className="flex items-center gap-5">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 shadow-sm">
-                <Check size={20} strokeWidth={3} />
-              </div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">
-                Trocar sem gastar dinheiro
-              </p>
-            </div>
-
-            <div className="flex items-center gap-5">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 shadow-sm">
-                <Check size={20} strokeWidth={3} />
-              </div>
-              <p className="text-sm font-bold text-slate-700 leading-tight">
-                Dar nova vida a objetos
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Bloco Psicológico (Destaque) */}
-        <div className="mt-12 p-6 bg-[#F8F9FC] rounded-[2rem] border border-blue-50 flex gap-4 items-center">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0">
+        {/* Bloco de Quebra de Objeção */}
+        <div className="mt-12 p-6 bg-[#F8F9FC] rounded-[2rem] border border-blue-50 flex gap-4 items-center shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-amber-500 shadow-sm shrink-0 border border-blue-50">
             <Lightbulb size={22} fill="currentColor" className="opacity-20" />
             <Lightbulb size={22} className="absolute" />
           </div>
@@ -127,7 +106,7 @@ export const TradeOnboardingView: React.FC<TradeOnboardingViewProps> = ({ onBack
           </p>
         </div>
 
-        {/* Botão Principal Call to Action */}
+        {/* Call to Action Principal */}
         <div className="mt-12 space-y-4">
           <button 
             onClick={onRegisterItem}
