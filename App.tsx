@@ -67,6 +67,7 @@ import { UserTradeItemsView } from '@/components/UserTradeItemsView';
 import { JobsSwipeView } from '@/components/JobsSwipeView';
 import { UserResumeView } from '@/components/UserResumeView';
 import { RoleSwitcherModal } from '@/components/RoleSwitcherModal';
+import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 
 export const App: React.FC = () => {
   const { user, userRole, loading: authLoading, signOut } = useAuth();
@@ -152,7 +153,8 @@ export const App: React.FC = () => {
     'beauty_selection', 'beauty_women', 'beauty_men',
     'autos_selection', 'autos_carros', 'autos_motos', 'autos_bikes', 'autos_eletricos',
     'classified_detail', 'job_detail', 'real_estate_detail', 'classified_search_results', 'plan_selection',
-    'troca_troca', 'troca_troca_intro', 'troca_troca_swipe', 'user_trade_items', 'user_resume', 'merchant_jobs'
+    'troca_troca', 'troca_troca_intro', 'troca_troca_swipe', 'user_trade_items', 'user_resume', 'merchant_jobs',
+    'patrocinador_master'
   ];
 
   return (
@@ -310,6 +312,7 @@ export const App: React.FC = () => {
                     {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => handleNavigate('profile')} user={user} />}
                     {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => handleNavigate('profile')} />}
                     {activeTab === 'store_support' && <StoreSupportModule onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
                     </main>
                 </Layout>
             )}

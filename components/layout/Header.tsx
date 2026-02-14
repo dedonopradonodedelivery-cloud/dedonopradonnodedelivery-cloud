@@ -132,16 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const checkNotifs = () => {
       let saved = localStorage.getItem('app_notifications');
-      if (!saved) {
-          const initial = [
-            { id: 'notif-1', title: 'Bem-vindo! 🧡', type: 'system', read: false, createdAt: new Date().toISOString() },
-            { id: 'notif-2', title: 'Dica do Tuco 🦜', type: 'system', read: false, createdAt: new Date().toISOString() },
-            { id: 'notif-3', title: 'Novo Cupom! 🎟️', type: 'coupon', read: false, createdAt: new Date().toISOString() },
-            { id: 'notif-4', title: 'JPA Conversa 🔥', type: 'ad', read: false, createdAt: new Date().toISOString() }
-          ];
-          localStorage.setItem('app_notifications', JSON.stringify(initial));
-          saved = JSON.stringify(initial);
-      }
+      if (!saved) return;
       const notifs = JSON.parse(saved);
       setUnreadCount(notifs.filter((n: any) => !n.read).length);
     };
@@ -163,8 +154,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* Container do Header - Rola com o conteúdo */}
-        <div className={`w-full transition-all duration-500 relative ${isHome ? 'bg-brand-blue pb-12 z-50' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+        {/* 
+          Ajuste de Stacking Order: O Header no modo Home agora tem z-30.
+          O Feed terá z-40 para passar por cima.
+        */}
+        <div className={`w-full transition-all duration-500 relative ${isHome ? 'bg-brand-blue pb-14 z-30' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
             <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
                 <div className="flex items-center justify-between py-2">
@@ -219,7 +213,7 @@ export const Header: React.FC<HeaderProps> = ({
                         >
                             <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
                                     <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}

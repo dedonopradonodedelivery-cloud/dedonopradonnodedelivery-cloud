@@ -38,7 +38,8 @@ import {
   FileText,
   CloudLightning,
   Sparkle,
-  Cpu
+  Cpu,
+  Repeat2
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -121,7 +122,7 @@ const SectionHeader: React.FC<{
   titleClassName?: string; 
   subtitleClassName?: string; 
   seeMoreClassName?: string; 
-}> = ({ 
+ }> = ({ 
   icon: Icon, 
   title, 
   subtitle, 
@@ -173,9 +174,12 @@ const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], onCli
 );
 
 
-const InstitutionalBanner: React.FC = () => (
+const InstitutionalBanner: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
   <section className="px-6 py-6">
-    <div className="relative bg-gradient-to-br from-[#1E5BFF] via-[#1E5BFF] to-[#0A3BBF] rounded-2xl py-5 px-6 shadow-[0_10px_30px_rgba(30,91,255,0.15)] overflow-hidden group border border-white/10 transition-all active:scale-[0.99]">
+    <div 
+      onClick={onClick}
+      className="relative bg-gradient-to-br from-[#1E5BFF] via-[#1E5BFF] to-[#0A3BBF] rounded-2xl py-5 px-6 shadow-[0_10px_30px_rgba(30,91,255,0.15)] overflow-hidden group border border-white/10 transition-all active:scale-[0.99] cursor-pointer"
+    >
         
         {/* Camada de Micro-Motion / Glow Suave */}
         <div className="absolute top-[-50%] right-[-10%] w-[200px] h-[200px] bg-white/5 rounded-full blur-[60px] animate-premium-glow pointer-events-none"></div>
@@ -198,32 +202,6 @@ const InstitutionalBanner: React.FC = () => (
   </section>
 );
 
-const JobCard: React.FC<{ job: Job, compatibility: CompatibilityResult, onClick: () => void }> = ({ job, compatibility, onClick }) => (
-    <div onClick={onClick} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 group hover:border-blue-500 transition-colors cursor-pointer shadow-sm">
-        <div className="flex justify-between items-start mb-2">
-            <div>
-                <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{job.role}</h4>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{job.company}</p>
-            </div>
-            <div className="flex flex-col items-end">
-                <span className="text-lg font-black text-emerald-500">{compatibility.score_total}%</span>
-                <span className="text-[8px] font-bold text-gray-400 uppercase">Compatível</span>
-            </div>
-        </div>
-        <div className="flex items-center gap-2 mt-3 mb-4">
-            {compatibility.motivos.slice(0,2).map((motivo, i) => (
-                <span key={i} className="text-[9px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full border border-blue-100 dark:border-blue-800/50">
-                    {motivo.length > 25 ? motivo.substring(0, 22) + '...' : motivo}
-                </span>
-            ))}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-            <MapPin size={12} />
-            <span>{job.neighborhood}</span>
-        </div>
-    </div>
-);
-
 export const HomeFeed: React.FC<{
   onNavigate: (view: string, data?: any) => void;
   onStoreClick: (store: Store) => void;
@@ -237,7 +215,6 @@ export const HomeFeed: React.FC<{
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   const [candidateProfile, setCandidateProfile] = useState<any | null>(null);
-  const [jobRecommendations, setJobRecommendations] = useState<{ job: Job; compatibility: CompatibilityResult }[]>([]);
   
   // Controle do Visualizador de Stories
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(null);
@@ -245,312 +222,232 @@ export const HomeFeed: React.FC<{
   useEffect(() => {
     setCandidateProfile(MOCK_CANDIDATE_PROFILES[0]);
   }, []);
-  
-  useEffect(() => {
-    if (candidateProfile) {
-      const recommendations = MOCK_JOBS_FOR_TESTING.map(merchantJob => {
-        const compatibility = calculateCompatibility(candidateProfile, merchantJob as unknown as MerchantJob);
-        
-        const job: Job = {
-            id: merchantJob.id,
-            role: merchantJob.titulo_cargo,
-            company: merchantJob.empresa_nome,
-            neighborhood: merchantJob.bairro,
-            type: merchantJob.tipo === 'Freela' ? 'Freelancer' : merchantJob.tipo,
-            salary: merchantJob.salario,
-            description: merchantJob.descricao_curta,
-            requirements: merchantJob.requisitos_obrigatorios,
-            postedAt: 'Há 1 dia',
-            experiencia_minima: merchantJob.experiencia_minima,
-            schedule_type: merchantJob.turno === 'Manhã' || merchantJob.turno === 'Tarde' || merchantJob.turno === 'Noite' ? 'Meio período' : merchantJob.turno === '12x36' ? 'Escala' : 'Integral',
-            category: 'Vagas',
-            isVerified: true
-        };
-        return { job, compatibility };
-      }).sort((a, b) => b.compatibility.score_total - a.compatibility.score_total)
-        .slice(0, 3);
-      setJobRecommendations(recommendations);
-    }
-  }, [candidateProfile]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 relative z-20">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-full">
       
-      {/* 1. UTILITY ROW */}
-      <section className="px-8 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />
-                <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">
-                    {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
-                </span>
-            </div>
-            
-            <div className="w-[1px] h-3 bg-gray-100 dark:bg-gray-800"></div>
-            
-            <div className="flex items-center gap-1.5">
-                <Sun size={14} className="text-amber-500" strokeWidth={2.5} />
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums lowercase">
-                    sol <span className="mx-0.5 opacity-30">•</span> 28°C
-                </span>
-            </div>
-            
-            <div className="w-[1px] h-3 bg-gray-100 dark:bg-gray-800"></div>
-            
-            <div className="flex items-center gap-2">
-                <div className="relative flex">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping absolute opacity-40"></div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 relative"></div>
-                </div>
-                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 lowercase leading-none">
-                    trânsito livre
-                </span>
-            </div>
-        </div>
-      </section>
-
-      {/* 2. ICON CATEGORY GRID */}
-      <section className="w-full overflow-x-auto no-scrollbar scroll-smooth">
-        <div className="flex items-center gap-5 px-6 py-6">
-          {QUICK_CATEGORIES.map(cat => {
-            const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
-            if (!fullCat) return null;
-            return (
-              <button 
-                key={cat.slug} 
-                onClick={() => onSelectCategory(fullCat)} 
-                className="flex flex-col items-center gap-3 flex-shrink-0 group active:scale-95 transition-all"
-              >
-                <div className="w-16 h-16 rounded-full bg-brand-blue shadow-[0_10px_25px_rgba(30,91,255,0.25)] flex items-center justify-center text-white border border-white/10 group-hover:brightness-110 transition-all">
-                  <cat.icon size={26} strokeWidth={2} />
-                </div>
-                <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">{cat.name}</span>
-              </button>
-            )
-          })}
-          <button 
-            onClick={() => setIsMoreCategoriesOpen(true)} 
-            className="flex flex-col items-center gap-3 flex-shrink-0 active:scale-95 transition-all"
-          >
-            <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-gray-900 border-2 border-dashed border-slate-200 dark:border-gray-800 flex items-center justify-center text-slate-300">
-              <Plus size={26} strokeWidth={3} />
-            </div>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mais</span>
-          </button>
-        </div>
-      </section>
-
-      {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
-      <section className="py-4 space-y-5">
-        <div className="px-6">
-            <SectionHeader 
-                icon={Flame} 
-                title="Acontecendo agora" 
-                subtitle="Stories do seu bairro" 
-                iconColor="text-amber-500" 
-                onSeeMore={() => onNavigate('neighborhood_posts')}
-            />
-        </div>
+      {/* 
+        ============================================================
+        A MÁGICA VISUAL: z-40 e -mt-12
+        O container branco agora tem um z-index maior que o Header (z-30),
+        permitindo que a borda arredondada sobreponha o azul.
+        ============================================================
+      */}
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-12 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] overflow-hidden">
         
-        <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-4">
-            {ACONTECENDO_AGORA_FEED.map((item, index) => (
-                <HappeningNowCard 
-                    key={item.id}
-                    item={item} 
-                    onClick={() => setSelectedStoryIndex(index)}
-                />
-            ))}
-        </div>
-      </section>
-
-      {/* 4. CUPOM DO DIA */}
-      {isFeatureActive('coupons') && (
-        <section className="space-y-6 py-12 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
-          <div className="px-6 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
-                <Ticket size={16} strokeWidth={2.5} />
-              </div>
-              <div className="flex flex-col">
-                <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest leading-none mb-1">Cupons do dia</h2>
-                <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 leading-none">Ofertas exclusivas esperando por você no seu bairro</p>
-              </div>
+        {/* 1. UTILITY ROW - Ajustado padding para compensar a subida */}
+        <section className="px-8 pt-10 pb-2">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />
+                    <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">
+                        {currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}
+                    </span>
+                </div>
+                
+                <div className="w-[1px] h-3 bg-gray-100 dark:bg-gray-800"></div>
+                
+                <div className="flex items-center gap-1.5">
+                    <Sun size={14} className="text-amber-500" strokeWidth={2.5} />
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums lowercase">
+                        sol <span className="mx-0.5 opacity-30">•</span> 28°C
+                    </span>
+                </div>
+                
+                <div className="w-[1px] h-3 bg-gray-100 dark:bg-gray-800"></div>
+                
+                <div className="flex items-center gap-2">
+                    <div className="relative flex">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping absolute opacity-40"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 relative"></div>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 lowercase leading-none">
+                        trânsito livre
+                    </span>
+                </div>
             </div>
-            <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
-          </div>
-
-          <div className="flex gap-3 overflow-x-auto no-scrollbar px-6 pb-2 snap-x">
-            {MOCK_COUPONS.map(coupon => (
-              <button 
-                key={coupon.id}
-                onClick={() => onNavigate('coupon_landing')}
-                className="flex-shrink-0 w-[185px] relative bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 flex items-center shadow-sm active:scale-[0.98] transition-all snap-start group overflow-hidden h-32"
-              >
-                {/* Perfurações de ticket */}
-                <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
-
-                {/* Parte visual do ticket */}
-                <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <Sparkles size={12} className="mb-1 opacity-60" />
-                  <span className="text-[7px] font-black leading-none uppercase tracking-tighter vertical-text transform -rotate-180" style={{ writingMode: 'vertical-rl' }}>Ticket</span>
-                </div>
-
-                {/* Conteúdo de texto */}
-                <div className="text-left min-w-0 flex-1 pl-4 pr-3">
-                  <p className="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate mb-1">{coupon.category}</p>
-                  <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight mb-1.5">{coupon.discount}</h4>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter truncate">{coupon.store}</p>
-                  <div className="mt-3 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded text-[7px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
-                    Resgatar
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
         </section>
-      )}
 
-      {/* 5. TROCA-TROCA DO BAIRRO - Hero Card */}
-      <section className="px-6 py-8 space-y-5">
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-purple-500 shadow-sm border border-black/10 dark:border-white/5">
-                    <Repeat size={24} strokeWidth={2.5} />
+        {/* 2. ICON CATEGORY GRID */}
+        <section className="w-full overflow-x-auto no-scrollbar scroll-smooth">
+            <div className="flex items-center gap-5 px-6 py-6">
+            {QUICK_CATEGORIES.map(cat => {
+                const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
+                if (!fullCat) return null;
+                return (
+                <button 
+                    key={cat.slug} 
+                    onClick={() => onSelectCategory(fullCat)} 
+                    className="flex flex-col items-center gap-3 flex-shrink-0 group active:scale-95 transition-all"
+                >
+                    <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 shadow-sm flex items-center justify-center text-blue-600 group-hover:brightness-110 transition-all">
+                    <cat.icon size={26} strokeWidth={2} />
+                    </div>
+                    <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">{cat.name}</span>
+                </button>
+                )
+            })}
+            <button 
+                onClick={() => setIsMoreCategoriesOpen(true)} 
+                className="flex flex-col items-center gap-3 flex-shrink-0 active:scale-95 transition-all"
+            >
+                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-gray-900 border-2 border-dashed border-slate-200 dark:border-gray-800 flex items-center justify-center text-slate-300">
+                <Plus size={26} strokeWidth={3} />
+                </div>
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mais</span>
+            </button>
+            </div>
+        </section>
+
+        {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
+        <section className="py-4 space-y-5">
+            <div className="px-6">
+                <SectionHeader 
+                    icon={Flame} 
+                    title="Acontecendo agora" 
+                    subtitle="Stories do seu bairro" 
+                    iconColor="text-amber-500" 
+                    onSeeMore={() => onNavigate('neighborhood_posts')}
+                />
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-4">
+                {ACONTECENDO_AGORA_FEED.map((item, index) => (
+                    <HappeningNowCard 
+                        key={item.id}
+                        item={item} 
+                        onClick={() => setSelectedStoryIndex(index)}
+                    />
+                ))}
+            </div>
+        </section>
+
+        {/* 4. CUPOM DO DIA */}
+        {isFeatureActive('coupons') && (
+            <section className="space-y-6 py-12 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
+            <div className="px-6 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
+                    <Ticket size={16} strokeWidth={2.5} />
                 </div>
                 <div className="flex flex-col">
-                    <h2 className="text-[12px] font-black uppercase tracking-[0.15em] leading-none text-gray-900 dark:text-white mt-1">
-                        Troca-Troca do Bairro
-                    </h2>
-                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 leading-none mt-1.5">
-                        Transforme coisas paradas em algo novo
+                    <h2 className="text-[12px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest leading-none mb-1">Cupons do dia</h2>
+                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 leading-none">Ofertas exclusivas no bairro</p>
+                </div>
+                </div>
+                <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
+            </div>
+
+            <div className="flex gap-3 overflow-x-auto no-scrollbar px-6 pb-2 snap-x">
+                {MOCK_COUPONS.map(coupon => (
+                <button 
+                    key={coupon.id}
+                    onClick={() => onNavigate('coupon_landing')}
+                    className="flex-shrink-0 w-[185px] relative bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 flex items-center shadow-sm active:scale-[0.98] transition-all snap-start group overflow-hidden h-32"
+                >
+                    <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
+                    <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
+                    <div className="absolute left-[52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+
+                    <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
+                    <Sparkles size={12} className="mb-1 opacity-60" />
+                    <span className="text-[7px] font-black leading-none uppercase tracking-tighter vertical-text transform -rotate-180" style={{ writingMode: 'vertical-rl' }}>Ticket</span>
+                    </div>
+
+                    <div className="text-left min-w-0 flex-1 pl-4 pr-3">
+                    <p className="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate mb-1">{coupon.category}</p>
+                    <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight mb-1.5">{coupon.discount}</h4>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter truncate">{coupon.store}</p>
+                    </div>
+                </button>
+                ))}
+            </div>
+            </section>
+        )}
+
+        {/* 5. VAGAS PERTO DE VOCÊ - BLOCO REDESENHADO PREMIUM */}
+        <section className="px-6 py-10 space-y-6">
+            <SectionHeader 
+                icon={Briefcase} 
+                title="💼 Oportunidades no Bairro" 
+                subtitle="IA conectando talentos e empresas locais" 
+                iconColor="text-emerald-500" 
+                subtitleClassName="text-[9px] font-black text-emerald-600/60"
+            />
+            
+            <div 
+            onClick={() => onNavigate('jobs')}
+            className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse"
+            >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 animate-premium-glow"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-flare pointer-events-none"></div>
+
+                <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="flex items-center gap-2 mb-6 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg">
+                        <Cpu size={14} className="text-white fill-emerald-200" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA-Driven Match</span>
+                    </div>
+                    
+                    <h3 className="text-2xl font-display font-black text-white leading-tight mb-2 tracking-tighter uppercase">
+                        Oportunidades <br/> Reais Perto de Você
+                    </h3>
+                    
+                    <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[240px] opacity-90">
+                        Nossa inteligência encontrou vagas compatíveis com seu perfil na região.
                     </p>
+                    
+                    <div className="w-full bg-white text-emerald-700 font-black py-5 px-8 rounded-2xl shadow-2xl active:scale-95 transition-all text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 group-hover:bg-emerald-50">
+                        Explorar Agora
+                        <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
                 </div>
             </div>
-        </div>
-        <button
-          onClick={() => onNavigate('troca_troca_swipe')}
-          className="w-full bg-slate-900 rounded-[2.5rem] p-6 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10"
-        >
-          <div className="relative mb-4">
-            <div className="flex justify-between items-center gap-4">
-              <div className="w-[48%] aspect-square rounded-3xl overflow-hidden bg-slate-800 border border-slate-700">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Tênis" />
-              </div>
-              <div className="w-[48%] aspect-square rounded-3xl overflow-hidden bg-slate-800 border border-slate-700">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Headphone" />
-              </div>
-            </div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg group-hover:scale-110 transition-transform">
-              <Repeat className="w-6 h-6 text-blue-400" />
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center gap-3">
-              <p className="text-slate-400 text-sm whitespace-nowrap">
-                Deslize para trocar com vizinhos do seu bairro.
-              </p>
-
-              <div className="flex items-center justify-center gap-5 my-4">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); alert('Passar (Não tenho interesse)'); }}
-                    className="w-14 h-14 bg-slate-800/60 rounded-full border border-slate-700 text-slate-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60 hover:text-white"
-                  >
-                    <X size={28} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); alert('Talvez (Pular)'); }}
-                    className="w-10 h-10 bg-slate-800/60 rounded-full border border-slate-700 text-blue-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60"
-                  >
-                    <Repeat size={20} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); alert('Gostei (Tenho interesse)'); }}
-                    className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 shadow-lg shadow-rose-500/20 hover:bg-rose-600"
-                  >
-                    <Heart size={28} fill="currentColor" />
-                  </button>
-              </div>
-              
-              <div className="w-full max-w-xs">
-                <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full text-white font-black text-sm uppercase tracking-widest shadow-2xl shadow-purple-500/40 group-hover:brightness-125 transition-all">
-                    🔥 Começar a trocar
-                </div>
-              </div>
-          </div>
-        </button>
-      </section>
-
-      {/* 6. VAGAS PERTO DE VOCÊ - BLOCO REDESENHADO PREMIUM */}
-      <section className="px-6 py-10 space-y-6">
-        <SectionHeader 
-            icon={Briefcase} 
-            title="💼 Oportunidades no Bairro" 
-            subtitle="IA conectando talentos e empresas locais" 
-            iconColor="text-emerald-500" 
-            subtitleClassName="text-[9px] font-black text-emerald-600/60"
-        />
-        
-        <div 
-          onClick={() => onNavigate('jobs')}
-          className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse"
-        >
-            {/* Efeitos de Glow e Flare */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 animate-premium-glow"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-flare pointer-events-none"></div>
-
-            <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="flex items-center gap-2 mb-6 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg">
-                    <Cpu size={14} className="text-white fill-emerald-200" />
-                    <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA-Driven Match</span>
-                </div>
-                
-                <h3 className="text-2xl font-display font-black text-white leading-tight mb-2 tracking-tighter uppercase">
-                    Oportunidades <br/> Reais Perto de Você
-                </h3>
-                
-                <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[240px] opacity-90">
-                    Nossa inteligência encontrou vagas compatíveis com seu perfil na região.
-                </p>
-                
-                <div className="w-full bg-white text-emerald-700 font-black py-5 px-8 rounded-2xl shadow-2xl active:scale-95 transition-all text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 group-hover:bg-emerald-50">
-                    Explorar Agora
-                    <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
-                </div>
-            </div>
-        </div>
-      </section>
-
-      {/* 7. LANÇAMENTO / ADS SECTION */}
-      {userRole === 'lojista' && isFeatureActive('sponsored_ads') && (
-        <section className="px-6 py-6 animate-in slide-in-from-bottom-4 duration-700">
-          <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
-      )}
 
-      <InstitutionalBanner />
-      
-      {/* 8. EXPLORE GUIDE SECTION */}
-      {isFeatureActive('explore_guide') && (
-        <div className="w-full pt-8 pb-10">
-            <div className="px-6">
-              <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="O melhor perto de você" onSeeMore={() => onNavigate('explore')} />
-              <div className="flex gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit mb-6">
-                  {['all', 'top_rated'].map((f) => (
-                    <button 
-                      key={f} 
-                      onClick={() => setListFilter(f as any)} 
-                      className={`text-[9px] font-black uppercase px-5 py-2 rounded-xl transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-md' : 'text-gray-400'}`}
-                    >
-                      {f === 'all' ? 'Ver Tudo' : 'Top Avaliados'}
-                    </button>
-                  ))}
-              </div>
-              <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
+        {/* 6. LANÇAMENTO / ADS SECTION */}
+        {userRole === 'lojista' && isFeatureActive('sponsored_ads') && (
+            <section className="px-6 py-6 animate-in slide-in-from-bottom-4 duration-700">
+            <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
+            </section>
+        )}
+
+        <InstitutionalBanner onClick={() => onNavigate('patrocinador_master')} />
+        
+        {/* 7. EXPLORE GUIDE SECTION */}
+        {isFeatureActive('explore_guide') && (
+            <div className="w-full pt-8 pb-10">
+                <div className="px-6">
+                <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="O melhor perto de você" onSeeMore={() => onNavigate('explore')} />
+                <div className="flex gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit mb-6">
+                    {['all', 'top_rated'].map((f) => (
+                        <button 
+                        key={f} 
+                        onClick={() => setListFilter(f as any)} 
+                        className={`text-[9px] font-black uppercase px-5 py-2 rounded-xl transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-md' : 'text-gray-400'}`}
+                        >
+                        {f === 'all' ? 'Ver Tudo' : 'Top Avaliados'}
+                        </button>
+                    ))}
+                </div>
+                <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
+                </div>
+            </div>
+        )}
+
+        <div className="mt-8 px-6">
+             <div className="bg-slate-900 rounded-3xl p-6 shadow-xl flex items-center justify-between group cursor-pointer border border-white/5" onClick={() => onNavigate('patrocinador_master')}>
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-[#FF6501]/20 rounded-xl flex items-center justify-center text-[#FF6501] shadow-inner"><Sparkles size={20} /></div>
+                    <div>
+                        <p className="text-[9px] font-black text-[#FF6501] uppercase tracking-widest mb-0.5 opacity-80">Clube de Vantagens</p>
+                        <p className="text-xs font-bold text-white uppercase tracking-tight">Conheça o Atual Clube</p>
+                    </div>
+                </div>
+                <ChevronRight size={18} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
             </div>
         </div>
-      )}
+
+      </div>
 
       <MoreCategoriesModal 
           isOpen={isMoreCategoriesOpen}
