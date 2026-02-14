@@ -1,9 +1,8 @@
+
 import React, { useState, useMemo } from 'react';
 import { X, Search, ChevronRight } from 'lucide-react';
-// FIX: Corrected import path for Category type from root types folder.
-import { Category } from '../../types';
-// FIX: Corrected import path for constants from root constants folder.
-import { CATEGORIES, SUBCATEGORIES } from '../../constants';
+import { Category } from '@/types';
+import { CATEGORIES, SUBCATEGORIES } from '@/constants';
 
 interface MoreCategoriesModalProps {
   isOpen: boolean;

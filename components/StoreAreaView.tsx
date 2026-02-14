@@ -31,7 +31,8 @@ import {
   PieChart,
   Building,
   Handshake,
-  FileText
+  FileText,
+  Repeat
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -150,9 +151,10 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
             />
           </section>
 
-          {(isFeatureActive('coupons') || isFeatureActive('banner_highlights')) && (
-            <section>
-                <SectionHeader title="Promoções e Vendas" icon={Tag} />
+          <section>
+            <SectionHeader title="Vendas e Trocas" icon={ShoppingBag} />
+            {(isFeatureActive('coupons') || isFeatureActive('banner_highlights')) && (
+              <>
                 {isFeatureActive('coupons') && (
                     <NavCard 
                     icon={Ticket} 
@@ -170,8 +172,23 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate
                     onClick={() => onNavigate('merchant_promotions')} 
                     />
                 )}
-            </section>
-          )}
+              </>
+            )}
+            <NavCard 
+              icon={Repeat} 
+              label="Itens para Troca da Loja" 
+              description="Cadastre produtos para o Troca-Troca"
+              onClick={() => onNavigate('user_trade_items')}
+              colorClass="bg-purple-50 text-purple-600 dark:bg-purple-900/20"
+            />
+             <NavCard 
+              icon={Briefcase} 
+              label="Vagas de Emprego" 
+              description="Anuncie e gerencie suas vagas"
+              onClick={() => onNavigate('merchant_jobs')}
+              colorClass="bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20"
+            />
+          </section>
 
           <section>
             <SectionHeader title="Crescimento e Anúncios" icon={Sparkles} />

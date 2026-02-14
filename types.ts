@@ -152,7 +152,7 @@ export interface ChatMessage {
   action?: 'retry';
   originalUserMessage?: string;
 }
-export interface Job { id: string; role: string; company: string; neighborhood: string; category: string; type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros'; salary?: string; description: string; requirements: string[]; benefits?: string[]; postedAt: string; isUrgentToday?: boolean; schedule?: string; contactWhatsapp?: string; isSponsored?: boolean; sponsoredUntil?: string; isUrgent?: boolean; logoUrl?: string; candidacy_method?: 'cv' | 'whatsapp'; modality?: 'Presencial' | 'Híbrido' | 'Remoto'; experience?: string; schedule_type?: 'Integral' | 'Meio período' | 'Escala'; isVerified?: boolean; isVerifiedMerchant?: boolean; }
+export interface Job { id: string; role: string; company: string; neighborhood: string; category: string; type: 'CLT' | 'PJ' | 'Freelancer' | 'Temporário' | 'Estágio' | 'Aprendiz' | 'Diarista' | 'Meio período' | 'Outros'; salary?: string; description: string; requirements: string[]; benefits?: string[]; postedAt: string; isUrgentToday?: boolean; schedule?: string; contactWhatsapp?: string; isSponsored?: boolean; sponsoredUntil?: string; isUrgent?: boolean; logoUrl?: string; candidacy_method?: 'cv' | 'whatsapp'; modality?: 'Presencial' | 'Híbrido' | 'Remoto'; experience?: string; schedule_type?: 'Integral' | 'Meio período' | 'Escala'; isVerified?: boolean; isVerifiedMerchant?: boolean; experiencia_minima?: string; }
 export interface NeighborhoodCommunity { id: string; name: string; description: string; image: string; icon: React.ReactNode; color: string; membersCount: string; type?: 'official' | 'user'; }
 export interface Story { id: string; name: string; image: string; }
 export interface EditorialCollection { id: string; title: string; subtitle: string; image: string; keywords: string[]; }
@@ -193,3 +193,23 @@ export interface DbMerchantSession { id: string; merchant_id: string; session_ty
 export interface DbCashbackTransaction { id: string; user_id: string; merchant_id: string; session_id?: string; purchase_value: number; amount_from_balance: number; amount_to_pay: number; cashback_value: number; status: TransactionStatus; created_at: string; approved_at?: string; rejected_at?: string; }
 export interface DbWalletMovement { id: string; user_id: string; transaction_id?: string; type: MovementType; amount: number; description: string; created_at: string; }
 export interface AppSuggestion { id: string; userId: string; userName: string; timestamp: string; subject: string; message: string; whitepace_reason?: string; category: 'bug' | 'idea' | 'improve' | 'other'; contactConsent: boolean; status: 'new' | 'analyzing' | 'responded'; }
+
+export interface TradeItem {
+  id: string;
+  userId: string;
+  userRole: 'cliente' | 'lojista';
+  title: string;
+  imageUrl: string;
+  category: string;
+  description: string;
+  wants: string; // What they want in return
+  neighborhood: string;
+  status: 'Disponível' | 'Em negociação' | 'Trocado';
+}
+
+export interface CompatibilityResult {
+  score_total: number;
+  motivos: string[];
+  pontos_fortes: string[];
+  pontos_de_atencao: string[];
+}

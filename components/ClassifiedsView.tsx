@@ -32,7 +32,6 @@ import { MasterSponsorBanner } from './MasterSponsorBanner';
 import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
 import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
-// FIX: Added missing interface definition for ClassifiedsViewProps
 interface ClassifiedsViewProps {
   onBack: () => void;
   user: User | null;

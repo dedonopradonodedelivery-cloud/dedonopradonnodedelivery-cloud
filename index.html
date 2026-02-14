@@ -112,20 +112,20 @@
       .sponsor-island {
         position: absolute;
         bottom: 60px;
-        background: white;
+        background: #FF6501; /* Fundo Laranja */
         padding: 14px 32px;
         border-radius: 24px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.05);
+        box-shadow: 0 15px 35px rgba(255,101,1,0.2), 0 5px 15px rgba(255,101,1,0.1); /* Sombra Laranja */
         opacity: 0;
         transform: translateY(20px);
         animation: islandEntrance 1s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
       }
 
       .sponsor-label {
-        color: #94A3B8;
+        color: rgba(255, 255, 255, 0.7); /* Letra Branca Translúcida */
         font-family: 'Outfit', sans-serif;
         font-size: 9px;
         font-weight: 700;
@@ -135,7 +135,7 @@
       }
 
       .sponsor-brand-orange {
-        color: #FF6501; /* Laranja Oficial Atual Clube */
+        color: white; /* Letra Branca */
         font-family: 'Outfit', sans-serif;
         font-size: 20px;
         font-weight: 900;
@@ -190,7 +190,10 @@
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
     "@/": "./",
     "path": "https://esm.sh/path@^0.12.7",
-    "url": "https://esm.sh/url@^0.11.4"
+    "url": "https://esm.sh/url@^0.11.4",
+    "mammoth": "https://esm.sh/mammoth@^1.8.0",
+    "pdfjs-dist/build/pdf.worker.mjs": "https://esm.sh/pdfjs-dist@4.4.168/build/pdf.worker.mjs",
+    "pdfjs-dist": "https://esm.sh/pdfjs-dist@4.4.168"
   }
 }
 </script>

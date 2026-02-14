@@ -24,7 +24,9 @@ import {
   Play,
   Lock,
   Zap,
-  Tag
+  Tag,
+  Repeat,
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
@@ -233,6 +235,20 @@ export const MenuView: React.FC<MenuViewProps> = ({
                     color="text-indigo-500"
                 />
               )}
+              <MenuItem 
+                icon={Repeat} 
+                label="Meus Itens para Troca" 
+                sublabel="Gerenciar seus itens do Troca-Troca"
+                onClick={() => onNavigate('user_trade_items')}
+                color="text-purple-500"
+              />
+              <MenuItem 
+                  icon={Briefcase} 
+                  label="Meu Currículo" 
+                  sublabel="Perfil para vagas de emprego"
+                  onClick={() => onNavigate('user_resume')}
+                  color="text-cyan-500"
+              />
               {isFeatureActive('classifieds') && (
                 <MenuItem 
                     icon={Package} 

@@ -37,7 +37,6 @@ export const MandatoryVideoLock: React.FC<MandatoryVideoLockProps> = ({ videoUrl
 
   const handleVideoEnd = () => {
     // REGRA FUTURA: No modo real, o desbloqueio acontece aqui.
-// FIX: Comparing against 'real' is now valid because VIDEO_GATE_MODE is typed as the union.
     if (VIDEO_GATE_MODE === 'real') {
       unlockContent();
     }

@@ -34,3 +34,12 @@ html, body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes premium-glow {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.2); }
+}
+
+.animate-premium-glow {
+  animation: premium-glow 10s ease-in-out infinite;
+}

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Store, Category, Job } from '@/types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Store, Category, Job, CompatibilityResult } from '@/types';
 import { 
   Compass, 
   MapPin, 
@@ -30,15 +30,21 @@ import {
   Camera,
   Briefcase,
   Building2,
-  TrendingUp
+  TrendingUp,
+  Repeat,
+  Settings,
+  X,
+  FileText
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
-import { CATEGORIES, MOCK_JOBS } from '@/constants';
+import { CATEGORIES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
+import { calculateCompatibility, MOCK_JOBS_FOR_TESTING, MOCK_CANDIDATE_PROFILES } from '@/utils/compatibilityEngine';
+import { MerchantJob } from './MerchantJobsModule';
 
 const QUICK_CATEGORIES: { name: string, icon: React.ElementType, slug: string }[] = [
   { name: 'Saúde', icon: Heart, slug: 'saude' },
@@ -59,38 +65,41 @@ const ACONTECENDO_AGORA_FEED = [
   { 
     id: 1, 
     type: 'EVENTO',
-    title: 'Música ao vivo hoje', 
-    subtitle: 'Noite de Jazz no Bar do Zeca', 
+    title: 'Música ao vivo no Bar do Zeca', 
+    subtitle: 'Noite de Jazz', 
     time: '20 min', 
     icon: Music, 
-    color: 'text-indigo-600', 
-    bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+    color: 'text-indigo-400', 
+    bg: 'bg-indigo-500',
     source: 'Lojista Parceiro',
-    isVerified: true
+    isVerified: true,
+    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800'
   },
   { 
     id: 2, 
     type: 'TRÂNSITO',
-    title: 'Obra na Geremário', 
-    subtitle: 'Interdição parcial na altura do Bananal', 
+    title: 'Obra na Geremário Dantas', 
+    subtitle: 'Interdição parcial', 
     time: 'Agora', 
     icon: Construction, 
-    color: 'text-amber-600', 
-    bg: 'bg-amber-50 dark:bg-amber-950/30',
+    color: 'text-amber-400', 
+    bg: 'bg-amber-500',
     source: 'Fonte Oficial',
-    isVerified: true
+    isVerified: true,
+    image: 'https://images.unsplash.com/photo-1581094371996-518296a8f15b?q=80&w=800'
   },
   { 
     id: 3, 
     type: 'UTILIDADE',
-    title: 'Feira Livre Freguesia', 
-    subtitle: 'Barracas montadas na Praça', 
+    title: 'Feira Livre na Praça', 
+    subtitle: 'Produtos frescos', 
     time: '2h', 
     icon: Zap, 
-    color: 'text-emerald-600', 
-    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+    color: 'text-emerald-400', 
+    bg: 'bg-emerald-500',
     source: 'Morador Verificado',
-    isVerified: true
+    isVerified: true,
+    image: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=800'
   }
 ];
 
@@ -127,19 +136,112 @@ const ACHADOS_PERDIDOS_MOCK = [
   }
 ];
 
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void; iconColor?: string }> = ({ icon: Icon, title, subtitle, onSeeMore, iconColor = "text-blue-600" }) => (
+const SectionHeader: React.FC<{ 
+  icon: React.ElementType; 
+  title: string; 
+  subtitle?: string; 
+  onSeeMore?: () => void; 
+  iconColor?: string; 
+  iconBg?: string; 
+  titleClassName?: string; 
+  subtitleClassName?: string; 
+  seeMoreClassName?: string; 
+}> = ({ 
+  icon: Icon, 
+  title, 
+  subtitle, 
+  onSeeMore, 
+  iconColor = "text-blue-600", 
+  iconBg = "bg-gray-50 dark:bg-gray-900", 
+  titleClassName = "text-gray-900 dark:text-white", 
+  subtitleClassName = "text-gray-400", 
+  seeMoreClassName = "text-blue-600" 
+}) => (
   <div className="flex items-center justify-between mb-4">
     <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center ${iconColor} shadow-sm border border-gray-100/50 dark:border-white/5`}>
+        <div className={`w-10 h-10 rounded-2xl ${iconBg} flex items-center justify-center ${iconColor} shadow-sm border border-black/10 dark:border-white/5`}>
             <Icon size={20} strokeWidth={2.5} />
         </div>
         <div>
-            <h2 className="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em] leading-none mb-1">{title}</h2>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">{subtitle}</p>
+            <h2 className={`text-[12px] font-black uppercase tracking-[0.15em] leading-none mb-1 ${titleClassName}`}>{title}</h2>
+            {subtitle && <p className={`text-[10px] font-bold uppercase tracking-widest leading-none ${subtitleClassName}`}>{subtitle}</p>}
         </div>
     </div>
-    <button onClick={onSeeMore} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver mais</button>
+    {onSeeMore && <button onClick={onSeeMore} className={`text-[10px] font-black uppercase tracking-widest ${seeMoreClassName}`}>Ver mais</button>}
   </div>
+);
+
+const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], className?: string, onClick: () => void }> = ({ item, className = '', onClick }) => (
+    <div
+      onClick={onClick}
+      className={`relative rounded-3xl overflow-hidden shadow-lg group cursor-pointer transition-all active:scale-[0.98] bg-slate-900 ${className}`}
+    >
+        <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        
+        <div className="relative z-10 p-5 flex flex-col justify-between h-full">
+            <div>
+                <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${item.bg} text-white`}>
+                    {item.type}
+                </span>
+            </div>
+
+            <div>
+                <h3 className="font-black text-white text-lg leading-tight uppercase tracking-tight drop-shadow-md">
+                    {item.title}
+                </h3>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 rounded-full flex items-center justify-center bg-black/30">
+                            <BadgeCheck size={10} className="text-blue-400" />
+                        </div>
+                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+                            {item.source}
+                        </span>
+                    </div>
+                    <ChevronRight size={14} className="text-slate-400 group-hover:text-white transition-colors" strokeWidth={3} />
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+
+const InstitutionalBanner: React.FC = () => (
+  <section className="px-6 pt-8 pb-2">
+    <div className="bg-brand-blue rounded-xl p-5 flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20">
+      <Sparkles size={16} className="text-white" />
+      <p className="text-sm font-black text-white uppercase tracking-widest">
+        Acreditamos que a vida acontece perto.
+      </p>
+    </div>
+  </section>
+);
+
+const JobCard: React.FC<{ job: Job, compatibility: CompatibilityResult, onClick: () => void }> = ({ job, compatibility, onClick }) => (
+    <div onClick={onClick} className="w-full bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 group hover:border-blue-500 transition-colors cursor-pointer shadow-sm">
+        <div className="flex justify-between items-start mb-2">
+            <div>
+                <h4 className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{job.role}</h4>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{job.company}</p>
+            </div>
+            <div className="flex flex-col items-end">
+                <span className="text-lg font-black text-emerald-500">{compatibility.score_total}%</span>
+                <span className="text-[8px] font-bold text-gray-400 uppercase">Compatível</span>
+            </div>
+        </div>
+        <div className="flex items-center gap-2 mt-3 mb-4">
+            {compatibility.motivos.slice(0,2).map((motivo, i) => (
+                <span key={i} className="text-[9px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full border border-blue-100 dark:border-blue-800/50">
+                    {motivo.length > 25 ? motivo.substring(0, 22) + '...' : motivo}
+                </span>
+            ))}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+            <MapPin size={12} />
+            <span>{job.neighborhood}</span>
+        </div>
+    </div>
 );
 
 export const HomeFeed: React.FC<{
@@ -154,6 +256,42 @@ export const HomeFeed: React.FC<{
   const { currentNeighborhood } = useNeighborhood();
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
+  const [candidateProfile, setCandidateProfile] = useState<any | null>(null);
+  const [jobRecommendations, setJobRecommendations] = useState<{ job: Job; compatibility: CompatibilityResult }[]>([]);
+
+  useEffect(() => {
+    // Para teste, sempre carrega o perfil de Juliana Costa (ID 1)
+    setCandidateProfile(MOCK_CANDIDATE_PROFILES[0]);
+  }, []);
+  
+  useEffect(() => {
+    if (candidateProfile) {
+// FIX: The `job` from `MOCK_JOBS_FOR_TESTING` is of type `MerchantJob`, which is incompatible with the expected `Job` type.
+// This fix explicitly maps the properties from `MerchantJob` to `Job` to resolve the type mismatch.
+      const recommendations = MOCK_JOBS_FOR_TESTING.map(merchantJob => {
+        const compatibility = calculateCompatibility(candidateProfile, merchantJob as unknown as MerchantJob);
+        
+        const job: Job = {
+            id: merchantJob.id,
+            role: merchantJob.titulo_cargo,
+            company: merchantJob.empresa_nome,
+            neighborhood: merchantJob.bairro,
+            type: merchantJob.tipo === 'Freela' ? 'Freelancer' : merchantJob.tipo,
+            salary: merchantJob.salario,
+            description: merchantJob.descricao_curta,
+            requirements: merchantJob.requisitos_obrigatorios,
+            postedAt: 'Há 1 dia',
+            experiencia_minima: merchantJob.experiencia_minima,
+            schedule_type: merchantJob.turno === 'Manhã' || merchantJob.turno === 'Tarde' || merchantJob.turno === 'Noite' ? 'Meio período' : merchantJob.turno === '12x36' ? 'Escala' : 'Integral',
+            category: 'Vagas',
+            isVerified: true
+        };
+        return { job, compatibility };
+      }).sort((a, b) => b.compatibility.score_total - a.compatibility.score_total)
+        .slice(0, 3);
+      setJobRecommendations(recommendations);
+    }
+  }, [candidateProfile]);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 rounded-t-[3.5rem] mt-[215px] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
@@ -222,7 +360,75 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. ACONTECENDO AGORA */}
+      {/* 🔥 TROCA-TROCA DO BAIRRO - Hero Card */}
+      <section className="px-6 py-8 space-y-5">
+        <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-purple-500 shadow-sm border border-black/10 dark:border-white/5">
+                    <Repeat size={24} strokeWidth={2.5} />
+                </div>
+                <div>
+                    <h2 className="text-[12px] font-black uppercase tracking-[0.15em] leading-none text-gray-900 dark:text-white mt-1">
+                        Troca-Troca do Bairro
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <button
+          onClick={() => onNavigate('troca_troca_swipe')}
+          className="w-full bg-slate-900 rounded-[2.5rem] p-6 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10"
+        >
+          <div className="relative mb-4">
+            <div className="flex justify-between items-center gap-4">
+              <div className="w-[48%] aspect-square rounded-3xl overflow-hidden bg-slate-800 border border-slate-700">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Tênis" />
+              </div>
+              <div className="w-[48%] aspect-square rounded-3xl overflow-hidden bg-slate-800 border border-slate-700">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Headphone" />
+              </div>
+            </div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg group-hover:scale-110 transition-transform">
+              <Repeat className="w-6 h-6 text-blue-400" />
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-3">
+              <p className="text-slate-400 text-sm whitespace-nowrap">
+                Deslize para trocar com vizinhos do seu bairro.
+              </p>
+
+              <div className="flex items-center justify-center gap-5 my-4">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); alert('Passar (Não tenho interesse)'); }}
+                    className="w-14 h-14 bg-slate-800/60 rounded-full border border-slate-700 text-slate-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60 hover:text-white"
+                  >
+                    <X size={28} strokeWidth={2.5} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); alert('Talvez (Pular)'); }}
+                    className="w-10 h-10 bg-slate-800/60 rounded-full border border-slate-700 text-blue-400 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-700/60"
+                  >
+                    <Repeat size={20} strokeWidth={2.5} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); alert('Gostei (Tenho interesse)'); }}
+                    className="w-14 h-14 bg-rose-500/80 rounded-full border border-rose-400 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-rose-500/20 hover:bg-rose-600"
+                  >
+                    <Heart size={28} fill="currentColor" />
+                  </button>
+              </div>
+              
+              <div className="w-full max-w-xs">
+                <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full text-white font-black text-sm uppercase tracking-widest shadow-2xl shadow-purple-500/40 group-hover:brightness-125 transition-all">
+                    🔥 Começar a trocar
+                </div>
+              </div>
+          </div>
+        </button>
+      </section>
+
+
+      {/* 3. ACONTECENDO AGORA - NOVO LAYOUT MOSAICO */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Flame} 
@@ -231,55 +437,50 @@ export const HomeFeed: React.FC<{
             iconColor="text-amber-500" 
             onSeeMore={() => onNavigate('neighborhood_posts')}
         />
-
-        <div className="space-y-4">
-          {ACONTECENDO_AGORA_FEED.map(item => (
-            <div 
-              key={item.id}
-              className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 p-5 flex items-start gap-5 shadow-[0_4px_25px_rgba(0,0,0,0.02)] group hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
-              onClick={() => onNavigate('neighborhood_posts')}
-            >
-              <div className={`w-12 h-12 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} shrink-0 shadow-inner`}>
-                <item.icon size={22} strokeWidth={2.5} />
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${item.color} bg-opacity-10 border border-current border-opacity-20`}>
-                        {item.type}
-                      </span>
-                  </div>
-                  <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-lg">
-                    <Clock size={10} className="text-gray-400" />
-                    <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">{item.time}</span>
-                  </div>
-                </div>
-
-                <h4 className="text-sm font-black text-gray-900 dark:text-white leading-tight uppercase tracking-tight mb-1 truncate">
-                    {item.title}
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3 line-clamp-1">{item.subtitle}</p>
-
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800">
-                    <div className="flex items-center gap-1.5">
-                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${item.source === 'Fonte Oficial' ? 'bg-blue-600' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                            {item.isVerified ? (
-                                <BadgeCheck size={10} className={item.source === 'Fonte Oficial' ? 'text-white' : 'text-blue-500'} />
-                            ) : (
-                                <Info size={10} className="text-gray-400" />
-                            )}
-                        </div>
-                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                            {item.source}
-                        </span>
-                    </div>
-                    <ChevronRight size={14} className="text-gray-200 group-hover:text-blue-500 transition-colors" strokeWidth={3} />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[200px]">
+            <HappeningNowCard 
+                item={ACONTECENDO_AGORA_FEED[0]} 
+                className="col-span-2"
+                onClick={() => onNavigate('neighborhood_posts')}
+            />
+            <HappeningNowCard 
+                item={ACONTECENDO_AGORA_FEED[1]} 
+                onClick={() => onNavigate('neighborhood_posts')}
+            />
+            <HappeningNowCard 
+                item={ACONTECENDO_AGORA_FEED[2]} 
+                onClick={() => onNavigate('neighborhood_posts')}
+            />
         </div>
+      </section>
+      
+      {/* 💼 VAGAS PERTO DE VOCÊ */}
+      <section className="px-6 py-8 space-y-5">
+        <SectionHeader 
+            icon={Briefcase} 
+            title="Vagas perto de você" 
+            subtitle={candidateProfile ? "Recomendadas pela IA" : "Conectando talentos locais"} 
+            iconColor="text-emerald-500" 
+            onSeeMore={() => onNavigate('jobs')}
+        />
+        {candidateProfile ? (
+            <div className="space-y-4">
+              {jobRecommendations.map(({ job, compatibility }) => (
+                <JobCard key={job.id} job={job} compatibility={compatibility} onClick={() => onNavigate('job_detail', { job, compatibility })} />
+              ))}
+            </div>
+        ) : (
+          <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
+              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
+                <FileText size={28} />
+              </div>
+              <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>
+              <p className="text-sm text-slate-400 mb-6">Envie seu currículo e deixe nossa IA encontrar a vaga perfeita para você no bairro.</p>
+              <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30">
+                Enviar currículo agora
+              </div>
+          </div>
+        )}
       </section>
 
       {/* 4. CUPOM DO DIA */}
@@ -370,75 +571,18 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 6. TRABALHE PERTO DE VOCÊ */}
-      {isFeatureActive('classifieds') && (
-        <section className="px-6 py-8 space-y-5">
-            <SectionHeader 
-                icon={Briefcase} 
-                title="Trabalhe perto de você" 
-                subtitle="Vagas e oportunidades locais" 
-                iconColor="text-emerald-500" 
-                onSeeMore={() => onNavigate('jobs')}
-            />
-
-            <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 pb-4 snap-x">
-                {MOCK_JOBS.slice(0, 5).map((job: Job) => (
-                    <div 
-                        key={job.id}
-                        onClick={() => onNavigate('job_detail', { job })}
-                        className="bg-white dark:bg-gray-900 rounded-[2.2rem] border border-gray-100 dark:border-gray-800 w-[260px] shadow-sm p-6 flex flex-col snap-center active:scale-[0.98] transition-all relative group overflow-hidden"
-                    >
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all">
-                            <Building2 size={80} />
-                        </div>
-
-                        <div className="flex justify-between items-start mb-4 relative z-10">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF] border border-blue-100 dark:border-blue-800/50">
-                                <Briefcase size={22} />
-                            </div>
-                            <span className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50">
-                                {job.type}
-                            </span>
-                        </div>
-
-                        <h4 className="text-[15px] font-black text-gray-900 dark:text-white leading-tight mb-1 truncate pr-2 relative z-10">
-                            {job.role}
-                        </h4>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 relative z-10">
-                            {job.company}
-                        </p>
-
-                        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-800 relative z-10">
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-1.5 text-gray-400">
-                                    <MapPin size={10} className="text-emerald-500" />
-                                    <span className="text-[9px] font-black uppercase tracking-tight">{job.neighborhood}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-gray-300">
-                                    <TrendingUp size={10} className="text-blue-400" />
-                                    <span className="text-[9px] font-black uppercase tracking-tight">Oportunidade real</span>
-                                </div>
-                            </div>
-                            <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-[#1E5BFF] group-hover:bg-blue-500 group-hover:text-white transition-all">
-                                <ChevronRight size={16} strokeWidth={3} />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </section>
-      )}
-
       {/* 7. LANÇAMENTO / ADS SECTION */}
       {userRole === 'lojista' && isFeatureActive('sponsored_ads') && (
         <section className="px-6 py-6 animate-in slide-in-from-bottom-4 duration-700">
           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
         </section>
       )}
+
+      <InstitutionalBanner />
       
       {/* 8. EXPLORE GUIDE SECTION */}
       {isFeatureActive('explore_guide') && (
-        <div className="w-full pt-10 pb-10">
+        <div className="w-full pt-8 pb-10">
             <div className="px-6">
               <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="O melhor perto de você" onSeeMore={() => onNavigate('explore')} />
               <div className="flex gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit mb-6">

@@ -1,5 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
 import { 
   ChevronLeft, 
   MapPin, 
@@ -13,17 +14,62 @@ import {
   Briefcase,
   AlertCircle
 } from 'lucide-react';
-import { MOCK_JOBS, STORES } from '../constants';
-import { Job, Store } from '../types';
+import { STORES } from '../constants';
+import { Job, Store, CompatibilityResult } from '../types';
 import { JobFiltersView, JobFilters } from './JobFiltersView';
+import { useAuth } from '@/contexts/AuthContext';
+import { calculateCompatibility, MOCK_JOBS_FOR_TESTING, MOCK_CANDIDATE_PROFILES } from '@/utils/compatibilityEngine';
+import { MerchantJob } from './MerchantJobsModule';
 
 interface JobsViewProps {
   onBack: () => void;
-  onJobClick: (job: Job) => void;
+  onJobClick: (job: Job, compatibility?: CompatibilityResult) => void;
   onNavigate?: (view: string, data?: any) => void;
 }
 
-const JobCard: React.FC<{ job: Job; onClick: () => void }> = ({ job, onClick }) => {
+const ScoreRing: React.FC<{ score: number }> = ({ score }) => {
+    const size = 36;
+    const strokeWidth = 4;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (score / 100) * circumference;
+
+    const getColor = () => {
+        if (score >= 75) return 'text-emerald-500';
+        if (score >= 50) return 'text-amber-500';
+        return 'text-red-500';
+    };
+
+    return (
+        <div className="relative" style={{ width: size, height: size }}>
+            <svg className="w-full h-full transform -rotate-90">
+                <circle
+                    className="text-gray-100 dark:text-gray-700"
+                    stroke="currentColor"
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                />
+                <circle
+                    className={`transition-all duration-1000 ease-out ${getColor()}`}
+                    stroke="currentColor"
+                    strokeWidth={strokeWidth}
+                    strokeLinecap="round"
+                    fill="transparent"
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                    style={{ strokeDasharray: circumference, strokeDashoffset: offset }}
+                />
+            </svg>
+            <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-black ${getColor()}`}>{score}</span>
+        </div>
+    );
+};
+
+const JobCard: React.FC<{ job: Job; compatibility?: CompatibilityResult; onClick: () => void }> = ({ job, compatibility, onClick }) => {
   const getBadgeStyles = (type: string) => {
     switch (type) {
       case 'CLT': return 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
@@ -49,9 +95,7 @@ const JobCard: React.FC<{ job: Job; onClick: () => void }> = ({ job, onClick }) 
               {job.role}
             </h3>
         </div>
-        <span className={`shrink-0 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${getBadgeStyles(job.type)}`}>
-          {job.type}
-        </span>
+        {compatibility && <ScoreRing score={compatibility.score_total} />}
       </div>
       
       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
@@ -71,8 +115,26 @@ const JobCard: React.FC<{ job: Job; onClick: () => void }> = ({ job, onClick }) 
   );
 };
 
+const mapTurnoToScheduleType = (turno: MerchantJob['turno']): Job['schedule_type'] => {
+  switch (turno) {
+    case 'Manhã':
+    case 'Tarde':
+    case 'Noite':
+      return 'Meio período';
+    case '12x36':
+      return 'Escala';
+    case 'Integral':
+      return 'Integral';
+    default:
+      return 'Integral';
+  }
+};
+
+
 export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNavigate }) => {
+  const { user } = useAuth();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [candidateProfile, setCandidateProfile] = useState<any | null>(null);
   const [filters, setFilters] = useState<JobFilters>({
     hireTypes: [],
     neighborhoods: [],
@@ -80,14 +142,53 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
     sortBy: 'recent'
   });
 
+  useEffect(() => {
+    // Para teste, sempre carrega o perfil de Juliana Costa (ID 1)
+    setCandidateProfile(MOCK_CANDIDATE_PROFILES[0]);
+  }, []);
+
+// FIX: The type `MerchantJob` from `MOCK_JOBS_FOR_TESTING` is incompatible with the expected `Job` type for this component's logic.
+// This fix explicitly maps the properties from `MerchantJob` to `Job` to resolve the type mismatch and ensure the component renders correctly.
+  const jobsWithCompatibility = useMemo(() => {
+    let jobs = MOCK_JOBS_FOR_TESTING.map(merchantJob => {
+      const compatibility = candidateProfile 
+        ? calculateCompatibility(candidateProfile, merchantJob) 
+        : undefined;
+      
+      const jobData: Job = {
+        id: merchantJob.id,
+        role: merchantJob.titulo_cargo,
+        company: merchantJob.empresa_nome,
+        neighborhood: merchantJob.bairro,
+        type: merchantJob.tipo === 'Freela' ? 'Freelancer' : merchantJob.tipo,
+        description: merchantJob.descricao_curta,
+        requirements: merchantJob.requisitos_obrigatorios,
+        salary: merchantJob.salario,
+        postedAt: 'Há 1 dia',
+        experiencia_minima: merchantJob.experiencia_minima,
+        schedule_type: mapTurnoToScheduleType(merchantJob.turno),
+        category: 'Vagas',
+        isVerified: true
+      };
+      
+      return { ...jobData, compatibility };
+    });
+
+    if (candidateProfile) {
+      jobs.sort((a, b) => (b.compatibility?.score_total || 0) - (a.compatibility?.score_total || 0));
+    }
+
+    return jobs;
+  }, [candidateProfile]);
+
   const filteredJobs = useMemo(() => {
-    return MOCK_JOBS.filter(job => {
+    return jobsWithCompatibility.filter(job => {
       if (filters.hireTypes.length > 0 && !filters.hireTypes.includes(job.type)) return false;
       if (filters.neighborhoods.length > 0 && !filters.neighborhoods.includes(job.neighborhood)) return false;
       if (filters.shifts.length > 0 && job.schedule_type && !filters.shifts.includes(job.schedule_type)) return false;
       return true;
     });
-  }, [filters]);
+  }, [filters, jobsWithCompatibility]);
 
   const handleApplyFilters = (newFilters: JobFilters) => {
     setFilters(newFilters);
@@ -133,13 +234,15 @@ export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNaviga
       <main className="p-5 space-y-10">
         <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
-                <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Vagas Recentes</h2>
+                <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                    {candidateProfile ? 'Recomendadas para você' : 'Vagas Recentes'}
+                </h2>
                 {filteredJobs.length > 0 && <span className="text-[10px] text-gray-400">{filteredJobs.length} vagas</span>}
             </div>
 
             {filteredJobs.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4">
-                    {filteredJobs.map(job => <JobCard key={job.id} job={job} onClick={() => onJobClick(job)} />)}
+                    {filteredJobs.map(job => <JobCard key={job.id} job={job} compatibility={job.compatibility} onClick={() => onJobClick(job, job.compatibility)} />)}
                 </div>
             ) : (
                 <div className="py-20 text-center opacity-40 flex flex-col items-center">

@@ -22,10 +22,7 @@ export const StoreCard: React.FC<{ store: Store; onClick: () => void }> = ({ sto
         <img src={store.logoUrl || store.image || "/assets/default-logo.png"} alt={store.name} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 dark:text-white text-base truncate pr-2">{store.name}</h4>
-          {isSponsored && <span className="text-[9px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded uppercase">Ads</span>}
-        </div>
+        <h4 className="font-bold text-gray-900 dark:text-white text-base truncate">{store.name}</h4>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           <span className="flex items-center gap-1 font-bold text-[#1E5BFF]"><Star className="w-3 h-3 fill-current" /> {store.rating?.toFixed(1)}</span>
           <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
@@ -53,7 +50,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({
   const masterStore = useMemo(() => STORES.find(s => s.id === 'atual-clube'), []);
 
   const handleMasterClick = () => {
-    if (onNavigate) onNavigate('patrocinador_master');
+    if (masterStore) onStoreClick(masterStore);
   };
 
   const filteredStores = useMemo(() => {
@@ -79,33 +76,35 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({
         {masterStore && activeFilter === 'all' && !premiumOnly && (
            <div 
                onClick={handleMasterClick}
-               className="relative w-full rounded-[2.5rem] p-[2px] bg-gradient-to-r from-[#FF6501] via-orange-300 to-[#FF6501] shadow-[0_15px_35px_rgba(255,101,1,0.12)] cursor-pointer group active:scale-[0.98] transition-all mb-8 mt-6"
+               className="relative w-full cursor-pointer group active:scale-[0.98] transition-all mb-6 mt-6"
            >
-               <div className="absolute top-0 right-8 -translate-y-1/2 z-20">
-                  <span className="bg-slate-900 text-white text-[8px] font-black px-3.5 py-1 rounded-full uppercase tracking-widest border-2 border-[#FF6501] flex items-center gap-2 shadow-2xl">
-                     <Crown className="w-3 h-3 fill-orange-400" /> Patrocinador Master
-                  </span>
+               <div className="absolute top-0 right-6 -translate-y-1/2 z-20">
+                  <div className="bg-slate-900 text-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg">
+                      <Crown className="w-4 h-4 text-white fill-white" />
+                      <div className="flex flex-col items-center leading-none">
+                          <span className="text-[7px] font-bold uppercase tracking-widest">Patrocinador</span>
+                          <span className="text-xs font-black uppercase tracking-wider -mt-0.5">Master</span>
+                      </div>
+                  </div>
                </div>
 
-               <div className="bg-white dark:bg-gray-900 rounded-[2.4rem] p-5 relative overflow-hidden h-full">
-                   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none"></div>
-
-                   <div className="flex gap-5 items-center relative z-10">
-                       <div className="w-18 h-18 rounded-[1.5rem] bg-white flex-shrink-0 overflow-hidden relative shadow-xl border-2 border-gray-50 dark:border-gray-800 flex items-center justify-center">
-                            <span className="text-orange-600 font-black text-xl">AC</span>
+               <div className="bg-brand-orange rounded-3xl p-5 pt-8 shadow-lg shadow-orange-500/20">
+                   <div className="flex gap-4 items-center">
+                       <div className="w-16 h-16 rounded-full bg-white flex-shrink-0 flex items-center justify-center shadow-md">
+                           <span className="text-brand-orange font-black text-3xl">AC</span>
                        </div>
                        <div className="flex-1 min-w-0">
-                           <h3 className="font-black text-lg text-[#FF6501] leading-tight truncate mb-1 uppercase tracking-tighter">Atual Clube</h3>
-                           <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 font-bold leading-relaxed">{masterStore.description}</p>
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1 text-[9px] font-black text-orange-600 bg-orange-50 dark:bg-orange-400/10 px-2.5 py-1 rounded-xl border border-orange-200 dark:border-orange-400/20">
-                                   <Star className="w-3 h-3 fill-current" />
-                                   {masterStore.rating?.toFixed(1)}
-                                </div>
-                                <div className="bg-gray-50 dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-gray-100 dark:border-white/5">
-                                    <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Proteção</span>
-                                </div>
-                            </div>
+                           <h3 className="font-black text-2xl text-white uppercase tracking-tight">Atual Clube</h3>
+                           <p className="text-white/90 text-xs mt-1 leading-tight font-medium line-clamp-2">{masterStore?.description}</p>
+                       </div>
+                   </div>
+                   <div className="flex items-center gap-2 mt-4">
+                       <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/20 px-2.5 py-1 rounded-md">
+                          <Star className="w-3 h-3 fill-current" />
+                          {masterStore.rating?.toFixed(1)}
+                       </div>
+                       <div className="bg-black/20 px-2.5 py-1 rounded-md">
+                           <span className="text-[10px] font-bold text-white uppercase">Proteção</span>
                        </div>
                    </div>
                </div>

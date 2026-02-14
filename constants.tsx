@@ -609,7 +609,7 @@ export const MOCK_JOBS: Job[] = [
     type: 'CLT',
     salary: 'R$ 1.450,00',
     description: 'Atendimento ao público, organização e limpeza do local.',
-    requirements: ['Experiência anterior', 'Boa comunicação'],
+    requirements: ['Experiência com caixa', 'Boa comunicação', 'Proatividade'],
     schedule: '6x1',
     contactWhatsapp: '5521999999999',
     postedAt: 'Há 2h',
@@ -617,6 +617,7 @@ export const MOCK_JOBS: Job[] = [
     sponsoredUntil: '2025-12-31',
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
+    experiencia_minima: 'Atendimento'
   },
   {
     id: 'job-2',
@@ -634,6 +635,7 @@ export const MOCK_JOBS: Job[] = [
     isUrgent: true,
     candidacy_method: 'whatsapp',
     modality: 'Presencial',
+    experiencia_minima: 'Vendas'
   }
 ];
 
@@ -773,3 +775,5 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   { id: 'post-9', userId: 'u9', userName: 'Rafael Lima', userAvatar: 'https://i.pravatar.cc/100?u=rafael', authorRole: 'resident', content: 'Alguém para dividir frete de mudança saindo da Freguesia para o Recreio este mês?', type: 'recommendation', communityId: 'comm-tips', neighborhood: 'Freguesia', timestamp: '1d', likes: 5, comments: 7 },
   { id: 'post-10', userId: 'm-padaria', userName: 'Padaria Imperial', userAvatar: 'https://i.pravatar.cc/100?u=padaria', authorRole: 'merchant', content: 'Pão quentinho saindo agora! Venham aproveitar nossa fornada especial de brioche.', type: 'recommendation', communityId: 'comm-tips', neighborhood: 'Freguesia', timestamp: '10 min', likes: 32, comments: 4, imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop', storeId: 'f-1' }
 ];
+
+export const TUCO_MASCOT_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARgAAACvCAYAAABrC6fPAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAP+6SURBVHhe7J0JfFTl+e/vM/OmaQoJCWFIAAEEiYgIiIgoIiCiKCii4uKuuLgKriCiKAgKuLgoiCAIgoCAgIAgWUgISSghhDRNfnf63vecM0kzmUxmEu97P93v+zzveOd5nzvzzswnk0wmw4cPH6jW/RkAAAAASUVORK5CYII=";

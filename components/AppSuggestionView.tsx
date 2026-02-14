@@ -11,7 +11,6 @@ import {
   Sparkles,
   Zap,
   HelpCircle,
-// Fix: Imported missing Info icon from lucide-react
   Info
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';

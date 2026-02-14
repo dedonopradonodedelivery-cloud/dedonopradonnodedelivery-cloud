@@ -255,7 +255,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
           const chatKey = `msgs_${requestId}_admin_auditoria`; // Using a generic merchant ID for demo
           const initialMsgs = [{
               id: `sys-trade-${Date.now()}`,
-              requestId,
+              requestId: requestId,
               senderId: 'system',
               senderName: 'Localizei JPA',
               senderRole: 'merchant',
@@ -281,7 +281,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
     setViewState('form_media');
   };
 
-  // FIX: handleItemClick added to correct scope
+// FIX: handleItemClick added to correct scope
   const handleItemClick = (item: Classified) => {
     onNavigate('classified_detail', { item });
   };
@@ -368,7 +368,7 @@ export const DesapegaView: React.FC<DesapegaViewProps> = ({ onBack, user, onRequ
 
   if (viewState === 'match_deck' && currentMatchCard) {
       return (
-          <div className="min-h-screen bg-slate-950 flex flex-col font-sans relative overflow-hidden">
+          <div className="min-h-screen bg-slate-950 flex flex-col font-display relative overflow-hidden">
               {/* Header com padding consistente */}
               <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-between items-center">
                   <button onClick={() => setViewState('list')} className="p-2.5 bg-black/20 backdrop-blur-md rounded-full text-white/70 hover:text-white transition-all active:scale-90">

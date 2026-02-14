@@ -12,7 +12,6 @@ import {
   UserCheck, ArrowRightLeft, CreditCard,
   LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
   ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight,
-// FIX: Imported missing Info icon from lucide-react
   Info
 } from 'lucide-react';
 import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
@@ -73,7 +72,6 @@ const FeatureManagement: React.FC = () => {
             
             <div className="p-6 bg-blue-900/10 border border-blue-500/20 rounded-[2.5rem] mt-12">
                 <div className="flex gap-4">
-                    {/* Info icon was previously undefined */}
                     <Info className="text-blue-400 shrink-0" size={20} />
                     <p className="text-xs text-blue-200/70 leading-relaxed">
                         <strong>Nota do Sistema:</strong> As alterações nas abas e módulos são aplicadas instantaneamente em todos os dispositivos sem necessidade de atualização da página ou do aplicativo.

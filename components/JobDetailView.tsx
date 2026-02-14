@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Job } from '../types';
+import { Job, CompatibilityResult } from '../types';
 import { 
   ChevronLeft, 
   MapPin, 
@@ -10,15 +10,60 @@ import {
   CheckCircle2, 
   Info,
   DollarSign,
-  Tag
+  Tag,
+  ThumbsUp,
+  AlertTriangle
 } from 'lucide-react';
 
 interface JobDetailViewProps {
   job: Job;
+  compatibility?: CompatibilityResult;
   onBack: () => void;
 }
 
-export const JobDetailView: React.FC<JobDetailViewProps> = ({ job, onBack }) => {
+const CompatibilityDetails: React.FC<{ analysis: CompatibilityResult }> = ({ analysis }) => {
+    return (
+        <section className="space-y-4">
+            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] px-1">Análise de Compatibilidade</h4>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter">Seu Score</h3>
+                    <div className="text-4xl font-black text-emerald-500 italic">{analysis.score_total} / 100</div>
+                </div>
+                
+                {analysis.pontos_fortes.length > 0 && (
+                    <div className="space-y-3">
+                        <h5 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-2"><ThumbsUp size={14}/> Pontos Fortes</h5>
+                        <ul className="space-y-2">
+                            {analysis.pontos_fortes.map((point, i) => (
+                                <li key={i} className="flex items-start gap-3 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                                    <span>{point}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {analysis.pontos_de_atencao.length > 0 && (
+                    <div className="space-y-3 pt-4 border-t border-gray-50 dark:border-gray-800">
+                        <h5 className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2"><AlertTriangle size={14}/> Pontos de Atenção</h5>
+                        <ul className="space-y-2">
+                            {analysis.pontos_de_atencao.map((point, i) => (
+                                <li key={i} className="flex items-start gap-3 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                                    <span>{point}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+export const JobDetailView: React.FC<JobDetailViewProps> = ({ job, compatibility, onBack }) => {
   const handleApply = () => {
     if (!job.contactWhatsapp) {
       alert("Informações de contato não disponíveis.");
@@ -68,6 +113,8 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({ job, onBack }) => 
             </div>
           </div>
         </section>
+
+        {compatibility && <CompatibilityDetails analysis={compatibility} />}
 
         {/* Sobre a Vaga */}
         <section className="space-y-4">
@@ -128,7 +175,7 @@ export const JobDetailView: React.FC<JobDetailViewProps> = ({ job, onBack }) => 
       <div className="fixed bottom-[80px] left-0 right-0 p-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 z-50 max-w-md mx-auto shadow-2xl">
         <button 
           onClick={handleApply}
-          className="w-full bg-[#1E5BFF] hover:bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
+          className="w-full bg-[#00D95F] hover:bg-[#00C254] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-widest text-xs shadow-xl shadow-green-500/20 active:scale-95 transition-all"
         >
           <MessageCircle size={20} className="fill-current" />
           Me candidatar pelo WhatsApp

@@ -52,8 +52,6 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
         // Mock data corrigido com propriedades obrigatórias da interface CashbackTransaction
         setRequests([
             {
-// FIX: The mock data was missing required properties from the CashbackTransaction interface.
-// 'amount_cents' and 'type' have been added to resolve the error.
                 id: 'mock-1',
                 merchant_id: merchantId,
                 store_id: 'store-1',
@@ -63,6 +61,8 @@ export const MerchantCashbackRequests: React.FC<MerchantCashbackRequestsProps> =
                 cashback_used_cents: 500,
                 cashback_to_earn_cents: 725,
                 amount_to_pay_now_cents: 14500,
+// FIX: The mock data was missing required properties from the CashbackTransaction interface.
+// 'amount_cents' and 'type' have been added to resolve the error.
                 amount_cents: 725,
                 type: 'earn',
                 status: 'pending',

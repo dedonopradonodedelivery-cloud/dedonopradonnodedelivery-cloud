@@ -20,11 +20,10 @@ interface NavItem {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
   const { isFeatureActive } = useFeatures();
 
-  // DEFINIÇÃO DE CORE NAVIGATION (Premium 4-Tab Layout)
+  // DEFINIÇÃO DE CORE NAVIGATION (Premium 3-Tab Layout)
   const allNavItems: NavItem[] = [
     { id: 'home', icon: Home, label: 'Início', featureKey: 'home_tab' },
     { id: 'explore', icon: Compass, label: 'Explorar', featureKey: 'explore_guide' },
-    { id: 'classifieds', icon: Newspaper, label: 'Classificados', featureKey: 'classifieds' },
     { id: 'profile', icon: User, label: 'Menu' },
   ];
 

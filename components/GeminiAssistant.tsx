@@ -2,28 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { X, Send, Loader2, Mic, RefreshCw, AlertCircle } from 'lucide-react';
 import { ChatMessage } from '@/types';
+import { TUCO_MASCOT_BASE64 } from '@/constants';
 
 const TucoAvatarLarge: React.FC = () => (
-  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-white/20">
-    <svg viewBox="0 0 240 200" className="w-8 h-8">
-        <defs>
-        <linearGradient id="tuco_body_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1E293B" />
-            <stop offset="100%" stopColor="#0F172A" />
-        </linearGradient>
-        <linearGradient id="tuco_beak_grad" x1="0%" y1="0%" x2="100%" y2="20%">
-            <stop offset="0%" stopColor="#FFD233" />
-            <stop offset="45%" stopColor="#FF9F00" />
-            <stop offset="100%" stopColor="#FF4D00" />
-        </linearGradient>
-        </defs>
-        <path d="M75 175C35 175 15 145 20 95C25 45 55 25 90 25C120 25 145 50 145 100C145 150 115 175 80 175Z" fill="url(#tuco_body_grad)" />
-        <path d="M88 162C72 162 64 148 64 108C64 68 76 48 94 48C102 48 110 58 114 78C118 98 114 144 104 156C100 160 94 162 88 162Z" fill="white" />
-        <circle cx="94" cy="82" r="18" fill="white" /> 
-        <circle cx="99" cy="82" r="9.5" fill="#0F172A" /> 
-        <circle cx="103" cy="77" r="3.5" fill="white" /> 
-        <path d="M115 60C155 48 220 70 230 100C235 125 185 140 145 140Z" fill="url(#tuco_beak_grad)" />
-    </svg>
+  <div className="w-10 h-10 bg-transparent rounded-full flex items-center justify-center overflow-hidden">
+    <img src={TUCO_MASCOT_BASE64} alt="Mascote Tuco" className="w-12 h-12 object-contain" />
   </div>
 );
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   ChevronLeft, 
@@ -29,20 +30,15 @@ import {
   Mail,
   Info
 } from 'lucide-react';
-// FIX: The import path was incorrect, pointing to a non-existent file. Corrected to use the project's alias.
 import { supabase } from '@/lib/supabaseClient';
-// FIX: Corrected import path for useAuth from root contexts folder.
 import { useAuth } from '@/contexts/AuthContext';
-// FIX: Corrected import path for constants from root constants folder.
 import { CATEGORIES, SUBCATEGORIES } from '@/constants';
-// FIX: Corrected import path for types from root types folder.
 import { BusinessHour } from '@/types';
 
 interface StoreProfileEditProps {
   onBack: () => void;
 }
 
-/* Added FormField component to resolve missing name error */
 const FormField: React.FC<{
   label: string;
   value: string;
