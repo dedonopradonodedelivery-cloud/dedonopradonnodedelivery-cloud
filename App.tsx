@@ -83,7 +83,7 @@ export const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<any>('Visitante');
   const [appReady, setAppReady] = useState(false);
 
-  // Estados de Navegação e Título
+  // ESTADOS DE NAVEGAÇÃO PREMIUM
   const [customHeaderTitle, setCustomHeaderTitle] = useState('');
   const [backView, setBackView] = useState('home');
 
@@ -127,21 +127,18 @@ export const App: React.FC = () => {
     setCustomHeaderTitle(category.name.toUpperCase());
     setBackView('home');
 
-    if (category.slug === 'saude') {
-        handleNavigate('health_selection');
-    } else if (category.slug === 'servicos') {
-        handleNavigate('services_selection');
-    } else if (category.slug === 'pets') {
-        handleNavigate('pets_selection');
-    } else if (category.slug === 'moda') {
-        handleNavigate('fashion_selection');
-    } else if (category.slug === 'beleza') {
-        handleNavigate('beauty_selection');
-    } else if (category.slug === 'autos') {
-        handleNavigate('autos_selection');
-    } else {
-        handleNavigate('category_detail');
-    }
+    // MAPEAMENTO DE REDIRECIONAMENTO DE CATEGORIA
+    const slugMap: Record<string, string> = {
+        'saude': 'health_selection',
+        'servicos': 'services_selection',
+        'pets': 'pets_selection',
+        'moda': 'fashion_selection',
+        'beleza': 'beauty_selection',
+        'autos': 'autos_selection'
+    };
+
+    const target = slugMap[category.slug] || 'category_detail';
+    handleNavigate(target);
   };
 
   const handleSignOut = async () => {
@@ -214,118 +211,98 @@ export const App: React.FC = () => {
 
                     {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={userRole} />}
                     {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => handleNavigate(backView)} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
+                    
+                    {/* FLUXO SAÚDE */}
                     {activeTab === 'health_selection' && (
                         <HealthSelectionView 
-                        onBack={() => handleNavigate('home')} 
-                        onSelect={(intent) => {
-                            if (intent === 'Mulher') {
-                                setCustomHeaderTitle('SAÚDE — MULHER');
-                                handleNavigate('health_women');
-                            } else if (intent === 'Pediatria') {
-                                setCustomHeaderTitle('SAÚDE — PEDIATRIA');
-                                handleNavigate('health_pediatrics');
-                            } else {
-                                setCustomHeaderTitle(intent.toUpperCase());
-                                setBackView('health_selection');
-                                handleNavigate('category_detail');
-                            }
-                        }} 
-                        onNavigate={handleNavigate}
+                            onBack={() => handleNavigate('home')} 
+                            onSelect={(intent) => {
+                                if (intent === 'Mulher') { setCustomHeaderTitle('SAÚDE — MULHER'); setBackView('health_selection'); handleNavigate('health_women'); }
+                                else if (intent === 'Pediatria') { setCustomHeaderTitle('SAÚDE — PEDIATRIA'); setBackView('health_selection'); handleNavigate('health_pediatrics'); }
+                                else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('health_selection'); handleNavigate('category_detail'); }
+                            }} 
+                            onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'health_women' && (
-                      <HealthWomenView 
-                        onBack={() => handleNavigate('health_selection')} 
-                        onSelect={(specialty) => {
-                          setCustomHeaderTitle(specialty.toUpperCase());
-                          setBackView('health_women');
-                          handleNavigate('category_detail');
-                        }} 
-                        onNavigate={handleNavigate} 
-                      />
+                    {activeTab === 'health_women' && <HealthWomenView onBack={() => handleNavigate('health_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('health_women'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+                    {activeTab === 'health_pediatrics' && <HealthPediatricsView onBack={() => handleNavigate('health_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('health_pediatrics'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+                    
+                    {/* FLUXO SERVIÇOS */}
+                    {activeTab === 'services_selection' && (
+                        <ServicesSelectionView 
+                            onBack={() => handleNavigate('home')} 
+                            onSelect={(intent) => {
+                                if (intent === 'Manuais') { setCustomHeaderTitle('SERVIÇOS — MANUAIS'); setBackView('services_selection'); handleNavigate('services_manual'); }
+                                else if (intent === 'Especializados') { setCustomHeaderTitle('SERVIÇOS — ESPECIALIZADOS'); setBackView('services_selection'); handleNavigate('services_specialized'); }
+                                else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('services_selection'); handleNavigate('category_detail'); }
+                            }}
+                            onNavigate={handleNavigate}
+                        />
                     )}
-                    {activeTab === 'health_pediatrics' && (
-                      <HealthPediatricsView 
-                        onBack={() => handleNavigate('health_selection')} 
-                        onSelect={(specialty) => {
-                          setCustomHeaderTitle(specialty.toUpperCase());
-                          setBackView('health_pediatrics');
-                          handleNavigate('category_detail');
-                        }} 
-                        onNavigate={handleNavigate} 
-                      />
+                    {activeTab === 'services_manual' && <ServicesManualView onBack={() => handleNavigate('services_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('services_manual'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+                    {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={() => handleNavigate('services_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('services_specialized'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+                    
+                    {/* FLUXO PETS */}
+                    {activeTab === 'pets_selection' && (
+                        <PetsSelectionView 
+                            onBack={() => handleNavigate('home')} 
+                            onSelect={(intent) => {
+                                if (intent === 'Cães') { setCustomHeaderTitle('PET — CÃES'); setBackView('pets_selection'); handleNavigate('pets_dogs'); }
+                                else if (intent === 'Gatos') { setCustomHeaderTitle('PET — GATOS'); setBackView('pets_selection'); handleNavigate('pets_cats'); }
+                                else if (intent === 'Outros Pets') { setCustomHeaderTitle('PET — OUTROS'); setBackView('pets_selection'); handleNavigate('pets_others'); }
+                                else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('pets_selection'); handleNavigate('category_detail'); }
+                            }}
+                            onNavigate={handleNavigate}
+                        />
                     )}
+                    {activeTab === 'pets_dogs' && <PetsDogsView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('pets_dogs'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_cats' && <PetsCatsView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('pets_cats'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_others' && <PetsOthersView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('pets_others'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
+
+                    {/* FLUXO MODA */}
                     {activeTab === 'fashion_selection' && (
                         <FashionSelectionView 
-                        onBack={() => handleNavigate('home')}
-                        onSelect={(intent) => {
-                            if (intent === 'Feminino') {
-                                setCustomHeaderTitle('MODA — MULHER');
-                                handleNavigate('fashion_women');
-                            } else if (intent === 'Masculino') {
-                                setCustomHeaderTitle('MODA — HOMEM');
-                                handleNavigate('fashion_men');
-                            } else if (intent === 'Infantil') {
-                                setCustomHeaderTitle('MODA — KIDS');
-                                handleNavigate('fashion_kids');
-                            } else {
-                                setCustomHeaderTitle(intent.toUpperCase());
-                                setBackView('fashion_selection');
-                                handleNavigate('category_detail');
-                            }
-                        }}
-                        onNavigate={handleNavigate}
+                            onBack={() => handleNavigate('home')}
+                            onSelect={(intent) => {
+                                if (intent === 'Feminino') { setCustomHeaderTitle('MODA — MULHER'); setBackView('fashion_selection'); handleNavigate('fashion_women'); }
+                                else if (intent === 'Masculino') { setCustomHeaderTitle('MODA — HOMEM'); setBackView('fashion_selection'); handleNavigate('fashion_men'); }
+                                else if (intent === 'Infantil') { setCustomHeaderTitle('MODA — KIDS'); setBackView('fashion_selection'); handleNavigate('fashion_kids'); }
+                                else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('fashion_selection'); handleNavigate('category_detail'); }
+                            }}
+                            onNavigate={handleNavigate}
                         />
                     )}
                     {activeTab === 'fashion_women' && <FashionWomenView onBack={() => handleNavigate('fashion_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('fashion_women'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
                     {activeTab === 'fashion_men' && <FashionMenView onBack={() => handleNavigate('fashion_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('fashion_men'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
                     {activeTab === 'fashion_kids' && <FashionKidsView onBack={() => handleNavigate('fashion_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('fashion_kids'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
                     
+                    {/* FLUXO BELEZA */}
                     {activeTab === 'beauty_selection' && (
                         <BeautySelectionView
-                          onBack={() => handleNavigate('home')}
-                          onSelect={(intent) => {
-                            if (intent === 'Mulher') {
-                                setCustomHeaderTitle('BELEZA — MULHER');
-                                handleNavigate('beauty_women');
-                            } else if (intent === 'Homem') {
-                                setCustomHeaderTitle('BELEZA — HOMEM');
-                                handleNavigate('beauty_men');
-                            } else {
-                                setCustomHeaderTitle(intent.toUpperCase());
-                                setBackView('beauty_selection');
-                                handleNavigate('category_detail');
-                            }
-                          }}
-                          onNavigate={handleNavigate}
+                            onBack={() => handleNavigate('home')}
+                            onSelect={(intent) => {
+                                if (intent === 'Mulher') { setCustomHeaderTitle('BELEZA — MULHER'); setBackView('beauty_selection'); handleNavigate('beauty_women'); }
+                                else if (intent === 'Homem') { setCustomHeaderTitle('BELEZA — HOMEM'); setBackView('beauty_selection'); handleNavigate('beauty_men'); }
+                                else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('beauty_selection'); handleNavigate('category_detail'); }
+                            }}
+                            onNavigate={handleNavigate}
                         />
                     )}
                     {activeTab === 'beauty_women' && <BeautyWomenView onBack={() => handleNavigate('beauty_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('beauty_women'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
                     {activeTab === 'beauty_men' && <BeautyMenView onBack={() => handleNavigate('beauty_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('beauty_men'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
                     
+                    {/* FLUXO AUTOS */}
                     {activeTab === 'autos_selection' && (
                         <AutosSelectionView
-                          onBack={() => handleNavigate('home')}
-                          onSelect={(intent) => {
-                            if (intent === 'Carros') {
-                                setCustomHeaderTitle('AUTOS — CARROS');
-                                handleNavigate('autos_carros');
-                            } else if (intent === 'Motos') {
-                                setCustomHeaderTitle('AUTOS — MOTOS');
-                                handleNavigate('autos_motos');
-                            } else if (intent === 'Bikes') {
-                                setCustomHeaderTitle('AUTOS — BIKES');
-                                handleNavigate('autos_bikes');
-                            } else if (intent === 'Elétricos') {
-                                setCustomHeaderTitle('AUTOS — ELÉTRICOS');
-                                handleNavigate('autos_eletricos');
-                            } else {
-                                setCustomHeaderTitle(intent.toUpperCase());
-                                setBackView('autos_selection');
-                                handleNavigate('category_detail');
-                            }
-                          }}
-                          onNavigate={handleNavigate}
+                            onBack={() => handleNavigate('home')}
+                            onSelect={(intent) => {
+                                if (intent === 'Carros') { setCustomHeaderTitle('AUTOS — CARROS'); setBackView('autos_selection'); handleNavigate('autos_carros'); }
+                                else if (intent === 'Motos') { setCustomHeaderTitle('AUTOS — MOTOS'); setBackView('autos_selection'); handleNavigate('autos_motos'); }
+                                else if (intent === 'Bikes') { setCustomHeaderTitle('AUTOS — BIKES'); setBackView('autos_selection'); handleNavigate('autos_bikes'); }
+                                else if (intent === 'Elétricos') { setCustomHeaderTitle('AUTOS — ELÉTRICOS'); setBackView('autos_selection'); handleNavigate('autos_eletricos'); }
+                                else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('autos_selection'); handleNavigate('category_detail'); }
+                            }}
+                            onNavigate={handleNavigate}
                         />
                     )}
                     {activeTab === 'autos_carros' && <AutosCarrosView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('autos_carros'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
@@ -333,54 +310,7 @@ export const App: React.FC = () => {
                     {activeTab === 'autos_bikes' && <AutosBikesView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('autos_bikes'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
                     {activeTab === 'autos_eletricos' && <AutosEletricosView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('autos_eletricos'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
 
-                    {activeTab === 'pets_selection' && (
-                        <PetsSelectionView 
-                        onBack={() => handleNavigate('home')} 
-                        onSelect={(intent) => {
-                            if (intent === 'Cães') {
-                                setCustomHeaderTitle('PET — CÃES');
-                                handleNavigate('pets_dogs');
-                            } else if (intent === 'Gatos') {
-                                setCustomHeaderTitle('PET — GATOS');
-                                handleNavigate('pets_cats');
-                            } else if (intent === 'Outros Pets') {
-                                setCustomHeaderTitle('PET — OUTROS');
-                                handleNavigate('pets_others');
-                            } else {
-                                setCustomHeaderTitle(intent.toUpperCase());
-                                setBackView('pets_selection');
-                                handleNavigate('category_detail');
-                            }
-                        }}
-                        onNavigate={handleNavigate}
-                        />
-                    )}
-                    {activeTab === 'pets_dogs' && <PetsDogsView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('pets_dogs'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
-                    {activeTab === 'pets_cats' && <PetsCatsView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('pets_cats'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
-                    {activeTab === 'pets_others' && <PetsOthersView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('pets_others'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
-                    
-                    {activeTab === 'services_selection' && (
-                        <ServicesSelectionView 
-                        onBack={() => handleNavigate('home')} 
-                        onSelect={(intent) => {
-                            if (intent === 'Manuais') {
-                                setCustomHeaderTitle('SERVIÇOS — MANUAIS');
-                                handleNavigate('services_manual');
-                            } else if (intent === 'Especializados') {
-                                setCustomHeaderTitle('SERVIÇOS — ESPECIALIZADOS');
-                                handleNavigate('services_specialized');
-                            } else {
-                                setCustomHeaderTitle(intent.toUpperCase());
-                                setBackView('services_selection');
-                                handleNavigate('category_detail');
-                            }
-                        }}
-                        onNavigate={handleNavigate}
-                        />
-                    )}
-                    {activeTab === 'services_manual' && <ServicesManualView onBack={() => handleNavigate('services_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('services_manual'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
-                    {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={() => handleNavigate('services_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); setBackView('services_specialized'); handleNavigate('category_detail'); }} onNavigate={handleNavigate} />}
-                    
+                    {/* DEMAIS ROTAS */}
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
                     {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'user_resume' && <UserResumeView user={user as any} onBack={() => handleNavigate('profile')} />}

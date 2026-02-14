@@ -161,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   // LÓGICA DE TÍTULO PREMIUM: Prioriza customTitle e garante UPPERCASE
-  const displayTitle = customTitle || viewTitles[activeTab] || 'Localizei ';
+  const displayTitle = (customTitle || viewTitles[activeTab] || 'Localizei ').toUpperCase();
 
   useEffect(() => {
     const checkNotifs = () => {
