@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Scissors, Stethoscope, Home, ShoppingBag, Sparkles, Dog, Heart, Zap, Star, Bone } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyItem {
   name: string;
@@ -19,6 +20,7 @@ interface PetsDogsViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -81,7 +83,17 @@ const SpecialtyCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({
   </button>
 );
 
-export const PetsDogsView: React.FC<PetsDogsViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const PetsDogsView: React.FC<PetsDogsViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Resort Canino JPA',
+      category: 'Pets',
+      subcategory: 'Hotel & Creche',
+      image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200',
+      description: 'Hospedagem 5 estrelas para cães com monitoramento 24h e atividades ao ar livre na Freguesia.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -101,16 +113,19 @@ export const PetsDogsView: React.FC<PetsDogsViewProps> = ({ onBack, onSelect, on
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Autoridade */}
-        <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        {/* Banner de Autoridade - Agora Clicável */}
+        <div 
+            onClick={handleHeroClick}
+            className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-10 flex items-start gap-4">
                 <div className="p-3 bg-blue-600 rounded-2xl">
                     <Bone size={24} className="text-white fill-white" />
                 </div>
                 <div>
                     <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Mundo Canino JPA</h3>
-                    <p className="text-slate-400 text-xs font-medium leading-relaxed">As melhores clínicas e profissionais especializados em cães na região.</p>
+                    <p className="text-slate-400 text-xs font-medium leading-relaxed">As melhores clínicas e profissionais especializados em cães na região. <span className="underline ml-1">Conhecer</span></p>
                 </div>
             </div>
         </div>

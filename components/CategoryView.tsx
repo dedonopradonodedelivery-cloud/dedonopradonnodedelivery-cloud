@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { AlertCircle, Crown, Info, Star, CheckCircle2, ArrowRight } from 'lucide-react';
-import { Category, Store } from '@/types';
+import { Category, Store, AdType } from '@/types';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 import { StoreCard } from '@/components/LojasEServicosList';
 
@@ -57,13 +57,21 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     return stores.filter(s => s.category === category.name || s.subcategory === category.name);
   }, [stores, category.name]);
 
-  const handleAdvertiseClick = () => {
-    if (userRole === 'lojista') {
-      onAdvertiseInCategory(category.name);
-      onNavigate('store_ads_module');
-    } else {
-      onNavigate('store_ads_module');
-    }
+  // Fallback para o Banner de Oportunidade
+  const handleOpportunityBannerClick = () => {
+    const demoStore: Partial<Store> = {
+      id: 'demo-destaque',
+      name: 'Seu Negócio Aqui',
+      category: category.name,
+      subcategory: 'Espaço Publicitário',
+      description: `Este é um exemplo de como seu perfil será exibido para milhares de moradores. Ocupar o topo de ${category.name} garante autoridade imediata no bairro.`,
+      image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200',
+      rating: 5.0,
+      verified: true,
+      isOpenNow: true,
+      adType: AdType.PREMIUM
+    };
+    onStoreClick(demoStore as Store);
   };
 
   return (
@@ -74,18 +82,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
         
         <main className="p-6 pt-12 space-y-10">
             
-            {/* 1️⃣ BANNER COMERCIAL (Opportunity Space) */}
+            {/* 1️⃣ BANNER COMERCIAL (Agora com Fallback de Perfil) */}
             <section 
-            onClick={handleAdvertiseClick}
+            onClick={handleOpportunityBannerClick}
             className="relative w-full aspect-[16/8] rounded-[2rem] overflow-hidden cursor-pointer group shadow-2xl shadow-blue-900/10"
             >
-            {/* Imagem de Fundo Elegante */}
             <img 
                 src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop" 
                 alt="Espaço Publicitário"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            {/* Overlay Gradiente Profundo */}
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent mix-blend-multiply opacity-90"></div>
             
             <div className="absolute inset-0 p-6 flex flex-col justify-center">
@@ -96,7 +102,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                     Sua marca aqui
                 </h2>
                 
-                {/* Conceito Comercial Discreto e Elegante */}
                 <div className="space-y-0.5 opacity-90">
                     <p className="text-xs font-bold text-blue-100 flex items-center gap-1.5">
                         Espaço publicitário <Info size={10} />
@@ -107,13 +112,12 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                 </div>
             </div>
 
-            {/* Botão sutil de ação */}
             <div className="absolute bottom-5 right-5 bg-white text-slate-900 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 duration-300">
-                Saber mais <ArrowRight size={10} />
+                Ver Exemplo <ArrowRight size={10} />
             </div>
             </section>
 
-            {/* 2️⃣ SEÇÃO DESTAQUES (Premium Cards) */}
+            {/* 2️⃣ SEÇÃO DESTAQUES (Agora 100% Clicáveis com Fallback) */}
             <section>
             <div className="flex items-center gap-2 mb-5 px-1">
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -126,6 +130,19 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                 {MOCK_HIGHLIGHTS.map((highlight) => (
                 <div 
                     key={highlight.id}
+                    onClick={() => onStoreClick({
+                      id: highlight.id,
+                      name: highlight.name,
+                      category: category.name,
+                      subcategory: highlight.role,
+                      description: highlight.description,
+                      image: highlight.image,
+                      rating: highlight.rating,
+                      adType: AdType.PREMIUM,
+                      verified: true,
+                      isOpenNow: true,
+                      distance: 'Freguesia • RJ'
+                    } as Store)}
                     className="min-w-[280px] max-w-[280px] bg-white dark:bg-gray-900 rounded-[2rem] p-4 shadow-md border border-gray-100 dark:border-gray-800 snap-center relative group active:scale-[0.98] transition-transform cursor-pointer"
                 >
                     <div className="flex items-start gap-4 mb-4">

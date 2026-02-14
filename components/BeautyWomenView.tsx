@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, Scissors, Hand, Smile, Palette, Eye, Droplets, Heart } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyGroup {
   title: string;
@@ -13,6 +14,7 @@ interface BeautyWomenViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -37,7 +39,17 @@ const SpecialtyCard: React.FC<{ item: {name: string, isPopular?: boolean}; onCli
   </button>
 );
 
-export const BeautyWomenView: React.FC<BeautyWomenViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const BeautyWomenView: React.FC<BeautyWomenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Espaço Glow — Estética Avançada',
+      category: 'Beleza',
+      subcategory: 'Estética Facial',
+      image: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=1200',
+      description: 'Especialista em realçar sua beleza natural com procedimentos de última geração e atendimento exclusivo.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -50,21 +62,24 @@ export const BeautyWomenView: React.FC<BeautyWomenViewProps> = ({ onBack, onSele
           </button>
           <div>
             <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Beleza — Mulher</h1>
-            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Especialidades femininas</p>
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Especialidades femininas</p>
           </div>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        <div className="flex items-start gap-4 p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30">
-          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+        <div 
+            onClick={handleHeroClick}
+            className="flex items-start gap-4 p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+        >
+          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
             <Sparkles className="text-rose-500" size={20} />
           </div>
           <div>
             <h4 className="text-xs font-black text-rose-900 dark:text-rose-200 uppercase tracking-widest mb-1">Cuidado Especializado</h4>
             <p className="text-[11px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
-              Selecione uma área abaixo para encontrar os melhores profissionais de Jacarepaguá.
+              Selecione uma área abaixo para encontrar os melhores profissionais de Jacarepaguá. <span className="underline ml-1">Ver Destaque</span>
             </p>
           </div>
         </div>

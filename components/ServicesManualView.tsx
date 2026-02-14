@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Construction, Zap, Hammer, Key, Shovel, Sparkles, Droplets, Trash2, Star, Clock } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyItem {
   name: string;
@@ -19,6 +20,7 @@ interface ServicesManualViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -118,7 +120,17 @@ const SpecialtyCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({
   </button>
 );
 
-export const ServicesManualView: React.FC<ServicesManualViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const ServicesManualView: React.FC<ServicesManualViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'João Reformas & Reparos',
+      category: 'Serviços',
+      subcategory: 'Pedreiro & Pintor',
+      image: 'https://images.unsplash.com/photo-1581578731117-10d52b4d8051?q=80&w=1200',
+      description: 'Especialista em reformas residenciais rápidas e acabamentos finos em Jacarepaguá.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -138,16 +150,19 @@ export const ServicesManualView: React.FC<ServicesManualViewProps> = ({ onBack, 
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Bloco de Urgência Psicológica */}
-        <div className="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        {/* Bloco de Urgência Psicológica - Agora Clicável */}
+        <div 
+            onClick={handleHeroClick}
+            className="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-105 transition-transform duration-700"></div>
             <div className="relative z-10 flex items-start gap-4">
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
                     <Star size={24} fill="#1E5BFF" className="text-[#1E5BFF]" />
                 </div>
                 <div>
                     <h3 className="font-black text-lg text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Mão de Obra de Confiança</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-medium leading-relaxed">Profissionais avaliados por seus vizinhos na Freguesia e região.</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-medium leading-relaxed">Profissionais avaliados por seus vizinhos na Freguesia e região. <span className="underline ml-1">Ver Perfil</span></p>
                 </div>
             </div>
         </div>

@@ -134,7 +134,6 @@ export const Header: React.FC<HeaderProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
-  // LISTA DE TELAS QUE USAM A IDENTIDADE "BIG APP BLUE"
   const blueTabs = [
     'home', 
     'health_selection', 
@@ -149,7 +148,6 @@ export const Header: React.FC<HeaderProps> = ({
   const isBlueHeader = blueTabs.includes(activeTab);
   const isHome = activeTab === 'home';
 
-  // MAPEAMENTO DE TÍTULOS PARA TELAS DE SELEÇÃO
   const viewTitles: Record<string, string> = {
     'health_selection': 'Saúde',
     'services_selection': 'Serviços',
@@ -160,7 +158,6 @@ export const Header: React.FC<HeaderProps> = ({
     'category_detail': 'Bairro'
   };
 
-  // LÓGICA DE TÍTULO PREMIUM: Prioriza customTitle e garante UPPERCASE
   const displayTitle = (customTitle || viewTitles[activeTab] || 'Localizei ').toUpperCase();
 
   useEffect(() => {
@@ -188,16 +185,20 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className={`w-full transition-all duration-500 relative ${isBlueHeader ? 'bg-brand-blue pb-14 z-30 shadow-none' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+        {/* 
+            Ajuste Crítico: z-30 para o Header e z-40 para o conteúdo em HomeFeed.
+            Isso permite que o conteúdo BRANCO sobreponha o fundo AZUL do header,
+            mantendo os botões (z-50) por cima de tudo para interatividade.
+        */}
+        <div className={`w-full transition-all duration-500 relative ${isBlueHeader ? 'bg-brand-blue pb-20 z-30' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-50'}`}>
             <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
-                <div className="flex items-center justify-between py-2">
-                    {/* 1️⃣ NAVEGAÇÃO E TÍTULO (Hierarquia #1) */}
+                <div className="flex items-center justify-between py-2 relative z-50">
                     <div className="flex items-center gap-3 min-w-0">
                         {!isHome ? (
                             <button 
-                                onClick={() => onBack ? onBack() : window.history.back()}
-                                className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0"
+                                onClick={() => onBack && onBack()}
+                                className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0 cursor-pointer"
                             >
                                 <ChevronLeft size={20} strokeWidth={3} />
                             </button>
@@ -212,7 +213,6 @@ export const Header: React.FC<HeaderProps> = ({
                         </h1>
                     </div>
 
-                    {/* 2️⃣ ÁREA INSTITUCIONAL À DIREITA (Apenas em telas internas) */}
                     {!isHome && isBlueHeader && (
                         <div className="flex-1 flex justify-end">
                             <MasterSponsorBadge 
@@ -222,10 +222,8 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                     )}
 
-                    {/* 3️⃣ UTILIDADES (Apenas na Home) */}
                     {isHome && (
                         <div className="flex items-center gap-2.5 shrink-0">
-                            {/* Bairro Selector */}
                             <button 
                                 onClick={(e) => {
                                     e.preventDefault();
@@ -244,13 +242,12 @@ export const Header: React.FC<HeaderProps> = ({
                                 <ChevronDown size={10} strokeWidth={3} className="opacity-40" />
                             </button>
 
-                            {/* Notificações */}
                             <button 
                                 onClick={onNotificationClick}
                                 className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
                                     isBlueHeader 
                                     ? 'text-white/80' 
-                                    : 'text-gray-500'
+                                    : 'text-gray-50'
                                 }`}
                             >
                                 <Bell size={20} />
@@ -261,7 +258,6 @@ export const Header: React.FC<HeaderProps> = ({
                                 )}
                             </button>
 
-                            {/* Admin/Mode Switcher - Reduzido visualmente */}
                             {isAdmin && (
                                 <button 
                                     onClick={(e) => {
@@ -279,7 +275,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {isHome && (
-                    <div className="relative pt-1 animate-in fade-in slide-in-from-top-1 duration-700">
+                    <div className="relative pt-1 animate-in fade-in slide-in-from-top-1 duration-700 z-40">
                         <div className="absolute bottom-[32px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
                              <TucoMascot />
                         </div>

@@ -152,17 +152,12 @@ const HappeningNowCard: React.FC<{ item: typeof ACONTECENDO_AGORA_FEED[0], onCli
       onClick={onClick}
       className="relative flex-shrink-0 w-36 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg group cursor-pointer transition-all active:scale-[0.97] bg-slate-900 snap-start"
     >
-        {/* Background Image */}
         <img 
           src={item.image} 
           alt={item.type} 
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
         />
-        
-        {/* Subtle Dark Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
-        
-        {/* Top Tag Label */}
         <div className="absolute top-3 left-3 right-3">
             <div className="inline-flex bg-black/40 backdrop-blur-md border border-white/20 px-2 py-1 rounded-full">
                 <span className="text-[7px] font-black text-white uppercase tracking-[0.15em] whitespace-nowrap">
@@ -180,20 +175,12 @@ const InstitutionalBanner: React.FC<{ onClick?: () => void }> = ({ onClick }) =>
       onClick={onClick}
       className="relative bg-gradient-to-br from-[#1E5BFF] via-[#1E5BFF] to-[#0A3BBF] rounded-2xl py-5 px-6 shadow-[0_10px_30px_rgba(30,91,255,0.15)] overflow-hidden group border border-white/10 transition-all active:scale-[0.99] cursor-pointer"
     >
-        
-        {/* Camada de Micro-Motion / Glow Suave */}
         <div className="absolute top-[-50%] right-[-10%] w-[200px] h-[200px] bg-white/5 rounded-full blur-[60px] animate-premium-glow pointer-events-none"></div>
-        
-        {/* Flare de luz passando suavemente */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-flare pointer-events-none"></div>
-
         <div className="relative z-10 flex items-center justify-center gap-4">
-            {/* Logo Compacto com Glassmorphism */}
             <div className="w-10 h-10 bg-white/10 backdrop-blur-lg rounded-xl flex items-center justify-center shrink-0 border border-white/20 shadow-sm transition-transform group-hover:scale-105 duration-700">
                 <MapPin size={20} className="text-white fill-white/20" strokeWidth={2.5} />
             </div>
-
-            {/* Texto Manifesto - Alinhado ao meio */}
             <p className="text-sm font-display font-black text-white leading-tight tracking-tight text-center">
                 Acreditamos que a vida acontece perto. 💙
             </p>
@@ -215,8 +202,6 @@ export const HomeFeed: React.FC<{
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   const [candidateProfile, setCandidateProfile] = useState<any | null>(null);
-  
-  // Controle do Visualizador de Stories
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -229,16 +214,14 @@ export const HomeFeed: React.FC<{
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-full">
       
       {/* 
-        ============================================================
-        A MÁGICA VISUAL: z-40 e -mt-12
-        O container branco agora tem um z-index maior que o Header (z-30),
-        permitindo que a borda arredondada sobreponha o azul.
-        ============================================================
+        A MÁGICA VISUAL CORRIGIDA: 
+        O z-40 garante que este container BRANCO sobreponha a cor AZUL do Header.
+        O -mt-16 puxa o conteúdo para cima criando a curva.
       */}
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-12 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] overflow-hidden">
+      <div className="flex-1 bg-[#F8F9FC] dark:bg-gray-950 rounded-t-[3.5rem] -mt-16 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
-        {/* 1. UTILITY ROW - Ajustado padding para compensar a subida */}
-        <section className="px-8 pt-10 pb-2">
+        {/* 1. UTILITY ROW - Padding superior ajustado para o overlap perfeito */}
+        <section className="px-8 pt-12 pb-2">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />
@@ -301,7 +284,7 @@ export const HomeFeed: React.FC<{
             </div>
         </section>
 
-        {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
+        {/* 3. ACONTECENDO AGORA */}
         <section className="py-4 space-y-4">
             <div className="px-6">
                 <SectionHeader 
@@ -322,7 +305,6 @@ export const HomeFeed: React.FC<{
                 ))}
             </div>
 
-            {/* Information Scent: Theme Indicators - Moved Below Cards */}
             <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-6 items-center pt-2">
                 {STORY_THEMES.map((theme, i) => (
                     <React.Fragment key={theme}>
@@ -362,7 +344,7 @@ export const HomeFeed: React.FC<{
                 >
                     <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
                     <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                    <div className="absolute left(52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+                    <div className="absolute left-[52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
                     <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
                     <Sparkles size={12} className="mb-1 opacity-60" />
@@ -380,7 +362,6 @@ export const HomeFeed: React.FC<{
             </section>
         )}
 
-        {/* 5. VAGAS PERTO DE VOCÊ - BLOCO REDESENHADO PREMIUM */}
         <section className="px-6 py-10 space-y-6">
             <SectionHeader 
                 icon={Briefcase} 
@@ -419,7 +400,6 @@ export const HomeFeed: React.FC<{
             </div>
         </section>
 
-        {/* 6. LANÇAMENTO / ADS SECTION */}
         {userRole === 'lojista' && isFeatureActive('sponsored_ads') && (
             <section className="px-6 py-6 animate-in slide-in-from-bottom-4 duration-700">
             <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
@@ -428,7 +408,6 @@ export const HomeFeed: React.FC<{
 
         <InstitutionalBanner onClick={() => onNavigate('patrocinador_master')} />
         
-        {/* 7. EXPLORE GUIDE SECTION */}
         {isFeatureActive('explore_guide') && (
             <div className="w-full pt-8 pb-10">
                 <div className="px-6">
@@ -470,7 +449,6 @@ export const HomeFeed: React.FC<{
           onSelectCategory={onSelectCategory}
       />
 
-      {/* Story Viewer Overlay */}
       {selectedStoryIndex !== null && (
         <StoryViewer 
           stories={ACONTECENDO_AGORA_FEED} 

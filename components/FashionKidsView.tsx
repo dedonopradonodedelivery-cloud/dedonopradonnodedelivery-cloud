@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, Heart, ShoppingBag, Gem, Zap, Star, LayoutGrid, Shirt, Baby, Users } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyItem {
   name: string;
@@ -18,6 +19,7 @@ interface FashionKidsViewProps {
   onBack: () => void;
   onSelect: (category: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -88,7 +90,17 @@ const CategoryCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({ 
   </button>
 );
 
-export const FashionKidsView: React.FC<FashionKidsViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const FashionKidsView: React.FC<FashionKidsViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Planeta Kids JPA',
+      category: 'Moda',
+      subcategory: 'Infantil',
+      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200',
+      description: 'A maior variedade de moda infantil e juvenil do bairro. Roupas, calçados e acessórios para todas as idades.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -108,16 +120,19 @@ export const FashionKidsView: React.FC<FashionKidsViewProps> = ({ onBack, onSele
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Inspiração para Kids */}
-        <div className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        {/* Banner de Inspiração para Kids - Agora Clicável */}
+        <div 
+            onClick={handleHeroClick}
+            className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-10 flex flex-col gap-4">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
                     <Baby size={24} className="text-white" />
                 </div>
                 <div>
                     <h3 className="font-black text-xl uppercase tracking-tighter leading-tight mb-1">O universo infantil <br/> mais completo da cidade.</h3>
-                    <p className="text-blue-100 text-xs font-medium leading-relaxed max-w-[220px]">Encontre as melhores marcas e lojas para seus pequenos em Jacarepaguá.</p>
+                    <p className="text-blue-100 text-xs font-medium leading-relaxed max-w-[220px]">Encontre as melhores marcas e lojas para seus pequenos em Jacarepaguá. <span className="underline ml-1">Explorar</span></p>
                 </div>
             </div>
         </div>

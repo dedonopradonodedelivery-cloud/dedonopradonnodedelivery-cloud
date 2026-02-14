@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Baby, Stethoscope, Brain, ShieldPlus, Activity, Heart, Thermometer, Microscope, Syringe, Sparkles } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SpecialtyItem {
   name: string;
@@ -17,6 +18,7 @@ interface HealthPediatricsViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -81,7 +83,17 @@ const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, 
   </button>
 );
 
-export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Pediátrica JPA — Dr. André Luiz',
+      category: 'Saúde',
+      subcategory: 'Pediatria',
+      image: 'https://images.unsplash.com/photo-1584515933487-9d317552d894?q=80&w=1200',
+      description: 'Especialista em desenvolvimento infantil com foco em pediatria preventiva e puericultura na Freguesia.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -94,21 +106,24 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
           </button>
           <div>
             <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Pediatria</h1>
-            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Cuidado Infantil Especializado</p>
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Cuidado Infantil Especializado</p>
           </div>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        <div className="flex items-start gap-4 p-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30">
-          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+        <div 
+            onClick={handleHeroClick}
+            className="flex items-start gap-4 p-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+        >
+          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
             <Baby className="text-amber-500" size={20} />
           </div>
           <div>
             <h4 className="text-xs font-black text-amber-900 dark:text-amber-200 uppercase tracking-widest mb-1">Crescimento Saudável</h4>
             <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
-              Encontre pediatras e especialistas focados no desenvolvimento integral do seu filho.
+              Encontre pediatras e especialistas focados no desenvolvimento integral do seu filho. <span className="underline ml-1">Ver Destaque</span>
             </p>
           </div>
         </div>

@@ -46,7 +46,6 @@ const StoreCard: React.FC<{ store: Store; onClick: () => void; isMaster?: boolea
 
 // Gerador de Banner Fake Realista baseado no nome da subcategoria
 const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => {
-    // Seed simples baseado no tamanho da string para consistência
     const seed = subcategory.length + neighborhood.length;
     
     const backgrounds = [
@@ -66,7 +65,6 @@ const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => 
         'Conhecer Agora', 'Ver Ofertas', 'Agendar Visita', 'Pedir Orçamento', 'Saiba Mais'
     ];
     
-    // Seleção determinística
     const bg = backgrounds[seed % backgrounds.length];
     const img = images[seed % images.length];
     const cta = ctas[seed % ctas.length];
@@ -74,7 +72,7 @@ const getSubcategoryBannerData = (subcategory: string, neighborhood: string) => 
     return {
         title: `Destaque em ${subcategory}`,
         storeName: `${subcategory} Premium ${neighborhood}`,
-        subtitle: `A melhor opção de ${subcategory.toLowerCase()} em ${neighborhood}.`,
+        subtitle: `A melhor opção de ${subcategory.toLowerCase()} em ${neighborhood}. Qualidade garantida para você.`,
         cta,
         bgColor: bg,
         image: img
@@ -85,7 +83,6 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
   const { currentNeighborhood } = useNeighborhood();
   const [activeFilter, setActiveFilter] = useState<'all' | 'top_rated' | 'open_now'>('all');
 
-  // Gerar dados do banner fixo
   const bannerData = useMemo(() => {
       const hood = currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood;
       return getSubcategoryBannerData(subcategoryName, hood);
@@ -93,9 +90,6 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
 
   const pool = useMemo(() => {
     let list = stores.filter(s => s.subcategory === subcategoryName);
-    
-    // Se "Jacarepaguá (todos)", mostra tudo da subcategoria.
-    // Se for bairro específico, filtra.
     if (currentNeighborhood !== "Jacarepaguá (todos)") {
       list = list.filter(s => s.neighborhood === currentNeighborhood);
     }
@@ -113,10 +107,8 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
     return [...sponsored, ...organic];
   }, [pool, activeFilter]);
 
-  // Handler para clicar no banner (leva para uma loja fake de exemplo ou real se houver)
   const handleBannerClick = () => {
-      // Tenta achar uma loja real compatível para simular clique no banner
-      const targetStore = pool[0] || {
+      const targetStore: Partial<Store> = {
           id: `banner-${subcategoryName}`,
           name: bannerData.storeName,
           category: categoryName,
@@ -127,8 +119,7 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
           neighborhood: currentNeighborhood,
           verified: true,
           isOpenNow: true,
-          image: bannerData.image,
-          logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(bannerData.storeName)}&background=random&color=fff`
+          image: bannerData.image
       };
       onStoreClick(targetStore as Store);
   };
@@ -149,7 +140,7 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
 
       <div className="p-5 space-y-8">
         
-        {/* BANNER FIXO DA SUBCATEGORIA - ESTILO HOME (16/12 ou 16/10) */}
+        {/* BANNER FIXO DA SUBCATEGORIA */}
         <div 
             onClick={handleBannerClick}
             className={`relative aspect-[16/12] w-full rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.98] group ${bannerData.bgColor} shadow-xl shadow-black/10`}
@@ -221,7 +212,7 @@ export const SubcategoryDetailView: React.FC<SubcategoryDetailViewProps> = ({ su
             {filteredList.length === 0 && (
                 <div className="py-20 text-center opacity-30 flex flex-col items-center">
                     <AlertCircle size={48} className="mb-4" />
-                    <p className="font-bold uppercase tracking-widest text-xs">Nenhum resultado para os filtros selecionados</p>
+                    <p className="font-bold uppercase tracking-widest text-xs">Nenhum resultado encontrado</p>
                 </div>
             )}
         </section>

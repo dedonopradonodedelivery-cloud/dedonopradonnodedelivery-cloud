@@ -14,6 +14,7 @@ import {
   Droplets
 } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
+import { Store } from '@/types';
 
 interface SubcategoryItem {
   name: string;
@@ -25,6 +26,7 @@ interface HealthWomenViewProps {
   onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 const SUBCATEGORIES_DATA: SubcategoryItem[] = [
@@ -55,10 +57,19 @@ const SubcategoryCard: React.FC<{ item: SubcategoryItem; onClick: () => void }> 
   );
 };
 
-export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+  const handleHeroClick = () => {
+    onStoreClick({
+      name: 'Centro de Saúde da Mulher JPA',
+      category: 'Saúde',
+      subcategory: 'Ginecologia & Obstetrícia',
+      image: 'https://images.unsplash.com/photo-1551076805-e2983fe3600c?q=80&w=1200',
+      description: 'O maior centro especializado em saúde feminina de Jacarepaguá. Atendimento humanizado e tecnologia de ponta para todas as fases da mulher.',
+    } as Store);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
-      {/* Header Sticky Premium Azul */}
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -76,21 +87,23 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32 space-y-8">
-        {/* Intro Banner Sutil */}
-        <div className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        {/* Banner de Inspiração - Agora Clicável */}
+        <div 
+            onClick={handleHeroClick}
+            className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-10 flex items-center gap-4">
                 <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
                     <Heart size={24} fill="white" className="text-white" />
                 </div>
                 <div>
                     <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Cuidado Especializado</h3>
-                    <p className="text-rose-100 text-xs font-medium leading-relaxed">Os melhores profissionais para cada fase da sua vida.</p>
+                    <p className="text-rose-100 text-xs font-medium leading-relaxed">Os melhores profissionais para cada fase da sua vida. <span className="underline ml-1">Conhecer</span></p>
                 </div>
             </div>
         </div>
 
-        {/* Grid de Subcategorias - A Nova Experiência */}
         <section>
           <div className="grid grid-cols-2 gap-4">
             {SUBCATEGORIES_DATA.map((item, idx) => (
@@ -103,7 +116,6 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
           </div>
         </section>
 
-        {/* Info de Rodapé sutil */}
         <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
             <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
             <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Health Ecosystem</p>
