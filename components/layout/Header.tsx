@@ -21,6 +21,7 @@ interface HeaderProps {
   toggleTheme?: () => void;
   userRole?: string | null;
   onSelectCategory: (category: Category) => void;
+  scrollY?: number;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -123,11 +124,26 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
+  scrollY = 0
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
   const isHome = activeTab === 'home';
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+
+  // Lógica de interpolação de animação premium
+  const threshold = 120;
+  const progress = Math.min(1, scrollY / threshold);
+  
+  // Opacidade dos elementos que somem
+  const contentOpacity = Math.max(0, 1 - (scrollY / 80));
+  const topRowOpacity = Math.max(0, 1 - (scrollY / 60));
+  
+  // Transformação da barra de busca
+  const searchTranslateY = Math.max(-148, -scrollY * 1.15);
+  // No ponto final (após 148px de scroll), a barra de busca "atraca" no topo.
+  // Usamos um valor calculado para garantir que ela fique centralizada no novo header encolhido.
+  const dockedSearchY = isHome ? (scrollY > 120 ? -148 : searchTranslateY) : 0;
 
   useEffect(() => {
     const checkNotifs = () => {
@@ -159,10 +175,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-[100] bg-brand-blue pb-12 shadow-lg shadow-blue-900/10' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
-            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
+        <div 
+          className={`w-full transition-colors duration-300 ${isHome ? 'fixed top-0 left-0 right-0 z-[100] bg-brand-blue shadow-lg shadow-blue-900/10' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}
+          style={isHome ? { height: Math.max(80, 240 - scrollY) } : {}}
+        >
+            <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5 relative h-full">
                 
-                <div className="flex items-center justify-between py-2">
+                {/* LINHA SUPERIOR (LOGO, BAIRRO, NOTIF) - DESAPARECE NO SCROLL */}
+                <div 
+                  className="flex items-center justify-between py-2 transition-all duration-200"
+                  style={isHome ? { opacity: topRowOpacity, transform: `translateY(${-scrollY * 0.5}px)` } : {}}
+                >
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isHome ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
                             <MapPin size={22} className="text-white fill-white" />
@@ -216,15 +239,16 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {isHome && (
-                    <div className="relative pt-1 animate-in fade-in slide-in-from-top-1 duration-700">
-                        <div className="absolute bottom-[32px] right-[8px] w-28 h-28 z-20 pointer-events-none transform -scale-x-100">
-                             <TucoMascot />
-                        </div>
-
-                        <button 
-                            onClick={() => setIsAssistantOpen(true)}
-                            className="w-full flex flex-col gap-4 transition-all active:scale-[0.99] group text-left relative cursor-pointer"
+                    <div className="relative pt-1">
+                        {/* SAUDAÇÃO E TUCO - DESAPARECEM NO SCROLL */}
+                        <div 
+                          className="transition-all duration-300 pointer-events-none"
+                          style={{ opacity: contentOpacity, transform: `translateY(${-scrollY * 0.3}px)` }}
                         >
+                            <div className="absolute bottom-[20px] right-[-8px] w-28 h-28 z-20 transform -scale-x-100">
+                                 <TucoMascot />
+                            </div>
+
                             <div className="flex flex-col relative z-10">
                                 <h2 className="text-2xl font-display text-white leading-tight">
                                     Olá, <span className="font-black">{greetingName}</span> 👋
@@ -233,14 +257,23 @@ export const Header: React.FC<HeaderProps> = ({
                                     Sua inteligência local
                                 </p>
                             </div>
+                        </div>
 
-                            <div className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 group-hover:bg-white/20 transition-all shadow-inner relative z-10">
-                                <Search size={18} className="text-white/40" />
-                                <span className="text-white/40 text-sm font-medium tracking-tight">
-                                    Como o Tuco pode te ajudar?
-                                </span>
-                            </div>
-                        </button>
+                        {/* BARRA DE BUSCA - SOBE E FICA FIXA */}
+                        <div 
+                          className="absolute left-0 right-0 z-30 transition-transform duration-75 ease-out"
+                          style={{ transform: `translateY(${dockedSearchY}px)` }}
+                        >
+                          <button 
+                              onClick={() => setIsAssistantOpen(true)}
+                              className="w-full bg-white/10 rounded-[1.5rem] border border-white/15 py-4 px-5 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner cursor-pointer"
+                          >
+                              <Search size={18} className="text-white/40" />
+                              <span className="text-white/40 text-sm font-medium tracking-tight">
+                                  Como o Tuco pode te ajudar?
+                              </span>
+                          </button>
+                        </div>
                     </div>
                 )}
             </div>

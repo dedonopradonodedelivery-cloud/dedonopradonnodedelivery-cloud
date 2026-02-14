@@ -80,6 +80,7 @@ export const App: React.FC = () => {
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [viewMode, setViewMode] = useState<any>('Visitante');
   const [appReady, setAppReady] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     if (!authLoading) {
@@ -107,6 +108,7 @@ export const App: React.FC = () => {
   const handleNavigate = (view: string, data?: any) => {
     if (data) setSelectedData(data);
     setActiveTab(view);
+    setScrollY(0); // Reset scroll on navigation
     window.scrollTo(0, 0);
   };
 
@@ -158,7 +160,13 @@ export const App: React.FC = () => {
       <div className="min-h-screen bg-brand-blue flex justify-center relative transition-colors duration-300">
         <div className={`w-full max-w-md h-[100dvh] transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
-                <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
+                <Layout 
+                  activeTab={activeTab} 
+                  setActiveTab={handleNavigate} 
+                  userRole={userRole} 
+                  hideNav={false}
+                  onScroll={setScrollY}
+                >
                     {!headerExclusionList.includes(activeTab) && (
                     <Header 
                         onNotificationClick={() => handleNavigate('notifications')} 
@@ -174,9 +182,10 @@ export const App: React.FC = () => {
                         viewMode={viewMode} 
                         onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
                         onSelectCategory={handleSelectCategory} 
+                        scrollY={scrollY}
                     />
                     )}
-                    <main className="w-full mx-auto">
+                    <main className="w-full mx-auto relative z-0">
                     {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}

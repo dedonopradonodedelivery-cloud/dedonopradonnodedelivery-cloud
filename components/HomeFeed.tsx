@@ -286,10 +286,10 @@ export const HomeFeed: React.FC<{
   }, [candidateProfile]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-[220px]">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-[220px] rounded-t-[2.5rem] relative z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.1)]">
       
       {/* 1. UTILITY ROW */}
-      <section className="px-8 pt-6 pb-2">
+      <section className="px-8 pt-8 pb-2">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <MapPin size={14} className="text-[#1E5BFF]" strokeWidth={2.5} />
@@ -352,7 +352,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. ACONTECENDO AGORA - POSIÇÃO ATUALIZADA */}
+      {/* 3. ACONTECENDO AGORA */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Flame} 
@@ -453,7 +453,7 @@ export const HomeFeed: React.FC<{
             </div>
         ) : (
           <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
-              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
+              <div className="w-16 h-16 bg-blue-50/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
                 <FileText size={28} />
               </div>
               <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>

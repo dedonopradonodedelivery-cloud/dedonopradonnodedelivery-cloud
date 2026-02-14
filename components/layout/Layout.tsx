@@ -8,9 +8,10 @@ interface LayoutProps {
   setActiveTab: (tab: string) => void;
   userRole?: 'cliente' | 'lojista' | null;
   hideNav?: boolean;
+  onScroll?: (scrollY: number) => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false, onScroll }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position when activeTab changes
@@ -19,6 +20,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [activeTab]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (onScroll) {
+      onScroll(e.currentTarget.scrollTop);
+    }
+  };
 
   // Se for admin_panel, forçamos hideNav true internamente por segurança extra
   const finalHideNav = hideNav || activeTab === 'admin_panel';
@@ -29,7 +36,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     >
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto no-scrollbar w-full"
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto no-scrollbar w-full relative z-10"
         style={{
           paddingBottom: finalHideNav
             ? 'env(safe-area-inset-bottom)'
