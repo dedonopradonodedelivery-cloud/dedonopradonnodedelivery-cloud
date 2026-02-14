@@ -14,7 +14,6 @@ import {
   CarFront,
   Ticket,
   ChevronRight,
-  // Added ArrowRight to fix "Cannot find name 'ArrowRight'" error on line 492
   ArrowRight,
   Sparkles,
   Flame,
@@ -61,9 +60,10 @@ const QUICK_CATEGORIES: { name: string, icon: React.ElementType, slug: string }[
 ];
 
 const MOCK_COUPONS = [
-  { id: 1, store: 'Bibi Lanches', discount: '20% OFF', category: 'Alimentação', color: 'from-orange-500 to-rose-500' },
+  { id: 1, store: 'Bibi Lanches', discount: '20% OFF', category: 'Comida', color: 'from-orange-500 to-rose-500' },
   { id: 2, store: 'Studio Hair', discount: 'R$ 15 OFF', category: 'Beleza', color: 'from-blue-600 to-indigo-700' },
   { id: 3, store: 'Pet Alegria', discount: '10% OFF', category: 'Pets', color: 'from-emerald-500 to-teal-600' },
+  { id: 4, store: 'Mecânica 24h', discount: '5% OFF', category: 'Auto', color: 'from-slate-600 to-slate-800' },
 ];
 
 const ACONTECENDO_AGORA_FEED = [
@@ -348,9 +348,9 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 4. CUPOM DO DIA */}
+      {/* 4. CUPOM DO DIA - AJUSTADO: FUNDO PREMIUM E CARDS COMPACTOS */}
       {isFeatureActive('coupons') && (
-        <section className="space-y-4 py-4">
+        <section className="space-y-4 py-8 bg-slate-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-white/5">
           <div className="px-6 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
@@ -364,28 +364,30 @@ export const HomeFeed: React.FC<{
             <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Ver todos</button>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-4 snap-x">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar px-6 pb-2 snap-x">
             {MOCK_COUPONS.map(coupon => (
               <button 
                 key={coupon.id}
                 onClick={() => onNavigate('coupon_landing')}
-                className="flex-shrink-0 w-[240px] relative bg-slate-50 dark:bg-gray-900 rounded-3xl border border-slate-200/50 dark:border-gray-800 flex items-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all snap-center group overflow-hidden"
+                className="flex-shrink-0 w-[165px] relative bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 flex items-center shadow-sm active:scale-[0.98] transition-all snap-start group overflow-hidden h-20"
               >
-                <div className="absolute left-[64px] -top-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[64px] -bottom-2 w-4 h-4 bg-white dark:bg-gray-950 border border-slate-200/50 dark:border-gray-800 rounded-full z-10"></div>
-                <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+                {/* Perfurações de ticket ajustadas para escala menor */}
+                <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
+                <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
+                <div className="absolute left-[52px] top-3 bottom-3 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
-                <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
+                {/* Parte visual do ticket reduzida */}
+                <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
+                  <Sparkles size={10} className="mb-0.5 opacity-60" />
+                  <span className="text-[6px] font-black leading-none uppercase tracking-tighter">Ticket</span>
                 </div>
 
-                <div className="text-left min-w-0 flex-1 pl-6 pr-4">
-                  <p className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate">{coupon.category}</p>
-                  <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">{coupon.discount}</h4>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{coupon.store}</p>
+                {/* Conteúdo de texto compacto */}
+                <div className="text-left min-w-0 flex-1 pl-4 pr-2">
+                  <p className="text-[7px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter truncate mb-0.5">{coupon.category}</p>
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white leading-none mb-1">{coupon.discount}</h4>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter truncate">{coupon.store}</p>
                 </div>
-
-                <ChevronRight size={14} className="text-gray-200 group-hover:text-blue-500 transition-colors mr-3" strokeWidth={3} />
               </button>
             ))}
           </div>
