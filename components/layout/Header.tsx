@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X } from 'lucide-react';
+import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X, ChevronLeft } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
 import { GeminiAssistant } from '@/components/GeminiAssistant';
@@ -123,11 +123,37 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
+  onNavigate
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
-  const isHome = activeTab === 'home';
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+
+  // LISTA DE TELAS QUE USAM A IDENTIDADE "BIG APP BLUE"
+  const blueTabs = [
+    'home', 
+    'health_selection', 
+    'services_selection', 
+    'pets_selection', 
+    'fashion_selection', 
+    'beauty_selection', 
+    'autos_selection',
+    'category_detail'
+  ];
+
+  const isBlueHeader = blueTabs.includes(activeTab);
+  const isHome = activeTab === 'home';
+
+  // MAPEAMENTO DE TÍTULOS PARA TELAS DE SELEÇÃO
+  const viewTitles: Record<string, string> = {
+    'health_selection': 'Saúde',
+    'services_selection': 'Serviços',
+    'pets_selection': 'Pet',
+    'fashion_selection': 'Moda',
+    'beauty_selection': 'Beleza',
+    'autos_selection': 'Autos',
+    'category_detail': 'Bairro'
+  };
 
   useEffect(() => {
     const checkNotifs = () => {
@@ -154,20 +180,26 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        {/* 
-          Ajuste de Stacking Order: O Header no modo Home agora tem z-30.
-          O Feed terá z-40 para passar por cima.
-        */}
-        <div className={`w-full transition-all duration-500 relative ${isHome ? 'bg-brand-blue pb-14 z-30' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+        <div className={`w-full transition-all duration-500 relative ${isBlueHeader ? 'bg-brand-blue pb-14 z-30 shadow-none' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
             <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
                 <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isHome ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
-                            <MapPin size={22} className="text-white fill-white" />
-                        </div>
-                        <h1 className={`text-lg font-black uppercase tracking-tighter leading-none ${isHome ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                            Localizei <span className={isHome ? 'opacity-50' : 'text-blue-600'}>JPA</span>
+                        {!isHome ? (
+                            <button 
+                                onClick={() => window.history.back()}
+                                className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all"
+                            >
+                                <ChevronLeft size={20} strokeWidth={3} />
+                            </button>
+                        ) : (
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isBlueHeader ? 'bg-white/10 border-white/20' : 'bg-blue-600 border-blue-50 shadow-md'}`}>
+                                <MapPin size={22} className="text-white fill-white" />
+                            </div>
+                        )}
+                        <h1 className={`text-lg font-black uppercase tracking-tighter leading-none ${isBlueHeader ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                            {isHome ? 'Localizei ' : viewTitles[activeTab] || 'Localizei '} 
+                            <span className={isBlueHeader ? 'opacity-50' : 'text-blue-600'}>{isHome ? 'JPA' : ''}</span>
                         </h1>
                     </div>
 
@@ -178,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 e.stopPropagation();
                                 if (onOpenViewSwitcher) onOpenViewSwitcher();
                             }}
-                            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] transition-all active:scale-90 cursor-pointer ${isHome ? 'text-amber-400' : 'text-amber-600'}`}
+                            className={`flex flex-col items-center justify-center min-w-[44px] min-h-[44px] transition-all active:scale-90 cursor-pointer ${isBlueHeader ? 'text-amber-400' : 'text-amber-600'}`}
                             title="Alternar Modo de Visualização"
                         >
                             <ShieldCheck size={24} />
@@ -192,7 +224,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 toggleSelector();
                             }}
                             className={`relative flex items-center gap-1 px-1 h-11 transition-all active:scale-95 cursor-pointer ${
-                                isHome 
+                                isBlueHeader 
                                 ? 'text-white' 
                                 : 'text-slate-700 dark:text-slate-200'
                             }`}
@@ -206,14 +238,14 @@ export const Header: React.FC<HeaderProps> = ({
                         <button 
                             onClick={onNotificationClick}
                             className={`relative flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
-                                isHome 
+                                isBlueHeader 
                                 ? 'text-white' 
                                 : 'text-gray-500'
                             }`}
                         >
                             <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isBlueHeader ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
                                     <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}

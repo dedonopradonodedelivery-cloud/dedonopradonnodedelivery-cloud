@@ -142,16 +142,19 @@ export const App: React.FC = () => {
     handleNavigate('home');
   };
 
+  // REMOVIDO: health_selection, services_selection, pets_selection, fashion_selection, beauty_selection, autos_selection, category_detail
+  // Essas telas agora mostram o Header Global Azul.
   const headerExclusionList = [
-    'store_detail', 'category_detail', 'user_coupons', 'coupon_landing', 
+    'store_detail', 'user_coupons', 'coupon_landing', 
     'admin_panel', 'services', 'service_chat', 'notifications',
     'adoption', 'donations', 'desapega', 'real_estate', 'jobs', 'job_wizard', 
     'real_estate_wizard', 'about_app', 'privacy_policy', 'support',
-    'health_selection', 'health_women', 'health_pediatrics', 'services_selection',
-    'services_manual', 'services_specialized', 'pets_selection', 'pets_dogs', 
-    'pets_cats', 'pets_others', 'fashion_selection', 'fashion_women', 'fashion_men', 'fashion_kids',
-    'beauty_selection', 'beauty_women', 'beauty_men',
-    'autos_selection', 'autos_carros', 'autos_motos', 'autos_bikes', 'autos_eletricos',
+    'health_women', 'health_pediatrics',
+    'services_manual', 'services_specialized', 
+    'pets_dogs', 'pets_cats', 'pets_others', 
+    'fashion_women', 'fashion_men', 'fashion_kids',
+    'beauty_women', 'beauty_men',
+    'autos_carros', 'autos_motos', 'autos_bikes', 'autos_eletricos',
     'classified_detail', 'job_detail', 'real_estate_detail', 'classified_search_results', 'plan_selection',
     'troca_troca', 'troca_troca_intro', 'troca_troca_swipe', 'user_trade_items', 'user_resume', 'merchant_jobs',
     'patrocinador_master'
@@ -159,7 +162,7 @@ export const App: React.FC = () => {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-[#F5F5F5] dark:bg-slate-950 flex justify-center relative transition-colors duration-300">
+      <div className="min-h-screen bg-brand-blue dark:bg-slate-950 flex justify-center relative transition-colors duration-300">
         <div className={`w-full max-w-md h-[100dvh] bg-white dark:bg-gray-900 transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
                 <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
