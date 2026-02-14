@@ -14,6 +14,8 @@ import {
   CarFront,
   Ticket,
   ChevronRight,
+  // Added ArrowRight to fix "Cannot find name 'ArrowRight'" error on line 492
+  ArrowRight,
   Sparkles,
   Flame,
   Music,
@@ -35,7 +37,8 @@ import {
   Settings,
   X,
   FileText,
-  CloudLightning
+  CloudLightning,
+  Sparkle
 } from 'lucide-react';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
@@ -84,7 +87,7 @@ const ACONTECENDO_AGORA_FEED = [
   { 
     id: 3, 
     type: 'PET PERDIDO',
-    image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=400&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=400&auto=format&fit=crop',
     authorName: 'Mariana Silva',
     authorAvatar: 'https://i.pravatar.cc/150?u=mariana',
     timestamp: 'há 1h'
@@ -345,7 +348,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 4. CUPOM DO DIA - MOVIDO PARA BAIXO DOS STORIES */}
+      {/* 4. CUPOM DO DIA */}
       {isFeatureActive('coupons') && (
         <section className="space-y-4 py-4">
           <div className="px-6 flex items-center justify-between">
@@ -373,7 +376,6 @@ export const HomeFeed: React.FC<{
                 <div className="absolute left-[72px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
                 <div className={`w-[72px] h-24 bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
-                  <Sparkles size={14} className="mb-0.5 opacity-60" />
                   <span className="text-[8px] font-black leading-none uppercase tracking-tighter">Ticket</span>
                 </div>
 
@@ -420,7 +422,7 @@ export const HomeFeed: React.FC<{
                 <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Headphone" />
               </div>
             </div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg group-hover:scale-110 transition-transform">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg group-hover:scale-110 transition-transform">
               <Repeat className="w-6 h-6 text-blue-400" />
             </div>
           </div>
@@ -460,33 +462,38 @@ export const HomeFeed: React.FC<{
         </button>
       </section>
 
-      {/* 6. VAGAS PERTO DE VOCÊ */}
-      <section className="px-6 py-8 space-y-5">
+      {/* 6. VAGAS PERTO DE VOCÊ - REDESIGN COMPACTO E MODERNO */}
+      <section className="px-6 py-8 space-y-6">
         <SectionHeader 
             icon={Briefcase} 
-            title="Vagas perto de você" 
-            subtitle={candidateProfile ? "Recomendadas pela IA" : "Conectando talentos locais"} 
+            title="💼 Oportunidades no Bairro" 
+            subtitle="Conexões inteligentes entre talentos e empresas locais" 
             iconColor="text-emerald-500" 
             onSeeMore={() => onNavigate('jobs')}
         />
-        {candidateProfile ? (
-            <div className="space-y-4">
-              {jobRecommendations.map(({ job, compatibility }) => (
-                <JobCard key={job.id} job={job} compatibility={compatibility} onClick={() => onNavigate('job_detail', { job, compatibility })} />
-              ))}
+        
+        <div 
+          onClick={() => onNavigate('jobs')}
+          className="w-full bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden"
+        >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl -mr-12 -mt-12"></div>
+            
+            <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="flex items-center gap-2 mb-4 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800">
+                    <Sparkle size={12} className="text-emerald-600 dark:text-emerald-400 fill-current" />
+                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">IA-Driven Connect</span>
+                </div>
+                
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-8 leading-relaxed max-w-[240px]">
+                    Empresas próximas estão buscando perfis compatíveis
+                </p>
+                
+                <div className="w-full bg-[#1E5BFF] text-white font-black py-4 px-8 rounded-2xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 group-hover:bg-blue-600">
+                    Ver oportunidades
+                    <ArrowRight size={16} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                </div>
             </div>
-        ) : (
-          <div onClick={() => onNavigate('user_resume')} className="w-full bg-slate-900 rounded-[2.5rem] p-8 text-center group transition-all active:scale-[0.98] border border-slate-800 shadow-2xl shadow-black/10 cursor-pointer">
-              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-500/20 text-blue-500">
-                <FileText size={28} />
-              </div>
-              <h3 className="font-black text-white text-lg uppercase mb-2">Receba vagas personalizadas</h3>
-              <p className="text-sm text-slate-400 mb-6">Envie seu currículo e deixe nossa IA encontrar a vaga perfeita para você no bairro.</p>
-              <div className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30">
-                Enviar currículo agora
-              </div>
-          </div>
-        )}
+        </div>
       </section>
 
       {/* 7. LANÇAMENTO / ADS SECTION */}
