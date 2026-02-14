@@ -78,7 +78,7 @@ const ACONTECENDO_AGORA_FEED = [
     time: 'Agora', 
     icon: Construction, 
     color: 'text-amber-400', 
-    bg: 'bg-amber-500',
+    bg: 'bg-amber-50',
     source: 'Fonte Oficial',
     isVerified: true,
     image: 'https://images.unsplash.com/photo-1581094371996-518296a8f15b?q=80&w=800'
@@ -255,7 +255,6 @@ export const HomeFeed: React.FC<{
   const [jobRecommendations, setJobRecommendations] = useState<{ job: Job; compatibility: CompatibilityResult }[]>([]);
 
   useEffect(() => {
-    // Para teste, sempre carrega o perfil de Juliana Costa (ID 1)
     setCandidateProfile(MOCK_CANDIDATE_PROFILES[0]);
   }, []);
   
@@ -287,7 +286,7 @@ export const HomeFeed: React.FC<{
   }, [candidateProfile]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 relative z-20">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 pt-[220px]">
       
       {/* 1. UTILITY ROW */}
       <section className="px-8 pt-6 pb-2">
@@ -353,7 +352,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 3. ACONTECENDO AGORA - MOVIDO PARA CÁ (POSIÇÃO SOLICITADA) */}
+      {/* 3. ACONTECENDO AGORA */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Flame} 

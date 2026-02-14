@@ -133,7 +133,6 @@ export const Header: React.FC<HeaderProps> = ({
     const checkNotifs = () => {
       let saved = localStorage.getItem('app_notifications');
       if (!saved) {
-          // Fallback para popular o sino no primeiro acesso
           const initial = [
             { id: 'notif-1', title: 'Bem-vindo! 🧡', type: 'system', read: false, createdAt: new Date().toISOString() },
             { id: 'notif-2', title: 'Dica do Tuco 🦜', type: 'system', read: false, createdAt: new Date().toISOString() },
@@ -160,7 +159,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-10 bg-brand-blue pb-12' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
+        <div className={`w-full transition-all duration-500 ${isHome ? 'fixed top-0 left-0 right-0 z-[100] bg-brand-blue pb-12 shadow-lg shadow-blue-900/10' : 'relative bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-40'}`}>
             <div className="max-w-md mx-auto px-6 pt-5 space-y-0.5">
                 
                 <div className="flex items-center justify-between py-2">
@@ -208,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
                         >
                             <Bell size={22} />
                             {unreadCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-950'}`}>
+                                <span className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#FF6501] rounded-full flex items-center justify-center border-2 shadow-lg ${isHome ? 'border-brand-blue' : 'border-white dark:border-gray-900'}`}>
                                     <span className="text-[7px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
                                 </span>
                             )}
