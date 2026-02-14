@@ -223,6 +223,8 @@ export const HomeFeed: React.FC<{
     setCandidateProfile(MOCK_CANDIDATE_PROFILES[0]);
   }, []);
 
+  const STORY_THEMES = ['Eventos', 'Trânsito', 'Utilidade', 'Achados e Perdidos', 'Pets Perdidos', 'Alertas'];
+
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-full">
       
@@ -300,24 +302,37 @@ export const HomeFeed: React.FC<{
         </section>
 
         {/* 3. ACONTECENDO AGORA - STORIES PREMIUM LAYOUT */}
-        <section className="py-4 space-y-5">
+        <section className="py-4 space-y-4">
             <div className="px-6">
                 <SectionHeader 
                     icon={Flame} 
                     title="Acontecendo agora" 
                     subtitle="Stories do seu bairro" 
                     iconColor="text-amber-500" 
-                    onSeeMore={() => onNavigate('neighborhood_posts')}
                 />
             </div>
             
-            <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-4">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-2">
                 {ACONTECENDO_AGORA_FEED.map((item, index) => (
                     <HappeningNowCard 
                         key={item.id}
                         item={item} 
                         onClick={() => setSelectedStoryIndex(index)}
                     />
+                ))}
+            </div>
+
+            {/* Information Scent: Theme Indicators - Moved Below Cards */}
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-6 items-center pt-2">
+                {STORY_THEMES.map((theme, i) => (
+                    <React.Fragment key={theme}>
+                        <span className="flex-shrink-0 text-[8px] font-black uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500 py-1 transition-colors hover:text-blue-500">
+                            {theme}
+                        </span>
+                        {i < STORY_THEMES.length - 1 && (
+                            <div className="w-0.5 h-0.5 rounded-full bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
+                        )}
+                    </React.Fragment>
                 ))}
             </div>
         </section>
@@ -347,7 +362,7 @@ export const HomeFeed: React.FC<{
                 >
                     <div className="absolute left-[46px] -top-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
                     <div className="absolute left-[46px] -bottom-2 w-3 h-3 bg-slate-50 dark:bg-gray-950 border border-slate-200/60 dark:border-gray-800 rounded-full z-10"></div>
-                    <div className="absolute left-[52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
+                    <div className="absolute left(52px] top-4 bottom-4 w-px border-l border-dashed border-gray-200 dark:border-gray-700"></div>
 
                     <div className={`w-[52px] h-full bg-gradient-to-br ${coupon.color} flex flex-col items-center justify-center text-white shrink-0 relative`}>
                     <Sparkles size={12} className="mb-1 opacity-60" />

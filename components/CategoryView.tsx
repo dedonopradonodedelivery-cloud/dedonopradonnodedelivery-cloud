@@ -1,8 +1,7 @@
 
 import React, { useMemo } from 'react';
-import { ChevronLeft, AlertCircle, Crown, Info, Star, CheckCircle2, ArrowRight } from 'lucide-react';
+import { AlertCircle, Crown, Info, Star, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Category, Store } from '@/types';
-import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 import { StoreCard } from '@/components/LojasEServicosList';
 
@@ -47,7 +46,6 @@ interface CategoryViewProps {
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ 
   category, 
-  onBack, 
   onStoreClick, 
   stores, 
   userRole, 
@@ -56,7 +54,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
 }) => {
 
   const filteredStores = useMemo(() => {
-    return stores.filter(s => s.category === category.name);
+    return stores.filter(s => s.category === category.name || s.subcategory === category.name);
   }, [stores, category.name]);
 
   const handleAdvertiseClick = () => {

@@ -22,6 +22,8 @@ interface HeaderProps {
   toggleTheme?: () => void;
   userRole?: string | null;
   onSelectCategory: (category: Category) => void;
+  customTitle?: string;
+  onBack?: () => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -124,7 +126,9 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
-  onNavigate
+  onNavigate,
+  customTitle,
+  onBack
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -155,6 +159,9 @@ export const Header: React.FC<HeaderProps> = ({
     'autos_selection': 'Autos',
     'category_detail': 'Bairro'
   };
+
+  // LÓGICA DE TÍTULO PREMIUM: Prioriza customTitle e garante UPPERCASE
+  const displayTitle = customTitle || viewTitles[activeTab] || 'Localizei ';
 
   useEffect(() => {
     const checkNotifs = () => {
@@ -189,7 +196,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="flex items-center gap-3 min-w-0">
                         {!isHome ? (
                             <button 
-                                onClick={() => window.history.back()}
+                                onClick={() => onBack ? onBack() : window.history.back()}
                                 className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0"
                             >
                                 <ChevronLeft size={20} strokeWidth={3} />
@@ -200,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
                             </div>
                         )}
                         <h1 className={`text-lg font-black uppercase tracking-tighter leading-none truncate ${isBlueHeader ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                            {isHome ? 'Localizei ' : (viewTitles[activeTab] || 'Localizei ')} 
+                            {isHome ? 'Localizei ' : displayTitle} 
                             <span className={isBlueHeader ? 'opacity-50' : 'text-blue-600'}>{isHome ? 'JPA' : ''}</span>
                         </h1>
                     </div>
