@@ -20,19 +20,14 @@ import {
   Construction,
   AlertTriangle,
   Clock,
-  ShieldCheck,
   BadgeCheck,
   Zap,
   Info,
   Search,
   Package,
   Key,
-  Camera,
   Briefcase,
-  Building2,
-  TrendingUp,
   Repeat,
-  Settings,
   X,
   FileText
 } from 'lucide-react';
@@ -294,7 +289,7 @@ export const HomeFeed: React.FC<{
   }, [candidateProfile]);
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 rounded-t-[3.5rem] mt-[215px] relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
+    <div className="flex flex-col bg-white dark:bg-gray-950 w-full max-w-md mx-auto animate-in fade-in duration-700 overflow-hidden pb-32 relative z-20">
       
       {/* 1. UTILITY ROW */}
       <section className="px-8 pt-6 pb-2">
@@ -360,7 +355,33 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 🔥 TROCA-TROCA DO BAIRRO - Hero Card */}
+      {/* 3. ACONTECENDO AGORA - MOVIDO PARA CÁ (REQUISITO) */}
+      <section className="px-6 py-8 space-y-5">
+        <SectionHeader 
+            icon={Flame} 
+            title="Acontecendo agora" 
+            subtitle="Informação verificada no bairro" 
+            iconColor="text-amber-500" 
+            onSeeMore={() => onNavigate('neighborhood_posts')}
+        />
+        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[200px]">
+            <HappeningNowCard 
+                item={ACONTECENDO_AGORA_FEED[0]} 
+                className="col-span-2"
+                onClick={() => onNavigate('neighborhood_posts')}
+            />
+            <HappeningNowCard 
+                item={ACONTECENDO_AGORA_FEED[1]} 
+                onClick={() => onNavigate('neighborhood_posts')}
+            />
+            <HappeningNowCard 
+                item={ACONTECENDO_AGORA_FEED[2]} 
+                onClick={() => onNavigate('neighborhood_posts')}
+            />
+        </div>
+      </section>
+
+      {/* 4. TROCA-TROCA DO BAIRRO - Hero Card */}
       <section className="px-6 py-8 space-y-5">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -426,35 +447,8 @@ export const HomeFeed: React.FC<{
           </div>
         </button>
       </section>
-
-
-      {/* 3. ACONTECENDO AGORA - NOVO LAYOUT MOSAICO */}
-      <section className="px-6 py-8 space-y-5">
-        <SectionHeader 
-            icon={Flame} 
-            title="Acontecendo agora" 
-            subtitle="Informação verificada no bairro" 
-            iconColor="text-amber-500" 
-            onSeeMore={() => onNavigate('neighborhood_posts')}
-        />
-        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[200px]">
-            <HappeningNowCard 
-                item={ACONTECENDO_AGORA_FEED[0]} 
-                className="col-span-2"
-                onClick={() => onNavigate('neighborhood_posts')}
-            />
-            <HappeningNowCard 
-                item={ACONTECENDO_AGORA_FEED[1]} 
-                onClick={() => onNavigate('neighborhood_posts')}
-            />
-            <HappeningNowCard 
-                item={ACONTECENDO_AGORA_FEED[2]} 
-                onClick={() => onNavigate('neighborhood_posts')}
-            />
-        </div>
-      </section>
       
-      {/* 💼 VAGAS PERTO DE VOCÊ */}
+      {/* 5. VAGAS PERTO DE VOCÊ */}
       <section className="px-6 py-8 space-y-5">
         <SectionHeader 
             icon={Briefcase} 
@@ -483,7 +477,7 @@ export const HomeFeed: React.FC<{
         )}
       </section>
 
-      {/* 4. CUPOM DO DIA */}
+      {/* 6. CUPOM DO DIA */}
       {isFeatureActive('coupons') && (
         <section className="space-y-4 py-4">
           <div className="px-6 flex items-center justify-between">
@@ -525,7 +519,7 @@ export const HomeFeed: React.FC<{
         </section>
       )}
 
-      {/* 5. ACHADOS & PERDIDOS */}
+      {/* 7. ACHADOS & PERDIDOS */}
       <section className="px-6 py-4 space-y-5">
         <SectionHeader 
             icon={Search} 
@@ -571,7 +565,7 @@ export const HomeFeed: React.FC<{
         </div>
       </section>
 
-      {/* 7. LANÇAMENTO / ADS SECTION */}
+      {/* 8. LANÇAMENTO / ADS SECTION */}
       {userRole === 'lojista' && isFeatureActive('sponsored_ads') && (
         <section className="px-6 py-6 animate-in slide-in-from-bottom-4 duration-700">
           <LaunchOfferBanner onClick={() => onNavigate('store_ads_module')} />
@@ -580,7 +574,7 @@ export const HomeFeed: React.FC<{
 
       <InstitutionalBanner />
       
-      {/* 8. EXPLORE GUIDE SECTION */}
+      {/* 9. EXPLORE GUIDE SECTION */}
       {isFeatureActive('explore_guide') && (
         <div className="w-full pt-8 pb-10">
             <div className="px-6">
