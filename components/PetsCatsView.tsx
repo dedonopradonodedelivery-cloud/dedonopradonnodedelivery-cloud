@@ -102,21 +102,17 @@ export const PetsCatsView: React.FC<PetsCatsViewProps> = ({ onBack, onSelect, on
           >
             <ChevronLeft size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Pet — Gatos</h1>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Especialistas em ronronar 🐱✨</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Pet — Gatos</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Autoridade - Clicável */}
         <div 
             onClick={handleHeroClick}
             className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
         >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-105 transition-transform duration-700"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-10 flex items-start gap-4">
                 <div className="p-3 bg-indigo-600 rounded-2xl">
                     <Cat size={24} className="text-white" />

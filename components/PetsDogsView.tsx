@@ -104,16 +104,12 @@ export const PetsDogsView: React.FC<PetsDogsViewProps> = ({ onBack, onSelect, on
           >
             <ChevronLeft size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Pet — Cães</h1>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Serviços e Cuidados 🐾</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Pet — Cães</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Autoridade - Agora Clicável */}
         <div 
             onClick={handleHeroClick}
             className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"

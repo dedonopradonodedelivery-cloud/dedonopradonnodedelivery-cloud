@@ -1,9 +1,10 @@
 
 import React, { useMemo } from 'react';
-import { AlertCircle, Crown, Info, Star, CheckCircle2, ArrowRight } from 'lucide-react';
+import { AlertCircle, Crown, Info, Star, CheckCircle2, ArrowRight, ChevronLeft } from 'lucide-react';
 import { Category, Store, AdType } from '@/types';
 import { MasterSponsorBanner } from '@/components/MasterSponsorBanner';
 import { StoreCard } from '@/components/LojasEServicosList';
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 // --- DADOS FAKE PARA CONCEITO COMERCIAL (DESTAQUES) ---
 const MOCK_HIGHLIGHTS = [
@@ -46,6 +47,7 @@ interface CategoryViewProps {
 
 export const CategoryView: React.FC<CategoryViewProps> = ({ 
   category, 
+  onBack,
   onStoreClick, 
   stores, 
   userRole, 
@@ -57,7 +59,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
     return stores.filter(s => s.category === category.name || s.subcategory === category.name);
   }, [stores, category.name]);
 
-  // Fallback para o Banner de Oportunidade
   const handleOpportunityBannerClick = () => {
     const demoStore: Partial<Store> = {
       id: 'demo-destaque',
@@ -77,12 +78,30 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
       
+      {/* 
+        ============================================================
+        HEADER PADRÃO OBRIGATÓRIO (Slide In)
+        ============================================================
+      */}
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onBack} 
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">{category.name}</h1>
+        </div>
+        <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
+      </header>
+
       {/* Overlap Card System */}
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-12 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         <main className="p-6 pt-12 space-y-10">
             
-            {/* 1️⃣ BANNER COMERCIAL (Agora com Fallback de Perfil) */}
+            {/* 1️⃣ BANNER COMERCIAL */}
             <section 
             onClick={handleOpportunityBannerClick}
             className="relative w-full aspect-[16/8] rounded-[2rem] overflow-hidden cursor-pointer group shadow-2xl shadow-blue-900/10"
@@ -117,7 +136,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             </div>
             </section>
 
-            {/* 2️⃣ SEÇÃO DESTAQUES (Agora 100% Clicáveis com Fallback) */}
+            {/* 2️⃣ SEÇÃO DESTAQUES */}
             <section>
             <div className="flex items-center gap-2 mb-5 px-1">
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -179,7 +198,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             </div>
             </section>
 
-            {/* 3️⃣ LISTA DE LOJAS (Geral) */}
+            {/* 3️⃣ LISTA DE LOJAS */}
             <section>
                 <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
@@ -204,9 +223,9 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
                 )}
             </section>
 
-            {/* 4️⃣ PATROCINADOR MASTER (Rodapé) */}
+            {/* 4️⃣ PATROCINADOR MASTER */}
             <section className="pt-4">
-            <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
+                <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label={category.name} />
             </section>
         </main>
       </div>

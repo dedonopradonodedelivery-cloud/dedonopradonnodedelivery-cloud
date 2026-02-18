@@ -38,7 +38,7 @@ const SelectionCard: React.FC<{
 export const BeautySelectionView: React.FC<BeautySelectionViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-12 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         <main className="p-6 pt-12 space-y-10">
             <div className="text-center space-y-3 mb-4">
                 <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-[1.5rem] flex items-center justify-center mx-auto text-[#1E5BFF] mb-2 shadow-inner">
@@ -71,7 +71,7 @@ export const BeautySelectionView: React.FC<BeautySelectionViewProps> = ({ onBack
                 <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
                     <Sparkles className="text-blue-500" size={18} />
                 </div>
-                <p className="text-xs text-blue-800 dark:text-blue-300 font-bold leading-tight uppercase tracking-tight">
+                <p className="text-[10px] text-blue-800 dark:text-blue-300 font-bold leading-tight uppercase tracking-tight">
                     Conectamos você com os melhores especialistas em Beleza do seu bairro.
                 </p>
             </div>

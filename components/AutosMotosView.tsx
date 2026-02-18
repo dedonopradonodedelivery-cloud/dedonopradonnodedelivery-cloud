@@ -40,14 +40,11 @@ export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"><ChevronLeft size={24} /></button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Autos — Motos</h1>
-            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Serviços e Cuidados</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Autos — Motos</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
@@ -56,7 +53,7 @@ export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect
             onClick={handleHeroClick}
             className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
         >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-105 transition-transform duration-700"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-10 flex items-start gap-4">
                 <div className="p-3 bg-amber-500 rounded-2xl shadow-lg">
                     <Zap size={24} className="text-white" />

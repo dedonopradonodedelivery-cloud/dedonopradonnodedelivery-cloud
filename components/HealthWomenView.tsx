@@ -50,7 +50,7 @@ const SubcategoryCard: React.FC<{ item: SubcategoryItem; onClick: () => void }> 
       <div className={`w-16 h-16 rounded-[1.5rem] ${item.color} bg-opacity-10 flex items-center justify-center ${item.color.replace('bg-', 'text-')} group-hover:scale-110 transition-transform duration-500`}>
         <Icon size={32} strokeWidth={2.5} />
       </div>
-      <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-tight px-1">
+      <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
         {item.name}
       </span>
     </button>
@@ -78,16 +78,12 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
           >
             <ChevronLeft size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Mulher</h1>
-            <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest mt-1">Especialidades femininas</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Mulher</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32 space-y-8">
-        {/* Banner de Inspiração - Agora Clicável */}
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32 space-y-8 relative">
         <div 
             onClick={handleHeroClick}
             className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"

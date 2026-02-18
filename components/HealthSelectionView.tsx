@@ -23,10 +23,10 @@ const SelectionButton: React.FC<{
       <div className={`w-14 h-14 rounded-2xl ${color} bg-opacity-10 flex items-center justify-center ${color.replace('bg-', 'text-')}`}>
         <Icon size={28} strokeWidth={2.5} />
       </div>
-      <span className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">{label}</span>
+      <span className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">{label}</span>
     </div>
     <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-300 group-hover:text-blue-600 group-hover:bg-blue-50 transition-all">
-      <ChevronLeft size={20} className="rotate-180" />
+      <ArrowRight size={20} strokeWidth={3} />
     </div>
   </button>
 );
@@ -42,7 +42,7 @@ export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onBack
         permitindo que a borda arredondada sobreponha o azul.
         ============================================================
       */}
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-12 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         <main className="p-6 pt-12 space-y-10">
             <div className="text-center space-y-3 mb-4">

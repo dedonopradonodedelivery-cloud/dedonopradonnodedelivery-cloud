@@ -89,3 +89,10 @@ html, body {
 .animate-ai-pulse {
   animation: ai-pulse 4s ease-in-out infinite;
 }
+
+/* Transições de alta performance para BottomNav */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}

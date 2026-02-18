@@ -104,10 +104,7 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
           >
             <ChevronLeft size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Pediatria</h1>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Cuidado Infantil Especializado</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Pediatria</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
@@ -148,8 +145,9 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
           </section>
         ))}
 
-        <div className="py-10 text-center opacity-20">
-          <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA Kids Ecosystem</p>
+        <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
+            <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA Kids Ecosystem</p>
         </div>
       </main>
     </div>

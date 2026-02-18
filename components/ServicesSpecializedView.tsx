@@ -137,7 +137,7 @@ export const ServicesSpecializedView: React.FC<ServicesSpecializedViewProps> = (
       name: 'Consultoria Especializada JPA',
       category: 'Serviços',
       subcategory: 'Especializados',
-      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800',
+      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200',
       description: 'Conectamos você aos melhores consultores e especialistas graduados em Jacarepaguá. Atendimento personalizado e alta competência técnica.',
     } as Store);
   };
@@ -152,16 +152,12 @@ export const ServicesSpecializedView: React.FC<ServicesSpecializedViewProps> = (
           >
             <ChevronLeft size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Serviços — Especializados</h1>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Profissionais de alto nível</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Serviços — Especializados</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        {/* Banner de Autoridade - Clicável */}
         <div 
             onClick={handleHeroClick}
             className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
@@ -182,7 +178,7 @@ export const ServicesSpecializedView: React.FC<ServicesSpecializedViewProps> = (
           <section key={idx} className="space-y-4">
             <div className="flex items-center gap-3 mb-2 px-1">
               <div className={`p-2 rounded-xl ${group.color} shrink-0`}>
-                <group.icon size={18} />
+                <group.icon size={18} strokeWidth={2.5} />
               </div>
               <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em]">
                 {group.title}

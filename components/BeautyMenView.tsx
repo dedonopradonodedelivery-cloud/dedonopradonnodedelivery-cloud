@@ -50,7 +50,7 @@ export const BeautyMenView: React.FC<BeautyMenViewProps> = ({ onBack, onSelect, 
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -59,10 +59,7 @@ export const BeautyMenView: React.FC<BeautyMenViewProps> = ({ onBack, onSelect, 
           >
             <ChevronLeft size={24} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Beleza — Homem</h1>
-            <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Cuidados masculinos</p>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Beleza — Homem</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>

@@ -38,7 +38,7 @@ const SelectionCard: React.FC<{
 export const AutosSelectionView: React.FC<AutosSelectionViewProps> = ({ onBack, onSelect, onNavigate }) => {
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-12 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         <main className="p-6 pt-12 space-y-10">
             <div className="text-center space-y-3 mb-4">
                 <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-[1.5rem] flex items-center justify-center mx-auto text-[#1E5BFF] mb-2 shadow-inner">
