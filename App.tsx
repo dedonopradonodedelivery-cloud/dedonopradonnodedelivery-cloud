@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
@@ -70,7 +70,7 @@ import { RoleSwitcherModal } from '@/components/RoleSwitcherModal';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 
 export const App: React.FC = () => {
-  const { user, userRole, loading: authLoading, signOut } = useAuth();
+  const { user: authUser, userRole: authRole, loading: authLoading, signOut } = useAuth();
   const { theme } = useTheme();
   
   const [activeTab, setActiveTab] = useState('home');
@@ -83,9 +83,27 @@ export const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<any>('Visitante');
   const [appReady, setAppReady] = useState(false);
 
-  // MOTOR DE NAVEGAÇÃO PREMIUM
   const [customHeaderTitle, setCustomHeaderTitle] = useState('');
   const [backView, setBackView] = useState('home');
+
+  // Lógica de Admin Real
+  const isRealAdmin = authUser?.email === 'dedonopradonodedelivery@gmail.com';
+
+  // Lógica de Simulação de Perfil para Admin
+  const simulatedRole = useMemo(() => {
+    if (isRealAdmin) {
+      if (viewMode === 'Lojista') return 'lojista';
+      if (viewMode === 'ADM') return 'admin';
+      if (viewMode === 'Usuário') return 'cliente';
+      if (viewMode === 'Visitante') return null;
+    }
+    return authRole;
+  }, [isRealAdmin, viewMode, authRole]);
+
+  const simulatedUser = useMemo(() => {
+    if (isRealAdmin && viewMode === 'Visitante') return null;
+    return authUser;
+  }, [isRealAdmin, viewMode, authUser]);
 
   useEffect(() => {
     if (!authLoading) {
@@ -109,20 +127,23 @@ export const App: React.FC = () => {
     }
   }, [authLoading]);
 
-  const isAdmin = user?.email === 'dedonopradonodedelivery@gmail.com';
-
   const handleNavigate = (view: string, data?: any) => {
     if (data) setSelectedData(data);
     setActiveTab(view);
     window.scrollTo(0, 0);
   };
 
-  /**
-   * MOTOR DE GERAÇÃO DE PERFIL FALLBACK (CRÍTICO)
-   * Garante que qualquer clique em destaque resulte em um perfil premium funcional.
-   */
+  const handleModeChange = (mode: string) => {
+    setViewMode(mode);
+    // Navegação contextual imediata ao trocar de modo para refletir a experiência
+    if (mode === 'ADM') {
+      setActiveTab('admin_panel');
+    } else {
+      setActiveTab('home');
+    }
+  };
+
   const handleSelectStore = (store: Store) => {
-    // Se o objeto estiver incompleto, injetamos dados simulados realistas
     const completedStore: Store = {
       id: store.id || `fallback-${Date.now()}`,
       name: store.name || 'Estabelecimento Local',
@@ -197,19 +218,19 @@ export const App: React.FC = () => {
       <div className="min-h-screen bg-brand-blue dark:bg-slate-950 flex justify-center relative transition-colors duration-300">
         <div className={`w-full max-w-md h-[100dvh] bg-white dark:bg-gray-900 transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
-                <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={userRole} hideNav={false}>
+                <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={simulatedRole} hideNav={false}>
                     {!headerExclusionList.includes(activeTab) && (
                     <Header 
                         onNotificationClick={() => handleNavigate('notifications')} 
-                        user={user} 
+                        user={simulatedUser} 
                         searchTerm={globalSearch} 
                         onSearchChange={setGlobalSearch} 
                         onNavigate={handleNavigate} 
                         activeTab={activeTab} 
-                        userRole={userRole as any} 
+                        userRole={simulatedRole} 
                         stores={STORES} 
                         onStoreClick={handleSelectStore} 
-                        isAdmin={isAdmin} 
+                        isAdmin={isRealAdmin} 
                         viewMode={viewMode} 
                         onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
                         onSelectCategory={handleSelectCategory} 
@@ -218,29 +239,29 @@ export const App: React.FC = () => {
                     />
                     )}
                     <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={user as any} userRole={userRole} onSelectCategory={handleSelectCategory} />}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={simulatedUser} userRole={simulatedRole} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('home')} onJobClick={(job, compatibility) => handleNavigate('job_detail', { job, compatibility })} onNavigate={handleNavigate} />}
-                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
-                    {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
-                    {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
-                    {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('home')} user={user as any} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'real_estate' && <RealEstateView onBack={() => handleNavigate('classifieds')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'adoption' && <AdoptionView onBack={() => handleNavigate('classifieds')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'donations' && <DonationsView onBack={() => handleNavigate('classifieds')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
+                    {activeTab === 'desapega' && <DesapegaView onBack={() => handleNavigate('home')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'troca_troca' && <TrocaTrocaView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
                     {activeTab === 'troca_troca_intro' && <TrocaTrocaIntroView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
                     {activeTab === 'troca_troca_swipe' && <TrocaTrocaSwipeView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
                     
-                    {activeTab === 'job_wizard' && <JobWizard user={user as any} onBack={() => handleNavigate('home')} onComplete={() => handleNavigate('home')} />}
-                    {activeTab === 'real_estate_wizard' && <RealEstateWizard user={user as any} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
+                    {activeTab === 'job_wizard' && <JobWizard user={simulatedUser} onBack={() => handleNavigate('home')} onComplete={() => handleNavigate('home')} />}
+                    {activeTab === 'real_estate_wizard' && <RealEstateWizard user={simulatedUser} onBack={() => handleNavigate('real_estate')} onComplete={() => handleNavigate('real_estate')} onNavigate={handleNavigate} />}
                     {activeTab === 'plan_selection' && <PlanSelectionView onBack={() => handleNavigate('home')} onSuccess={() => handleNavigate('home')} />}
                     
-                    {activeTab === 'classified_detail' && selectedData?.item && <ClassifiedDetailView item={selectedData.item} onBack={() => handleNavigate('classifieds')} user={user} onRequireLogin={() => setIsAuthModalOpen(true)} />}
+                    {activeTab === 'classified_detail' && selectedData?.item && <ClassifiedDetailView item={selectedData.item} onBack={() => handleNavigate('classifieds')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} />}
                     {activeTab === 'job_detail' && selectedData?.job && <JobDetailView job={selectedData.job} compatibility={selectedData.compatibility} onBack={() => handleNavigate('jobs')} />}
-                    {activeTab === 'real_estate_detail' && selectedData?.property && <RealEstateDetailView property={selectedData.property} onBack={() => handleNavigate('real_estate')} onRequireLogin={() => setIsAuthModalOpen(true)} user={user} />}
+                    {activeTab === 'real_estate_detail' && selectedData?.property && <RealEstateDetailView property={selectedData.property} onBack={() => handleNavigate('real_estate')} onRequireLogin={() => setIsAuthModalOpen(true)} user={simulatedUser} />}
                     {activeTab === 'classified_search_results' && selectedData?.searchTerm && <ClassifiedSearchResultsView searchTerm={selectedData.searchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
 
-                    {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={userRole} />}
-                    {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => handleNavigate(backView)} onStoreClick={handleSelectStore} stores={STORES} userRole={userRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
+                    {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={simulatedRole} />}
+                    {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={() => handleNavigate(backView)} onStoreClick={handleSelectStore} stores={STORES} userRole={simulatedRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO SAÚDE */}
                     {activeTab === 'health_selection' && (
@@ -342,19 +363,19 @@ export const App: React.FC = () => {
 
                     {/* DEMAIS ROTAS */}
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
-                    {activeTab === 'profile' && <MenuView user={user as any} userRole={userRole} onAuthClick={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />}
-                    {activeTab === 'user_resume' && <UserResumeView user={user as any} onBack={() => handleNavigate('profile')} />}
-                    {activeTab === 'user_trade_items' && <UserTradeItemsView user={user as any} userRole={userRole} onBack={() => handleNavigate('profile')} />}
-                    {activeTab === 'user_profile_full' && user && <UserProfileFullView onBack={() => handleNavigate('profile')} onEdit={() => handleNavigate('edit_profile_view')} />}
-                    {activeTab === 'edit_profile_view' && user && <EditProfileView user={user as any} onBack={() => handleNavigate('user_profile_full')} />}
+                    {activeTab === 'profile' && <MenuView user={simulatedUser} userRole={simulatedRole} onAuthClick={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />}
+                    {activeTab === 'user_resume' && <UserResumeView user={simulatedUser} onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'user_trade_items' && <UserTradeItemsView user={simulatedUser} userRole={simulatedRole} onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'user_profile_full' && simulatedUser && <UserProfileFullView onBack={() => handleNavigate('profile')} onEdit={() => handleNavigate('edit_profile_view')} />}
+                    {activeTab === 'edit_profile_view' && simulatedUser && <EditProfileView user={simulatedUser} onBack={() => handleNavigate('user_profile_full')} />}
                     {activeTab === 'user_coupons' && <UserCupomScreen onBack={() => handleNavigate('home')} onNavigate={handleNavigate} onStoreClick={handleSelectStore} />}
                     {activeTab === 'coupon_landing' && <CouponLandingView onBack={() => handleNavigate('home')} onLogin={() => setIsAuthModalOpen(true)} />}
                     {activeTab === 'admin_panel' && <AdminPanel onLogout={handleSignOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} />}
-                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={user as any} />}
+                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={simulatedUser} />}
                     {activeTab === 'merchant_reviews' && <MerchantReviewsModule onBack={() => handleNavigate('profile')} />}
                     {activeTab === 'merchant_promotions' && <MerchantPromotionsModule onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
                     {activeTab === 'merchant_coupons' && <MerchantCouponsModule onBack={() => handleNavigate('profile')} />}
-                    {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => handleNavigate('profile')} user={user} />}
+                    {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => handleNavigate('profile')} user={simulatedUser} />}
                     {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => handleNavigate('profile')} />}
                     {activeTab === 'store_support' && <StoreSupportModule onBack={() => handleNavigate('profile')} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
@@ -362,8 +383,8 @@ export const App: React.FC = () => {
                 </Layout>
             )}
         </div>
-        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} user={user as any} />
-        <RoleSwitcherModal isOpen={isRoleSwitcherOpen} onClose={() => setIsRoleSwitcherOpen(false)} currentMode={viewMode} onModeChange={setViewMode} />
+        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} user={authUser} />
+        <RoleSwitcherModal isOpen={isRoleSwitcherOpen} onClose={() => setIsRoleSwitcherOpen(false)} currentMode={viewMode} onModeChange={handleModeChange} />
       </div>
     </div>
   );
