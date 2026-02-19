@@ -75,7 +75,7 @@ export const AutosBikesView: React.FC<AutosBikesViewProps> = ({ onBack, onSelect
               {group.items.map((item, itemIdx) => (
                 <SpecialtyCard 
                   key={itemIdx} 
-                  item={item} 
+                  name={item.name} 
                   onClick={() => onSelect(item.name)} 
                 />
               ))}
