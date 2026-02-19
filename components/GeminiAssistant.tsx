@@ -3,11 +3,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { X, Send, Loader2, Mic, RefreshCw, AlertCircle, Copy, Check } from 'lucide-react';
 import { ChatMessage } from '@/types';
-import { TUCO_MASCOT_BASE64 } from '@/constants';
+import { LOKA_MASCOT_BASE64 } from '@/constants';
 
-const TucoAvatarLarge: React.FC = () => (
+const LokaAvatarLarge: React.FC = () => (
   <div className="w-10 h-10 bg-transparent rounded-full flex items-center justify-center overflow-hidden">
-    <img src={TUCO_MASCOT_BASE64} alt="Mascote Tuco" className="w-12 h-12 object-contain" />
+    <img src={LOKA_MASCOT_BASE64} alt="Mascote LOKA" className="w-12 h-12 object-contain" />
   </div>
 );
 
@@ -17,7 +17,7 @@ interface AssistantProps {
 }
 
 export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onClose }) => {
-  const INITIAL_GREETING = 'Olá! Sou o Tuco 🦜 Como posso ajudar você no bairro hoje?';
+  const INITIAL_GREETING = 'Olá! Sou a LOKA 🦜 Como posso ajudar você no bairro hoje?';
   
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', text: INITIAL_GREETING, type: 'response' }
@@ -87,10 +87,10 @@ Endpoint: generateContent
         model: 'gemini-3-flash-preview',
         contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
         config: {
-          systemInstruction: `Você é Tuco, o assistente inteligente oficial do Localizei JPA. 
+          systemInstruction: `Você é LOKA, a assistente inteligente oficial do Localizei JPA. 
           Sua missão é ajudar moradores a encontrar lojas, serviços, cupons e vagas de emprego em Jacarepaguá/RJ. 
           Bairros de atuação: Freguesia, Taquara, Pechincha, Anil, Tanque, Curicica, etc.
-          Personalidade: Extremamente útil, rápido, amigável, usa emojis e conhece Jacarepaguá como ninguém.`,
+          Personalidade: Extremamente útil, rápido, amigável, usa emojis e conhece Jacarepaguá como ninguém. LOKA, a IA de JPA.`,
           temperature: 0.7,
           topP: 0.95,
         },
@@ -106,7 +106,7 @@ Endpoint: generateContent
       ]);
 
     } catch (error: any) {
-      console.error("[Tuco API Error]", error);
+      console.error("[LOKA API Error]", error);
       setLastError(error);
       
       setMessages(prev => [
@@ -152,12 +152,12 @@ Endpoint: generateContent
         {/* Header */}
         <div className="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] p-5 flex justify-between items-center shadow-md relative z-10">
           <div className="flex items-center gap-3">
-            <TucoAvatarLarge />
+            <LokaAvatarLarge />
             <div>
-              <h3 className="font-black text-white text-xl tracking-tight leading-none uppercase">TUCO</h3>
+              <h3 className="font-black text-white text-xl tracking-tight leading-none uppercase">LOKA</h3>
               <div className="flex items-center gap-1.5 mt-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]"></div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">Inteligência Local Ativa</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">LOKA, a IA de JPA</p>
               </div>
             </div>
           </div>
@@ -194,6 +194,7 @@ Endpoint: generateContent
                           onClick={copyErrorDetails}
                           className="flex items-center justify-center gap-2 text-[8px] text-rose-400 uppercase font-black tracking-widest hover:underline"
                         >
+                          {/* Fixed invalid JSX by adding fragment */}
                           {copied ? <><Check size={10}/> Copiado</> : <><Copy size={10}/> Copiar detalhes do erro</>}
                         </button>
                     </div>
@@ -226,7 +227,7 @@ Endpoint: generateContent
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
-                    placeholder="Como o Tuco pode te ajudar?"
+                    placeholder="Como a LOKA pode te ajudar?"
                     className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-[1.25rem] px-5 py-4 pr-12 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/30 border border-blue-100/50 dark:border-gray-700 placeholder-gray-400 transition-all disabled:opacity-50"
                 />
                 <button

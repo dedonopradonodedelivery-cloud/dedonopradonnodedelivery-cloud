@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
-  // FIX: Added missing ChevronRight icon to the imports
   ChevronRight,
   Bell, 
   MessageSquare, 
@@ -35,7 +34,7 @@ const INITIAL_MOCK_NOTIFS: AppNotification[] = [
     id: 'notif-1',
     userId: 'visitante',
     title: 'Bem-vindo ao Atual Clube! 🧡',
-    message: 'Agora você have acesso a benefícios exclusivos em toda Jacarepaguá. Confira seu painel.',
+    message: 'Agora você tem acesso a benefícios exclusivos em toda Jacarepaguá. Confira seu painel.',
     type: 'system',
     read: false,
     createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
@@ -43,7 +42,7 @@ const INITIAL_MOCK_NOTIFS: AppNotification[] = [
   {
     id: 'notif-2',
     userId: 'visitante',
-    title: 'Dica do Tuco: Trânsito Livre 🦜',
+    title: 'Dica da LOKA: Trânsito Livre 🦜',
     message: 'A Linha Amarela apresenta fluxo bom no sentido Barra agora. Aproveite!',
     type: 'system',
     read: false,

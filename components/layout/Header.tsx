@@ -4,7 +4,7 @@ import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X, ChevronLeft, 
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
 import { GeminiAssistant } from '@/components/GeminiAssistant';
-import { TUCO_MASCOT_BASE64 } from '@/constants';
+import { LOKA_MASCOT_BASE64 } from '@/constants';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 const NEIGHBORHOOD_CONTEXT_DATA: Record<string, { traffic: string, temp: string, status: string }> = {
@@ -125,7 +125,6 @@ export const Header: React.FC<HeaderProps> = ({
                                 <button onClick={() => onBack && onBack()} className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0">
                                     <ChevronLeft size={20} strokeWidth={3} />
                                 </button>
-                                {/* O TÍTULO DA TELA DEVE ESTAR AQUI, AO LADO DA SETA DE VOLTAR */}
                                 <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none animate-in slide-in-from-left duration-500 py-1 truncate">
                                     {customTitle || "CATEGORIA"}
                                 </h1>
@@ -165,10 +164,10 @@ export const Header: React.FC<HeaderProps> = ({
                 {isHome && (
                     <div className="w-full mt-6">
                         <div className="animate-in fade-in slide-in-from-top-1 duration-700">
-                             <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Eu sou o Tuco, sua IA de Jacarepaguá!</p>
+                             <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Eu sou a LOKA, a IA de JPA!</p>
                              <div className="w-full relative mb-4">
                                 <button onClick={() => setIsAssistantOpen(true)} className="w-full bg-white/10 rounded-[1.25rem] border border-white/15 py-3.5 pl-5 pr-14 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner">
-                                    <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer para o Tuco te ajudar</span>
+                                    <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer para a LOKA te ajudar</span>
                                 </button>
                                 <button onClick={handleVoiceSearch} className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-300 ${isListening ? 'text-red-400 scale-125' : 'text-white/30 hover:text-white/60'}`}><Mic size={20} className={isListening ? 'animate-pulse' : ''} /></button>
                              </div>

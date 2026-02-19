@@ -4,7 +4,8 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Sun, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
-import { CATEGORIES, TUCO_MASCOT_BASE64 } from '@/constants';
+// Corrected import from TUCO_MASCOT_BASE64 to LOKA_MASCOT_BASE64
+import { CATEGORIES, LOKA_MASCOT_BASE64 } from '@/constants';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
 
 interface HeaderProps {
@@ -60,8 +61,9 @@ const NeighborhoodSelectorModal: React.FC = () => {
     );
 };
 
-const TucoMascot: React.FC = () => (
-  <img src={TUCO_MASCOT_BASE64} alt="Mascote Tuco" className="w-full h-full object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.4)]" />
+// Renamed and updated to use LOKA_MASCOT_BASE64
+const LokaMascot: React.FC = () => (
+  <img src={LOKA_MASCOT_BASE64} alt="Mascote Loka" className="w-full h-full object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.4)]" />
 );
 
 export const Header: React.FC<HeaderProps> = ({

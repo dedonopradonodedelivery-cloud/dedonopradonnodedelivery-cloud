@@ -24,8 +24,8 @@ import {
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '@/types';
 
-// Fix: Exporting TUCO_MASCOT_BASE64 which was missing and causing errors in GeminiAssistant and Header.
-export const TUCO_MASCOT_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+// Oficialmente renomeado de TUCO para LOKA
+export const LOKA_MASCOT_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
@@ -56,64 +56,62 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const ACONTECENDO_AGORA_DATA = [
-  { id: 1, type: 'Trânsito', image: 'https://images.unsplash.com/photo-1545147422-b96338ea878c?q=80&w=400&auto=format&fit=crop', authorName: 'CET-Rio JPA', timestamp: '15 min', neighborhood: 'Freguesia', icon: MapIcon },
-  { id: 2, type: 'Achados', image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=400&auto=format&fit=crop', authorName: 'Segurança Center', timestamp: '1h', neighborhood: 'Tanque', icon: Search },
-  { id: 3, type: 'Pets Perdidos', image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', authorName: 'Amigos dos Pets', timestamp: '2h', neighborhood: 'Anil', icon: PawPrint },
-  { id: 4, type: 'Utilidade', image: 'https://images.unsplash.com/photo-1584515933487-9d317552d894?q=80&w=400&auto=format&fit=crop', authorName: 'Posto Saúde JPA', timestamp: '3h', neighborhood: 'Taquara', icon: Info },
-  { id: 5, type: 'Promoção', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop', authorName: 'Pizzaria do Zé', timestamp: '4h', neighborhood: 'Pechincha', icon: Flame },
+  { id: 1, type: 'Trânsito', image: 'https://images.unsplash.com/photo-1545147422-b96338ea878c?q=80&w=400&auto=format&fit=crop', authorName: 'CET-Rio JPA', authorAvatar: 'https://i.pravatar.cc/150?u=cetrio', timestamp: '15 min', neighborhood: 'Freguesia', icon: MapIcon },
+  { id: 2, type: 'Achados', image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=400&auto=format&fit=crop', authorName: 'Segurança Center', authorAvatar: 'https://i.pravatar.cc/150?u=segcenter', timestamp: '1h', neighborhood: 'Tanque', icon: Search },
+  { id: 3, type: 'Pets Perdidos', image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&auto=format&fit=crop', authorName: 'Amigos dos Pets', authorAvatar: 'https://i.pravatar.cc/150?u=amigospets', timestamp: '2h', neighborhood: 'Anil', icon: PawPrint },
+  { id: 4, type: 'Utilidade', image: 'https://images.unsplash.com/photo-1584515933487-9d317552d894?q=80&w=400&auto=format&fit=crop', authorName: 'Posto Saúde JPA', authorAvatar: 'https://i.pravatar.cc/150?u=postojpa', timestamp: '3h', neighborhood: 'Taquara', icon: Info },
+  { id: 5, type: 'Promoção', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400&auto=format&fit=crop', authorName: 'Pizzaria do Zé', authorAvatar: 'https://i.pravatar.cc/150?u=pizzazé', timestamp: '4h', neighborhood: 'Pechincha', icon: Flame },
 ];
 
-// Fix: Completing truncated SUBCATEGORIES and fixing line 111 error where icon was missing.
-export const SUBCATEGORIES: Record<string, { name: string; icon: React.ReactNode }[]> = {
+export const SUBCATEGORIES: Record<string, { name: string; icon: React.ElementType }[]> = {
   'Serviços': [
-    { name: 'Elétrica', icon: <Zap /> },
-    { name: 'Hidráulica', icon: <Droplets /> },
-    { name: 'Chaveiro', icon: <Key /> },
-    { name: 'Marido de Aluguel', icon: <Hammer /> },
-    { name: 'Pintura', icon: <PaintRoller /> },
-    { name: 'Limpeza', icon: <Sparkles /> },
-    { name: 'Jardinagem', icon: <Leaf /> },
-    { name: 'Montagem de Móveis', icon: <Settings /> },
+    { name: 'Elétrica', icon: Zap },
+    { name: 'Hidráulica', icon: Droplets },
+    { name: 'Chaveiro', icon: Key },
+    { name: 'Marido de Aluguel', icon: Hammer },
+    { name: 'Pintura', icon: PaintRoller },
+    { name: 'Limpeza', icon: Sparkles },
+    { name: 'Jardinagem', icon: Leaf },
+    { name: 'Montagem de Móveis', icon: Settings },
   ],
   'Alimentação': [
-    { name: 'Marmitas', icon: <Package /> },
-    { name: 'Lanches', icon: <Sandwich /> },
-    { name: 'Doces', icon: <Cake /> },
-    { name: 'Salgados', icon: <Croissant /> },
-    { name: 'Comida Caseira', icon: <Soup /> },
-    { name: 'Bebidas', icon: <Beer /> },
-    { name: 'Produtos Naturais', icon: <Apple /> },
-    { name: 'Congelados', icon: <Package /> },
+    { name: 'Marmitas', icon: Package },
+    { name: 'Lanches', icon: Sandwich },
+    { name: 'Doces', icon: Cake },
+    { name: 'Salgados', icon: Croissant },
+    { name: 'Comida Caseira', icon: Soup },
+    { name: 'Bebidas', icon: Beer },
+    { name: 'Produtos Naturais', icon: Apple },
+    { name: 'Congelados', icon: Package },
   ],
   'Restaurantes': [
-    { name: 'Pizzarias', icon: <Pizza /> },
-    { name: 'Hamburguerias', icon: <Beef /> },
-    { name: 'Brasileira', icon: <Utensils /> },
-    { name: 'Japonesa', icon: <Globe2 /> },
-    { name: 'Italiana', icon: <Pizza /> },
-    { name: 'Árabe', icon: <Globe /> },
-    { name: 'Self-service', icon: <Utensils /> },
-    { name: 'Delivery', icon: <Bike /> },
+    { name: 'Pizzarias', icon: Pizza },
+    { name: 'Hamburguerias', icon: Beef },
+    { name: 'Brasileira', icon: Utensils },
+    { name: 'Japonesa', icon: Globe2 },
+    { name: 'Italiana', icon: Pizza },
+    { name: 'Árabe', icon: Globe },
+    { name: 'Self-service', icon: Utensils },
+    { name: 'Delivery', icon: Bike },
   ],
   'Mercados': [
-    { name: 'Supermercados', icon: <ShoppingCart /> },
-    { name: 'Mercadinhos', icon: <StoreIcon /> },
-    { name: 'Hortifruti', icon: <Apple /> },
-    { name: 'Açougue', icon: <Beef /> },
-    { name: 'Peixaria', icon: <Globe /> },
-    { name: 'Conveniência', icon: <Clock /> },
-    { name: 'Bebidas', icon: <Beer /> },
-    { name: 'Importados', icon: <Globe2 /> },
+    { name: 'Supermercados', icon: ShoppingCart },
+    { name: 'Mercadinhos', icon: StoreIcon },
+    { name: 'Hortifruti', icon: Apple },
+    { name: 'Açougue', icon: Beef },
+    { name: 'Peixaria', icon: Globe },
+    { name: 'Conveniência', icon: Clock },
+    { name: 'Bebidas', icon: Beer },
+    { name: 'Importados', icon: Globe2 },
   ],
   'Farmácias': [
-    { name: 'Drogaria', icon: <Pill /> },
-    { name: 'Manipulação', icon: <Microscope /> },
-    { name: 'Homeopatia', icon: <Stethoscope /> },
-    { name: 'Suplementos', icon: <Activity /> },
+    { name: 'Drogaria', icon: Pill },
+    { name: 'Manipulação', icon: Microscope },
+    { name: 'Homeopatia', icon: Stethoscope },
+    { name: 'Suplementos', icon: Activity },
   ],
 };
 
-// Fix: Exporting STORES required by App, ServicesView, PostCard, etc.
 export const STORES: Store[] = [
   {
     id: 'f-1',
@@ -174,13 +172,11 @@ export const STORES: Store[] = [
   }
 ];
 
-// Fix: Exporting STORIES required by StatusView.
 export const STORIES: Story[] = [
   { id: 's1', name: 'Padaria Imperial', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400' },
   { id: 's2', name: 'Pet Shop Amigo', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=400' },
 ];
 
-// Fix: Exporting MOCK_CLASSIFIEDS required by ExploreView and others.
 export const MOCK_CLASSIFIEDS: Classified[] = [
   {
     id: 'cl-1',
@@ -211,7 +207,6 @@ export const MOCK_CLASSIFIEDS: Classified[] = [
   }
 ];
 
-// Fix: Exporting MOCK_JOBS required by ExploreView.
 export const MOCK_JOBS: Job[] = [
   {
     id: 'job-1',
@@ -228,15 +223,14 @@ export const MOCK_JOBS: Job[] = [
   }
 ];
 
-// Fix: Exporting NEIGHBORHOOD_COMMUNITIES required by EditProfileView.
 export const NEIGHBORHOOD_COMMUNITIES: NeighborhoodCommunity[] = [
   { id: 'comm-1', name: 'Moradores da Freguesia', description: 'Grupo oficial de moradores', image: '', icon: <Users />, color: 'bg-blue-500', membersCount: '15.4k' },
 ];
 
+// Corrected NEIGHBORHOODS_COMMUNITIES to NEIGHBORHOOD_COMMUNITIES
 export const OFFICIAL_COMMUNITIES: NeighborhoodCommunity[] = NEIGHBORHOOD_COMMUNITIES;
 export const MOCK_USER_COMMUNITIES: NeighborhoodCommunity[] = [];
 
-// Fix: Exporting MOCK_COMMUNITY_POSTS required by NeighborhoodPostsView.
 export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   {
     id: 'post-1',
@@ -256,7 +250,6 @@ export const MOCK_COMMUNITY_POSTS: CommunityPost[] = [
   }
 ];
 
-// Fix: Exporting MOCK_REAL_ESTATE_PROPERTIES required by RealEstateView.
 export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
   {
     id: 're-1',
@@ -275,7 +268,6 @@ export const MOCK_REAL_ESTATE_PROPERTIES: RealEstateProperty[] = [
   }
 ];
 
-// Fix: Exporting CATEGORY_TOP_BANNERS required by CategoryTopCarousel.
 export const CATEGORY_TOP_BANNERS: Record<string, Record<string, { storeId: string; image: string }[]>> = {
   'alimentacao': {
     'Freguesia': [{ storeId: 'f-1', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800' }],

@@ -7,7 +7,7 @@ import { useFeatures, FeatureKey } from '@/contexts/FeatureContext';
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: 'cliente' | 'lojista' | null;
+  userRole?: 'cliente' | 'lojista' | 'admin' | null;
 }
 
 interface NavItem {
