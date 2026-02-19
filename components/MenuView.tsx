@@ -35,7 +35,7 @@ import { useFeatures } from '@/contexts/FeatureContext';
 
 interface MenuViewProps {
   user: User | null;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
   onAuthClick: () => void;
   onNavigate: (view: string, data?: any) => void;
   onBack?: () => void;

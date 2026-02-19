@@ -26,7 +26,7 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 
 interface UserTradeItemsViewProps {
   user: User | null;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
   onBack: () => void;
 }
 
@@ -59,7 +59,7 @@ export const UserTradeItemsView: React.FC<UserTradeItemsViewProps> = ({ user, us
       const newItem: TradeItem = {
         id: `trade-${Date.now()}`,
         userId: user!.id,
-        userRole: userRole!,
+        userRole: userRole === 'admin' ? 'lojista' : userRole!, // Mapping admin to lojista for data storage if needed, or handle explicitly
         ...itemData
       };
       updatedItems = [newItem, ...items];
@@ -155,7 +155,7 @@ export const UserTradeItemsView: React.FC<UserTradeItemsViewProps> = ({ user, us
   );
 };
 
-const ItemCard: React.FC<{ item: TradeItem, userRole: 'cliente' | 'lojista' | null, onEdit: () => void, onDelete: () => void, onStatusChange: (status: TradeItem['status']) => void }> = ({ item, userRole, onEdit, onDelete, onStatusChange }) => {
+const ItemCard: React.FC<{ item: TradeItem, userRole: 'cliente' | 'lojista' | 'admin' | null, onEdit: () => void, onDelete: () => void, onStatusChange: (status: TradeItem['status']) => void }> = ({ item, userRole, onEdit, onDelete, onStatusChange }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const getStatusStyles = () => {
         switch(item.status) {
@@ -186,7 +186,7 @@ const ItemCard: React.FC<{ item: TradeItem, userRole: 'cliente' | 'lojista' | nu
                         )}
                     </div>
                 </div>
-                {userRole === 'lojista' && (
+                {(userRole === 'lojista' || userRole === 'admin') && (
                     <span className="text-[9px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 inline-block mt-1">🔥 Loja Parceira</span>
                 )}
                 <p className="text-xs text-slate-400 mt-2 truncate">Interesse: {item.wants}</p>
@@ -268,7 +268,6 @@ const ItemForm: React.FC<{ onBack: () => void, onSave: (data: any) => void, item
                     <div className="space-y-1">
                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Categoria</label>
                         <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white appearance-none">
-                            {/* FIX: Correctly map over the array of strings `TRADE_CATEGORIES`. The string `c` serves as key, value, and label. */}
                             {TRADE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>

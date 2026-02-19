@@ -39,7 +39,7 @@ interface CategoryViewProps {
   onBack: () => void;
   onStoreClick: (store: Store) => void;
   stores: Store[];
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
   onAdvertiseInCategory: (categoryName: string | null) => void;
   onNavigate: (view: string) => void;
   onSubcategoryClick?: (subName: string) => void;

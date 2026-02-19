@@ -6,7 +6,7 @@ interface LayoutProps {
   children: ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: 'cliente' | 'lojista' | null;
+  userRole?: 'cliente' | 'lojista' | 'admin' | null;
   hideNav?: boolean;
 }
 
