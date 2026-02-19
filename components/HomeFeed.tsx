@@ -119,22 +119,23 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
             </div>
         </section>
 
-        {/* 2. ACONTECENDO AGORA */}
-        <section className="py-4 space-y-4">
-            <div className="px-6 flex items-center justify-between">
+        {/* 2. ACONTECENDO AGORA - ALIGNMENT FIXED */}
+        <section className="px-6 py-4 space-y-4">
+            <div className="flex items-center justify-between">
                 <SectionHeader icon={Flame} title="Acontecendo agora" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Toda Jacarepaguá" : `Em ${currentNeighborhood}`} iconColor="text-amber-500" />
             </div>
 
             <div className="relative">
                 {filteredStories.length > 0 ? (
                     <>
-                        <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 snap-x pb-2">
+                        {/* -mx-6 px-6 allows full width scroll while keeping first item aligned */}
+                        <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6 snap-x pb-2">
                             {filteredStories.map((item, index) => (
                                 <StoryCard key={item.id} item={item} onClick={() => setSelectedStoryIndex(index)} />
                             ))}
                         </div>
                         {/* THEME LABELS BELOW CARDS */}
-                        <div className="px-6 flex flex-wrap gap-x-2 gap-y-1 mt-2 opacity-60">
+                        <div className="flex flex-wrap gap-x-2 gap-y-1 mt-2 opacity-60">
                             {storyLabels.map((label, i) => (
                                 <span key={i} className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">
                                     {label} {i < storyLabels.length - 1 && "•"}
@@ -143,7 +144,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                         </div>
                     </>
                 ) : (
-                    <div className="px-6 py-10 text-center opacity-30 flex flex-col items-center">
+                    <div className="py-10 text-center opacity-30 flex flex-col items-center">
                         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                             <Sparkle size={24} className="text-gray-400" />
                         </div>
@@ -153,10 +154,10 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
             </div>
         </section>
 
-        {/* 3. CUPONS DO DIA */}
+        {/* 3. CUPONS DO DIA - ALIGNMENT FIXED */}
         {isFeatureActive('coupons') && featuredCoupon && (
-            <section className="py-12">
-                <div className="px-6 flex items-center justify-between mb-8">
+            <section className="px-6 py-12 space-y-8">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]"><Ticket size={16} strokeWidth={2.5} /></div>
                         <div className="flex flex-col">
@@ -167,11 +168,10 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Ver todos</button>
                 </div>
 
-                {/* FULL-BLEED TICKET CARD */}
-                <div className="relative -mx-6">
+                <div className="relative">
                     <button 
                         onClick={() => onNavigate('coupon_landing')} 
-                        className="w-full h-[180px] relative flex bg-white dark:bg-gray-900 shadow-2xl shadow-blue-900/10 active:scale-[0.99] transition-all overflow-hidden border-y border-gray-100 dark:border-white/5 group"
+                        className="w-full h-[180px] relative flex bg-white dark:bg-gray-900 shadow-2xl shadow-blue-900/10 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] border border-gray-100 dark:border-white/5 group"
                     >
                         {/* Lado Esquerdo: Valor */}
                         <div className={`w-[35%] bg-gradient-to-br ${featuredCoupon.color} p-6 flex flex-col justify-center items-center text-center relative overflow-hidden`}>
@@ -181,8 +181,8 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                             <h4 className="text-4xl font-black text-white leading-none drop-shadow-2xl italic tracking-tighter">{featuredCoupon.discount}</h4>
                             
                             {/* Decorative Edge Cutouts */}
-                            <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-[#F8F9FC] dark:bg-gray-950 z-20 shadow-inner"></div>
-                            <div className="absolute -bottom-3 -right-3 w-6 h-6 rounded-full bg-[#F8F9FC] dark:bg-gray-950 z-20 shadow-inner"></div>
+                            <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-900 z-20 shadow-inner"></div>
+                            <div className="absolute -bottom-3 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-900 z-20 shadow-inner"></div>
                         </div>
 
                         {/* Dashed Separator */}
@@ -214,16 +214,32 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
             </section>
         )}
 
-        {/* 4. VAGAS DE EMPREGO */}
+        {/* 4. VAGAS DE EMPREGO (IA LOKA REFINEMENT) */}
         <section className="px-6 py-10 space-y-6">
-            <SectionHeader icon={Briefcase} title="💼 Empregos no Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Oportunidades em JPA" : `Trabalhe em ${currentNeighborhood}`} iconColor="text-emerald-500" />
+            <SectionHeader icon={Briefcase} title="Empregos no Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Oportunidades em JPA" : `Trabalhe em ${currentNeighborhood}`} iconColor="text-emerald-500" />
             <div onClick={() => onNavigate('jobs')} className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse">
                 <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="flex items-center gap-2 mb-6 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg"><Cpu size={14} className="text-white" /><span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA-Driven Match</span></div>
-                    <h3 className="text-2xl font-display font-black text-white leading-tight mb-2 tracking-tighter uppercase">Vagas Perto <br/> de Você</h3>
-                    <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[240px] opacity-90">{currentNeighborhood === "Jacarepaguá (todos)" ? "Vagas abertas em Jacarepaguá." : `Novas vagas encontradas em ${currentNeighborhood}.`}</p>
-                    <div className="w-full bg-white text-emerald-700 font-black py-5 rounded-2xl text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3">Explorar Agora <ArrowRight size={18} strokeWidth={3} /></div>
+                    <div className="flex items-center gap-2 mb-6 bg-white/15 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg group-hover:bg-white/25 transition-all">
+                        <Cpu size={14} className="text-emerald-100" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA LOKA • MATCH INTELIGENTE</span>
+                    </div>
+                    
+                    <h3 className="text-3xl font-display font-black text-white leading-none mb-3 tracking-tighter uppercase drop-shadow-md">
+                        AS MELHORES VAGAS <br/> PERTO DE VOCÊ
+                    </h3>
+                    
+                    <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[260px] opacity-90 drop-shadow-sm">
+                        A LOKA encontra compatibilidade real entre vagas e profissionais do bairro.
+                    </p>
+                    
+                    <div className="w-full bg-white text-emerald-700 font-black py-5 rounded-2xl text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-xl group-hover:shadow-emerald-900/40 transition-all">
+                        VER MATCHES 
+                        <ArrowRight size={18} strokeWidth={4} />
+                    </div>
                 </div>
+                
+                {/* Decorative Tech Ring */}
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full border-[10px] border-white/5 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
             </div>
         </section>
 
