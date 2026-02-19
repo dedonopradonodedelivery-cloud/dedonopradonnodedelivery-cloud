@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X, ChevronLeft, Sun, Zap, Mic, Cloud, CloudRain, Thermometer } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
 import { Store, Category } from '@/types';
@@ -171,12 +171,6 @@ export const Header: React.FC<HeaderProps> = ({
                                     <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer para o Tuco te ajudar</span>
                                 </button>
                                 <button onClick={handleVoiceSearch} className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-300 ${isListening ? 'text-red-400 scale-125' : 'text-white/30 hover:text-white/60'}`}><Mic size={20} className={isListening ? 'animate-pulse' : ''} /></button>
-                                {/* Mascote Tuco adicionado aqui */}
-                                <img 
-                                    src={TUCO_MASCOT_BASE64} 
-                                    alt="Mascote Tuco" 
-                                    className="absolute w-12 h-12 object-contain right-[-5px] top-[-10px] z-50 transform group-hover:scale-105 transition-transform drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]" 
-                                />
                              </div>
                              <div className="flex items-center justify-center gap-2 text-white/70">
                                 <span className="text-[10px] font-black uppercase tracking-widest">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
