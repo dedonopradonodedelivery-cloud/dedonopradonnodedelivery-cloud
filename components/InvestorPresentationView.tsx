@@ -50,58 +50,72 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               <h2 className="text-xl font-black text-white uppercase tracking-tight">{section}</h2>
             </div>
             {section === 'Visão Geral' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>O Localizei JPA é um guia digital do bairro.</p>
-                  <p>Ele conecta moradores e comerciantes locais dentro de uma única plataforma simples e intuitiva.</p>
-                  <div>
-                    <p>Funciona como uma mistura de:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>• Lista telefônica moderna</li>
-                      <li>• Classificados locais</li>
-                      <li>• Promoções e cupons</li>
-                      <li>• Guia de serviços da região</li>
+              <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
+                <div className="text-slate-300 text-[15px] font-medium leading-relaxed space-y-8">
+                  <p>
+                    O <span className="text-white font-bold">Localizei JPA</span> é um guia digital do bairro.
+                  </p>
+                  <p>
+                    Ele conecta <span className="text-white font-bold">moradores</span> e <span className="text-white font-bold">comerciantes locais</span> dentro de uma única plataforma simples e intuitiva.
+                  </p>
+                  <div className="space-y-4">
+                    <p className="text-slate-400">Funciona como uma mistura de:</p>
+                    <ul className="space-y-4 ml-2">
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Lista telefônica moderna</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Classificados locais</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Promoções e cupons</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Guia de serviços da região</li>
                     </ul>
                   </div>
-                  <p>Tudo em um único aplicativo.</p>
+                  <p className="text-white font-bold text-lg pt-4 border-t border-white/5">
+                    Tudo em um único aplicativo.
+                  </p>
                 </div>
               </div>
             ) : section === 'Problema' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Pequenos comércios enfrentam dificuldades para ganhar visibilidade.</p>
-                  <div>
-                    <p>Hoje dependem de:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>• Redes sociais</li>
-                      <li>• Indicações</li>
-                      <li>• Anúncios caros</li>
+              <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
+                <div className="text-slate-300 text-[15px] font-medium leading-relaxed space-y-8">
+                  <p className="text-white font-bold text-lg">
+                    Pequenos comércios enfrentam dificuldades para ganhar visibilidade.
+                  </p>
+                  <div className="space-y-4">
+                    <p className="text-slate-400">Hoje dependem de:</p>
+                    <ul className="space-y-4 ml-2">
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-red-500/50"></span> Redes sociais</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-red-500/50"></span> Indicações</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-red-500/50"></span> Anúncios caros</li>
                     </ul>
                   </div>
-                  <div>
-                    <p>Enquanto isso, moradores:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>• Não sabem onde encontrar serviços locais</li>
-                      <li>• Têm dificuldade em descobrir promoções</li>
-                      <li>• Não possuem um canal centralizado do bairro</li>
+                  <div className="space-y-4 pt-4 border-t border-white/5">
+                    <p className="text-slate-400">Enquanto isso, moradores:</p>
+                    <ul className="space-y-4 ml-2">
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-red-500/50"></span> Não sabem onde encontrar serviços locais</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-red-500/50"></span> Têm dificuldade em descobrir promoções</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-red-500/50"></span> Não possuem um canal centralizado do bairro</li>
                     </ul>
                   </div>
-                  <p>Existe um desencontro entre quem vende e quem procura.</p>
+                  <p className="text-white font-bold text-lg pt-4 border-t border-white/5">
+                    Existe um desencontro entre quem vende e quem procura.
+                  </p>
                 </div>
               </div>
             ) : section === 'Solução' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>O Localizei JPA cria um ponto de encontro digital da região.</p>
-                  <div>
-                    <p>Onde:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>• Comerciantes ganham visibilidade</li>
-                      <li>• Moradores encontram tudo perto de casa</li>
-                      <li>• Promoções circulam dentro do próprio bairro</li>
+              <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
+                <div className="text-slate-300 text-[15px] font-medium leading-relaxed space-y-8">
+                  <p className="text-white font-bold text-lg">
+                    O Localizei JPA cria um ponto de encontro digital da região.
+                  </p>
+                  <div className="space-y-4">
+                    <p className="text-slate-400">Onde:</p>
+                    <ul className="space-y-4 ml-2">
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span className="text-white">Comerciantes</span> ganham visibilidade</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span className="text-white">Moradores</span> encontram tudo perto de casa</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span className="text-white">Promoções</span> circulam dentro do próprio bairro</li>
                     </ul>
                   </div>
-                  <p>Um ecossistema local simples, direto e eficiente.</p>
+                  <p className="text-white font-bold text-lg pt-4 border-t border-white/5">
+                    Um ecossistema local simples, direto e eficiente.
+                  </p>
                 </div>
               </div>
             ) : section === 'Modelo de Negócio' ? (
@@ -149,71 +163,90 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                 </div>
               </div>
             ) : section === 'Novas Receitas (V.2)' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <ul className="mt-2 space-y-4 ml-2">
-                    <li>
-                      <p>✔ ADS Local</p>
-                      <p className="ml-4">Investimento acessível: R$ 0,99 / dia</p>
+              <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
+                <div className="text-slate-300 text-[15px] font-medium leading-relaxed space-y-8">
+                  <ul className="space-y-6">
+                    <li className="bg-white/5 p-5 rounded-xl border border-white/5">
+                      <p className="text-white font-bold flex items-center gap-2 text-lg mb-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        ADS Local
+                      </p>
+                      <p className="ml-4 text-slate-400">Investimento acessível: <span className="text-white">R$ 0,99 / dia</span></p>
                     </li>
-                    <li>
-                      <p>✔ JPA Connect (Networking Empresarial)</p>
-                      <p className="ml-4">Mensalidade: R$ 200,00 por empresário</p>
-                      <p className="ml-4">Grupos de 25 participantes</p>
-                      <p className="ml-4">Capacidade inicial: até 10 grupos</p>
+                    <li className="bg-white/5 p-5 rounded-xl border border-white/5">
+                      <p className="text-white font-bold flex items-center gap-2 text-lg mb-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        JPA Connect <span className="text-sm font-normal text-slate-400">(Networking Empresarial)</span>
+                      </p>
+                      <div className="ml-4 space-y-2 text-slate-400">
+                        <p>Mensalidade: <span className="text-white">R$ 200,00</span> por empresário</p>
+                        <p>Grupos de <span className="text-white">25 participantes</span></p>
+                        <p>Capacidade inicial: <span className="text-white">até 10 grupos</span></p>
+                      </div>
                     </li>
-                    <li>
-                      <p>✔ Lead de Serviços</p>
-                      <p className="ml-4">Valor: R$ 5,90 por lead</p>
+                    <li className="bg-white/5 p-5 rounded-xl border border-white/5">
+                      <p className="text-white font-bold flex items-center gap-2 text-lg mb-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        Lead de Serviços
+                      </p>
+                      <p className="ml-4 text-slate-400">Valor: <span className="text-white">R$ 5,90</span> por lead</p>
                     </li>
-                    <li>
-                      <p>✔ Cashback entre Lojas</p>
-                      <p className="ml-4">Sistema de benefícios e incentivo ao consumo local dentro do ecossistema.</p>
+                    <li className="bg-white/5 p-5 rounded-xl border border-white/5">
+                      <p className="text-white font-bold flex items-center gap-2 text-lg mb-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        Cashback entre Lojas
+                      </p>
+                      <p className="ml-4 text-slate-400">Sistema de benefícios e incentivo ao consumo local dentro do ecossistema.</p>
                     </li>
                   </ul>
-                  <p className="mt-4">Modelo voltado para fortalecimento da economia do bairro.</p>
+                  <p className="text-white font-bold text-lg pt-4 border-t border-white/5 text-center">
+                    Modelo voltado para fortalecimento da economia do bairro.
+                  </p>
                 </div>
               </div>
             ) : section === 'Plano de Expansão' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Modelo replicável e escalável.</p>
-                  <div>
-                    <p>Expansão prevista para bairros e regiões estratégicas:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Barra da Tijuca</li>
-                      <li>✔ Recreio dos Bandeirantes</li>
-                      <li>✔ Zona Sul</li>
-                      <li>✔ Centro</li>
-                      <li>✔ Méier</li>
-                      <li>✔ Tijuca</li>
-                      <li>✔ Ilha do Governador</li>
-                      <li>✔ Duque de Caxias</li>
-                      <li>✔ Nova Iguaçu</li>
-                      <li>✔ São João de Meriti</li>
-                      <li>✔ Belford Roxo</li>
-                      <li>✔ Região Serrana</li>
-                      <li>✔ Região dos Lagos</li>
-                      <li>✔ Costa Verde</li>
-                    </ul>
+              <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
+                <div className="text-slate-300 text-[15px] font-medium leading-relaxed space-y-8">
+                  <p className="text-white font-bold text-xl">
+                    Modelo replicável e escalável.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <p className="text-slate-400">Expansão prevista para bairros e regiões estratégicas:</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Barra da Tijuca</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Recreio dos Bandeirantes</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Zona Sul</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Centro</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Méier</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Tijuca</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Ilha do Governador</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Duque de Caxias</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Nova Iguaçu</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> São João de Meriti</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Belford Roxo</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Região Serrana</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Região dos Lagos</div>
+                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Costa Verde</div>
+                    </div>
+                    <p className="text-indigo-400 font-bold mt-4">Total previsto: 14 frentes de expansão</p>
                   </div>
-                  <p>Total previsto: 14 frentes de expansão</p>
 
-                  <div className="pt-4">
-                    <p>Escala Potencial:</p>
-                    <p className="mt-2">Mantendo apenas cenário conservador por região:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Expansão proporcional da base de receita</li>
-                      <li>✔ Crescimento previsível e replicável</li>
+                  <div className="space-y-4 pt-6 border-t border-white/5">
+                    <p className="text-white font-bold text-lg">Escala Potencial</p>
+                    <p className="text-slate-400">Mantendo apenas cenário conservador por região:</p>
+                    <ul className="space-y-3 ml-2">
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Expansão proporcional da base de receita</li>
+                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Crescimento previsível e replicável</li>
                     </ul>
-                    <p className="mt-2">Estrutura com alto potencial de valorização.</p>
+                    <p className="text-white font-medium">Estrutura com alto potencial de valorização.</p>
                   </div>
-                  <div className="pt-4">
-                    <p>Escala Potencial do Modelo:</p>
-                    <p className="mt-2">Considerando replicação em todas as regiões previstas:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Faturamento estimado superior a R$ 800.000,00 / mês (cenário estratégico)</li>
-                    </ul>
+
+                  <div className="bg-indigo-500/10 border border-indigo-500/20 p-6 rounded-xl mt-6">
+                    <p className="text-indigo-300 font-bold mb-2">Escala Potencial do Modelo</p>
+                    <p className="text-sm text-indigo-200/70 mb-4">Considerando replicação em todas as regiões previstas:</p>
+                    <p className="text-2xl font-black text-white">Superior a R$ 800.000,00 <span className="text-sm font-medium text-slate-400">/ mês</span></p>
+                    <p className="mt-2 text-xs text-indigo-300/50 uppercase tracking-widest">(Cenário Estratégico)</p>
                   </div>
                 </div>
               </div>
