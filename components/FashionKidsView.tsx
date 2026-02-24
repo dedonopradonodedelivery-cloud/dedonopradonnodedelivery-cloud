@@ -120,7 +120,7 @@ export const FashionKidsView: React.FC<FashionKidsViewProps> = ({ onBack, onSele
         <main className="p-6 pt-12 space-y-10">
           <div 
               onClick={handleHeroClick}
-              className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+              className="py-14 px-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
           >
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
               <div className="relative z-10 flex flex-col gap-4">

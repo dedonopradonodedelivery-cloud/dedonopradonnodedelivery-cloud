@@ -113,7 +113,7 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
         <main className="p-6 pt-12 space-y-8">
           <div 
               onClick={handleHeroClick}
-              className="flex items-start gap-4 p-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+              className="flex items-start gap-4 py-9 px-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30 cursor-pointer active:scale-[0.99] transition-all group"
           >
             <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
               <Baby className="text-amber-500" size={20} />

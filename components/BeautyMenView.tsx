@@ -68,7 +68,7 @@ export const BeautyMenView: React.FC<BeautyMenViewProps> = ({ onBack, onSelect, 
         <main className="p-6 pt-12 space-y-8">
           <div 
               onClick={handleHeroClick}
-              className="flex items-start gap-4 p-5 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+              className="flex items-start gap-4 py-9 px-5 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 cursor-pointer active:scale-[0.99] transition-all group"
           >
             <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
               <Sparkles className="text-blue-500" size={20} />

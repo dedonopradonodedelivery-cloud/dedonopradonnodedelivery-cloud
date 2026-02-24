@@ -87,7 +87,7 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
         <main className="p-6 pt-12 space-y-8">
           <div 
               onClick={handleHeroClick}
-              className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+              className="py-10 px-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
           >
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
               <div className="relative z-10 flex items-center gap-4">

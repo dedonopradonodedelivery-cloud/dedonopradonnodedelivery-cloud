@@ -95,7 +95,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
                   className={`transition-all duration-300 transform ${
                     isActive 
                       ? 'text-[#1E5BFF] scale-110 -translate-y-1' 
-                      : 'text-slate-400 dark:text-slate-500 opacity-60 scale-100 translate-y-0'
+                      : 'text-[#1E5BFF] opacity-60 scale-100 translate-y-0'
                   }`} 
                   strokeWidth={isActive ? 2.5 : 2} 
                 />

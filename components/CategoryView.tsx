@@ -104,7 +104,7 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
             {/* 1️⃣ BANNER COMERCIAL */}
             <section 
             onClick={handleOpportunityBannerClick}
-            className="relative w-full aspect-[16/8] rounded-[2rem] overflow-hidden cursor-pointer group shadow-2xl shadow-blue-900/10"
+            className="relative w-full aspect-[3/2] rounded-[2rem] overflow-hidden cursor-pointer group shadow-2xl shadow-blue-900/10"
             >
             <img 
                 src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop" 

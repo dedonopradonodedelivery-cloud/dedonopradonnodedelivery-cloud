@@ -52,7 +52,7 @@ export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect
         <main className="p-6 pt-12 space-y-8">
           <div 
               onClick={handleHeroClick}
-              className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
+              className="py-10 px-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
           >
               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
               <div className="relative z-10 flex items-start gap-4">

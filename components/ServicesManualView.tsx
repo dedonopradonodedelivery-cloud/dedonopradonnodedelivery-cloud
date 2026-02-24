@@ -150,7 +150,7 @@ export const ServicesManualView: React.FC<ServicesManualViewProps> = ({ onBack, 
         <main className="p-6 pt-12 space-y-10">
           <div 
               onClick={handleHeroClick}
-              className="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+              className="py-10 px-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
           >
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-105 transition-transform duration-700"></div>
               <div className="relative z-10 flex items-start gap-4">

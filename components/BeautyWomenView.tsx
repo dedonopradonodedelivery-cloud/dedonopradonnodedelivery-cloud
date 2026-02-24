@@ -69,7 +69,7 @@ export const BeautyWomenView: React.FC<BeautyWomenViewProps> = ({ onBack, onSele
         <main className="p-6 pt-12 space-y-8">
           <div 
               onClick={handleHeroClick}
-              className="flex items-start gap-4 p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+              className="flex items-start gap-4 py-9 px-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30 cursor-pointer active:scale-[0.99] transition-all group"
           >
             <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
               <Sparkles className="text-rose-500" size={20} />

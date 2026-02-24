@@ -45,7 +45,7 @@ const SubcategoryCarousel = () => {
 
   return (
     <div className="px-5 mb-6">
-      <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[32px] shadow-lg">
+      <div className="relative aspect-[7/6] w-full overflow-hidden rounded-[32px] shadow-lg">
         {SUB_BANNERS.map((banner, index) => (
           <div
             key={banner.id}
