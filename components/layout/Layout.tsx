@@ -20,8 +20,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     }
   }, [activeTab]);
 
-  // Se for admin_panel, forçamos hideNav true internamente por segurança extra
-  const finalHideNav = hideNav || activeTab === 'admin_panel';
+  // Se for admin_panel ou investor_presentation, forçamos hideNav true internamente por segurança extra
+  const finalHideNav = hideNav || activeTab === 'admin_panel' || activeTab === 'investor_presentation';
 
   return (
     <div

@@ -71,12 +71,8 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(null);
 
   const filteredStories = useMemo(() => {
-    let base = ACONTECENDO_AGORA_DATA;
-    if (currentNeighborhood !== "Jacarepaguá (todos)") {
-        base = base.filter(item => item.neighborhood === currentNeighborhood);
-    }
-    return base;
-  }, [currentNeighborhood]);
+    return ACONTECENDO_AGORA_DATA;
+  }, []);
 
   const featuredCoupon = useMemo(() => {
     const list = currentNeighborhood === "Jacarepaguá (todos)" 

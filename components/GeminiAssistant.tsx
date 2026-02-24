@@ -17,7 +17,7 @@ interface AssistantProps {
 }
 
 export const GeminiAssistant: React.FC<AssistantProps> = ({ isExternalOpen, onClose }) => {
-  const INITIAL_GREETING = 'Olá! Sou a LOKA 🦜 Como posso ajudar você no bairro hoje?';
+  const INITIAL_GREETING = 'Olá! Como posso te ajudar no bairro hoje?';
   
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', text: INITIAL_GREETING, type: 'response' }
@@ -154,10 +154,10 @@ Endpoint: generateContent
           <div className="flex items-center gap-3">
             <LokaAvatarLarge />
             <div>
-              <h3 className="font-black text-white text-xl tracking-tight leading-none uppercase">LOKA</h3>
+              <h3 className="font-black text-white text-xl tracking-tight leading-none uppercase">Assistente</h3>
               <div className="flex items-center gap-1.5 mt-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]"></div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">LOKA, a IA de JPA</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-blue-50">Assistente do Localizei JPA</p>
               </div>
             </div>
           </div>
@@ -227,7 +227,7 @@ Endpoint: generateContent
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
-                    placeholder="Como a LOKA pode te ajudar?"
+                    placeholder="Como posso te ajudar?"
                     className="w-full bg-gray-50 dark:bg-gray-800 dark:text-white rounded-[1.25rem] px-5 py-4 pr-12 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/30 border border-blue-100/50 dark:border-gray-700 placeholder-gray-400 transition-all disabled:opacity-50"
                 />
                 <button

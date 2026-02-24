@@ -97,7 +97,7 @@ const SectionHeader: React.FC<{ title: string; onBack: () => void; rightElement?
   </div>
 );
 
-const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
+const AdminHub: React.FC<{ onSelect: (tab: any) => void, onNavigateToApp: (view: string) => void }> = ({ onSelect, onNavigateToApp }) => (
   <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
     <button onClick={() => onSelect('features')} className="bg-blue-900/40 p-6 rounded-[2.5rem] border border-blue-500/30 shadow-xl hover:shadow-blue-500/10 transition-all text-left group col-span-2 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
@@ -127,6 +127,11 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void }> = ({ onSelect }) => (
         <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-blue-100"><Users size={20}/></div>
         <h3 className="font-black text-sm text-gray-900 uppercase tracking-tighter mb-1">Gerenciamento</h3>
         <p className="text-[10px] text-gray-500 leading-relaxed font-medium">Base de clientes e lojistas parceiros.</p>
+    </button>
+    <button onClick={() => onNavigateToApp('investor_presentation')} className="bg-indigo-600 p-5 rounded-3xl shadow-lg hover:shadow-indigo-500/20 transition-all text-left group border border-indigo-500">
+        <div className="w-10 h-10 bg-white/20 text-white rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-white/30"><FileText size={20}/></div>
+        <h3 className="font-black text-sm text-white uppercase tracking-tighter mb-1">Apresentação (Investidor)</h3>
+        <p className="text-[10px] text-indigo-100 leading-relaxed font-medium">Pitch deck e visão de negócio.</p>
     </button>
   </div>
 );
@@ -198,7 +203,7 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
 
       <main className="flex-1 p-8 overflow-y-auto no-scrollbar pb-32 max-w-7xl mx-auto w-full">
         
-        {activeTab === 'hub' && <AdminHub onSelect={setActiveTab} />}
+        {activeTab === 'hub' && <AdminHub onSelect={setActiveTab} onNavigateToApp={onNavigateToApp} />}
 
         {activeTab === 'features' && (
             <div className="space-y-6">
