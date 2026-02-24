@@ -230,6 +230,64 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                   </ul>
                 </div>
               </div>
+            ) : section === 'Pedido / Proposta' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Proposta de Parceria de Negócios: App Localizei JPA</p>
+                  <div>
+                    <p>1. O Investimento</p>
+                    <p className="mt-2">Valor: R$ 100.000,00</p>
+                    <p className="mt-2">Participação:</p>
+                    <p>O investidor passa a ser dono de 30% da empresa</p>
+                    <p className="mt-2">Garantia de Execução:</p>
+                    <p>O protótipo já está funcionando (MVP), reduzindo o risco, pois o projeto já saiu do papel.</p>
+                  </div>
+                  <div>
+                    <p>2. Como o investidor recebe os ganhos</p>
+                    <p className="mt-2">Embora a participação societária seja de 30%, a divisão de lucros será:</p>
+                    <p className="mt-2">Divisão Meio a Meio</p>
+                    <p className="mt-2">De todo o lucro gerado pelo app:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ 50% para o investidor</li>
+                      <li>✔ 50% para a operação</li>
+                    </ul>
+                    <p className="mt-2">Estrutura que permite recuperação acelerada do capital investido.</p>
+                  </div>
+                  <div>
+                    <p>3. Gestão Profissional dos Resultados (Regra dos 4 Pilares)</p>
+                    <p className="mt-2">Distribuição dos valores gerados:</p>
+                    <ul className="mt-2 space-y-2 ml-2">
+                      <li>
+                        <p>✔ Crescimento (24%)</p>
+                        <p className="ml-4">Fundo destinado a marketing, expansão e melhorias da plataforma.</p>
+                      </li>
+                      <li>
+                        <p>✔ Trabalho (10%)</p>
+                        <p className="ml-4">Pró-labore operacional.</p>
+                      </li>
+                      <li>
+                        <p>✔ Lucro do Investidor (33%)</p>
+                        <p className="ml-4">Retorno direto.</p>
+                      </li>
+                      <li>
+                        <p>✔ Lucro Operacional (33%)</p>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p>4. Estrutura Operacional</p>
+                    <p className="mt-2">Modelo de gestão voltado para crescimento sustentável, expansão regional e valorização do ativo.</p>
+                  </div>
+                  <div>
+                    <p>5. Potencial de Valorização</p>
+                    <p className="mt-2">Diferente de aplicações financeiras tradicionais, o investimento se dá em um ativo escalável com potencial de multiplicação de valor.</p>
+                    <p className="mt-2">Em eventual venda da empresa, o investidor participa proporcionalmente:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ 30% do valor total da negociação.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="h-40 bg-slate-900/50 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Espaço para conteúdo</p>
