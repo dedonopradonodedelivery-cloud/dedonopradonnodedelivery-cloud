@@ -29,8 +29,9 @@ export const LOKA_MASCOT_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },
-  { id: 'cat-alimentacao', name: 'Alimentação', slug: 'alimentacao', icon: <Soup />, color: 'bg-brand-blue' },
-  { id: 'cat-restaurantes', name: 'Restaurantes', slug: 'restaurantes', icon: <Utensils />, color: 'bg-brand-blue' },
+  { id: 'cat-alimentacao', name: 'Alimentação & Produtos', slug: 'alimentacao', icon: <Soup />, color: 'bg-brand-blue' },
+  { id: 'cat-restaurantes', name: 'Restaurantes & Delivery', slug: 'restaurantes', icon: <Utensils />, color: 'bg-brand-blue' },
+  { id: 'cat-alimentacao-estilos', name: 'Alimentação & Estilos', slug: 'alimentacao-estilos', icon: <Leaf />, color: 'bg-brand-blue' },
   { id: 'cat-mercados', name: 'Mercados', slug: 'mercados', icon: <ShoppingCart />, color: 'bg-brand-blue' },
   { id: 'cat-farmacias', name: 'Farmácias', slug: 'farmacias', icon: <Pill />, color: 'bg-brand-blue' },
   { id: 'cat-autos', name: 'Autos', slug: 'autos', icon: <CarFront />, color: 'bg-brand-blue' },
@@ -38,7 +39,6 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-beleza', name: 'Beleza', slug: 'beleza', icon: <Scissors />, color: 'bg-brand-blue' },
   { id: 'cat-casa', name: 'Casa', slug: 'casa', icon: <HomeIcon />, color: 'bg-brand-blue' },
   { id: 'cat-informatica', name: 'Informática', slug: 'informatica', icon: <Monitor />, color: 'bg-brand-blue' },
-  { id: 'cat-papelaria', name: 'Papelaria', slug: 'papelaria', icon: <PenTool />, color: 'bg-brand-blue' },
   { id: 'cat-pets', name: 'Pets', slug: 'pets', icon: <PawPrint />, color: 'bg-brand-blue' },
   { id: 'cat-saude', name: 'Saúde', slug: 'saude', icon: <Heart />, color: 'bg-brand-blue' },
   { id: 'cat-educacao', name: 'Educação', slug: 'educacao', icon: <BookOpen />, color: 'bg-brand-blue' },
@@ -46,13 +46,9 @@ export const CATEGORIES: Category[] = [
   { id: 'cat-bemestar', name: 'Bem-estar', slug: 'bemestar', icon: <Smile />, color: 'bg-brand-blue' },
   { id: 'cat-infantil', name: 'Infantil', slug: 'infantil', icon: <Baby />, color: 'bg-brand-blue' },
   { id: 'cat-servicospublicos', name: 'Serviços Públicos', slug: 'servicospublicos', icon: <Landmark />, color: 'bg-brand-blue' },
-  { id: 'cat-eventos', name: 'Eventos', slug: 'eventos', icon: <PartyPopper />, color: 'bg-brand-blue' },
+  { id: 'cat-eventos-lazer', name: 'Eventos & Lazer', slug: 'eventos-lazer', icon: <PartyPopper />, color: 'bg-brand-blue' },
   { id: 'cat-condominios', name: 'Condomínios', slug: 'condominios', icon: <Building2 />, color: 'bg-brand-blue' },
-  { id: 'cat-lazer', name: 'Lazer', slug: 'lazer', icon: <Tent />, color: 'bg-brand-blue' },
-  { id: 'cat-cupons', name: 'Cupons', slug: 'cupons', icon: <TicketPercent />, color: 'bg-brand-blue' },
-  { id: 'cat-promocoes', name: 'Promoções', slug: 'promocoes', icon: <Percent />, color: 'bg-brand-blue' },
-  { id: 'cat-classificados', name: 'Classificados', slug: 'classificados', icon: <Newspaper />, color: 'bg-brand-blue' },
-  { id: 'cat-achados', name: 'Achados e Perdidos', slug: 'achados', icon: <Search />, color: 'bg-brand-blue' },
+  { id: 'cat-ofertas', name: 'Ofertas', slug: 'ofertas', icon: <TicketPercent />, color: 'bg-brand-blue' },
 ];
 
 export const ACONTECENDO_AGORA_DATA = [
@@ -74,7 +70,7 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ElementTy
     { name: 'Jardinagem', icon: Leaf },
     { name: 'Montagem de Móveis', icon: Settings },
   ],
-  'Alimentação': [
+  'Alimentação & Produtos': [
     { name: 'Marmitas', icon: Package },
     { name: 'Lanches', icon: Sandwich },
     { name: 'Doces', icon: Cake },
@@ -84,7 +80,17 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ElementTy
     { name: 'Produtos Naturais', icon: Apple },
     { name: 'Congelados', icon: Package },
   ],
-  'Restaurantes': [
+  'Alimentação & Estilos': [
+    { name: 'Vegano', icon: Leaf },
+    { name: 'Vegetariano', icon: Leaf },
+    { name: 'Sem Glúten', icon: Activity },
+    { name: 'Sem Lactose', icon: Activity },
+    { name: 'Orgânicos', icon: Apple },
+    { name: 'Natural', icon: Leaf },
+    { name: 'Funcional', icon: Activity },
+    { name: 'Alimentação Saudável', icon: Heart },
+  ],
+  'Restaurantes & Delivery': [
     { name: 'Pizzarias', icon: Pizza },
     { name: 'Hamburguerias', icon: Beef },
     { name: 'Brasileira', icon: Utensils },
@@ -110,13 +116,16 @@ export const SUBCATEGORIES: Record<string, { name: string; icon: React.ElementTy
     { name: 'Homeopatia', icon: Stethoscope },
     { name: 'Suplementos', icon: Activity },
   ],
+  'Casa': [
+    { name: 'Papelaria', icon: PenTool },
+  ],
 };
 
 export const STORES: Store[] = [
   {
     id: 'f-1',
     name: 'Bibi Lanches',
-    category: 'Alimentação',
+    category: 'Alimentação & Produtos',
     subcategory: 'Lanches',
     rating: 4.8,
     reviewsCount: 1240,

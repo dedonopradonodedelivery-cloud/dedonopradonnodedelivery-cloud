@@ -24,7 +24,8 @@ import {
   Store as StoreIcon,
   User as UserIcon,
   ShoppingBag,
-  CheckCircle2
+  CheckCircle2,
+  Plus
 } from 'lucide-react';
 import { Store, BusinessHour, StorePromotion } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -279,9 +280,20 @@ export const StoreDetailView: React.FC<{
                         </div>
 
                         <div className="space-y-4 pt-4">
-                            <h3 className="text-sm font-black text-gray-900 dark:text-white px-1 uppercase tracking-tight flex items-center gap-2">
-                                <LayoutGrid size={16} className="text-[#1E5BFF]" /> Feed da Loja
-                            </h3>
+                            <div className="flex items-center justify-between px-1">
+                                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                                    <LayoutGrid size={16} className="text-[#1E5BFF]" /> Feed da Loja
+                                </h3>
+                                {user?.role === 'merchant' && user?.id === store.id && (
+                                    <button 
+                                        onClick={() => onNavigate('merchant_post_create')}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1E5BFF] hover:bg-blue-600 text-white rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm active:scale-95 transition-all"
+                                    >
+                                        <Plus size={12} />
+                                        Criar Postagem
+                                    </button>
+                                )}
+                            </div>
                             
                             {/* GRADE DO FEED - LIMITADA PELO visibleRows */}
                             <div className="grid grid-cols-3 gap-1">

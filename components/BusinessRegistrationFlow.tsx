@@ -246,7 +246,7 @@ export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> =
                 </div>
                 <div>
                     <h3 className="font-bold text-gray-900 dark:text-white">Padaria Estrela da Freguesia</h3>
-                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alimentação</p>
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Alimentação & Produtos</p>
                 </div>
             </div>
             <div className="flex items-center gap-2 text-xs text-green-600 font-bold bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg w-fit">
