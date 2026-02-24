@@ -11,10 +11,10 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
     'Visão Geral',
     'Problema',
     'Solução',
-    'Produto',
     'Modelo de Negócio',
-    'Expansão & Novas Receitas (V2)',
+    'Novas Receitas (V.2)',
     'Plano de Expansão',
+    'Plano de Investimento',
     'Pedido / Proposta'
   ];
 
@@ -104,23 +104,9 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                   <p>Um ecossistema local simples, direto e eficiente.</p>
                 </div>
               </div>
-            ) : section === 'Produto' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>O aplicativo permite:</p>
-                  <ul className="mt-2 space-y-2 ml-2">
-                    <li>✔ Buscar serviços locais</li>
-                    <li>✔ Descobrir empresas próximas</li>
-                    <li>✔ Visualizar promoções e cupons</li>
-                    <li>✔ Explorar categorias do bairro</li>
-                  </ul>
-                  <p className="mt-4">Interface simples, intuitiva e acessível.</p>
-                </div>
-              </div>
             ) : section === 'Modelo de Negócio' ? (
               <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
                 <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Modelo escalável e estratégico:</p>
                   <p>O comerciante não paga para aparecer na plataforma.</p>
                   <div>
                     <p>Receitas atuais:</p>
@@ -153,12 +139,18 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                     </ul>
                     <p className="mt-2">Modelo com potencial de geração de receita recorrente e previsível.</p>
                   </div>
+                  <div>
+                    <p>Faturamento Estimado (Cenário Conservador):</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Potencial superior a R$ 63.000,00 / mês</li>
+                    </ul>
+                    <p className="mt-2">Modelo baseado em receita recorrente e previsível.</p>
+                  </div>
                 </div>
               </div>
-            ) : section === 'Expansão & Novas Receitas (V2)' ? (
+            ) : section === 'Novas Receitas (V.2)' ? (
               <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
                 <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Receitas futuras estratégicas:</p>
                   <ul className="mt-2 space-y-4 ml-2">
                     <li>
                       <p>✔ ADS Local</p>
@@ -216,6 +208,105 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                     </ul>
                     <p className="mt-2">Estrutura com alto potencial de valorização.</p>
                   </div>
+                  <div className="pt-4">
+                    <p>Escala Potencial do Modelo:</p>
+                    <p className="mt-2">Considerando replicação em todas as regiões previstas:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Faturamento estimado superior a R$ 800.000,00 / mês (cenário estratégico)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : section === 'Plano de Investimento' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-6">
+                  <p className="text-lg font-bold text-white">Estrutura Refinada do Uso do Investimento</p>
+                  
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 1. Estrutura Técnica</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Publicação Apple + Android → R$ 700</li>
+                      <li>✔ Base de Dados – Lista de Comércios Reais → R$ 2.000</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 2. Formalização & Regularização</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Formalização & Regularização → R$ 3.000</li>
+                    </ul>
+                    <p className="mt-2">Incluindo:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Abertura de empresa / CNPJ</li>
+                      <li>✔ Taxas e licenças</li>
+                      <li>✔ Registros necessários</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 3. Lançamento & Aquisição Inicial</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Redes sociais locais → R$ 5.000</li>
+                      <li>✔ Influenciadores locais → R$ 2.000</li>
+                    </ul>
+                    <p className="mt-2 font-bold text-white">👉 Subtotal → R$ 7.000</p>
+                  </div>
+
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 4. Marketing & Crescimento</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Agência Marketing Digital → R$ 4.000</li>
+                      <li>✔ Investimento em Anúncios Digitais → R$ 4.000</li>
+                    </ul>
+                    <p className="mt-2">Distribuição estratégica:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>• Meta Ads → R$ 2.000</li>
+                      <li>• Google Ads → R$ 2.000</li>
+                    </ul>
+                    <p className="mt-2 font-bold text-white">👉 Subtotal → R$ 8.000</p>
+                  </div>
+
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 5. Expansão & Operação Comercial</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Estruturação comercial & posicionamento profissional → R$ 16.000</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 6. Reserva Estratégica de Crescimento</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Reserva Estratégica de Crescimento → R$ 18.000</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="text-indigo-400 font-bold">🔥 7. Margem Estratégica de Segurança Operacional</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Margem Estratégica de Segurança Operacional → R$ 10.000</li>
+                    </ul>
+                    <p className="mt-2">Recursos destinados a:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Ajustes técnicos / melhorias</li>
+                      <li>✔ Infraestrutura / contingências</li>
+                      <li>✔ Estabilidade operacional</li>
+                      <li>✔ Continuidade do crescimento</li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10">
+                    <p className="text-lg font-bold text-white mb-4">✅ TOTAL ESTIMADO FINAL</p>
+                    <ul className="space-y-2">
+                      <li>Estrutura Técnica → R$ 2.700</li>
+                      <li>Formalização → R$ 3.000</li>
+                      <li>Lançamento → R$ 7.000</li>
+                      <li>Marketing & Crescimento → R$ 8.000</li>
+                      <li>Operação Comercial → R$ 16.000</li>
+                      <li>Reserva Estratégica → R$ 18.000</li>
+                      <li>Margem Segurança → R$ 10.000</li>
+                    </ul>
+                    <p className="mt-6 text-xl font-black text-indigo-400">💰 TOTAL → R$ 69.700</p>
+                  </div>
                 </div>
               </div>
             ) : section === 'Pedido / Proposta' ? (
@@ -223,9 +314,7 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                 <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
                   <p>Proposta de Parceria de Negócios: App Localizei JPA</p>
                   <div>
-                    <p>1. O Investimento</p>
-                    <p className="mt-2">Valor: R$ 100.000,00</p>
-                    <p className="mt-2">Participação:</p>
+                    <p>1. Participação:</p>
                     <p>O investidor passa a ser dono de 30% da empresa</p>
                     <p className="mt-2">Garantia de Execução:</p>
                     <p>O protótipo já está funcionando (MVP), reduzindo o risco, pois o projeto já saiu do papel.</p>
@@ -263,16 +352,8 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                     </ul>
                   </div>
                   <div>
-                    <p>4. Estrutura Operacional</p>
-                    <p className="mt-2">Modelo de gestão voltado para crescimento sustentável, expansão regional e valorização do ativo.</p>
-                  </div>
-                  <div>
-                    <p>5. Potencial de Valorização</p>
-                    <p className="mt-2">Diferente de aplicações financeiras tradicionais, o investimento se dá em um ativo escalável com potencial de multiplicação de valor.</p>
-                    <p className="mt-2">Em eventual venda da empresa, o investidor participa proporcionalmente:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ 30% do valor total da negociação.</li>
-                    </ul>
+                    <p>5. Valor do Investimento</p>
+                    <p className="mt-2">Valor: R$ 100.000,00</p>
                   </div>
                 </div>
               </div>
