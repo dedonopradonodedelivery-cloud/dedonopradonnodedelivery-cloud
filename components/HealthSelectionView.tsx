@@ -42,7 +42,7 @@ export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onBack
         permitindo que a borda arredondada sobreponha o azul.
         ============================================================
       */}
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         <main className="p-6 pt-12 space-y-10">
             <div className="text-center space-y-3 mb-4">

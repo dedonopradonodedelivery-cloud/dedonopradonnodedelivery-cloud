@@ -116,7 +116,7 @@ export const FashionKidsView: React.FC<FashionKidsViewProps> = ({ onBack, onSele
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         <main className="p-6 pt-12 space-y-10">
           <div 
               onClick={handleHeroClick}
