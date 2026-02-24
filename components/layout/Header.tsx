@@ -82,12 +82,20 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenViewSwitcher,
   onNavigate,
   customTitle,
-  onBack
+  onBack,
+  userRole
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
+
+  const greetingName = useMemo(() => {
+    if (!user) return "Visitante";
+    const fullName = user.user_metadata?.full_name;
+    if (fullName) return fullName.split(' ')[0];
+    return user.email?.split('@')[0] || "Morador";
+  }, [user]);
 
   const contextData = NEIGHBORHOOD_CONTEXT_DATA[currentNeighborhood] || NEIGHBORHOOD_CONTEXT_DATA["Jacarepaguá (todos)"];
   const isHome = activeTab === 'home';
@@ -164,19 +172,12 @@ export const Header: React.FC<HeaderProps> = ({
                 {isHome && (
                     <div className="w-full mt-6">
                         <div className="animate-in fade-in slide-in-from-top-1 duration-700">
-                             <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Eu sou a LOKA, a IA de JPA!</p>
+                             <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Olá, {greetingName}</p>
                              <div className="w-full relative mb-4">
                                 <button onClick={() => setIsAssistantOpen(true)} className="w-full bg-white/10 rounded-[1.25rem] border border-white/15 py-3.5 pl-5 pr-14 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner">
                                     <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer para a LOKA te ajudar</span>
                                 </button>
                                 <button onClick={handleVoiceSearch} className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-300 ${isListening ? 'text-red-400 scale-125' : 'text-white/30 hover:text-white/60'}`}><Mic size={20} className={isListening ? 'animate-pulse' : ''} /></button>
-                             </div>
-                             <div className="flex items-center justify-center gap-2 text-white/70">
-                                <span className="text-[10px] font-black uppercase tracking-widest">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
-                                <span className="opacity-30 text-xs">•</span>
-                                <div className="flex items-center gap-1.5"><Zap size={11} className="text-blue-400 fill-blue-400" /><span className="text-[10px] font-bold uppercase tracking-wider">{contextData.traffic}</span></div>
-                                <span className="opacity-30 text-xs">•</span>
-                                <div className="flex items-center gap-1.5"><Sun size={11} className="text-amber-400 fill-amber-400" /><span className="text-[10px] font-bold uppercase tracking-wider">{contextData.temp}</span></div>
                              </div>
                         </div>
                     </div>

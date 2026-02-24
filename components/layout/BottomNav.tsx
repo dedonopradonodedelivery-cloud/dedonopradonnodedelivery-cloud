@@ -108,11 +108,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
               }`}>
                 {item.label}
               </span>
-
-              {/* MINIMALIST ANCHOR INDICATOR */}
-              <div className={`absolute bottom-2 w-1 h-1 rounded-full bg-[#1E5BFF] transition-all duration-500 ${
-                isActive ? 'opacity-40 scale-100' : 'opacity-0 scale-0'
-              }`}></div>
             </button>
           );
         })}

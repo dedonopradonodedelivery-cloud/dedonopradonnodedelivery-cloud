@@ -168,7 +168,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Ver todos</button>
                 </div>
 
-                <div className="relative">
+                <div className="relative bg-blue-50/40 dark:bg-blue-900/10 p-4 rounded-[3rem] border border-blue-100/50 dark:border-blue-800/20 shadow-sm">
                     <button 
                         onClick={() => onNavigate('coupon_landing')} 
                         className="w-full h-[180px] relative flex bg-white dark:bg-gray-900 shadow-2xl shadow-blue-900/10 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] border border-gray-100 dark:border-white/5 group"
