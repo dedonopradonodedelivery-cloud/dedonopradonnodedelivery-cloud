@@ -122,10 +122,73 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
             ) : section === 'Modelo de Negócio' ? (
               <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
                 <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Modelo simples e previsível:</p>
-                  <p>Comerciantes pagam uma mensalidade para aparecer na plataforma.</p>
-                  <p>Receita recorrente, escalável e sustentável.</p>
-                  <p>Funciona como uma vitrine digital do bairro.</p>
+                  <p>Modelo escalável e estratégico:</p>
+                  <p>O comerciante não paga para aparecer na plataforma.</p>
+                  <div>
+                    <p>Receitas atuais:</p>
+                    <ul className="mt-2 space-y-2 ml-2">
+                      <li>
+                        <p>✔ Patrocinador Master Fundador</p>
+                        <p className="ml-4">Investimento inicial: R$ 1.000,00</p>
+                        <p className="ml-4">Após fase fundadora: R$ 2.500,00 / mês</p>
+                      </li>
+                      <li>
+                        <p>✔ Banners por Especialidade</p>
+                        <p className="ml-4">Valor: R$ 49,90</p>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p>Mais de 1.500 espaços publicitários disponíveis, considerando:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>• Especialidades</li>
+                      <li>• Segmentação por bairro</li>
+                      <li>• 9 bairros disponíveis</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p>Receitas futuras (V2):</p>
+                    <ul className="mt-2 space-y-2 ml-2">
+                      <li>
+                        <p>✔ ADS Local</p>
+                        <p className="ml-4">Investimento acessível: R$ 0,99 / dia</p>
+                      </li>
+                      <li>
+                        <p>✔ JPA Connect (Networking Empresarial)</p>
+                        <p className="ml-4">Mensalidade: R$ 200,00 por empresário</p>
+                        <p className="ml-4">Grupos de 25 participantes</p>
+                        <p className="ml-4">Capacidade inicial: até 10 grupos</p>
+                      </li>
+                      <li>
+                        <p>✔ Lead de Serviços</p>
+                        <p className="ml-4 mt-2">Moradores solicitam serviços no app e recebem até 5 orçamentos gratuitos.</p>
+                        <p className="ml-4 mt-2">Profissionais pagam apenas para visualizar o lead:</p>
+                        <p className="ml-4 mt-2">Valor: R$ 5,90 por lead</p>
+                      </li>
+                    </ul>
+                  </div>
+                  <p>Modelo baseado em múltiplas fontes de receita recorrente.</p>
+                  <div>
+                    <p>Plano de expansão:</p>
+                    <p className="mt-2">Expansão prevista para bairros e regiões estratégicas:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Barra da Tijuca</li>
+                      <li>✔ Recreio dos Bandeirantes</li>
+                      <li>✔ Zona Sul</li>
+                      <li>✔ Centro</li>
+                      <li>✔ Méier</li>
+                      <li>✔ Tijuca</li>
+                      <li>✔ Ilha do Governador</li>
+                      <li>✔ Duque de Caxias</li>
+                      <li>✔ Nova Iguaçu</li>
+                      <li>✔ São João de Meriti</li>
+                      <li>✔ Belford Roxo</li>
+                      <li>✔ Região Serrana</li>
+                      <li>✔ Região dos Lagos</li>
+                      <li>✔ Costa Verde</li>
+                    </ul>
+                  </div>
+                  <p>Total previsto: 14 frentes de expansão</p>
                 </div>
               </div>
             ) : section === 'Tração' ? (
