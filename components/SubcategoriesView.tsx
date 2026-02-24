@@ -151,50 +151,54 @@ export const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ macroId, m
   const items = SUBCATEGORIES_DATA[macroId] || SUBCATEGORIES_DATA['other'];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in slide-in-from-right duration-300">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in slide-in-from-right duration-300">
       
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 px-5 pt-8 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 flex items-center gap-4 mb-4">
+      <div className="bg-brand-blue px-5 pt-8 pb-6 border-b border-white/10 sticky top-0 z-50 flex items-center gap-4 mb-4">
         <button 
           onClick={onBack}
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
         >
-          <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-white" />
+          <ChevronLeft className="w-6 h-6 text-white" />
         </button>
         <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-display leading-tight">
+            <h1 className="text-xl font-bold text-white font-display leading-tight">
               {macroName}
             </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-blue-100">
               Escolha o tipo de serviço que você precisa
             </p>
         </div>
       </div>
 
-      {/* Carrossel de Banners */}
-      <SubcategoryCarousel />
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+        <main className="p-6 pt-12 space-y-10">
+          {/* Carrossel de Banners */}
+          <SubcategoryCarousel />
 
-      {/* Content Grid */}
-      <div className="px-5">
-        <div className="grid grid-cols-2 gap-4">
-          {items.map((sub, idx) => {
-            const Icon = sub.icon;
-            return (
-              <button 
-                key={idx}
-                onClick={() => onSelectSubcategory(sub.name)}
-                className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-[0.98] min-h-[120px] group"
-              >
-                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF] group-hover:bg-blue-100 transition-colors">
-                  <Icon className="w-6 h-6" />
-                </div>
-                <span className="font-bold text-gray-700 dark:text-gray-200 text-xs text-center leading-tight uppercase tracking-tight">
-                  {sub.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+          {/* Content Grid */}
+          <div className="px-1">
+            <div className="grid grid-cols-2 gap-4">
+              {items.map((sub, idx) => {
+                const Icon = sub.icon;
+                return (
+                  <button 
+                    key={idx}
+                    onClick={() => onSelectSubcategory(sub.name)}
+                    className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-[0.98] min-h-[120px] group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF] group-hover:bg-blue-100 transition-colors">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <span className="font-bold text-gray-700 dark:text-gray-200 text-xs text-center leading-tight uppercase tracking-tight">
+                      {sub.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </main>
       </div>
 
     </div>

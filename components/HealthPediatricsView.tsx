@@ -95,7 +95,7 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -109,47 +109,49 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        <div 
-            onClick={handleHeroClick}
-            className="flex items-start gap-4 p-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30 cursor-pointer active:scale-[0.99] transition-all group"
-        >
-          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-            <Baby className="text-amber-500" size={20} />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-amber-900 dark:text-amber-200 uppercase tracking-widest mb-1">Crescimento Saudável</h4>
-            <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
-              Encontre pediatras e especialistas focados no desenvolvimento integral do seu filho. <span className="underline ml-1">Ver Destaque</span>
-            </p>
-          </div>
-        </div>
-
-        {GROUPS.map((group, idx) => (
-          <section key={idx} className="space-y-3">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-4 bg-amber-500 rounded-full"></div>
-              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                {group.title}
-              </h3>
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+        <main className="p-6 pt-12 space-y-8">
+          <div 
+              onClick={handleHeroClick}
+              className="flex items-start gap-4 p-5 bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] border border-amber-100 dark:border-amber-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+          >
+            <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+              <Baby className="text-amber-500" size={20} />
             </div>
-            <div className="flex flex-col">
-              {group.items.map((item, itemIdx) => (
-                <SpecialtyCard 
-                  key={itemIdx} 
-                  name={item.name} 
-                  onClick={() => onSelect(item.name)} 
-                />
-              ))}
+            <div>
+              <h4 className="text-xs font-black text-amber-900 dark:text-amber-200 uppercase tracking-widest mb-1">Crescimento Saudável</h4>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
+                Encontre pediatras e especialistas focados no desenvolvimento integral do seu filho. <span className="underline ml-1">Ver Destaque</span>
+              </p>
             </div>
-          </section>
-        ))}
+          </div>
 
-        <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
-            <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA Kids Ecosystem</p>
-        </div>
-      </main>
+          {GROUPS.map((group, idx) => (
+            <section key={idx} className="space-y-3">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1.5 h-4 bg-amber-500 rounded-full"></div>
+                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
+                  {group.title}
+                </h3>
+              </div>
+              <div className="flex flex-col">
+                {group.items.map((item, itemIdx) => (
+                  <SpecialtyCard 
+                    key={itemIdx} 
+                    name={item.name} 
+                    onClick={() => onSelect(item.name)} 
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+
+          <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
+              <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA Kids Ecosystem</p>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

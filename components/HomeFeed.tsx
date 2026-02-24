@@ -127,7 +127,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <Plus size={22} strokeWidth={3} />
                 </div>
                 <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
-                    + 16
+                    Ver mais
                 </span>
             </button>
             </div>

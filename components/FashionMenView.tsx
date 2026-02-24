@@ -98,7 +98,7 @@ export const FashionMenView: React.FC<FashionMenViewProps> = ({ onBack, onSelect
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -112,48 +112,50 @@ export const FashionMenView: React.FC<FashionMenViewProps> = ({ onBack, onSelect
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10 relative">
-        <div 
-            onClick={handleHeroClick}
-            className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
-        >
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="relative z-10 flex flex-col gap-4">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                    <User size={24} className="text-white" />
-                </div>
-                <div>
-                    <h3 className="font-black text-xl uppercase tracking-tighter leading-tight mb-1">Seu estilo,<br/>sua autenticidade.</h3>
-                    <p className="text-blue-100 text-xs font-medium leading-relaxed max-w-[220px]">Lojas selecionadas para você em Jacarepaguá. <span className="underline ml-1">Conhecer</span></p>
-                </div>
-            </div>
-        </div>
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+        <main className="p-6 pt-12 space-y-10">
+          <div 
+              onClick={handleHeroClick}
+              className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+          >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
+              <div className="relative z-10 flex flex-col gap-4">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
+                      <User size={24} className="text-white" />
+                  </div>
+                  <div>
+                      <h3 className="font-black text-xl uppercase tracking-tighter leading-tight mb-1">Seu estilo,<br/>sua autenticidade.</h3>
+                      <p className="text-blue-100 text-xs font-medium leading-relaxed max-w-[220px]">Lojas selecionadas para você em Jacarepaguá. <span className="underline ml-1">Conhecer</span></p>
+                  </div>
+              </div>
+          </div>
 
-        {GROUPS.map((group, idx) => (
-          <section key={idx} className="space-y-4">
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-              <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em]">
-                {group.title}
-              </h3>
-            </div>
-            <div className="flex flex-col">
-              {group.items.map((item, itemIdx) => (
-                <CategoryCard 
-                  key={itemIdx} 
-                  item={item} 
-                  onClick={() => onSelect(item.name)} 
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+          {GROUPS.map((group, idx) => (
+            <section key={idx} className="space-y-4">
+              <div className="flex items-center gap-2 mb-2 px-1">
+                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em]">
+                  {group.title}
+                </h3>
+              </div>
+              <div className="flex flex-col">
+                {group.items.map((item, itemIdx) => (
+                  <CategoryCard 
+                    key={itemIdx} 
+                    item={item} 
+                    onClick={() => onSelect(item.name)} 
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
 
-        <div className="pt-8 pb-12 text-center opacity-30 flex flex-col items-center gap-2">
-            <Watch size={20} className="text-blue-500" fill="currentColor" />
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA • Men's Fashion Hub</p>
-        </div>
-      </main>
+          <div className="pt-8 pb-12 text-center opacity-30 flex flex-col items-center gap-2">
+              <Watch size={20} className="text-blue-500" fill="currentColor" />
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Localizei JPA • Men's Fashion Hub</p>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

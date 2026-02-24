@@ -69,7 +69,7 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -83,40 +83,42 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32 space-y-8 relative">
-        <div 
-            onClick={handleHeroClick}
-            className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
-        >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="relative z-10 flex items-center gap-4">
-                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
-                    <Heart size={24} fill="white" className="text-white" />
-                </div>
-                <div>
-                    <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Cuidado Especializado</h3>
-                    <p className="text-rose-100 text-xs font-medium leading-relaxed">Os melhores profissionais para cada fase da sua vida. <span className="underline ml-1">Conhecer</span></p>
-                </div>
-            </div>
-        </div>
-
-        <section>
-          <div className="grid grid-cols-2 gap-4">
-            {SUBCATEGORIES_DATA.map((item, idx) => (
-              <SubcategoryCard 
-                key={idx} 
-                item={item} 
-                onClick={() => onSelect(item.name)} 
-              />
-            ))}
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+        <main className="p-6 pt-12 space-y-8">
+          <div 
+              onClick={handleHeroClick}
+              className="p-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"
+          >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
+              <div className="relative z-10 flex items-center gap-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
+                      <Heart size={24} fill="white" className="text-white" />
+                  </div>
+                  <div>
+                      <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Cuidado Especializado</h3>
+                      <p className="text-rose-100 text-xs font-medium leading-relaxed">Os melhores profissionais para cada fase da sua vida. <span className="underline ml-1">Conhecer</span></p>
+                  </div>
+              </div>
           </div>
-        </section>
 
-        <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
-            <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Health Ecosystem</p>
-        </div>
-      </main>
+          <section>
+            <div className="grid grid-cols-2 gap-4">
+              {SUBCATEGORIES_DATA.map((item, idx) => (
+                <SubcategoryCard 
+                  key={idx} 
+                  item={item} 
+                  onClick={() => onSelect(item.name)} 
+                />
+              ))}
+            </div>
+          </section>
+
+          <div className="py-10 text-center opacity-20 flex flex-col items-center gap-2">
+              <div className="h-1 w-8 bg-gray-400 rounded-full mb-2"></div>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Health Ecosystem</p>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
