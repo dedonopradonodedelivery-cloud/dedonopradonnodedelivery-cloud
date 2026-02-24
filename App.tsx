@@ -299,9 +299,9 @@ export const App: React.FC = () => {
                         <PetsSelectionView 
                             onBack={() => handleNavigate('home')} 
                             onSelect={(intent) => {
-                                if (intent === 'Cães') { setCustomHeaderTitle('PET — CÃES'); setBackView('pets_selection'); handleNavigate('pets_dogs'); }
-                                else if (intent === 'Gatos') { setCustomHeaderTitle('PET — GATOS'); setBackView('pets_selection'); handleNavigate('pets_cats'); }
-                                else if (intent === 'Outros Pets') { setCustomHeaderTitle('PET — OUTROS'); setBackView('pets_selection'); handleNavigate('pets_others'); }
+                                if (intent === 'Cães') { setCustomHeaderTitle('CÃES'); setBackView('pets_selection'); handleNavigate('pets_dogs'); }
+                                else if (intent === 'Gatos') { setCustomHeaderTitle('GATOS'); setBackView('pets_selection'); handleNavigate('pets_cats'); }
+                                else if (intent === 'Outros Pets') { setCustomHeaderTitle('OUTROS PETS'); setBackView('pets_selection'); handleNavigate('pets_others'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('pets_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
@@ -316,9 +316,9 @@ export const App: React.FC = () => {
                         <FashionSelectionView 
                             onBack={() => handleNavigate('home')}
                             onSelect={(intent) => {
-                                if (intent === 'Feminino') { setCustomHeaderTitle('MODA — MULHER'); setBackView('fashion_selection'); handleNavigate('fashion_women'); }
-                                else if (intent === 'Masculino') { setCustomHeaderTitle('MODA — HOMEM'); setBackView('fashion_selection'); handleNavigate('fashion_men'); }
-                                else if (intent === 'Infantil') { setCustomHeaderTitle('MODA — KIDS'); setBackView('fashion_selection'); handleNavigate('fashion_kids'); }
+                                if (intent === 'Feminino') { setCustomHeaderTitle('MODA FEMININA'); setBackView('fashion_selection'); handleNavigate('fashion_women'); }
+                                else if (intent === 'Masculino') { setCustomHeaderTitle('MODA MASCULINA'); setBackView('fashion_selection'); handleNavigate('fashion_men'); }
+                                else if (intent === 'Infantil') { setCustomHeaderTitle('MODA INFANTIL'); setBackView('fashion_selection'); handleNavigate('fashion_kids'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('fashion_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
@@ -333,8 +333,8 @@ export const App: React.FC = () => {
                         <BeautySelectionView
                             onBack={() => handleNavigate('home')}
                             onSelect={(intent) => {
-                                if (intent === 'Mulher') { setCustomHeaderTitle('BELEZA — MULHER'); setBackView('beauty_selection'); handleNavigate('beauty_women'); }
-                                else if (intent === 'Homem') { setCustomHeaderTitle('BELEZA — HOMEM'); setBackView('beauty_selection'); handleNavigate('beauty_men'); }
+                                if (intent === 'Mulher') { setCustomHeaderTitle('BELEZA FEMININA'); setBackView('beauty_selection'); handleNavigate('beauty_women'); }
+                                else if (intent === 'Homem') { setCustomHeaderTitle('BELEZA MASCULINA'); setBackView('beauty_selection'); handleNavigate('beauty_men'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('beauty_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
@@ -348,10 +348,10 @@ export const App: React.FC = () => {
                         <AutosSelectionView
                             onBack={() => handleNavigate('home')}
                             onSelect={(intent) => {
-                                if (intent === 'Carros') { setCustomHeaderTitle('AUTOS — CARROS'); setBackView('autos_selection'); handleNavigate('autos_carros'); }
-                                else if (intent === 'Motos') { setCustomHeaderTitle('AUTOS — MOTOS'); setBackView('autos_selection'); handleNavigate('autos_motos'); }
-                                else if (intent === 'Bikes') { setCustomHeaderTitle('AUTOS — BIKES'); setBackView('autos_selection'); handleNavigate('autos_bikes'); }
-                                else if (intent === 'Elétricos') { setCustomHeaderTitle('AUTOS — ELÉTRICOS'); setBackView('autos_selection'); handleNavigate('autos_eletricos'); }
+                                if (intent === 'Carros') { setCustomHeaderTitle('CARROS'); setBackView('autos_selection'); handleNavigate('autos_carros'); }
+                                else if (intent === 'Motos') { setCustomHeaderTitle('MOTOS'); setBackView('autos_selection'); handleNavigate('autos_motos'); }
+                                else if (intent === 'Bikes') { setCustomHeaderTitle('BIKES'); setBackView('autos_selection'); handleNavigate('autos_bikes'); }
+                                else if (intent === 'Elétricos') { setCustomHeaderTitle('ELÉTRICOS'); setBackView('autos_selection'); handleNavigate('autos_eletricos'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('autos_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}

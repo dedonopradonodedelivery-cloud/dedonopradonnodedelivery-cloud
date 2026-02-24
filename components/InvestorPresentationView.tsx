@@ -13,10 +13,8 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
     'Solução',
     'Produto',
     'Modelo de Negócio',
-    'Tração',
-    'Mercado',
-    'Roadmap',
-    'Equipe',
+    'Expansão & Novas Receitas (V2)',
+    'Plano de Expansão',
     'Pedido / Proposta'
   ];
 
@@ -147,30 +145,49 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                     </ul>
                   </div>
                   <div>
-                    <p>Receitas futuras (V2):</p>
-                    <ul className="mt-2 space-y-2 ml-2">
-                      <li>
-                        <p>✔ ADS Local</p>
-                        <p className="ml-4">Investimento acessível: R$ 0,99 / dia</p>
-                      </li>
-                      <li>
-                        <p>✔ JPA Connect (Networking Empresarial)</p>
-                        <p className="ml-4">Mensalidade: R$ 200,00 por empresário</p>
-                        <p className="ml-4">Grupos de 25 participantes</p>
-                        <p className="ml-4">Capacidade inicial: até 10 grupos</p>
-                      </li>
-                      <li>
-                        <p>✔ Lead de Serviços</p>
-                        <p className="ml-4 mt-2">Moradores solicitam serviços no app e recebem até 5 orçamentos gratuitos.</p>
-                        <p className="ml-4 mt-2">Profissionais pagam apenas para visualizar o lead:</p>
-                        <p className="ml-4 mt-2">Valor: R$ 5,90 por lead</p>
-                      </li>
+                    <p>Estimativa de Faturamento (Cenário Conservador):</p>
+                    <p className="mt-2">Considerando:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ 80% dos espaços de banners vendidos</li>
+                      <li>✔ 1 Patrocinador Master ativo</li>
                     </ul>
+                    <p className="mt-2">Modelo com potencial de geração de receita recorrente e previsível.</p>
                   </div>
-                  <p>Modelo baseado em múltiplas fontes de receita recorrente.</p>
+                </div>
+              </div>
+            ) : section === 'Expansão & Novas Receitas (V2)' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Receitas futuras estratégicas:</p>
+                  <ul className="mt-2 space-y-4 ml-2">
+                    <li>
+                      <p>✔ ADS Local</p>
+                      <p className="ml-4">Investimento acessível: R$ 0,99 / dia</p>
+                    </li>
+                    <li>
+                      <p>✔ JPA Connect (Networking Empresarial)</p>
+                      <p className="ml-4">Mensalidade: R$ 200,00 por empresário</p>
+                      <p className="ml-4">Grupos de 25 participantes</p>
+                      <p className="ml-4">Capacidade inicial: até 10 grupos</p>
+                    </li>
+                    <li>
+                      <p>✔ Lead de Serviços</p>
+                      <p className="ml-4">Valor: R$ 5,90 por lead</p>
+                    </li>
+                    <li>
+                      <p>✔ Cashback entre Lojas</p>
+                      <p className="ml-4">Sistema de benefícios e incentivo ao consumo local dentro do ecossistema.</p>
+                    </li>
+                  </ul>
+                  <p className="mt-4">Modelo voltado para fortalecimento da economia do bairro.</p>
+                </div>
+              </div>
+            ) : section === 'Plano de Expansão' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Modelo replicável e escalável.</p>
                   <div>
-                    <p>Plano de expansão:</p>
-                    <p className="mt-2">Expansão prevista para bairros e regiões estratégicas:</p>
+                    <p>Expansão prevista para bairros e regiões estratégicas:</p>
                     <ul className="mt-2 space-y-1 ml-2">
                       <li>✔ Barra da Tijuca</li>
                       <li>✔ Recreio dos Bandeirantes</li>
@@ -189,45 +206,16 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                     </ul>
                   </div>
                   <p>Total previsto: 14 frentes de expansão</p>
-                </div>
-              </div>
-            ) : section === 'Tração' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Projeto em fase de expansão.</p>
-                  <div>
-                    <p>Já validamos:</p>
-                    <ul className="mt-2 space-y-2 ml-2">
-                      <li>✔ Interesse de comerciantes locais</li>
-                      <li>✔ Aceitação da proposta</li>
-                      <li>✔ Potencial de crescimento</li>
+
+                  <div className="pt-4">
+                    <p>Escala Potencial:</p>
+                    <p className="mt-2">Mantendo apenas cenário conservador por região:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>✔ Expansão proporcional da base de receita</li>
+                      <li>✔ Crescimento previsível e replicável</li>
                     </ul>
+                    <p className="mt-2">Estrutura com alto potencial de valorização.</p>
                   </div>
-                  <p className="mt-4">Agora buscamos aceleração estratégica.</p>
-                </div>
-              </div>
-            ) : section === 'Mercado' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Todo bairro possui:</p>
-                  <ul className="mt-2 space-y-2 ml-2">
-                    <li>✔ Comerciantes</li>
-                    <li>✔ Prestadores de serviço</li>
-                    <li>✔ Consumidores locais</li>
-                  </ul>
-                  <p className="mt-4">Modelo replicável e escalável.</p>
-                </div>
-              </div>
-            ) : section === 'Roadmap' ? (
-              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Próximos passos:</p>
-                  <ul className="mt-2 space-y-2 ml-2">
-                    <li>✔ Expansão de usuários</li>
-                    <li>✔ Expansão de lojistas</li>
-                    <li>✔ Fortalecimento da marca</li>
-                    <li>✔ Escala para novas regiões</li>
-                  </ul>
                 </div>
               </div>
             ) : section === 'Pedido / Proposta' ? (

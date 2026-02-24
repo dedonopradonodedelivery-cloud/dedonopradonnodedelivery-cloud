@@ -98,8 +98,8 @@ export const Header: React.FC<HeaderProps> = ({
   }, [user]);
 
   const contextData = NEIGHBORHOOD_CONTEXT_DATA[currentNeighborhood] || NEIGHBORHOOD_CONTEXT_DATA["Jacarepaguá (todos)"];
-  const isHome = activeTab === 'home';
-  const blueTabs = ['home', 'health_selection', 'services_selection', 'pets_selection', 'fashion_selection', 'beauty_selection', 'autos_selection', 'category_detail'];
+  const isHomeOrExplore = activeTab === 'home' || activeTab === 'explore';
+  const blueTabs = ['home', 'explore', 'health_selection', 'services_selection', 'pets_selection', 'fashion_selection', 'beauty_selection', 'autos_selection', 'category_detail'];
   const isBlueHeader = blueTabs.includes(activeTab);
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* 1. TOPO: Ações e Logo */}
                 <div className="flex items-center justify-between w-full py-2 relative z-50">
                     <div className="flex items-center gap-3 min-w-0">
-                        {!isHome ? (
+                        {!isHomeOrExplore ? (
                             <>
                                 <button onClick={() => onBack && onBack()} className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0">
                                     <ChevronLeft size={20} strokeWidth={3} />
@@ -138,12 +138,19 @@ export const Header: React.FC<HeaderProps> = ({
                                 </h1>
                             </>
                         ) : (
-                            <h1 className="text-lg font-black text-white uppercase tracking-tighter leading-none truncate">LOCALIZEI <span className="opacity-50">JPA</span></h1>
+                            <div className="flex items-center gap-1.5">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" fill="white" fillOpacity="0.2" />
+                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                    <circle cx="12" cy="10" r="3" fill="white" />
+                                </svg>
+                                <h1 className="text-[22px] font-black text-white uppercase tracking-tighter leading-none truncate">LOCALIZEI <span className="opacity-50">JPA</span></h1>
+                            </div>
                         )}
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {isHome ? (
+                        {isHomeOrExplore ? (
                             <>
                                 <button onClick={toggleSelector} className="flex items-center gap-1.5 transition-all active:scale-95 text-white/90 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
                                     <span className="text-[10px] font-black uppercase tracking-[0.1em] truncate max-w-[90px]">{currentNeighborhood === "Jacarepaguá (todos)" ? "Jacarepaguá" : currentNeighborhood}</span>
@@ -168,8 +175,8 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                 </div>
 
-                {/* 2. CONTEÚDO DINÂMICO (APENAS PARA HOME QUANDO isHome É TRUE) */}
-                {isHome && (
+                {/* 2. CONTEÚDO DINÂMICO (APENAS PARA HOME E EXPLORAR) */}
+                {isHomeOrExplore && (
                     <div className="w-full mt-6">
                         <div className="animate-in fade-in slide-in-from-top-1 duration-700">
                              {greetingName && <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Olá, {greetingName}</p>}

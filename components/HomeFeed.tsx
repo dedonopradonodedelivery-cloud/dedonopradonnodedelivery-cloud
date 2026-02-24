@@ -29,6 +29,12 @@ const MOCK_COUPONS_BASE = [
   { id: 2, store: 'Studio Hair', title: 'Corte + Hidratação', description: 'Somente com agendamento', discount: 'R$ 15 OFF', category: 'Beleza', color: 'from-blue-600 to-indigo-700', neighborhood: 'Taquara', rules: 'Válido Terça a Quinta', validity: '15/12' },
   { id: 3, store: 'Pet Alegria', title: 'Banho e Tosa Completo', description: 'Ganhe tosa higiênica', discount: '10% OFF', category: 'Pets', color: 'from-emerald-500 to-teal-600', neighborhood: 'Pechincha', rules: 'Cães até 15kg', validity: '20/11' },
   { id: 4, store: 'Mecânica 24h', title: 'Troca de Óleo', description: 'Filtro incluso no pacote', discount: '5% OFF', category: 'Auto', color: 'from-slate-600 to-slate-800', neighborhood: 'Anil', rules: 'Somente óleo sintético', validity: '10/12' },
+  { id: 5, store: 'Pizza Prime', title: 'Pizza Grande', description: 'Qualquer sabor tradicional', discount: '15% OFF', category: 'Comida', color: 'from-red-500 to-orange-600', neighborhood: 'Freguesia', rules: 'Apenas delivery', validity: '05/12' },
+  { id: 6, store: 'Drogaria Vida', title: 'Medicamentos', description: 'Em compras acima de R$ 100', discount: 'R$ 20 OFF', category: 'Saúde', color: 'from-teal-500 to-emerald-600', neighborhood: 'Taquara', rules: 'Exceto perfumaria', validity: '12/12' },
+  { id: 7, store: 'Studio Fit', title: 'Treino Experimental', description: 'Conheça nossa estrutura', discount: '1ª aula grátis', category: 'Esporte', color: 'from-purple-500 to-pink-600', neighborhood: 'Pechincha', rules: 'Agendamento prévio', validity: '30/11' },
+  { id: 8, store: 'Pet Center JPA', title: 'Rações Premium', description: 'Qualquer marca', discount: '10% OFF', category: 'Pets', color: 'from-amber-500 to-orange-500', neighborhood: 'Anil', rules: 'Pacotes acima de 10kg', validity: '08/12' },
+  { id: 9, store: 'Lava Jato Express', title: 'Lavagem Completa', description: 'Ducha + Cera', discount: '20% OFF', category: 'Auto', color: 'from-cyan-500 to-blue-600', neighborhood: 'Freguesia', rules: 'Veículos de passeio', validity: '15/12' },
+  { id: 10, store: 'Café & Cia', title: 'Café + Salgado', description: 'Para começar bem o dia', discount: 'Combo promocional', category: 'Comida', color: 'from-stone-500 to-stone-700', neighborhood: 'Taquara', rules: 'Até as 10h', validity: '20/12' },
 ];
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle?: string; onSeeMore?: () => void; iconColor?: string; iconBg?: string; titleClassName?: string; subtitleClassName?: string; seeMoreClassName?: string; }> = ({ icon: Icon, title, subtitle, onSeeMore, iconColor = "text-blue-600", iconBg = "bg-gray-50 dark:bg-gray-900", titleClassName = "text-gray-900 dark:text-white", subtitleClassName = "text-gray-400", seeMoreClassName = "text-blue-600" }) => (
@@ -69,17 +75,29 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
   const { isFeatureActive } = useFeatures();
   const [isMoreCategoriesOpen, setIsMoreCategoriesOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(null);
+  const [currentCouponIndex, setCurrentCouponIndex] = useState(0);
 
   const filteredStories = useMemo(() => {
     return ACONTECENDO_AGORA_DATA;
   }, []);
 
-  const featuredCoupon = useMemo(() => {
-    const list = currentNeighborhood === "Jacarepaguá (todos)" 
+  const availableCoupons = useMemo(() => {
+    return currentNeighborhood === "Jacarepaguá (todos)" 
       ? MOCK_COUPONS_BASE 
       : MOCK_COUPONS_BASE.filter(item => item.neighborhood === currentNeighborhood);
-    return list[0] || MOCK_COUPONS_BASE[0];
   }, [currentNeighborhood]);
+
+  useEffect(() => {
+    if (availableCoupons.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentCouponIndex((prevIndex) => (prevIndex + 1) % availableCoupons.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [availableCoupons.length]);
+
+  const featuredCoupon = availableCoupons[currentCouponIndex] || MOCK_COUPONS_BASE[0];
 
   const storyLabels = ['Trânsito', 'Achados', 'Pets Perdidos', 'Utilidades', 'Promoções'];
 
@@ -109,7 +127,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <Plus size={22} strokeWidth={3} />
                 </div>
                 <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
-                    + Mais
+                    + 16
                 </span>
             </button>
             </div>
