@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isListening, setIsListening] = useState(false);
 
   const greetingName = useMemo(() => {
-    if (!user) return "Visitante";
+    if (!user) return null;
     const fullName = user.user_metadata?.full_name;
     if (fullName) return fullName.split(' ')[0];
     return user.email?.split('@')[0] || "Morador";
@@ -172,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {isHome && (
                     <div className="w-full mt-6">
                         <div className="animate-in fade-in slide-in-from-top-1 duration-700">
-                             <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Olá, {greetingName}</p>
+                             {greetingName && <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Olá, {greetingName}</p>}
                              <div className="w-full relative mb-4">
                                 <button onClick={() => setIsAssistantOpen(true)} className="w-full bg-white/10 rounded-[1.25rem] border border-white/15 py-3.5 pl-5 pr-14 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner">
                                     <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer para a LOKA te ajudar</span>

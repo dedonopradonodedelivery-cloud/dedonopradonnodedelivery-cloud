@@ -99,7 +99,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                 if (!fullCat) return null;
                 return (
                 <button key={cat.slug} onClick={() => onSelectCategory(fullCat)} className="flex flex-col items-center gap-2 group active:scale-95 transition-all flex-1">
-                    <div className="w-[52px] h-[52px] rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 shadow-sm flex items-center justify-center text-blue-600 group-hover:brightness-110 transition-all">
+                    <div className="w-[52px] h-[52px] rounded-full bg-blue-50 dark:bg-blue-900/20 border-t border-white/80 dark:border-white/10 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] flex items-center justify-center text-blue-600 group-hover:brightness-110 transition-all">
                         <cat.icon size={22} strokeWidth={2.5} />
                     </div>
                     <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
@@ -109,7 +109,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                 )
             })}
             <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center gap-2 group active:scale-95 transition-all flex-1">
-                <div className="w-[52px] h-[52px] rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 shadow-sm flex items-center justify-center text-blue-600">
+                <div className="w-[52px] h-[52px] rounded-full bg-blue-50 dark:bg-blue-900/20 border-t border-white/80 dark:border-white/10 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] flex items-center justify-center text-blue-600">
                     <Plus size={22} strokeWidth={3} />
                 </div>
                 <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
@@ -168,10 +168,10 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Ver todos</button>
                 </div>
 
-                <div className="relative bg-blue-50/40 dark:bg-blue-900/10 p-4 rounded-[3rem] border border-blue-100/50 dark:border-blue-800/20 shadow-sm">
+                <div className="relative p-4 rounded-[3rem] shadow-[0_0_40px_rgba(30,91,255,0.12)] dark:shadow-[0_0_50px_rgba(30,91,255,0.08)]">
                     <button 
                         onClick={() => onNavigate('coupon_landing')} 
-                        className="w-full h-[180px] relative flex bg-white dark:bg-gray-900 shadow-2xl shadow-blue-900/10 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] border border-gray-100 dark:border-white/5 group"
+                        className="w-full h-[180px] relative flex bg-white dark:bg-gray-900 shadow-2xl shadow-blue-900/10 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] group"
                     >
                         {/* Lado Esquerdo: Valor */}
                         <div className={`w-[35%] bg-gradient-to-br ${featuredCoupon.color} p-6 flex flex-col justify-center items-center text-center relative overflow-hidden`}>
