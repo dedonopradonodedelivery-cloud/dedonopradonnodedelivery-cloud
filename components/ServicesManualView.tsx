@@ -141,7 +141,7 @@ export const ServicesManualView: React.FC<ServicesManualViewProps> = ({ onBack, 
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Serviços — Manuais</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Manuais</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>

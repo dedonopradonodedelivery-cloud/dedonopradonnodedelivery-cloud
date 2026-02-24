@@ -40,41 +40,43 @@ export const AutosMotosView: React.FC<AutosMotosViewProps> = ({ onBack, onSelect
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"><ChevronLeft size={24} /></button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Autos — Motos</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Motos</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
-        <div 
-            onClick={handleHeroClick}
-            className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
-        >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="relative z-10 flex items-start gap-4">
-                <div className="p-3 bg-amber-500 rounded-2xl shadow-lg">
-                    <Zap size={24} className="text-white" />
-                </div>
-                <div>
-                    <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Paixão por Duas Rodas</h3>
-                    <p className="text-slate-400 text-xs font-medium leading-relaxed">As melhores oficinas e lojas de acessórios para sua moto. <span className="underline ml-1">Ver</span></p>
-                </div>
-            </div>
-        </div>
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+        <main className="p-6 pt-12 space-y-8">
+          <div 
+              onClick={handleHeroClick}
+              className="p-6 bg-slate-900 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-white/5 cursor-pointer active:scale-[0.99] transition-all group"
+          >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
+              <div className="relative z-10 flex items-start gap-4">
+                  <div className="p-3 bg-amber-500 rounded-2xl shadow-lg">
+                      <Zap size={24} className="text-white" />
+                  </div>
+                  <div>
+                      <h3 className="font-black text-lg uppercase tracking-tight leading-none mb-1">Paixão por Duas Rodas</h3>
+                      <p className="text-slate-400 text-xs font-medium leading-relaxed">As melhores oficinas e lojas de acessórios para sua moto. <span className="underline ml-1">Ver</span></p>
+                  </div>
+              </div>
+          </div>
 
-        {GROUPS.map((group, idx) => (
-          <section key={idx} className="space-y-3">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-slate-500"><group.icon size={20} strokeWidth={2.5}/></div>
-              <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{group.title}</h3>
-            </div>
-            {group.items.map((item, itemIdx) => <SpecialtyCard key={itemIdx} name={item.name} onClick={() => onSelect(item.name)} />)}
-          </section>
-        ))}
-      </main>
+          {GROUPS.map((group, idx) => (
+            <section key={idx} className="space-y-3">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-slate-500"><group.icon size={20} strokeWidth={2.5}/></div>
+                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{group.title}</h3>
+              </div>
+              {group.items.map((item, itemIdx) => <SpecialtyCard key={itemIdx} name={item.name} onClick={() => onSelect(item.name)} />)}
+            </section>
+          ))}
+        </main>
+      </div>
     </div>
   );
 };

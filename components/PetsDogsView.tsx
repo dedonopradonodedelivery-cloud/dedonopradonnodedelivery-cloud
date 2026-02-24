@@ -104,7 +104,7 @@ export const PetsDogsView: React.FC<PetsDogsViewProps> = ({ onBack, onSelect, on
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Pet — Cães</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Cães</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>

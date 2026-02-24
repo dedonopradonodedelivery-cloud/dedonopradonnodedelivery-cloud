@@ -78,7 +78,7 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Mulher</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Mulher</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>

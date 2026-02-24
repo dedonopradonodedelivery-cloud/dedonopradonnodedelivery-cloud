@@ -170,7 +170,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
 
         {/* 3. CUPONS DO DIA - ALIGNMENT FIXED */}
         {isFeatureActive('coupons') && featuredCoupon && (
-            <section className="px-6 py-12 space-y-8">
+            <section className="px-6 py-6 space-y-8">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#1E5BFF]"><Ticket size={16} strokeWidth={2.5} /></div>
@@ -229,7 +229,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
         )}
 
         {/* 4. VAGAS DE EMPREGO (IA LOKA REFINEMENT) */}
-        <section className="px-6 py-10 space-y-6">
+        <section className="px-6 py-6 space-y-6">
             <SectionHeader icon={Briefcase} title="Empregos no Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Oportunidades em JPA" : `Trabalhe em ${currentNeighborhood}`} iconColor="text-emerald-500" />
             <div onClick={() => onNavigate('jobs')} className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse">
                 <div className="relative z-10 flex flex-col items-center text-center">
@@ -259,7 +259,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
 
         {/* 5. EXPLORAR GUIA */}
         {isFeatureActive('explore_guide') && (
-            <div className="w-full pt-8 pb-10">
+            <div className="w-full pt-4 pb-10">
                 <div className="px-6">
                     <SectionHeader icon={Compass} title="Explorar Bairro" subtitle="O melhor perto de você" onSeeMore={() => onNavigate('explore')} />
                     <div className="flex gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit mb-6">

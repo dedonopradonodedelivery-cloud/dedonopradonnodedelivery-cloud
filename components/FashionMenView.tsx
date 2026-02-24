@@ -107,7 +107,7 @@ export const FashionMenView: React.FC<FashionMenViewProps> = ({ onBack, onSelect
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Moda — Homem</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Homem</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>

@@ -211,7 +211,7 @@ export const App: React.FC = () => {
     'autos_carros', 'autos_motos', 'autos_bikes', 'autos_eletricos',
     'classified_detail', 'job_detail', 'real_estate_detail', 'classified_search_results', 'plan_selection',
     'troca_troca', 'troca_troca_intro', 'troca_troca_swipe', 'user_trade_items', 'user_resume', 'merchant_jobs',
-    'patrocinador_master', 'investor_presentation'
+    'patrocinador_master', 'investor_presentation', 'category_detail'
   ];
 
   return (
@@ -269,8 +269,8 @@ export const App: React.FC = () => {
                         <HealthSelectionView 
                             onBack={() => handleNavigate('home')} 
                             onSelect={(intent) => {
-                                if (intent === 'Mulher') { setCustomHeaderTitle('SAÚDE — MULHER'); setBackView('health_selection'); handleNavigate('health_women'); }
-                                else if (intent === 'Pediatria') { setCustomHeaderTitle('SAÚDE — PEDIATRIA'); setBackView('health_selection'); handleNavigate('health_pediatrics'); }
+                                if (intent === 'Mulher') { setCustomHeaderTitle('MULHER'); setBackView('health_selection'); handleNavigate('health_women'); }
+                                else if (intent === 'Pediatria') { setCustomHeaderTitle('PEDIATRIA'); setBackView('health_selection'); handleNavigate('health_pediatrics'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('health_selection'); handleNavigate('category_detail'); }
                             }} 
                             onNavigate={handleNavigate}
@@ -284,8 +284,8 @@ export const App: React.FC = () => {
                         <ServicesSelectionView 
                             onBack={() => handleNavigate('home')} 
                             onSelect={(intent) => {
-                                if (intent === 'Manuais') { setCustomHeaderTitle('SERVIÇOS — MANUAIS'); setBackView('services_selection'); handleNavigate('services_manual'); }
-                                else if (intent === 'Especializados') { setCustomHeaderTitle('SERVIÇOS — ESPECIALIZADOS'); setBackView('services_selection'); handleNavigate('services_specialized'); }
+                                if (intent === 'Manuais') { setCustomHeaderTitle('MANUAIS'); setBackView('services_selection'); handleNavigate('services_manual'); }
+                                else if (intent === 'Especializados') { setCustomHeaderTitle('ESPECIALIZADOS'); setBackView('services_selection'); handleNavigate('services_specialized'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('services_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
@@ -316,9 +316,9 @@ export const App: React.FC = () => {
                         <FashionSelectionView 
                             onBack={() => handleNavigate('home')}
                             onSelect={(intent) => {
-                                if (intent === 'Feminino') { setCustomHeaderTitle('MODA FEMININA'); setBackView('fashion_selection'); handleNavigate('fashion_women'); }
-                                else if (intent === 'Masculino') { setCustomHeaderTitle('MODA MASCULINA'); setBackView('fashion_selection'); handleNavigate('fashion_men'); }
-                                else if (intent === 'Infantil') { setCustomHeaderTitle('MODA INFANTIL'); setBackView('fashion_selection'); handleNavigate('fashion_kids'); }
+                                if (intent === 'Feminino') { setCustomHeaderTitle('FEMININA'); setBackView('fashion_selection'); handleNavigate('fashion_women'); }
+                                else if (intent === 'Masculino') { setCustomHeaderTitle('MASCULINA'); setBackView('fashion_selection'); handleNavigate('fashion_men'); }
+                                else if (intent === 'Infantil') { setCustomHeaderTitle('INFANTIL'); setBackView('fashion_selection'); handleNavigate('fashion_kids'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('fashion_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
@@ -333,8 +333,8 @@ export const App: React.FC = () => {
                         <BeautySelectionView
                             onBack={() => handleNavigate('home')}
                             onSelect={(intent) => {
-                                if (intent === 'Mulher') { setCustomHeaderTitle('BELEZA FEMININA'); setBackView('beauty_selection'); handleNavigate('beauty_women'); }
-                                else if (intent === 'Homem') { setCustomHeaderTitle('BELEZA MASCULINA'); setBackView('beauty_selection'); handleNavigate('beauty_men'); }
+                                if (intent === 'Mulher') { setCustomHeaderTitle('FEMININA'); setBackView('beauty_selection'); handleNavigate('beauty_women'); }
+                                else if (intent === 'Homem') { setCustomHeaderTitle('MASCULINA'); setBackView('beauty_selection'); handleNavigate('beauty_men'); }
                                 else { setCustomHeaderTitle(intent.toUpperCase()); setBackView('beauty_selection'); handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}

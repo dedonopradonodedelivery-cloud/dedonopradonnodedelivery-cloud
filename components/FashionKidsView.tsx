@@ -111,7 +111,7 @@ export const FashionKidsView: React.FC<FashionKidsViewProps> = ({ onBack, onSele
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Moda — Kids</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Kids</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>

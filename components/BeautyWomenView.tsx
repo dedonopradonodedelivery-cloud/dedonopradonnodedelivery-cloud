@@ -51,7 +51,7 @@ export const BeautyWomenView: React.FC<BeautyWomenViewProps> = ({ onBack, onSele
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-gray-950 flex flex-col animate-in fade-in duration-500 pb-20">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in fade-in duration-500">
       <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div className="flex items-center gap-4">
           <button 
@@ -60,53 +60,55 @@ export const BeautyWomenView: React.FC<BeautyWomenViewProps> = ({ onBack, onSele
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Beleza — Mulher</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Mulher</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 relative">
-        <div 
-            onClick={handleHeroClick}
-            className="flex items-start gap-4 p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30 cursor-pointer active:scale-[0.99] transition-all group"
-        >
-          <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-            <Sparkles className="text-rose-500" size={20} />
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-8 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
+        <main className="p-6 pt-12 space-y-8">
+          <div 
+              onClick={handleHeroClick}
+              className="flex items-start gap-4 p-5 bg-rose-50 dark:bg-rose-900/10 rounded-[2rem] border border-rose-100 dark:border-rose-800/30 cursor-pointer active:scale-[0.99] transition-all group"
+          >
+            <div className="p-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
+              <Sparkles className="text-rose-500" size={20} />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-rose-900 dark:text-rose-200 uppercase tracking-widest mb-1">Cuidado Especializado</h4>
+              <p className="text-[11px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
+                Selecione uma área abaixo para encontrar os melhores profissionais de Jacarepaguá. <span className="underline ml-1">Ver Destaque</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-xs font-black text-rose-900 dark:text-rose-200 uppercase tracking-widest mb-1">Cuidado Especializado</h4>
-            <p className="text-[11px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
-              Selecione uma área abaixo para encontrar os melhores profissionais de Jacarepaguá. <span className="underline ml-1">Ver Destaque</span>
-            </p>
-          </div>
-        </div>
 
-        {GROUPS.map((group, idx) => (
-          <section key={idx} className="space-y-3">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-rose-500">
-                  <group.icon size={20} strokeWidth={2.5}/>
+          {GROUPS.map((group, idx) => (
+            <section key={idx} className="space-y-3">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-rose-500">
+                    <group.icon size={20} strokeWidth={2.5}/>
+                </div>
+                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                  {group.title}
+                </h3>
               </div>
-              <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                {group.title}
-              </h3>
-            </div>
-            <div className="flex flex-col">
-              {group.items.map((item, itemIdx) => (
-                <SpecialtyCard 
-                  key={itemIdx} 
-                  item={item} 
-                  onClick={() => onSelect(item.name)} 
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+              <div className="flex flex-col">
+                {group.items.map((item, itemIdx) => (
+                  <SpecialtyCard 
+                    key={itemIdx} 
+                    item={item} 
+                    onClick={() => onSelect(item.name)} 
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
 
-        <div className="py-10 text-center opacity-20">
-          <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Beauty Ecosystem</p>
-        </div>
-      </main>
+          <div className="py-10 text-center opacity-20">
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em]">Jacarepaguá Beauty Ecosystem</p>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

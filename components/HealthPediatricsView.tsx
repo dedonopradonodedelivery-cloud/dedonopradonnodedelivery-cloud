@@ -104,7 +104,7 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Saúde — Pediatria</h1>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Pediatria</h1>
         </div>
         <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
       </header>
