@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
         <div className={`w-full transition-all duration-500 relative ${isBlueHeader ? 'bg-brand-blue pb-8 z-30' : 'bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 pb-6 z-50'}`}>
-            <div className="max-w-md mx-auto px-6 pt-5 flex flex-col items-start">
+            <div className="w-full px-6 pt-5 flex flex-col items-start">
                 
                 {/* 1. TOPO: Ações e Logo */}
                 <div className="flex items-center justify-between w-full py-2 relative z-50">
@@ -175,7 +175,7 @@ export const Header: React.FC<HeaderProps> = ({
                              {greetingName && <p className="text-[12px] font-medium text-white/85 tracking-tight mb-2 ml-1 leading-none">Olá, {greetingName}</p>}
                              <div className="w-full relative mb-4">
                                 <button onClick={() => setIsAssistantOpen(true)} className="w-full bg-white/10 rounded-[1.25rem] border border-white/15 py-3.5 pl-5 pr-14 flex items-center gap-3 hover:bg-white/20 transition-all shadow-inner">
-                                    <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer para a LOKA te ajudar</span>
+                                    <Search size={16} className="text-white/40" /><span className="text-white/40 text-sm font-medium tracking-tight truncate">Diga o que você quer que eu te ajudo</span>
                                 </button>
                                 <button onClick={handleVoiceSearch} className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-300 ${isListening ? 'text-red-400 scale-125' : 'text-white/30 hover:text-white/60'}`}><Mic size={20} className={isListening ? 'animate-pulse' : ''} /></button>
                              </div>

@@ -88,18 +88,18 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
   const storyLabels = ['Trânsito', 'Achados', 'Pets Perdidos', 'Utilidades', 'Promoções'];
 
   return (
-    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-full">
+    <div className="flex flex-col bg-brand-blue w-full min-h-full">
       <div className="flex-1 bg-[#F8F9FC] dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         {/* 1. ICON CATEGORY GRID */}
         <section className="w-full">
-            <div className="flex items-start justify-between px-5 pt-2 pb-8">
+            <div className="flex items-start justify-between px-6 pt-5 pb-8">
             {QUICK_CATEGORIES.map(cat => {
                 const fullCat = CATEGORIES.find(c => c.slug === cat.slug);
                 if (!fullCat) return null;
                 return (
                 <button key={cat.slug} onClick={() => onSelectCategory(fullCat)} className="flex flex-col items-center gap-2 group active:scale-95 transition-all flex-1">
-                    <div className="w-[52px] h-[52px] rounded-full bg-gradient-to-b from-white via-white to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-950 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15),inset_0_6px_12px_rgba(255,255,255,1),inset_0_-6px_12px_rgba(0,0,0,0.08)] border border-white/80 dark:border-white/5 flex items-center justify-center text-blue-600 group-hover:brightness-105 transition-all">
+                    <div className="w-[56px] h-[56px] rounded-full bg-gradient-to-b from-white via-white to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-950 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15),inset_0_6px_12px_rgba(255,255,255,1),inset_0_-6px_12px_rgba(0,0,0,0.08)] border border-white/80 dark:border-white/5 flex items-center justify-center text-blue-600 group-hover:brightness-105 transition-all">
                         <cat.icon size={22} strokeWidth={2.5} />
                     </div>
                     <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
@@ -109,7 +109,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                 )
             })}
             <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center gap-2 group active:scale-95 transition-all flex-1">
-                <div className="w-[52px] h-[52px] rounded-full bg-gradient-to-b from-white via-white to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-950 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15),inset_0_6px_12px_rgba(255,255,255,1),inset_0_-6px_12px_rgba(0,0,0,0.08)] border border-white/80 dark:border-white/5 flex items-center justify-center text-blue-600">
+                <div className="w-[56px] h-[56px] rounded-full bg-gradient-to-b from-white via-white to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-950 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15),inset_0_6px_12px_rgba(255,255,255,1),inset_0_-6px_12px_rgba(0,0,0,0.08)] border border-white/80 dark:border-white/5 flex items-center justify-center text-blue-600">
                     <Plus size={22} strokeWidth={3} />
                 </div>
                 <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
@@ -168,10 +168,10 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Ver todos</button>
                 </div>
 
-                <div className="relative p-4 rounded-[3rem] shadow-[0_0_40px_rgba(30,91,255,0.12)] dark:shadow-[0_0_50px_rgba(30,91,255,0.08)]">
+                <div className="relative p-4 rounded-[3rem] shadow-[0_0_40px_rgba(30,91,255,0.08)] dark:shadow-[0_0_50px_rgba(30,91,255,0.05)]">
                     <button 
                         onClick={() => onNavigate('coupon_landing')} 
-                        className="w-full h-[180px] relative flex bg-white dark:bg-gray-900 shadow-2xl shadow-blue-900/10 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] group"
+                        className="w-full h-[180px] relative flex bg-slate-50 dark:bg-gray-900 shadow-xl shadow-blue-900/5 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] group"
                     >
                         {/* Lado Esquerdo: Valor */}
                         <div className={`w-[35%] bg-gradient-to-br ${featuredCoupon.color} p-6 flex flex-col justify-center items-center text-center relative overflow-hidden`}>
@@ -181,15 +181,15 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                             <h4 className="text-4xl font-black text-white leading-none drop-shadow-2xl italic tracking-tighter">{featuredCoupon.discount}</h4>
                             
                             {/* Decorative Edge Cutouts */}
-                            <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-900 z-20 shadow-inner"></div>
-                            <div className="absolute -bottom-3 -right-3 w-6 h-6 rounded-full bg-white dark:bg-gray-900 z-20 shadow-inner"></div>
+                            <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-slate-50 dark:bg-gray-900 z-20 shadow-inner"></div>
+                            <div className="absolute -bottom-3 -right-3 w-6 h-6 rounded-full bg-slate-50 dark:bg-gray-900 z-20 shadow-inner"></div>
                         </div>
 
                         {/* Dashed Separator */}
                         <div className="h-full border-l-2 border-dashed border-gray-100 dark:border-gray-800 relative z-10"></div>
 
                         {/* Lado Direito: Info */}
-                        <div className="flex-1 p-6 flex flex-col justify-between text-left bg-white dark:bg-gray-900">
+                        <div className="flex-1 p-6 flex flex-col justify-between text-left bg-slate-50 dark:bg-gray-900">
                             <div>
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <span className="text-[8px] font-black bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/50 uppercase tracking-widest">Oferta Ativa</span>
