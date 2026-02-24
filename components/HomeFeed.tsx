@@ -99,7 +99,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                 if (!fullCat) return null;
                 return (
                 <button key={cat.slug} onClick={() => onSelectCategory(fullCat)} className="flex flex-col items-center gap-2 group active:scale-95 transition-all flex-1">
-                    <div className="w-[52px] h-[52px] rounded-full bg-blue-50 dark:bg-blue-900/20 border-t border-white/80 dark:border-white/10 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] flex items-center justify-center text-blue-600 group-hover:brightness-110 transition-all">
+                    <div className="w-[52px] h-[52px] rounded-full bg-gradient-to-b from-white via-white to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-950 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15),inset_0_6px_12px_rgba(255,255,255,1),inset_0_-6px_12px_rgba(0,0,0,0.08)] border border-white/80 dark:border-white/5 flex items-center justify-center text-blue-600 group-hover:brightness-105 transition-all">
                         <cat.icon size={22} strokeWidth={2.5} />
                     </div>
                     <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
@@ -109,7 +109,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                 )
             })}
             <button onClick={() => setIsMoreCategoriesOpen(true)} className="flex flex-col items-center gap-2 group active:scale-95 transition-all flex-1">
-                <div className="w-[52px] h-[52px] rounded-full bg-blue-50 dark:bg-blue-900/20 border-t border-white/80 dark:border-white/10 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] flex items-center justify-center text-blue-600">
+                <div className="w-[52px] h-[52px] rounded-full bg-gradient-to-b from-white via-white to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-950 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15),inset_0_6px_12px_rgba(255,255,255,1),inset_0_-6px_12px_rgba(0,0,0,0.08)] border border-white/80 dark:border-white/5 flex items-center justify-center text-blue-600">
                     <Plus size={22} strokeWidth={3} />
                 </div>
                 <span className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-tight text-center leading-none">
