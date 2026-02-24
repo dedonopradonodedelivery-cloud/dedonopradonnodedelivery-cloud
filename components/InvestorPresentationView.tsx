@@ -51,9 +51,127 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               <span className="text-indigo-500 font-black text-lg">0{index + 1}.</span>
               <h2 className="text-xl font-black text-white uppercase tracking-tight">{section}</h2>
             </div>
-            <div className="h-40 bg-slate-900/50 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center">
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Espaço para conteúdo</p>
-            </div>
+            {section === 'Visão Geral' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>O Localizei JPA é um guia digital do bairro.</p>
+                  <p>Ele conecta moradores e comerciantes locais dentro de uma única plataforma simples e intuitiva.</p>
+                  <div>
+                    <p>Funciona como uma mistura de:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>• Lista telefônica moderna</li>
+                      <li>• Classificados locais</li>
+                      <li>• Promoções e cupons</li>
+                      <li>• Guia de serviços da região</li>
+                    </ul>
+                  </div>
+                  <p>Tudo em um único aplicativo.</p>
+                </div>
+              </div>
+            ) : section === 'Problema' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Pequenos comércios enfrentam dificuldades para ganhar visibilidade.</p>
+                  <div>
+                    <p>Hoje dependem de:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>• Redes sociais</li>
+                      <li>• Indicações</li>
+                      <li>• Anúncios caros</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p>Enquanto isso, moradores:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>• Não sabem onde encontrar serviços locais</li>
+                      <li>• Têm dificuldade em descobrir promoções</li>
+                      <li>• Não possuem um canal centralizado do bairro</li>
+                    </ul>
+                  </div>
+                  <p>Existe um desencontro entre quem vende e quem procura.</p>
+                </div>
+              </div>
+            ) : section === 'Solução' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>O Localizei JPA cria um ponto de encontro digital da região.</p>
+                  <div>
+                    <p>Onde:</p>
+                    <ul className="mt-2 space-y-1 ml-2">
+                      <li>• Comerciantes ganham visibilidade</li>
+                      <li>• Moradores encontram tudo perto de casa</li>
+                      <li>• Promoções circulam dentro do próprio bairro</li>
+                    </ul>
+                  </div>
+                  <p>Um ecossistema local simples, direto e eficiente.</p>
+                </div>
+              </div>
+            ) : section === 'Produto' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>O aplicativo permite:</p>
+                  <ul className="mt-2 space-y-2 ml-2">
+                    <li>✔ Buscar serviços locais</li>
+                    <li>✔ Descobrir empresas próximas</li>
+                    <li>✔ Visualizar promoções e cupons</li>
+                    <li>✔ Explorar categorias do bairro</li>
+                  </ul>
+                  <p className="mt-4">Interface simples, intuitiva e acessível.</p>
+                </div>
+              </div>
+            ) : section === 'Modelo de Negócio' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Modelo simples e previsível:</p>
+                  <p>Comerciantes pagam uma mensalidade para aparecer na plataforma.</p>
+                  <p>Receita recorrente, escalável e sustentável.</p>
+                  <p>Funciona como uma vitrine digital do bairro.</p>
+                </div>
+              </div>
+            ) : section === 'Tração' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Projeto em fase de expansão.</p>
+                  <div>
+                    <p>Já validamos:</p>
+                    <ul className="mt-2 space-y-2 ml-2">
+                      <li>✔ Interesse de comerciantes locais</li>
+                      <li>✔ Aceitação da proposta</li>
+                      <li>✔ Potencial de crescimento</li>
+                    </ul>
+                  </div>
+                  <p className="mt-4">Agora buscamos aceleração estratégica.</p>
+                </div>
+              </div>
+            ) : section === 'Mercado' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Todo bairro possui:</p>
+                  <ul className="mt-2 space-y-2 ml-2">
+                    <li>✔ Comerciantes</li>
+                    <li>✔ Prestadores de serviço</li>
+                    <li>✔ Consumidores locais</li>
+                  </ul>
+                  <p className="mt-4">Modelo replicável e escalável.</p>
+                </div>
+              </div>
+            ) : section === 'Roadmap' ? (
+              <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                  <p>Próximos passos:</p>
+                  <ul className="mt-2 space-y-2 ml-2">
+                    <li>✔ Expansão de usuários</li>
+                    <li>✔ Expansão de lojistas</li>
+                    <li>✔ Fortalecimento da marca</li>
+                    <li>✔ Escala para novas regiões</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="h-40 bg-slate-900/50 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center">
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Espaço para conteúdo</p>
+              </div>
+            )}
           </section>
         ))}
       </main>
