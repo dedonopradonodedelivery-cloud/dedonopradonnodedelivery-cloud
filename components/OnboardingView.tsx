@@ -1,10 +1,8 @@
 
-import React from 'react';
+
 
 // Unused component kept for file integrity
-interface OnboardingViewProps {
-  onComplete: () => void;
-}
+export type OnboardingViewProps = object;
 
 export const OnboardingView: React.FC<OnboardingViewProps> = () => {
   return null;

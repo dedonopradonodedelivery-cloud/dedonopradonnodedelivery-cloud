@@ -1,33 +1,31 @@
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  ChevronLeft, ArrowRight, Home, LayoutGrid, Zap, MapPin, Loader2, Gem, Info, AlertTriangle, ShieldCheck, Paintbrush, CheckCircle2
+  ChevronLeft, ArrowRight, Home, LayoutGrid, Zap, Gem, Paintbrush, CheckCircle2
 } from 'lucide-react';
+
 import { User } from '@supabase/supabase-js';
-import { StoreBannerEditor, BannerPreview } from '@/components/StoreBannerEditor';
+import { StoreBannerEditor } from '@/components/StoreBannerEditor';
 import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
 
 interface StoreAdsModuleProps {
   onBack: () => void;
-  onNavigate: (view: string, data?: any) => void;
   user: User | null;
-  categoryName?: string;
-  viewMode?: string;
-  initialView?: 'sales' | 'chat';
 }
 
-const NEIGHBORHOODS = ["Freguesia", "Pechincha", "Anil", "Taquara", "Tanque", "Curicica"];
+
 const DISPLAY_MODES = [
   { id: 'home', label: 'HOME', icon: Home, price: 49.90, description: 'Exibido na página inicial.' },
   { id: 'cat', label: 'CATEGORIAS', icon: LayoutGrid, price: 29.90, description: 'Exibido nas buscas por produtos.' },
   { id: 'combo', label: 'COMBO', icon: Zap, price: 69.90, description: 'Home + Categorias.' },
 ];
 
-export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, user }) => {
   const [view, setView] = useState<'sales' | 'editor'>('sales');
   const [selectedMode, setSelectedMode] = useState<typeof DISPLAY_MODES[0] | null>(null);
   const [isArtSaved, setIsArtSaved] = useState(false);
   const [savedDesign, setSavedDesign] = useState<any>(null);
+
 
   const handleSaveDesign = (design: any) => {
     setSavedDesign(design);
@@ -68,10 +66,9 @@ export const StoreAdsModule: React.FC<StoreAdsModuleProps> = ({ onBack, onNaviga
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-500">2. Crie sua arte</h3>
               <button onClick={() => setView('editor')} className={`w-full p-8 rounded-[2.5rem] border-2 text-left flex items-center gap-6 transition-all ${isArtSaved ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500' : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-white/10'}`}><div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isArtSaved ? 'bg-emerald-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400'}`}><Paintbrush size={28} /></div><div><h4 className="font-bold">{isArtSaved ? 'Arte Pronta!' : 'Configurar Banner'}</h4><p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Toque para começar</p></div></button>
             </section>
-            {isArtSaved && savedDesign && (
+            {isArtSaved && (
               <section className="space-y-6 animate-in zoom-in-95 duration-500">
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-500">3. Revisão Final</h3>
-                  <div className="w-full aspect-[16/10] shadow-xl rounded-[2.5rem] overflow-hidden"><BannerPreview config={savedDesign} storeName={user?.user_metadata?.store_name || "Sua Loja"} storeLogo={user?.user_metadata?.logo_url} /></div>
+
                   <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 space-y-4 shadow-sm"><div className="flex justify-between items-center"><span className="text-xs font-bold text-gray-400 uppercase">Total do Destaque</span><span className="text-3xl font-black text-emerald-600">R$ {selectedMode?.price.toFixed(2)}</span></div><div className="flex items-center gap-2 text-[9px] font-black text-gray-400 uppercase"><CheckCircle2 size={12} className="text-emerald-500" /> Ativação Imediata após o PIX</div></div>
               </section>
             )}

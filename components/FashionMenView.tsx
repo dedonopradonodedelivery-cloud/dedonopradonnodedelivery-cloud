@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, Shirt, User, Watch, Zap, LayoutGrid } from 'lucide-react';
+import { ChevronRight, Sparkles, Shirt, User, Watch, Zap, LayoutGrid, ChevronLeft } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 import { Store } from '@/types';
 
@@ -16,10 +16,10 @@ interface SpecialtyGroup {
 }
 
 interface FashionMenViewProps {
-  onBack: () => void;
   onSelect: (category: string) => void;
   onNavigate: (view: string) => void;
   onStoreClick: (store: Store) => void;
+  onBack: () => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -86,7 +86,7 @@ const CategoryCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({ 
   </button>
 );
 
-export const FashionMenView: React.FC<FashionMenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+export const FashionMenView: React.FC<FashionMenViewProps> = ({ onSelect, onNavigate, onStoreClick, onBack }) => {
   const handleHeroClick = () => {
     onStoreClick({
       name: 'Man Style JPA',

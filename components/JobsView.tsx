@@ -2,9 +2,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
-  ChevronLeft, 
   MapPin, 
   ChevronRight, 
+  ChevronLeft,
   Search,
   Building2,
   SlidersHorizontal,
@@ -22,9 +22,9 @@ import { calculateCompatibility, MOCK_JOBS_FOR_TESTING, MOCK_CANDIDATE_PROFILES 
 import { MerchantJob } from './MerchantJobsModule';
 
 interface JobsViewProps {
-  onBack: () => void;
   onJobClick: (job: Job, compatibility?: CompatibilityResult) => void;
   onNavigate?: (view: string, data?: any) => void;
+  onBack: () => void;
 }
 
 const ScoreRing: React.FC<{ score: number }> = ({ score }) => {
@@ -131,7 +131,7 @@ const mapTurnoToScheduleType = (turno: MerchantJob['turno']): Job['schedule_type
 };
 
 
-export const JobsView: React.FC<JobsViewProps> = ({ onBack, onJobClick, onNavigate }) => {
+export const JobsView: React.FC<JobsViewProps> = ({ onJobClick, onNavigate, onBack }) => {
   const { user } = useAuth();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [candidateProfile, setCandidateProfile] = useState<any | null>(null);

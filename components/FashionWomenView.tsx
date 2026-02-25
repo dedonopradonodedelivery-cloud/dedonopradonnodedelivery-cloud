@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, Heart, ShoppingBag, Gem, Zap, Star, LayoutGrid, Shirt } from 'lucide-react';
+import { ChevronRight, Sparkles, Heart, ShoppingBag, Gem, Zap, Star, LayoutGrid, Shirt, ChevronLeft } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 import { Store } from '@/types';
 
@@ -16,10 +16,10 @@ interface SpecialtyGroup {
 }
 
 interface FashionWomenViewProps {
-  onBack: () => void;
   onSelect: (category: string) => void;
   onNavigate: (view: string) => void;
   onStoreClick: (store: Store) => void;
+  onBack: () => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -81,7 +81,7 @@ const CategoryCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({ 
   </button>
 );
 
-export const FashionWomenView: React.FC<FashionWomenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+export const FashionWomenView: React.FC<FashionWomenViewProps> = ({ onSelect, onNavigate, onStoreClick, onBack }) => {
   const handleHeroClick = () => {
     onStoreClick({
       name: 'Boutique Elegance JPA',

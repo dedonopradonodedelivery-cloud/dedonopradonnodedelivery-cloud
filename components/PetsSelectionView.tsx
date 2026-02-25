@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { ChevronLeft, Dog, Cat, PawPrint, Info, ArrowRight, Sparkles } from 'lucide-react';
+import { Dog, Cat, PawPrint, Info, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface PetsSelectionViewProps {
-  onBack: () => void;
   onSelect: (type: string) => void;
   onNavigate: (view: string) => void;
+  onBack: () => void;
 }
 
 const SelectionCard: React.FC<{ 
@@ -35,7 +35,7 @@ const SelectionCard: React.FC<{
   </button>
 );
 
-export const PetsSelectionView: React.FC<PetsSelectionViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const PetsSelectionView: React.FC<PetsSelectionViewProps> = ({ onSelect, onNavigate, onBack }) => {
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
       

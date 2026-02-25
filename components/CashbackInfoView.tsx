@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Clock, Sparkles } from 'lucide-react';
 import { CashbackIcon } from './CashbackIcon';
+import { ChevronLeft } from 'lucide-react';
 
-interface CashbackInfoViewProps {
-  onBack: () => void;
-}
+export type CashbackInfoViewProps = {
+    onBack: () => void;
+};
 
 const COUNTDOWN_TARGET = new Date();
 COUNTDOWN_TARGET.setDate(COUNTDOWN_TARGET.getDate() + 30);

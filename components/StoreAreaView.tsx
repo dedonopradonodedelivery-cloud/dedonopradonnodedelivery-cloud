@@ -2,14 +2,12 @@
 import React from 'react';
 import { 
   ChevronRight, 
-  Megaphone, 
   LayoutGrid, 
   BarChart3, 
   MessageSquare, 
   CreditCard, 
   HelpCircle, 
   LogOut,
-  User,
   Sparkles,
   LifeBuoy,
   Crown,
@@ -21,18 +19,15 @@ import {
   Ticket,
   Video,
   Settings,
-  ShoppingBag,
-  Clock,
-  Briefcase,
   Users,
-  Tag,
   Zap,
   Store as StoreIcon,
   PieChart,
   Building,
   Handshake,
-  FileText,
-  Repeat
+  Repeat,
+  ShoppingBag,
+  Briefcase
 } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,7 +37,6 @@ import { MandatoryVideoLock } from '@/components/MandatoryVideoLock';
 import { useFeatures } from '@/contexts/FeatureContext';
 
 interface StoreAreaViewProps {
-  onBack: () => void;
   onNavigate: (view: string, data?: any) => void;
   user: SupabaseUser | null;
 }
@@ -100,7 +94,7 @@ const SectionHeader: React.FC<{ title: string; icon?: React.ElementType }> = ({ 
   </div>
 );
 
-export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onBack, onNavigate, user }) => {
+export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onNavigate, user }) => {
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { isFeatureActive } = useFeatures();

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Baby, Stethoscope, Brain, ShieldPlus, Activity, Heart, Thermometer, Microscope, Syringe, Sparkles } from 'lucide-react';
+import { ChevronRight, Baby, Stethoscope, Brain, ShieldPlus, Activity, Heart, Thermometer, Microscope, Syringe, Sparkles, ChevronLeft } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 import { Store } from '@/types';
 
@@ -15,10 +15,10 @@ interface SpecialtyGroup {
 }
 
 interface HealthPediatricsViewProps {
-  onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
   onStoreClick: (store: Store) => void;
+  onBack: () => void;
 }
 
 const GROUPS: SpecialtyGroup[] = [
@@ -83,7 +83,7 @@ const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, 
   </button>
 );
 
-export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onSelect, onNavigate, onStoreClick, onBack }) => {
   const handleHeroClick = () => {
     onStoreClick({
       name: 'Pediátrica JPA — Dr. André Luiz',

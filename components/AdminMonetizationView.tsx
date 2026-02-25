@@ -6,7 +6,6 @@ import {
   LayoutGrid, 
   Crown, 
   Home, 
-  UserCheck, 
   Info,
   TrendingUp,
   AlertTriangle,
@@ -17,7 +16,6 @@ import {
   Loader2,
   Award,
   ShieldCheck,
-  Lock,
   ArrowDownToLine,
   Gem
 } from 'lucide-react';
@@ -165,7 +163,7 @@ const INITIAL_MONETIZATION_DATA: MonetizationItem[] = [
   }
 ];
 
-export const AdminMonetizationView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+export const AdminMonetizationView: React.FC<object> = () => {
   const [items, setItems] = useState<MonetizationItem[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 

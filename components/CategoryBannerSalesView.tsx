@@ -1,9 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, Check, Lock, DollarSign, Calendar, MapPin, LayoutGrid, Info, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Check, DollarSign, Calendar, LayoutGrid, Info, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { categoryBannerService } from '../lib/categoryBannerService';
-import { User } from '@supabase/supabase-js';
 import { SUBCATEGORIES, CATEGORIES } from '../constants';
+import { useAuth } from '@/contexts/AuthContext';
 
 const BAIRROS_LIST = [
   { name: 'Taquara', slug: 'taquara' },
@@ -18,12 +18,12 @@ const BAIRROS_LIST = [
 ];
 
 interface CategoryBannerSalesViewProps {
-  user: User | null;
   onBack: () => void;
   onSuccess: () => void;
 }
 
-export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = ({ user, onBack, onSuccess }) => {
+export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = ({ onBack, onSuccess }) => {
+  const { user } = useAuth();
   const [bairro, setBairro] = useState('freguesia');
   const [categoria, setCategoria] = useState('Comida');
   const [subcategoria, setSubcategoria] = useState('');
@@ -59,7 +59,7 @@ export const CategoryBannerSalesView: React.FC<CategoryBannerSalesViewProps> = (
     setIsBuying(slotKey);
     // Simula Checkout e Pagamento
     setTimeout(() => {
-        categoryBannerService.reserveSlot(slotKey, user.id, user.user_metadata?.store_name || 'Minha Loja');
+        categoryBannerService.reserveSlot(slotKey, 'temp-user-id', 'Minha Loja');
         
         categoryBannerService.confirmPurchase(slotKey, {
             image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=800',

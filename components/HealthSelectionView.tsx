@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { ChevronLeft, Baby, User, Users, Heart, ArrowRight, Info } from 'lucide-react';
+import { Baby, User, Users, Heart, ArrowRight, Info, ChevronLeft } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface HealthSelectionViewProps {
-  onBack: () => void;
   onSelect: (intent: string) => void;
   onNavigate: (view: string) => void;
+  onBack: () => void;
 }
 
 const SelectionButton: React.FC<{ 
@@ -31,14 +31,20 @@ const SelectionButton: React.FC<{
   </button>
 );
 
-export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onSelect, onNavigate, onBack }) => {
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
       
       <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         <main className="p-6 pt-12 space-y-10">
-            <div className="text-center space-y-3 mb-4">
+            <div className="text-center space-y-3 mb-4 relative">
+                <button 
+                  onClick={onBack}
+                  className="absolute left-0 top-0 p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900"
+                >
+                  <ChevronLeft size={20} />
+                </button>
                 <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-[1.5rem] flex items-center justify-center mx-auto text-[#1E5BFF] mb-2 shadow-inner">
                     <Heart size={32} fill="currentColor" />
                 </div>

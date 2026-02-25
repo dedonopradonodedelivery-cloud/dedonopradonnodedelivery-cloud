@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, MapPin, SlidersHorizontal, ArrowDownWideNarrow } from 'lucide-react';
+import { Check, MapPin, SlidersHorizontal, ArrowDownWideNarrow, X } from 'lucide-react';
 import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 
 interface ClassifiedsFilterModalProps {

@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Store, AdType } from '@/types';
 import { STORES } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';

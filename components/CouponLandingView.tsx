@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  ChevronLeft, 
+  ChevronLeft,
   Ticket, 
   Search, 
   LogIn, 
@@ -12,11 +12,11 @@ import {
 } from 'lucide-react';
 
 interface CouponLandingViewProps {
-  onBack: () => void;
   onLogin: () => void;
+  onBack: () => void;
 }
 
-export const CouponLandingView: React.FC<CouponLandingViewProps> = ({ onBack, onLogin }) => {
+export const CouponLandingView: React.FC<CouponLandingViewProps> = ({ onLogin, onBack }) => {
   const steps = [
     {
       icon: Search,

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { 
-  ChevronLeft, 
   Heart, 
   Baby, 
   Activity, 
@@ -11,7 +10,8 @@ import {
   Sparkles, 
   Microscope,
   Stethoscope,
-  Droplets
+  Droplets,
+  ChevronLeft
 } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 import { Store } from '@/types';
@@ -23,10 +23,10 @@ interface SubcategoryItem {
 }
 
 interface HealthWomenViewProps {
-  onBack: () => void;
   onSelect: (specialty: string) => void;
   onNavigate: (view: string) => void;
   onStoreClick: (store: Store) => void;
+  onBack: () => void;
 }
 
 const SUBCATEGORIES_DATA: SubcategoryItem[] = [
@@ -57,7 +57,7 @@ const SubcategoryCard: React.FC<{ item: SubcategoryItem; onClick: () => void }> 
   );
 };
 
-export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
+export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onSelect, onNavigate, onStoreClick, onBack }) => {
   const handleHeroClick = () => {
     onStoreClick({
       name: 'Centro de Saúde da Mulher JPA',
@@ -72,6 +72,13 @@ export const HealthWomenView: React.FC<HealthWomenViewProps> = ({ onBack, onSele
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in fade-in duration-500">
       <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         <main className="p-6 pt-12 space-y-8">
+          <div className="flex items-center gap-4 mb-6">
+            <button onClick={onBack} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900">
+              <ChevronLeft size={20} />
+            </button>
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Saúde da Mulher</h2>
+          </div>
+
           <div 
               onClick={handleHeroClick}
               className="py-10 px-6 bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2.5rem] text-white shadow-xl shadow-rose-500/20 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all group"

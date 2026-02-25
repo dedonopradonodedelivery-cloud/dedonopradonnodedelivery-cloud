@@ -5,12 +5,8 @@ import {
   PauseCircle, 
   Send, 
   User as UserIcon, 
-  Building, 
-  Clock, 
   Image as ImageIcon, 
-  Sparkles, 
   CheckCircle, 
-  Info,
   AlertTriangle,
   Loader2
 } from 'lucide-react';

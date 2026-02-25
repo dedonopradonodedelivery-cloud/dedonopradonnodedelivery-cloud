@@ -122,7 +122,10 @@ export interface CommunityPost {
   userAvatar: string;
   authorRole: 'resident' | 'merchant';
   content: string;
-  type: 'recommendation' | 'alert' | 'event' | 'poll' | 'promotion';
+  type: 'recommendation' | 'alert' | 'event' | 'poll' | 'promotion' | 'pets_perdidos';
+  category?: string;
+  isUrgent?: boolean;
+  location?: { latitude: number; longitude: number; address?: string; };
   communityId: string;
   neighborhood?: string;
   timestamp: string;

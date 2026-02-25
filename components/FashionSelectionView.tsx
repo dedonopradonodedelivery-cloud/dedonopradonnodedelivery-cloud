@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { ChevronLeft, Shirt, User, Baby, ArrowRight, Sparkles, ShoppingBag } from 'lucide-react';
+import { Shirt, User, Baby, ArrowRight, Sparkles, ShoppingBag, ChevronLeft } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface FashionSelectionViewProps {
-  onBack: () => void;
   onSelect: (type: string) => void;
   onNavigate: (view: string) => void;
+  onBack: () => void;
 }
 
 const SelectionCard: React.FC<{ 
@@ -35,7 +35,7 @@ const SelectionCard: React.FC<{
   </button>
 );
 
-export const FashionSelectionView: React.FC<FashionSelectionViewProps> = ({ onBack, onSelect, onNavigate }) => {
+export const FashionSelectionView: React.FC<FashionSelectionViewProps> = ({ onSelect, onNavigate, onBack }) => {
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
       

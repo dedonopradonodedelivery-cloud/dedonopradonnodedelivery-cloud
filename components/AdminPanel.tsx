@@ -1,24 +1,15 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  ShieldCheck, Users, Store, History, Search, 
-  ArrowLeft, Download, TrendingUp, AlertTriangle, 
-  Clock, DollarSign, Calendar, LayoutDashboard,
-  LogOut, User as UserIcon, Building, MessageSquare, 
-  MessageCircle, Paintbrush, Wrench, CheckCircle2,
-  ArrowUpRight, ArrowDownRight, PieChart, FileText,
-  Zap, ChevronRight, Lightbulb, Bug, Activity,
-  Settings, BarChart3, X, Filter, Newspaper, Crown,
-  UserCheck, ArrowRightLeft, CreditCard,
-  LayoutGrid, Home, Mail, Smartphone, BadgeCheck,
-  ShieldAlert, Copy, Check, Coins, ToggleLeft, ToggleRight,
-  Info
+  ShieldCheck, Users, 
+  ArrowLeft, DollarSign,
+  LogOut, ShieldAlert, FileText,
+  Zap, ChevronRight, Coins,
+  Info, ToggleLeft, ToggleRight
 } from 'lucide-react';
-import { fetchAdminMerchants, fetchAdminUsers } from '../backend/services';
-import { ServiceRequest, AppSuggestion } from '../types';
 import { AdminModerationPanel } from './AdminModerationPanel';
 import { AdminMonetizationView } from './AdminMonetizationView';
-import { useFeatures, FeatureKey } from '../contexts/FeatureContext';
+import { useFeatures } from '../contexts/FeatureContext';
 
 // --- SUB-COMPONENTS ---
 
@@ -138,29 +129,8 @@ const AdminHub: React.FC<{ onSelect: (tab: any) => void, onNavigateToApp: (view:
 
 // --- CORE COMPONENT ---
 
-export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, onOpenMonitorChat, initialTab }) => {
+export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitcher, onNavigateToApp, initialTab }) => {
   const [activeTab, setActiveTab] = useState<'hub' | 'management' | 'financial' | 'monitoring' | 'suggestions' | 'conversations' | 'moderation' | 'monetization' | 'features'>(initialTab || 'hub');
-  const [managementTab, setManagementTab] = useState<'clients' | 'merchants'>('clients');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [merchants, setMerchants] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (activeTab === 'management') {
-        if (managementTab === 'clients') loadUsers();
-        else loadMerchants();
-    }
-  }, [activeTab, managementTab, searchTerm]);
-
-  const loadMerchants = async () => { 
-    const data = await fetchAdminMerchants(searchTerm);
-    setMerchants(data); 
-  };
-
-  const loadUsers = async () => { 
-    const data = await fetchAdminUsers(searchTerm);
-    setUsers(data); 
-  };
 
   const headerTitle = useMemo(() => {
       switch(activeTab) {
@@ -213,11 +183,11 @@ export const AdminPanel: React.FC<any> = ({ onLogout, viewMode, onOpenViewSwitch
         )}
 
         {activeTab === 'moderation' && (
-            <AdminModerationPanel onBack={() => setActiveTab('hub')} />
+            <AdminModerationPanel />
         )}
 
         {activeTab === 'monetization' && (
-            <AdminMonetizationView onBack={() => setActiveTab('hub')} />
+            <AdminMonetizationView />
         )}
         
       </main>

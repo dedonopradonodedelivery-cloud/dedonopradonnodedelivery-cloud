@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Sparkles, ArrowRight, Wallet, Store, Coins, CheckCircle2, XCircle, HeartHandshake, ShoppingBag } from 'lucide-react';
+import { Sparkles, ArrowRight, Wallet, Store, Coins, CheckCircle2, XCircle, HeartHandshake, ShoppingBag, ChevronLeft } from 'lucide-react';
 import { CashbackIcon } from './CashbackIcon';
 
 interface CashbackLandingViewProps {
-  onBack: () => void;
   onLogin: () => void;
+  onBack: () => void;
 }
 
 const MOCK_CASHBACK_STORES = [
@@ -15,7 +15,7 @@ const MOCK_CASHBACK_STORES = [
   { id: '5', name: 'Academia Corpo Ativo' },
 ];
 
-export const CashbackLandingView: React.FC<CashbackLandingViewProps> = ({ onBack, onLogin }) => {
+export const CashbackLandingView: React.FC<CashbackLandingViewProps> = ({ onLogin, onBack }) => {
   const [fakeBalance, setFakeBalance] = useState(0);
 
   useEffect(() => {

@@ -1,18 +1,15 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Compass, MapPin, Sun, Plus, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront, Ticket, ChevronRight, ArrowRight, Sparkles, Flame, Music, Construction, AlertTriangle, Clock, ShieldCheck, BadgeCheck, Zap, Info, Search, Package, Key, Camera, Briefcase, Building2, TrendingUp, Repeat, Settings, X, FileText, CloudLightning, Sparkle, Cpu, Repeat2, LayoutGrid
+  Compass, Plus, Ticket, ArrowRight, Sparkles, Flame, Briefcase, ChevronRight, Sparkle, Heart, Wrench, PawPrint, Shirt, Scissors
 } from 'lucide-react';
 import { Store, Category } from '@/types.ts';
 import { LojasEServicosList } from '@/components/LojasEServicosList';
 import { User } from '@supabase/supabase-js';
 import { CATEGORIES, ACONTECENDO_AGORA_DATA } from '@/constants';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { LaunchOfferBanner } from '@/components/LaunchOfferBanner';
 import { useFeatures } from '@/contexts/FeatureContext';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
-import { calculateCompatibility, MOCK_JOBS_FOR_TESTING, MOCK_CANDIDATE_PROFILES } from '@/utils/compatibilityEngine';
-import { MerchantJob } from './MerchantJobsModule';
 import { StoryViewer } from './StoryViewer';
 import { MasterSponsorBanner } from './MasterSponsorBanner';
 
@@ -35,6 +32,13 @@ const MOCK_COUPONS_BASE = [
   { id: 8, store: 'Pet Center JPA', title: 'Rações Premium', description: 'Qualquer marca', discount: '10% OFF', category: 'Pets', color: 'from-amber-500 to-orange-500', neighborhood: 'Anil', rules: 'Pacotes acima de 10kg', validity: '08/12' },
   { id: 9, store: 'Lava Jato Express', title: 'Lavagem Completa', description: 'Ducha + Cera', discount: '20% OFF', category: 'Auto', color: 'from-cyan-500 to-blue-600', neighborhood: 'Freguesia', rules: 'Veículos de passeio', validity: '15/12' },
   { id: 10, store: 'Café & Cia', title: 'Café + Salgado', description: 'Para começar bem o dia', discount: 'Combo promocional', category: 'Comida', color: 'from-stone-500 to-stone-700', neighborhood: 'Taquara', rules: 'Até as 10h', validity: '20/12' },
+];
+
+const MOCK_NEIGHBORHOOD_PROMOS = [
+  { id: 1, store: 'Supermercado Mundial', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400', title: 'Ofertas da Semana', price: 'A partir de R$ 9,90', neighborhood: 'Freguesia' },
+  { id: 2, store: 'Drogaria Venancio', image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=400', title: 'Leve 3 Pague 2', price: 'Descontos de até 50%', neighborhood: 'Taquara' },
+  { id: 3, store: 'Hortifruti Natural', image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=400', title: 'Feirinha de Orgânicos', price: 'Tudo fresquinho', neighborhood: 'Pechincha' },
+  { id: 4, store: 'American Pet', image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400', title: 'Ração Premium', price: 'R$ 129,90', neighborhood: 'Anil' },
 ];
 
 const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle?: string; onSeeMore?: () => void; iconColor?: string; iconBg?: string; titleClassName?: string; subtitleClassName?: string; seeMoreClassName?: string; }> = ({ icon: Icon, title, subtitle, onSeeMore, iconColor = "text-blue-600", iconBg = "bg-gray-50 dark:bg-gray-900", titleClassName = "text-gray-900 dark:text-white", subtitleClassName = "text-gray-400", seeMoreClassName = "text-blue-600" }) => (
@@ -69,7 +73,7 @@ const StoryCard: React.FC<{ item: any, onClick: () => void }> = ({ item, onClick
     </div>
 );
 
-export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void; onStoreClick: (store: Store) => void; stores: Store[]; user: User | null; userRole: 'cliente' | 'lojista' | 'admin' | null; onSelectCategory: (category: Category) => void; }> = ({ onNavigate, onStoreClick, user, userRole, onSelectCategory }) => {
+export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void; onStoreClick: (store: Store) => void; stores: Store[]; user: User | null; onSelectCategory: (category: Category) => void; }> = ({ onNavigate, onStoreClick, user, onSelectCategory }) => {
   const [listFilter, setListFilter] = useState<'all' | 'top_rated'>('all');
   const { currentNeighborhood } = useNeighborhood();
   const { isFeatureActive } = useFeatures();
@@ -228,7 +232,33 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
             </section>
         )}
 
-        {/* 4. VAGAS DE EMPREGO (DISCREET SHORTCUT) */}
+        {/* 4. PROMOÇÕES NO BAIRRO */}
+        <section className="px-6 py-6 space-y-4">
+          <SectionHeader icon={Sparkles} title="Promoções no Bairro" subtitle="Ofertas imperdíveis" iconColor="text-rose-500" />
+          
+          <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x pb-4 -mr-6 pr-6">
+            {MOCK_NEIGHBORHOOD_PROMOS.map((promo) => (
+              <div key={promo.id} className="min-w-[200px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 snap-start group cursor-pointer active:scale-[0.98] transition-all">
+                <div className="h-28 overflow-hidden relative">
+                    <img src={promo.image} alt={promo.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+                    <span className="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/10">{promo.store}</span>
+                </div>
+                <div className="p-3">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-1">{promo.title}</h4>
+                    <p className="text-xs font-medium text-rose-500">{promo.price}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 5. PATROCINADOR MASTER */}
+        <section className="px-6 pb-8 pt-2">
+          <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Patrocinador Master" />
+        </section>
+
+        {/* 6. VAGAS DE EMPREGO (DISCREET SHORTCUT) */}
         <section className="px-6 py-2 space-y-4">
             <button onClick={() => onNavigate('jobs')} className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm">
                 <div className="flex items-center gap-3">
@@ -244,7 +274,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
             </button>
         </section>
 
-        {/* 5. EXPLORAR GUIA */}
+        {/* 7. EXPLORAR GUIA */}
         {isFeatureActive('explore_guide') && (
             <div className="w-full pt-4 pb-10">
                 <div className="px-6">

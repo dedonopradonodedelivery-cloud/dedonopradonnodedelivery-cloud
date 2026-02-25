@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, Copy, CheckCircle, Ticket, Wallet } from 'lucide-react';
+import { Copy, CheckCircle, Ticket, Wallet, ChevronLeft } from 'lucide-react';
 
 interface RewardDetailsViewProps {
   reward: {
@@ -9,11 +9,11 @@ interface RewardDetailsViewProps {
     value: string;
     description?: string;
   } | null;
-  onBack: () => void;
   onHome: () => void;
+  onBack: () => void;
 }
 
-export const RewardDetailsView: React.FC<RewardDetailsViewProps> = ({ reward, onBack, onHome }) => {
+export const RewardDetailsView: React.FC<RewardDetailsViewProps> = ({ reward, onHome, onBack }) => {
   const [copied, setCopied] = useState(false);
 
   if (!reward) return null;

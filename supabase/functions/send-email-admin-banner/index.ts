@@ -1,5 +1,5 @@
 
-// @ts-ignore
+// @ts-expect-error: Deno types are not available in this context
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const sendEmail = async (emailContent: string) => {

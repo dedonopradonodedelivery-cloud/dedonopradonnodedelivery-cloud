@@ -1,10 +1,8 @@
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   ChevronLeft, 
-  Search, 
   Building2, 
-  Smartphone, 
   Mail, 
   CheckCircle2, 
   AlertTriangle, 
@@ -22,8 +20,8 @@ import {
 import { supabase } from '../lib/supabase';
 
 interface BusinessRegistrationFlowProps {
-  onBack: () => void;
   onComplete: () => void;
+  onBack: () => void;
 }
 
 type Step = 'search' | 'found' | 'not_found' | 'select_method' | 'otp' | 'success' | 'manual_verify';
@@ -76,7 +74,7 @@ const SupportQuestion: React.FC<{
   );
 };
 
-export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> = ({ onBack, onComplete }) => {
+export const BusinessRegistrationFlow: React.FC<BusinessRegistrationFlowProps> = ({ onComplete, onBack }) => {
   const [step, setStep] = useState<Step>('search');
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [isClaimed, setIsClaimed] = useState(false);

@@ -1,27 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  ChevronLeft, 
-  ShieldAlert, 
+  ShieldCheck, 
   CheckCircle2, 
-  XCircle, 
-  Info, 
   Building2, 
   Tag, 
   User as UserIcon,
   FileText,
   Search,
-  Filter,
-  Check,
-  ShieldCheck,
-  Flag,
-  AlertCircle
+  Flag
 } from 'lucide-react';
 import { PostReport, TaxonomySuggestion, StoreClaimRequest } from '../types';
 
-interface AdminModerationPanelProps {
-  onBack: () => void;
-}
+export type AdminModerationPanelProps = Record<string, never>;
 
 // Mock inicial para visualização
 const MOCK_REPORTS: PostReport[] = [
@@ -72,12 +63,12 @@ const MOCK_SUGGESTIONS: TaxonomySuggestion[] = [
     }
 ];
 
-export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = ({ onBack }) => {
+export const AdminModerationPanel: React.FC<AdminModerationPanelProps> = () => {
   const [activeTab, setActiveTab] = useState<'reports' | 'taxonomy' | 'claims'>('taxonomy');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Data States
-  const [reports, setReports] = useState<PostReport[]>(MOCK_REPORTS);
+  const [reports] = useState<PostReport[]>(MOCK_REPORTS);
   const [claims, setClaims] = useState<StoreClaimRequest[]>(MOCK_CLAIMS);
   const [taxonomySuggestions, setTaxonomySuggestions] = useState<TaxonomySuggestion[]>([]);
 

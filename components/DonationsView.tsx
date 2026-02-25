@@ -1,10 +1,9 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
   ChevronLeft, 
   Heart, 
-  MapPin, 
   Clock, 
   Plus, 
   Search, 
@@ -17,17 +16,18 @@ import {
   Check,
   Camera,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  MapPin
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified, Store } from '../types';
 import { MOCK_CLASSIFIEDS, STORES } from '../constants';
 
 interface DonationsViewProps {
-  onBack: () => void;
-  user: User | null;
   onRequireLogin: () => void;
   onNavigate: (view: string, data?: any) => void;
+  onBack: () => void;
+  user: User | null;
 }
 
 // Fallback images for donations
@@ -93,7 +93,7 @@ const DonationCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
   );
 };
 
-export const DonationsView: React.FC<DonationsViewProps> = ({ onBack, user, onRequireLogin, onNavigate }) => {
+export const DonationsView: React.FC<DonationsViewProps> = ({ onRequireLogin, onNavigate, onBack, user }) => {
   const [activeSubTab, setActiveSubTab] = useState<'items' | 'pets'>('items');
   const [viewState, setViewState] = useState<'list' | 'form' | 'success'>('list');
   const [filterHood, setFilterHood] = useState<string | null>(null);

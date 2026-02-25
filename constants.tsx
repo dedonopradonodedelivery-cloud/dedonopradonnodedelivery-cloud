@@ -1,31 +1,36 @@
 
 import React from 'react';
 import { 
-  Utensils, ShoppingCart, Scissors, Heart, PawPrint, Home, Wrench, 
-  Dumbbell, CarFront, BookOpen, Monitor, Shirt, Ticket, Map as MapIcon, 
-  Store as StoreIcon,
-  LayoutGrid, Pill, Briefcase, Plane, Zap,
-  Beef, Coffee, Pizza, Croissant, Soup, Cake, Sandwich, 
-  Stethoscope, Package, Clock, Target, Settings, Dog,
-  Star, Tag, Award, TrendingUp, ChevronRight, MessageSquare, Users,
-  Apple, Building2, Leaf, Shield, PaintRoller, Hammer, Droplets, Laptop,
-  Baby, GraduationCap, Microscope, Brain, Sparkles, Smile, Beer, 
-  Activity, Eye, FileText, Globe, Calendar, Music, PartyPopper, Globe2, Edit3, User, Bell, Search,
-  Camera, Vote, Handshake, Flame, Milestone, History, Home as HomeIcon,
-  MessageCircle, HelpCircle, UserCheck, Recycle, Scale, Calculator, PenTool, Ruler,
-  Key, Fan, Truck, Shovel,
-  Meh, ThumbsDown, Gift, RefreshCw,
-  Landmark, Tent, TicketPercent, Percent, Newspaper,
-  Palette, Printer, Book, Lightbulb, Bike, Sofa, Smartphone, Headphones,
-  Wifi, MapPin, Trash2, ShieldAlert, Megaphone, ShieldCheck,
-  Circle, Flower, Swords, Gamepad, Gamepad2, Church, Film, Mic, Bus,
-  Lock, Wind, Disc, Cpu,
-  Info
+  Utensils, ShoppingCart, Scissors, Heart, PawPrint, Wrench, 
+  Dumbbell, CarFront, BookOpen, Monitor, Shirt, Map as MapIcon, 
+  Store as StoreIcon, Pill, Zap,
+  Beef, Pizza, Croissant, Soup, Cake, Sandwich, 
+  Stethoscope, Package, Clock, Settings, Users,
+  Apple, Building2, Leaf, PaintRoller, Hammer, Droplets, 
+  Baby, Microscope, Sparkles, Smile, Beer, 
+  Activity, Globe, PartyPopper, Globe2, Flame, Home as HomeIcon,
+  PenTool, Key, Landmark, TicketPercent, Bike, Info, Search
 } from 'lucide-react';
 import { AdType, Category, Store, Story, EditorialCollection, Job, CommunityPost, NeighborhoodCommunity, Classified, RealEstateProperty } from '@/types';
 
 // Oficialmente renomeado de TUCO para LOKA
 export const LOKA_MASCOT_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+export const NEIGHBORHOODS = [
+  'Freguesia',
+  'Taquara',
+  'Pechincha',
+  'Anil',
+  'Tanque',
+  'Curicica',
+  'Praça Seca',
+  'Vila Valqueire',
+  'Camorim',
+  'Vargem Pequena',
+  'Vargem Grande',
+  'Recreio',
+  'Barra da Tijuca'
+];
 
 export const CATEGORIES: Category[] = [
   { id: 'cat-servicos', name: 'Serviços', slug: 'servicos', icon: <Wrench />, color: 'bg-brand-blue' },

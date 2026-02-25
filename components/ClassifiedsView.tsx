@@ -1,8 +1,8 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
-  ChevronLeft, Plus, MessageSquare, Briefcase, Building2, Wrench, PawPrint, Tag, Heart, Search, MapPin, Clock, ArrowRight, SlidersHorizontal, CheckCircle2, X, Camera, Loader2, AlertCircle, Megaphone, Check, ChevronRight
+  ChevronLeft, Plus, MessageSquare, Building2, Wrench, PawPrint, Tag, Heart, Search, MapPin, Clock, ArrowRight, SlidersHorizontal, CheckCircle2, X, Camera, Loader2, AlertCircle, Megaphone, Check, ChevronRight
 } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
 import { Classified, AdType, Store, ServiceUrgency } from '../types';
@@ -12,10 +12,10 @@ import { ClassifiedsSelectionModal } from './ClassifiedsSelectionModal';
 import { ClassifiedsFilterModal } from './ClassifiedsFilterModal';
 
 interface ClassifiedsViewProps {
+  onNavigate: (view: string, data?: any) => void;
   onBack: () => void;
   user: User | null;
   onRequireLogin: () => void;
-  onNavigate: (view: string, data?: any) => void;
 }
 
 const CLASSIFIED_CATEGORIES = [
@@ -50,7 +50,7 @@ const ClassifiedCard: React.FC<{ item: Classified; onClick: () => void }> = ({ i
     </div>
 );
 
-export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onBack, onNavigate, user, onRequireLogin }) => {
+export const ClassifiedsView: React.FC<ClassifiedsViewProps> = ({ onNavigate, onBack, user, onRequireLogin }) => {
   const { currentNeighborhood } = useNeighborhood();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSelectionOpen, setIsSelectionOpen] = useState(false);

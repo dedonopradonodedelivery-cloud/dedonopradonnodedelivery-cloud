@@ -64,7 +64,8 @@ import { Store, Category, AdType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { UserTradeItemsView } from '@/components/UserTradeItemsView';
-import { JobsSwipeView } from '@/components/JobsSwipeView';
+import { NeighborhoodPostsView } from '@/components/CommunityFeedView';
+
 import { UserResumeView } from '@/components/UserResumeView';
 import { RoleSwitcherModal } from '@/components/RoleSwitcherModal';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
@@ -280,7 +281,7 @@ export const App: React.FC = () => {
                     />
                     )}
                     <main className="w-full mx-auto">
-                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={simulatedUser} userRole={simulatedRole} onSelectCategory={handleSelectCategory} />}
+                    {activeTab === 'home' && <HomeFeed onNavigate={handleNavigate} onStoreClick={handleSelectStore} stores={STORES} user={simulatedUser} onSelectCategory={handleSelectCategory} />}
                     {activeTab === 'explore' && <ExploreView stores={STORES} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'classifieds' && <ClassifiedsView onBack={() => handleNavigate('home')} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} onNavigate={handleNavigate} />}
                     {activeTab === 'jobs' && <JobsView onBack={() => handleNavigate('home')} onJobClick={(job, compatibility) => handleNavigate('job_detail', { job, compatibility })} onNavigate={handleNavigate} />}
@@ -316,8 +317,8 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'health_women' && <HealthWomenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'health_pediatrics' && <HealthPediatricsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'health_women' && <HealthWomenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'health_pediatrics' && <HealthPediatricsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO SERVIÇOS */}
                     {activeTab === 'services_selection' && (
@@ -331,8 +332,8 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'services_manual' && <ServicesManualView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'services_manual' && <ServicesManualView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO PETS */}
                     {activeTab === 'pets_selection' && (
@@ -347,9 +348,9 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'pets_dogs' && <PetsDogsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'pets_cats' && <PetsCatsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'pets_others' && <PetsOthersView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_dogs' && <PetsDogsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_cats' && <PetsCatsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_others' && <PetsOthersView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
 
                     {/* FLUXO MODA */}
                     {activeTab === 'fashion_selection' && (
@@ -364,9 +365,9 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'fashion_women' && <FashionWomenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'fashion_men' && <FashionMenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'fashion_kids' && <FashionKidsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'fashion_women' && <FashionWomenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'fashion_men' && <FashionMenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'fashion_kids' && <FashionKidsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO BELEZA */}
                     {activeTab === 'beauty_selection' && (
@@ -380,8 +381,8 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'beauty_women' && <BeautyWomenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'beauty_men' && <BeautyMenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'beauty_women' && <BeautyWomenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'beauty_men' && <BeautyMenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO AUTOS */}
                     {activeTab === 'autos_selection' && (
@@ -397,10 +398,10 @@ export const App: React.FC = () => {
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'autos_carros' && <AutosCarrosView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'autos_motos' && <AutosMotosView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'autos_bikes' && <AutosBikesView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'autos_eletricos' && <AutosEletricosView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_carros' && <AutosCarrosView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_motos' && <AutosMotosView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_bikes' && <AutosBikesView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_eletricos' && <AutosEletricosView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
 
                     {/* DEMAIS ROTAS */}
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
@@ -412,7 +413,8 @@ export const App: React.FC = () => {
                     {activeTab === 'user_coupons' && <UserCupomScreen onBack={() => handleNavigate('home')} onNavigate={handleNavigate} onStoreClick={handleSelectStore} />}
                     {activeTab === 'coupon_landing' && <CouponLandingView onBack={() => handleNavigate('home')} onLogin={() => setIsAuthModalOpen(true)} />}
                     {activeTab === 'admin_panel' && <AdminPanel onLogout={handleSignOut} viewMode={viewMode} onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} onNavigateToApp={handleNavigate} />}
-                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => handleNavigate('home')} onNavigate={handleNavigate} user={simulatedUser} />}
+                    {activeTab === 'store_ads_module' && <StoreAdsModule onBack={() => handleNavigate('home')} user={simulatedUser} />}
+                    {activeTab === 'neighborhood_posts' && <NeighborhoodPostsView onBack={() => handleNavigate('home')} onStoreClick={handleSelectStore} user={simulatedUser} onRequireLogin={() => setIsAuthModalOpen(true)} userRole={simulatedRole} onNavigate={handleNavigate} />}
                     {activeTab === 'merchant_reviews' && <MerchantReviewsModule onBack={() => handleNavigate('profile')} />}
                     {activeTab === 'merchant_promotions' && <MerchantPromotionsModule onBack={() => handleNavigate('profile')} onNavigate={handleNavigate} />}
                     {activeTab === 'merchant_coupons' && <MerchantCouponsModule onBack={() => handleNavigate('profile')} />}
@@ -425,7 +427,7 @@ export const App: React.FC = () => {
                 </Layout>
             )}
         </div>
-        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} user={authUser} />
+        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         <RoleSwitcherModal isOpen={isRoleSwitcherOpen} onClose={() => setIsRoleSwitcherOpen(false)} currentMode={viewMode} onModeChange={handleModeChange} />
       </div>
     </div>

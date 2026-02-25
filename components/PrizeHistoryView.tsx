@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { ChevronLeft, Wallet, Ticket, Meh, RefreshCw, Loader2, AlertTriangle, Dices, ArrowRight } from 'lucide-react';
+import { Wallet, Ticket, Meh, RefreshCw, Loader2, AlertTriangle, Dices, ArrowRight, ChevronLeft } from 'lucide-react';
 
 // --- Tipos ---
 interface PrizeHistoryViewProps {
   userId: string;
-  onBack: () => void;
   onGoToSpinWheel: () => void;
+  onBack: () => void;
 }
 
 interface Spin {
@@ -56,7 +56,7 @@ const SkeletonCard: React.FC = () => (
 );
 
 // --- Componente Principal ---
-export const PrizeHistoryView: React.FC<PrizeHistoryViewProps> = ({ userId, onBack, onGoToSpinWheel }) => {
+export const PrizeHistoryView: React.FC<PrizeHistoryViewProps> = ({ userId, onGoToSpinWheel, onBack }) => {
   const [spins, setSpins] = useState<Spin[]>([]);
   const [status, setStatus] = useState<LoadingStatus>('loading');
   const [page, setPage] = useState(0);

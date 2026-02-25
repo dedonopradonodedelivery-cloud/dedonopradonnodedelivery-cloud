@@ -1,24 +1,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
+import { Flame, MessageSquare, Repeat, Search, Sparkles, TrendingUp, ChevronRight, Briefcase, Cpu, ArrowRight } from 'lucide-react';
 import { Store, Classified, Job } from "@/types";
-import {
-  MapPin,
-  Sparkles,
-  Lightbulb,
-  TrendingUp,
-  ArrowRight,
-  Flame,
-  MessageSquare,
-  Repeat,
-  Search,
-  Users,
-  Calendar,
-  Dog,
-  Gift,
-  Briefcase,
-  ChevronRight,
-  Cpu
-} from "lucide-react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MOCK_CLASSIFIEDS, MOCK_JOBS } from "@/constants";
 

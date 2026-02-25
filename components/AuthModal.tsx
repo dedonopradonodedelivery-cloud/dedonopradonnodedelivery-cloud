@@ -18,7 +18,6 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: SupabaseUser | null;
   signupContext?: 'default' | 'merchant_lead_qr';
   onLoginSuccess?: () => void;
   customTitle?: string;

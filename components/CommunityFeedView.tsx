@@ -1,34 +1,21 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
-  ChevronLeft, 
-  MoreHorizontal, 
-  Heart, 
-  MessageSquare, 
-  Plus, 
-  Users,
-  ChevronRight,
-  MessageCircle,
-  LayoutGrid,
-  HeartHandshake,
-  ShieldCheck,
+  ChevronLeft,
+  Plus,
   X,
-  PlusCircle,
-  Hash,
   AlertCircle,
-  Share2,
   Loader2,
   Image as ImageIcon,
   MapPin,
-  AtSign,
   CheckCircle2,
   Search,
   SlidersHorizontal,
   Store as StoreIcon
 } from 'lucide-react';
-import { NeighborhoodCommunity, CommunityPost, Store, ReportReason } from '../types';
-import { OFFICIAL_COMMUNITIES, MOCK_USER_COMMUNITIES, MOCK_COMMUNITY_POSTS, STORES } from '@/constants';
-import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { CommunityPost, Store } from '../types';
+import { MOCK_COMMUNITY_POSTS, NEIGHBORHOODS } from '@/constants';
+
 import { User } from '@supabase/supabase-js';
 import { PostCard } from './PostCard';
 import { useSavedPosts } from '@/hooks/useSavedPosts';
@@ -52,16 +39,19 @@ const CreatePostView: React.FC<{
   user: User;
   onClose: () => void;
   onCreatePost: (post: CommunityPost) => void;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
 }> = ({ user, onClose, onCreatePost, userRole }) => {
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [caption, setCaption] = useState('');
+  const [postCategory, setPostCategory] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number; address?: string; } | null>(null);
   const [showOnStoreProfile, setShowOnStoreProfile] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const [error, setError] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -121,10 +111,22 @@ const CreatePostView: React.FC<{
   };
 
   const handlePostSubmit = () => {
-    if(!caption.trim()){
+    if (!caption.trim()) {
       setError("Por favor, escreva uma legenda para seu post.");
       return;
     }
+
+    if (postCategory === 'pets_perdidos') {
+      if (!mediaFiles.length) {
+        setError("Posts de 'Pets Perdidos' exigem uma foto.");
+        return;
+      }
+      if (!location) {
+        setError("Posts de 'Pets Perdidos' exigem uma localização precisa.");
+        return;
+      }
+    }
+
     setIsPosting(true);
     setTimeout(() => {
       const newPost: CommunityPost = {
@@ -134,7 +136,10 @@ const CreatePostView: React.FC<{
         userAvatar: user.user_metadata?.avatar_url || `https://i.pravatar.cc/100?u=${user.id}`,
         authorRole: userRole === 'lojista' ? 'merchant' : 'resident',
         content: caption,
-        type: 'recommendation',
+        type: postCategory === 'pets_perdidos' ? 'pets_perdidos' : 'recommendation',
+        category: postCategory || undefined,
+        isUrgent: isUrgent || undefined,
+        location: location || undefined,
         communityId: 'comm-residents',
         neighborhood: 'Freguesia',
         timestamp: 'Agora',
@@ -144,7 +149,14 @@ const CreatePostView: React.FC<{
         videoUrl: mediaType === 'video' ? mediaPreviews[0] : undefined,
         showOnStoreProfile: userRole === 'lojista' && showOnStoreProfile,
       };
+
       onCreatePost(newPost);
+
+      if (postCategory === 'pets_perdidos' && isUrgent && location) {
+        // Simulate geolocated notification
+        alert(`🚨 Pet perdido próximo a você!\n'${caption.substring(0, 30)}${caption.length > 30 ? '...' : ''} desapareceu em ${location.address || 'sua região'} – toque para ver a foto.'\n\n[Ação: Abrir app]`);
+      }
+
       setIsPosting(false);
     }, 1500);
   };
@@ -160,6 +172,31 @@ const CreatePostView: React.FC<{
         </button>
       </header>
       <div className="flex-1 p-4 flex flex-col">
+        <div className="mb-4">
+          <label htmlFor="postCategory" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">Categoria do Post</label>
+          <select
+            id="postCategory"
+            value={postCategory}
+            onChange={(e) => setPostCategory(e.target.value)}
+            className="w-full bg-gray-50 dark:bg-gray-800 border-none py-3 px-4 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white shadow-inner"
+          >
+            <option value="">Selecione uma categoria</option>
+            <option value="recommendation">Recomendação</option>
+            <option value="alert">Alerta</option>
+            <option value="event">Evento</option>
+            <option value="poll">Enquete</option>
+            <option value="promotion">Promoção</option>
+            <option value="pets_perdidos">Pets Perdidos</option>
+          </select>
+        </div>
+
+        {postCategory === 'pets_perdidos' && (
+          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800/30 text-red-800 dark:text-red-300">
+            <p className="font-bold text-sm mb-2 flex items-center gap-2"><AlertCircle size={16} /> Post de Pet Perdido</p>
+            <p className="text-xs">Este tipo de post exige uma foto e localização precisa. Marque como URGENTE para notificar vizinhos próximos.</p>
+          </div>
+        )}
+
         <div className="flex gap-4">
            <div className="w-24 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0 relative">
              {mediaPreviews.length > 0 ? (
@@ -187,6 +224,37 @@ const CreatePostView: React.FC<{
         {error && <div className="mt-4 text-red-500 text-xs font-bold flex items-center gap-2 p-2 bg-red-50 rounded-lg"><AlertCircle size={14}/> {error}</div>}
 
         <div className="border-t border-gray-100 dark:border-gray-800 my-4"></div>
+
+        {postCategory === 'pets_perdidos' && (
+          <div className="space-y-4 mb-4">
+            <label htmlFor="isUrgent" className="flex items-center gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/10 cursor-pointer border border-red-100 dark:border-red-800/30 transition-colors">
+              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isUrgent ? 'bg-red-600 border-red-600' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}`}>
+                {isUrgent && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <input type="checkbox" id="isUrgent" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} className="hidden" />
+              <div className="flex-1">
+                 <span className="font-bold text-sm text-red-800 dark:text-red-300 flex items-center gap-2">
+                    <AlertCircle size={14} className="text-red-500" /> 
+                    Marcar como URGENTE
+                 </span>
+                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Dispara notificação para vizinhos em um raio de 500m.</p>
+              </div>
+            </label>
+
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MapPin size={20} className="text-gray-400" />
+                <span className="font-medium text-sm">Localização: {location?.address || 'Não selecionada'}</span>
+              </div>
+              <button onClick={() => {
+                // Simulate location selection
+                const simulatedLocation = { latitude: -22.9519, longitude: -43.2105, address: 'Rua Exemplo, 123 - Freguesia' };
+                setLocation(simulatedLocation);
+                alert(`Localização definida para: ${simulatedLocation.address}`);
+              }} className="text-blue-600 font-bold text-sm">Selecionar</button>
+            </div>
+          </div>
+        )}
         
         <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
             <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500">
@@ -196,14 +264,7 @@ const CreatePostView: React.FC<{
             <input type="file" multiple accept="image/*,video/*" onChange={handleFileChange} className="hidden" />
         </label>
         
-        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-           <div className="flex items-center gap-3"><MapPin size={20} className="text-gray-400" /> <span className="font-medium text-sm">Adicionar localização</span></div>
-           <ChevronRight size={20} className="text-gray-400" />
-        </div>
-        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-           <div className="flex items-center gap-3"><AtSign size={20} className="text-gray-400" /> <span className="font-medium text-sm">Marcar pessoas</span></div>
-           <ChevronRight size={20} className="text-gray-400" />
-        </div>
+
 
         {userRole === 'lojista' && (
           <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -306,13 +367,13 @@ interface NeighborhoodPostsViewProps {
   onStoreClick: (store: Store) => void;
   user: User | null;
   onRequireLogin: () => void;
-  userRole: 'cliente' | 'lojista' | null;
+  userRole: 'cliente' | 'lojista' | 'admin' | null;
   onNavigate: (view: string) => void;
 }
 
 export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ onBack, onStoreClick, user, onRequireLogin, userRole, onNavigate }) => {
   const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
-  const { currentNeighborhood: displayNeighborhood } = useNeighborhood();
+
   const [searchTerm, setSearchTerm] = useState('');
   
   const [activeTheme, setActiveTheme] = useState('all');
@@ -324,14 +385,14 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
   const { isPostSaved, toggleSavePost } = useSavedPosts(user);
 
   const filteredPosts = useMemo(() => {
-    let currentPosts = posts.filter(post => {
+    const filteredPosts = posts.filter(post => {
       const matchNeighborhood = neighborhoodFilter.length === 0 || neighborhoodFilter.includes(post.neighborhood || '');
       const matchSearch = !searchTerm || post.content.toLowerCase().includes(searchTerm.toLowerCase()) || post.userName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchTheme = activeTheme === 'all' || post.theme === activeTheme;
       return matchNeighborhood && matchSearch && matchTheme;
     });
 
-    return [...currentPosts].sort((a, b) => {
+    return filteredPosts.sort((a, b) => {
       if (sortBy === 'comments') return b.comments - a.comments;
       if (sortBy === 'likes') return b.likes - a.likes;
       return 0; // 'recent' is default order
@@ -422,8 +483,3 @@ export const NeighborhoodPostsView: React.FC<NeighborhoodPostsViewProps> = ({ on
   );
 };
 
-const ChevronDown = ({ size, className }: { size?: number, className?: string }) => (
-  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m6 9 6 6 6-6"/>
-  </svg>
-);
