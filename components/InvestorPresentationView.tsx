@@ -68,10 +68,10 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
     'Problema',
     'Solução',
     'Modelo de Negócio',
-    'Novas Receitas (V.2)',
     'Plano de Expansão',
-    'Plano de Investimento',
-    'Pedido / Proposta'
+    'Novas Receitas (V.2)',
+    'Pedido / Proposta',
+    'Plano de Investimento'
   ];
 
   return (
@@ -348,49 +348,45 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               </div>
             ) : section === 'Pedido / Proposta' ? (
               <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
-                  <p>Proposta de Parceria de Negócios: App Localizei JPA</p>
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-6">
+                  <p className="text-white font-bold text-lg">Proposta de Parceria de Negócios: App Localizei JPA</p>
+                  
                   <div>
-                    <p>1. Participação:</p>
-                    <p>O investidor passa a ser dono de 30% da empresa</p>
-                    <p className="mt-2">Garantia de Execução:</p>
-                    <p>O protótipo já está funcionando (MVP), reduzindo o risco, pois o projeto já saiu do papel.</p>
-                  </div>
-                  <div>
-                    <p>2. Como o investidor recebe os ganhos</p>
-                    <p className="mt-2">Embora a participação societária seja de 30%, a divisão de lucros será:</p>
-                    <p className="mt-2">Divisão Meio a Meio</p>
-                    <p className="mt-2">De todo o lucro gerado pelo app:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ 50% para o investidor</li>
-                      <li>✔ 50% para a operação</li>
-                    </ul>
-                    <p className="mt-2">Estrutura que permite recuperação acelerada do capital investido.</p>
-                  </div>
-                  <div>
-                    <p>3. Gestão Profissional dos Resultados (Regra dos 4 Pilares)</p>
-                    <p className="mt-2">Distribuição dos valores gerados:</p>
-                    <ul className="mt-2 space-y-2 ml-2">
-                      <li>
-                        <p>✔ Crescimento (24%)</p>
-                        <p className="ml-4">Fundo destinado a marketing, expansão e melhorias da plataforma.</p>
+                    <p className="text-white font-bold mb-2">De todo o lucro gerado pelo app:</p>
+                    <ul className="space-y-2 ml-2">
+                      <li className="flex items-center gap-2">
+                        <span className="text-indigo-500">✔</span> 50% para o Sócio Investidor
                       </li>
-                      <li>
-                        <p>✔ Trabalho (10%)</p>
-                        <p className="ml-4">Pró-labore operacional.</p>
-                      </li>
-                      <li>
-                        <p>✔ Lucro do Investidor (33%)</p>
-                        <p className="ml-4">Retorno direto.</p>
-                      </li>
-                      <li>
-                        <p>✔ Lucro Operacional (33%)</p>
+                      <li className="flex items-center gap-2">
+                        <span className="text-indigo-500">✔</span> 50% para o Sócio Majoritário
                       </li>
                     </ul>
                   </div>
+
                   <div>
-                    <p>5. Valor do Investimento</p>
-                    <p className="mt-2">Valor: R$ 100.000,00</p>
+                    <p className="text-white font-bold mb-3">Distribuição dos valores gerados:</p>
+                    <ul className="space-y-4 ml-2">
+                      <li>
+                        <p className="text-indigo-400 font-bold">✔ Crescimento (24%)</p>
+                        <p className="ml-6 text-slate-400">Fundo destinado a marketing, expansão e melhorias da plataforma.</p>
+                      </li>
+                      <li>
+                        <p className="text-indigo-400 font-bold">✔ Trabalho (10%)</p>
+                        <p className="ml-6 text-slate-400">Pró-labore operacional (Rafael e Rafa).</p>
+                      </li>
+                      <li>
+                        <p className="text-indigo-400 font-bold">✔ Lucro do Sócio Investidor (33%)</p>
+                        <p className="ml-6 text-slate-400">Retorno direto.</p>
+                      </li>
+                      <li>
+                        <p className="text-indigo-400 font-bold">✔ Lucro do Sócio Majoritário (33%)</p>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-6 border-t border-white/5">
+                    <p className="text-white font-bold mb-2">5. Valor do Investimento</p>
+                    <p className="text-2xl font-black text-indigo-400">Valor: R$ 70.000,00 ✅</p>
                   </div>
                 </div>
               </div>
