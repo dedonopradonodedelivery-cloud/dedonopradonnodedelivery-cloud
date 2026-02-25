@@ -284,7 +284,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                             <button key={f} onClick={() => setListFilter(f as any)} className={`text-[9px] font-black uppercase px-5 py-2 rounded-xl transition-all ${listFilter === f ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-md' : 'text-gray-400'}`}>{f === 'all' ? 'Ver Tudo' : 'Top Avaliados'}</button>
                         ))}
                     </div>
-                    <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
+                    <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} premiumOnly={false} />
                     
 
                 </div>
