@@ -269,7 +269,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     </div>
                     <LojasEServicosList onStoreClick={onStoreClick} onViewAll={() => onNavigate('explore')} activeFilter={listFilter as any} user={user} onNavigate={onNavigate} premiumOnly={false} />
                     
-                    <MasterSponsorBanner onClick={() => onNavigate('patrocinador_master')} label="Jacarepaguá" />
+
                 </div>
             </div>
         )}
