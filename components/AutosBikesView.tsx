@@ -72,13 +72,20 @@ export const AutosBikesView: React.FC<AutosBikesViewProps> = ({ onBack, onSelect
                 <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-emerald-500"><group.icon size={20} strokeWidth={2.5}/></div>
                 <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{group.title}</h3>
               </div>
-              <div className="flex flex-col">
+              <div className="grid grid-cols-2 gap-4">
                 {group.items.map((item, itemIdx) => (
-                  <SpecialtyCard 
-                    key={itemIdx} 
-                    name={item.name} 
-                    onClick={() => onSelect(item.name)} 
-                  />
+                  <button
+                    key={itemIdx}
+                    onClick={() => onSelect(item.name)}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                  >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-emerald-500 bg-opacity-10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform duration-500">
+                      <group.icon size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                      {item.name}
+                    </span>
+                  </button>
                 ))}
               </div>
             </section>

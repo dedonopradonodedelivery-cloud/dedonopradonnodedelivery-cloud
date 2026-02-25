@@ -64,21 +64,29 @@ export const ServicesSelectionView: React.FC<ServicesSelectionViewProps> = ({ on
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Selecione para filtrar os profissionais.</p>
             </div>
 
-            <div className="space-y-4">
-                <SelectionCard 
-                    icon={Wrench} 
-                    label="Manuais" 
-                    sublabel="Reparos, Obras e Manutenção"
-                    color="bg-brand-blue" 
-                    onClick={() => onSelect('Manuais')} 
-                />
-                <SelectionCard 
-                    icon={Briefcase} 
-                    label="Especializados" 
-                    sublabel="Consultoria, Técnica e Apoio"
-                    color="bg-indigo-500" 
-                    onClick={() => onSelect('Especializados')} 
-                />
+            <div className="grid grid-cols-2 gap-4">
+                <button
+                    onClick={() => onSelect('Manuais')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-brand-blue bg-opacity-10 flex items-center justify-center text-brand-blue group-hover:scale-110 transition-transform duration-500">
+                        <Wrench size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Manuais
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Especializados')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-500 bg-opacity-10 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform duration-500">
+                        <Briefcase size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Especializados
+                    </span>
+                </button>
             </div>
 
             <div className="mt-4 p-6 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 flex gap-4 items-center">

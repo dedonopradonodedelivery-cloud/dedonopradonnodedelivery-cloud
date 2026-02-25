@@ -62,41 +62,38 @@ export const SpecialtiesView: React.FC<SpecialtiesViewProps> = ({ subcategoryNam
 
       <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
 
-      {/* Content List */}
-      <div className="p-5">
-        <div className="flex flex-col gap-3">
-          {items.map((specialty, idx) => (
-            <button 
-              key={idx}
-              onClick={() => onSelectSpecialty(specialty)}
-              className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between hover:shadow-md transition-all active:scale-[0.99] group text-left"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center text-primary-500 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 transition-colors">
-                  <CheckCircle2 className="w-5 h-5" />
+        {/* Content List */}
+        <div className="p-6 pt-12">
+          <div className="grid grid-cols-2 gap-4">
+            {items.map((specialty, idx) => (
+              <button 
+                key={idx}
+                onClick={() => onSelectSpecialty(specialty)}
+                className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+              >
+                <div className="w-16 h-16 rounded-[1.5rem] bg-blue-500 bg-opacity-10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-500">
+                  <CheckCircle2 size={32} strokeWidth={2.5} />
                 </div>
-                <span className="font-semibold text-gray-800 dark:text-gray-200 text-sm">
+                <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
                   {specialty}
                 </span>
-              </div>
-              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
-            </button>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
 
-        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800 text-center">
-            <p className="text-xs text-blue-700 dark:text-blue-300">
-                Não encontrou exatamente o que precisa?
-            </p>
-            <button 
-                onClick={() => onSelectSpecialty('Outro')}
-                className="mt-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
-            >
-                Descrever meu problema manualmente
-            </button>
+          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800 text-center">
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Não encontrou exatamente o que precisa?
+              </p>
+              <button 
+                  onClick={() => onSelectSpecialty('Outro')}
+                  className="mt-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                  Descrever meu problema manualmente
+              </button>
+          </div>
         </div>
       </div>
-
     </div>
   );
 };

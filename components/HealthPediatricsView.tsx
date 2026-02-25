@@ -134,13 +134,20 @@ export const HealthPediatricsView: React.FC<HealthPediatricsViewProps> = ({ onBa
                   {group.title}
                 </h3>
               </div>
-              <div className="flex flex-col">
+              <div className="grid grid-cols-2 gap-4">
                 {group.items.map((item, itemIdx) => (
-                  <SpecialtyCard 
-                    key={itemIdx} 
-                    name={item.name} 
-                    onClick={() => onSelect(item.name)} 
-                  />
+                  <button
+                    key={itemIdx}
+                    onClick={() => onSelect(item.name)}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                  >
+                    <div className={`w-16 h-16 rounded-[1.5rem] ${group.color.split(' ')[1]} bg-opacity-10 flex items-center justify-center ${group.color.split(' ')[0]} group-hover:scale-110 transition-transform duration-500`}>
+                      <Stethoscope size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                      {item.name}
+                    </span>
+                  </button>
                 ))}
               </div>
             </section>

@@ -64,28 +64,40 @@ export const FashionSelectionView: React.FC<FashionSelectionViewProps> = ({ onBa
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">As melhores tendências pertinho de você.</p>
             </div>
 
-            <div className="space-y-3">
-                <SelectionCard 
-                    icon={User} 
-                    label="Feminino" 
-                    sublabel="Moda Feminina"
-                    color="bg-rose-500" 
-                    onClick={() => onSelect('Feminino')} 
-                />
-                <SelectionCard 
-                    icon={User} 
-                    label="Masculino" 
-                    sublabel="Moda Masculina"
-                    color="bg-blue-500" 
-                    onClick={() => onSelect('Masculino')} 
-                />
-                <SelectionCard 
-                    icon={Baby} 
-                    label="Infantil" 
-                    sublabel="Moda Infantil"
-                    color="bg-amber-500" 
-                    onClick={() => onSelect('Infantil')} 
-                />
+            <div className="grid grid-cols-2 gap-4">
+                <button
+                    onClick={() => onSelect('Feminino')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-rose-500 bg-opacity-10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform duration-500">
+                        <User size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Feminino
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Masculino')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-blue-500 bg-opacity-10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-500">
+                        <User size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Masculino
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Infantil')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500 bg-opacity-10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform duration-500">
+                        <Baby size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Infantil
+                    </span>
+                </button>
             </div>
 
             <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/10 rounded-[2rem] border border-blue-100 dark:border-blue-800/30 flex gap-4 items-center">
