@@ -84,8 +84,37 @@ export const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<any>('Visitante');
   const [appReady, setAppReady] = useState(false);
 
-  const [customHeaderTitle, setCustomHeaderTitle] = useState('');
+
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
+
+  const headerTitle = useMemo(() => {
+    const titles: Record<string, string> = {
+      category_detail: selectedCategory?.name.toUpperCase() || 'CATEGORIA',
+      health_selection: 'SAÚDE',
+      health_women: 'MULHER',
+      health_pediatrics: 'PEDIATRIA',
+      services_selection: 'SERVIÇOS',
+      services_manual: 'SERVIÇOS MANUAIS',
+      services_specialized: 'SERVIÇOS ESPECIALIZADOS',
+      pets_selection: 'PETS',
+      pets_dogs: 'CÃES',
+      pets_cats: 'GATOS',
+      pets_others: 'OUTROS PETS',
+      fashion_selection: 'MODA',
+      fashion_women: 'MODA FEMININA',
+      fashion_men: 'MODA MASCULINA',
+      fashion_kids: 'MODA INFANTIL',
+      beauty_selection: 'BELEZA',
+      beauty_women: 'BELEZA FEMININA',
+      beauty_men: 'BELEZA MASCULINA',
+      autos_selection: 'AUTOS',
+      autos_carros: 'CARROS',
+      autos_motos: 'MOTOS',
+      autos_bikes: 'BIKES',
+      autos_eletricos: 'ELÉTRICOS',
+    };
+    return titles[activeTab] || '';
+  }, [activeTab, selectedCategory]);
 
   // Lógica de Admin Real
   const isRealAdmin = authUser?.email === 'dedonopradonodedelivery@gmail.com';
@@ -196,8 +225,6 @@ export const App: React.FC = () => {
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
-    setCustomHeaderTitle(category.name.toUpperCase());
-
 
     const slugMap: Record<string, string> = {
         'saude': 'health_selection',
@@ -254,7 +281,7 @@ export const App: React.FC = () => {
                         viewMode={viewMode} 
                         onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
                         onSelectCategory={handleSelectCategory} 
-                        customTitle={customHeaderTitle}
+                        customTitle={headerTitle}
                         onBack={handleBack}
                     />
                     )}
@@ -286,100 +313,100 @@ export const App: React.FC = () => {
                     {/* FLUXO SAÚDE */}
                     {activeTab === 'health_selection' && (
                         <HealthSelectionView 
-                            onBack={() => handleNavigate('home')} 
+                            onBack={handleBack} 
                             onSelect={(intent) => {
-                                if (intent === 'Mulher') { setCustomHeaderTitle('MULHER'); handleNavigate('health_women'); }
-                                else if (intent === 'Pediatria') { setCustomHeaderTitle('PEDIATRIA'); handleNavigate('health_pediatrics'); }
-                                else { setCustomHeaderTitle(intent.toUpperCase()); handleNavigate('category_detail'); }
+                                if (intent === 'Mulher') { handleNavigate('health_women'); }
+                                else if (intent === 'Pediatria') { handleNavigate('health_pediatrics'); }
+                                else { handleNavigate('category_detail'); }
                             }} 
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'health_women' && <HealthWomenView onBack={() => handleNavigate('health_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'health_pediatrics' && <HealthPediatricsView onBack={() => handleNavigate('health_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'health_women' && <HealthWomenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'health_pediatrics' && <HealthPediatricsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO SERVIÇOS */}
                     {activeTab === 'services_selection' && (
                         <ServicesSelectionView 
-                            onBack={() => handleNavigate('home')} 
+                            onBack={handleBack} 
                             onSelect={(intent) => {
-                                if (intent === 'Manuais') { setCustomHeaderTitle('MANUAIS'); handleNavigate('services_manual'); }
-                                else if (intent === 'Especializados') { setCustomHeaderTitle('ESPECIALIZADOS'); handleNavigate('services_specialized'); }
-                                else { setCustomHeaderTitle(intent.toUpperCase()); handleNavigate('category_detail'); }
+                                if (intent === 'Manuais') { handleNavigate('services_manual'); }
+                                else if (intent === 'Especializados') { handleNavigate('services_specialized'); }
+                                else { handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'services_manual' && <ServicesManualView onBack={() => handleNavigate('services_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={() => handleNavigate('services_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'services_manual' && <ServicesManualView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO PETS */}
                     {activeTab === 'pets_selection' && (
                         <PetsSelectionView 
-                            onBack={() => handleNavigate('home')} 
+                            onBack={handleBack} 
                             onSelect={(intent) => {
-                                if (intent === 'Cães') { setCustomHeaderTitle('CÃES'); handleNavigate('pets_dogs'); }
-                                else if (intent === 'Gatos') { setCustomHeaderTitle('GATOS'); handleNavigate('pets_cats'); }
-                                else if (intent === 'Outros Pets') { setCustomHeaderTitle('OUTROS PETS'); handleNavigate('pets_others'); }
-                                else { setCustomHeaderTitle(intent.toUpperCase()); handleNavigate('category_detail'); }
+                                if (intent === 'Cães') { handleNavigate('pets_dogs'); }
+                                else if (intent === 'Gatos') { handleNavigate('pets_cats'); }
+                                else if (intent === 'Outros Pets') { handleNavigate('pets_others'); }
+                                else { handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'pets_dogs' && <PetsDogsView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'pets_cats' && <PetsCatsView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'pets_others' && <PetsOthersView onBack={() => handleNavigate('pets_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_dogs' && <PetsDogsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_cats' && <PetsCatsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'pets_others' && <PetsOthersView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
 
                     {/* FLUXO MODA */}
                     {activeTab === 'fashion_selection' && (
                         <FashionSelectionView 
-                            onBack={() => handleNavigate('home')}
+                            onBack={handleBack}
                             onSelect={(intent) => {
-                                if (intent === 'Feminino') { setCustomHeaderTitle('FEMININA'); handleNavigate('fashion_women'); }
-                                else if (intent === 'Masculino') { setCustomHeaderTitle('MASCULINA'); handleNavigate('fashion_men'); }
-                                else if (intent === 'Infantil') { setCustomHeaderTitle('INFANTIL'); handleNavigate('fashion_kids'); }
-                                else { setCustomHeaderTitle(intent.toUpperCase()); handleNavigate('category_detail'); }
+                                if (intent === 'Feminino') { handleNavigate('fashion_women'); }
+                                else if (intent === 'Masculino') { handleNavigate('fashion_men'); }
+                                else if (intent === 'Infantil') { handleNavigate('fashion_kids'); }
+                                else { handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'fashion_women' && <FashionWomenView onBack={() => handleNavigate('fashion_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'fashion_men' && <FashionMenView onBack={() => handleNavigate('fashion_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'fashion_kids' && <FashionKidsView onBack={() => handleNavigate('fashion_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'fashion_women' && <FashionWomenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'fashion_men' && <FashionMenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'fashion_kids' && <FashionKidsView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO BELEZA */}
                     {activeTab === 'beauty_selection' && (
                         <BeautySelectionView
-                            onBack={() => handleNavigate('home')}
+                            onBack={handleBack}
                             onSelect={(intent) => {
-                                if (intent === 'Mulher') { setCustomHeaderTitle('FEMININA'); handleNavigate('beauty_women'); }
-                                else if (intent === 'Homem') { setCustomHeaderTitle('MASCULINA'); handleNavigate('beauty_men'); }
-                                else { setCustomHeaderTitle(intent.toUpperCase()); handleNavigate('category_detail'); }
+                                if (intent === 'Mulher') { handleNavigate('beauty_women'); }
+                                else if (intent === 'Homem') { handleNavigate('beauty_men'); }
+                                else { handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'beauty_women' && <BeautyWomenView onBack={() => handleNavigate('beauty_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'beauty_men' && <BeautyMenView onBack={() => handleNavigate('beauty_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'beauty_women' && <BeautyWomenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'beauty_men' && <BeautyMenView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO AUTOS */}
                     {activeTab === 'autos_selection' && (
                         <AutosSelectionView
-                            onBack={() => handleNavigate('home')}
+                            onBack={handleBack}
                             onSelect={(intent) => {
-                                if (intent === 'Carros') { setCustomHeaderTitle('CARROS'); handleNavigate('autos_carros'); }
-                                else if (intent === 'Motos') { setCustomHeaderTitle('MOTOS'); handleNavigate('autos_motos'); }
-                                else if (intent === 'Bikes') { setCustomHeaderTitle('BIKES'); handleNavigate('autos_bikes'); }
-                                else if (intent === 'Elétricos') { setCustomHeaderTitle('ELÉTRICOS'); handleNavigate('autos_eletricos'); }
-                                else { setCustomHeaderTitle(intent.toUpperCase()); handleNavigate('category_detail'); }
+                                if (intent === 'Carros') { handleNavigate('autos_carros'); }
+                                else if (intent === 'Motos') { handleNavigate('autos_motos'); }
+                                else if (intent === 'Bikes') { handleNavigate('autos_bikes'); }
+                                else if (intent === 'Elétricos') { handleNavigate('autos_eletricos'); }
+                                else { handleNavigate('category_detail'); }
                             }}
                             onNavigate={handleNavigate}
                         />
                     )}
-                    {activeTab === 'autos_carros' && <AutosCarrosView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'autos_motos' && <AutosMotosView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'autos_bikes' && <AutosBikesView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
-                    {activeTab === 'autos_eletricos' && <AutosEletricosView onBack={() => handleNavigate('autos_selection')} onSelect={(spec) => { setCustomHeaderTitle(spec.toUpperCase()); handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_carros' && <AutosCarrosView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_motos' && <AutosMotosView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_bikes' && <AutosBikesView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
+                    {activeTab === 'autos_eletricos' && <AutosEletricosView onBack={handleBack} onSelect={(spec) => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
 
                     {/* DEMAIS ROTAS */}
                     {activeTab === 'store_detail' && selectedStore && <StoreDetailView store={selectedStore} onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
