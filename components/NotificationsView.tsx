@@ -60,7 +60,7 @@ const INITIAL_MOCK_NOTIFS: AppNotification[] = [
   {
     id: 'notif-4',
     userId: 'visitante',
-    title: 'Acontecendo Agora em JPA 🔥',
+    title: 'Aconteceu Agora no seu Bairro',
     message: 'Nova postagem no JPA Conversa sobre a feira orgânica da Praça.',
     type: 'ad',
     read: false,

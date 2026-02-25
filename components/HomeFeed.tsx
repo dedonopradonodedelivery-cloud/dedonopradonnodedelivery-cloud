@@ -136,7 +136,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
         {/* 2. ACONTECENDO AGORA - ALIGNMENT FIXED */}
         <section className="px-6 py-4 space-y-4">
             <div className="flex items-center justify-between">
-                <SectionHeader icon={Flame} title="Acontecendo agora" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Toda Jacarepaguá" : `Em ${currentNeighborhood}`} iconColor="text-amber-500" />
+                <SectionHeader icon={Flame} title="Aconteceu Agora no seu Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Toda Jacarepaguá" : `Em ${currentNeighborhood}`} iconColor="text-amber-500" />
             </div>
 
             <div className="relative">
