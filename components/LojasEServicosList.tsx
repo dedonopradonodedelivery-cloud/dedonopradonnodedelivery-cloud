@@ -50,7 +50,9 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({
   const masterStore = useMemo(() => STORES.find(s => s.id === 'atual-clube'), []);
 
   const handleMasterClick = () => {
-    if (masterStore) onStoreClick(masterStore);
+    if (onNavigate) {
+      onNavigate('patrocinador_master');
+    }
   };
 
   const filteredStores = useMemo(() => {
