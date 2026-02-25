@@ -352,8 +352,19 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                   <p className="text-white font-bold text-lg">Proposta de Parceria de Negócios: App Localizei JPA</p>
                   
                   <div>
-                    <p className="text-white font-bold mb-2">De todo o lucro gerado pelo app:</p>
-                    <ul className="space-y-2 ml-2">
+                    <p className="text-white font-bold mb-1">1. Participação:</p>
+                    <p>O investidor passa a ser dono de <span className="text-white font-bold">30% da empresa</span></p>
+                    
+                    <p className="text-white font-bold mt-4 mb-1">Garantia de Execução:</p>
+                    <p>O protótipo já está funcionando (MVP), reduzindo o risco, pois o projeto já saiu do papel.</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-white font-bold mb-2">2. Como o investidor recebe os ganhos</p>
+                    <p className="mb-3">Embora a participação societária seja de 30%, a divisão de lucros será:</p>
+                    <p className="text-indigo-400 font-bold mb-2">Divisão Meio a Meio</p>
+                    <p className="text-slate-400 mb-2">De todo o lucro gerado pelo app:</p>
+                    <ul className="space-y-2 ml-2 mb-4">
                       <li className="flex items-center gap-2">
                         <span className="text-indigo-500">✔</span> 50% para o Sócio Investidor
                       </li>
@@ -361,10 +372,12 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                         <span className="text-indigo-500">✔</span> 50% para o Sócio Majoritário
                       </li>
                     </ul>
+                    <p className="text-xs text-slate-500 italic">Estrutura que permite recuperação acelerada do capital investido.</p>
                   </div>
 
-                  <div>
-                    <p className="text-white font-bold mb-3">Distribuição dos valores gerados:</p>
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-white font-bold mb-3">3. Gestão Profissional dos Resultados (Regra dos 4 Pilares)</p>
+                    <p className="text-slate-400 mb-3">Distribuição dos valores gerados:</p>
                     <ul className="space-y-4 ml-2">
                       <li>
                         <p className="text-indigo-400 font-bold">✔ Crescimento (24%)</p>
@@ -386,7 +399,7 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
 
                   <div className="pt-6 border-t border-white/5">
                     <p className="text-white font-bold mb-2">5. Valor do Investimento</p>
-                    <p className="text-2xl font-black text-indigo-400">Valor: R$ 70.000,00 ✅</p>
+                    <p className="text-2xl font-black text-indigo-400">Valor: R$ 70.000,00</p>
                   </div>
                 </div>
               </div>
