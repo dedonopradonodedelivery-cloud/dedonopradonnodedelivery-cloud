@@ -92,7 +92,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
     
     const interval = setInterval(() => {
       setCurrentCouponIndex((prevIndex) => (prevIndex + 1) % availableCoupons.length);
-    }, 4000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [availableCoupons.length]);
@@ -149,7 +149,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                             ))}
                         </div>
                         {/* THEME LABELS BELOW CARDS */}
-                        <div className="flex flex-wrap gap-x-2 gap-y-1 mt-2 opacity-60">
+                        <div className="flex flex-wrap justify-center gap-x-2 gap-y-1 mt-2 opacity-60">
                             {storyLabels.map((label, i) => (
                                 <span key={i} className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">
                                     {label} {i < storyLabels.length - 1 && "•"}
