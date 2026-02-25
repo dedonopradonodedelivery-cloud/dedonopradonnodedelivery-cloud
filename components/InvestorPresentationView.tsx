@@ -1,10 +1,31 @@
 
 import React from 'react';
-import { ArrowLeft, Presentation } from 'lucide-react';
+import { ArrowLeft, Presentation, Flame } from 'lucide-react';
 
 interface InvestorPresentationViewProps {
   onBack: () => void;
 }
+
+const InvestmentItem: React.FC<{ title: string; items: string[]; subItems?: string[]; subTotal?: string }> = ({ title, items, subItems, subTotal }) => (
+  <div>
+    <p className="text-indigo-400 font-bold flex items-center gap-2">
+      <Flame size={16} className="text-indigo-500" />
+      {title}
+    </p>
+    <ul className="mt-2 space-y-1 ml-2">
+      {items.map((item, index) => <li key={index}>✔ {item}</li>)}
+    </ul>
+    {subItems && (
+      <div className="mt-2">
+        <p>Incluindo:</p>
+        <ul className="mt-2 space-y-1 ml-2">
+          {subItems.map((item, index) => <li key={index}>✔ {item}</li>)}
+        </ul>
+      </div>
+    )}
+    {subTotal && <p className="mt-2 font-bold text-white">👉 {subTotal}</p>}
+  </div>
+);
 
 export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> = ({ onBack }) => {
   const sections = [
@@ -254,92 +275,60 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
                 <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-6">
                   <p className="text-lg font-bold text-white">Estrutura Refinada do Uso do Investimento</p>
-                  
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 1. Estrutura Técnica</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Publicação Apple + Android → R$ 700</li>
-                      <li>✔ Base de Dados – Lista de Comércios Reais → R$ 2.000</li>
-                    </ul>
-                  </div>
+                    
+                    <InvestmentItem 
+                      title="1. Estrutura Técnica"
+                      items={['Publicação Apple + Android → R$ 700', 'Base de Dados – Lista de Comércios Reais → R$ 2.000']}
+                    />
 
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 2. Formalização & Regularização</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Formalização & Regularização → R$ 3.000</li>
-                    </ul>
-                    <p className="mt-2">Incluindo:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Abertura de empresa / CNPJ</li>
-                      <li>✔ Taxas e licenças</li>
-                      <li>✔ Registros necessários</li>
-                    </ul>
-                  </div>
+                    <InvestmentItem 
+                      title="2. Formalização & Regularização"
+                      items={['Formalização & Regularização → R$ 3.000']}
+                      subItems={['Abertura de empresa / CNPJ', 'Taxas e licenças', 'Registros necessários']}
+                    />
 
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 3. Lançamento & Aquisição Inicial</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Redes sociais locais → R$ 5.000</li>
-                      <li>✔ Influenciadores locais → R$ 2.000</li>
-                    </ul>
-                    <p className="mt-2 font-bold text-white">👉 Subtotal → R$ 7.000</p>
-                  </div>
+                    <InvestmentItem 
+                      title="3. Lançamento & Aquisição Inicial"
+                      items={['Redes sociais locais → R$ 5.000', 'Influenciadores locais → R$ 2.000']}
+                      subTotal="Subtotal → R$ 7.000"
+                    />
 
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 4. Marketing & Crescimento</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Agência Marketing Digital → R$ 4.000</li>
-                      <li>✔ Investimento em Anúncios Digitais → R$ 4.000</li>
-                    </ul>
-                    <p className="mt-2">Distribuição estratégica:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>• Meta Ads → R$ 2.000</li>
-                      <li>• Google Ads → R$ 2.000</li>
-                    </ul>
-                    <p className="mt-2 font-bold text-white">👉 Subtotal → R$ 8.000</p>
-                  </div>
+                    <InvestmentItem 
+                      title="4. Marketing & Crescimento"
+                      items={['Agência Marketing Digital → R$ 4.000', 'Investimento em Anúncios Digitais → R$ 4.000']}
+                      subItems={['Meta Ads → R$ 2.000', 'Google Ads → R$ 2.000']}
+                      subTotal="Subtotal → R$ 8.000"
+                    />
 
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 5. Expansão & Operação Comercial</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Estruturação comercial & posicionamento profissional → R$ 16.000</li>
-                    </ul>
-                  </div>
+                    <InvestmentItem 
+                      title="5. Expansão & Operação Comercial"
+                      items={['Estruturação comercial & posicionamento profissional → R$ 16.000']}
+                    />
 
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 6. Reserva Estratégica de Crescimento</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Reserva Estratégica de Crescimento → R$ 18.000</li>
-                    </ul>
-                  </div>
+                    <InvestmentItem 
+                      title="6. Reserva Estratégica de Crescimento"
+                      items={['Reserva Estratégica de Crescimento → R$ 18.000']}
+                    />
 
-                  <div>
-                    <p className="text-indigo-400 font-bold">🔥 7. Margem Estratégica de Segurança Operacional</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Margem Estratégica de Segurança Operacional → R$ 10.000</li>
-                    </ul>
-                    <p className="mt-2">Recursos destinados a:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Ajustes técnicos / melhorias</li>
-                      <li>✔ Infraestrutura / contingências</li>
-                      <li>✔ Estabilidade operacional</li>
-                      <li>✔ Continuidade do crescimento</li>
-                    </ul>
-                  </div>
+                    <InvestmentItem 
+                      title="7. Margem Estratégica de Segurança Operacional"
+                      items={['Margem Estratégica de Segurança Operacional → R$ 10.000']}
+                      subItems={['Ajustes técnicos / melhorias', 'Infraestrutura / contingências', 'Estabilidade operacional', 'Continuidade do crescimento']}
+                    />
 
-                  <div className="pt-4 border-t border-white/10">
-                    <p className="text-lg font-bold text-white mb-4">✅ TOTAL ESTIMADO FINAL</p>
-                    <ul className="space-y-2">
-                      <li>Estrutura Técnica → R$ 2.700</li>
-                      <li>Formalização → R$ 3.000</li>
-                      <li>Lançamento → R$ 7.000</li>
-                      <li>Marketing & Crescimento → R$ 8.000</li>
-                      <li>Operação Comercial → R$ 16.000</li>
-                      <li>Reserva Estratégica → R$ 18.000</li>
-                      <li>Margem Segurança → R$ 10.000</li>
-                    </ul>
-                    <p className="mt-6 text-xl font-black text-indigo-400">💰 TOTAL → R$ 69.700</p>
-                  </div>
+                    <div className="pt-4 border-t border-white/10">
+                      <p className="text-lg font-bold text-white mb-4">✅ TOTAL ESTIMADO FINAL</p>
+                      <ul className="space-y-2">
+                        <li>Estrutura Técnica → R$ 2.700</li>
+                        <li>Formalização → R$ 3.000</li>
+                        <li>Lançamento → R$ 7.000</li>
+                        <li>Marketing & Crescimento → R$ 8.000</li>
+                        <li>Operação Comercial → R$ 16.000</li>
+                        <li>Reserva Estratégica → R$ 18.000</li>
+                        <li>Margem Segurança → R$ 10.000</li>
+                      </ul>
+                      <p className="mt-6 text-xl font-black text-indigo-400">💰 TOTAL → R$ 69.700</p>
+                    </div>
                 </div>
               </div>
             ) : section === 'Pedido / Proposta' ? (
