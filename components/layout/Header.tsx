@@ -130,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="flex items-center gap-3 min-w-0">
                         {!isHomeOrExplore ? (
                             <>
-                                <button onClick={() => onBack && onBack()} className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0">
+                                <button onClick={onBack} className="p-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white active:scale-90 transition-all shrink-0">
                                     <ChevronLeft size={20} strokeWidth={3} />
                                 </button>
                                 <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none animate-in slide-in-from-left duration-500 py-1 truncate">
