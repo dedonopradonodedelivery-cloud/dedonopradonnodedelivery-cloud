@@ -28,19 +28,32 @@ const InvestmentItem: React.FC<{ title: string; items: string[]; subItems?: stri
 );
 
 const expansionPlan = [
-    { zone: 'ZONA SUDOESTE', neighborhoods: 18, banners: 2880, revenue: 'R$ 143.712,00', locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
-    { zone: 'ZONA SUL', neighborhoods: 16, banners: 2560, revenue: 'R$ 127.744,00', locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
-    { zone: 'ZONA NORTE', neighborhoods: 12, banners: 1920, revenue: 'R$ 95.808,00', locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
-    { zone: 'ZONA OESTE', neighborhoods: 9, banners: 1440, revenue: 'R$ 71.856,00', locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
-    { zone: 'CENTRO', neighborhoods: 7, banners: 1120, revenue: 'R$ 55.888,00', locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
+    { zone: 'ZONA SUDOESTE', countLabel: '18 bairros', bannerCount: 2880, bannerPrice: '49,90', bannerRevenue: 'R$ 143.712,00', destaqueCount: 8640, destaquePrice: '9,90', destaqueRevenue: 'R$ 85.536,00', totalRevenue: 'R$ 229.248,00', locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
+    { zone: 'ZONA SUL', countLabel: '16 bairros', bannerCount: 2560, bannerPrice: '49,90', bannerRevenue: 'R$ 127.744,00', destaqueCount: 7680, destaquePrice: '9,90', destaqueRevenue: 'R$ 76.032,00', totalRevenue: 'R$ 203.776,00', locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
+    { zone: 'ZONA NORTE', countLabel: '12 bairros', bannerCount: 1920, bannerPrice: '49,90', bannerRevenue: 'R$ 95.808,00', destaqueCount: 5760, destaquePrice: '9,90', destaqueRevenue: 'R$ 57.024,00', totalRevenue: 'R$ 152.832,00', locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
+    { zone: 'ZONA OESTE', countLabel: '9 bairros', bannerCount: 1440, bannerPrice: '49,90', bannerRevenue: 'R$ 71.856,00', destaqueCount: 4320, destaquePrice: '9,90', destaqueRevenue: 'R$ 42.768,00', totalRevenue: 'R$ 114.624,00', locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
+    { zone: 'CENTRO (RJ)', countLabel: '7 bairros', bannerCount: 1120, bannerPrice: '49,90', bannerRevenue: 'R$ 55.888,00', destaqueCount: 3360, destaquePrice: '9,90', destaqueRevenue: 'R$ 33.264,00', totalRevenue: 'R$ 89.152,00', locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
+    { zone: 'REGIÃO SERRANA', countLabel: '4 cidades', bannerCount: 640, bannerPrice: '49,90', bannerRevenue: 'R$ 31.936,00', destaqueCount: 1920, destaquePrice: '9,90', destaqueRevenue: 'R$ 19.008,00', totalRevenue: 'R$ 50.944,00', locations: ['Petrópolis', 'Teresópolis', 'Nova Friburgo', 'Guapimirim'] },
+    { zone: 'BAIXADA FLUMINENSE', countLabel: '12 cidades', bannerCount: 1920, bannerPrice: '49,90', bannerRevenue: 'R$ 95.808,00', destaqueCount: 5760, destaquePrice: '9,90', destaqueRevenue: 'R$ 57.024,00', totalRevenue: 'R$ 152.832,00', locations: ['Duque de Caxias', 'Nova Iguaçu', 'São João de Meriti', 'Belford Roxo', 'Nilópolis', 'Mesquita', 'Queimados', 'Japeri', 'Seropédica', 'Magé', 'Itaguaí', 'Paracambi'] },
+    { zone: 'NITERÓI', countLabel: '11 bairros/regiões', bannerCount: 1760, bannerPrice: '49,90', bannerRevenue: 'R$ 87.824,00', destaqueCount: 5280, destaquePrice: '9,90', destaqueRevenue: 'R$ 52.272,00', totalRevenue: 'R$ 140.096,00', locations: ['Niterói', 'Centro', 'Icaraí', 'Ingá', 'Boa Viagem', 'São Domingos', 'Gragoatá', 'Ponta d’Areia', 'Santa Rosa', 'Charitas', 'São Francisco'] },
+    { zone: 'REGIÃO DOS LAGOS', countLabel: '7 cidades', bannerCount: 1120, bannerPrice: '49,90', bannerRevenue: 'R$ 55.888,00', destaqueCount: 3360, destaquePrice: '9,90', destaqueRevenue: 'R$ 33.264,00', totalRevenue: 'R$ 89.152,00', locations: ['Cabo Frio', 'Arraial do Cabo', 'Armação dos Búzios', 'Araruama', 'São Pedro da Aldeia', 'Iguaba Grande', 'Saquarema'] },
+    { zone: 'COSTA VERDE', countLabel: '5 cidades', bannerCount: 800, bannerPrice: '49,90', bannerRevenue: 'R$ 39.920,00', destaqueCount: 2400, destaquePrice: '9,90', destaqueRevenue: 'R$ 23.760,00', totalRevenue: 'R$ 63.680,00', locations: ['Angra dos Reis', 'Paraty', 'Mangaratiba', 'Itaguaí', 'Rio Claro'] },
 ];
 
-const ExpansionRegion: React.FC<{ zone: string; neighborhoods: number; banners: number; revenue: string; locations: string[] }> = ({ zone, neighborhoods, banners, revenue, locations }) => (
+const ExpansionRegion: React.FC<typeof expansionPlan[0]> = ({ zone, countLabel, bannerCount, bannerPrice, bannerRevenue, destaqueCount, destaquePrice, destaqueRevenue, totalRevenue, locations }) => (
     <div className="pb-6 border-b border-white/5 last:border-b-0 last:pb-0 mb-6 last:mb-0">
-        <h3 className="text-base font-black text-indigo-400 mb-2 tracking-wider uppercase">{zone}</h3>
-        <p className="text-xs text-slate-400 mb-4 font-medium">
-            {neighborhoods} bairros | <span className="font-bold text-slate-300">{banners.toLocaleString('pt-BR')}</span> espaços de banner | Faturamento: <span className="font-bold text-emerald-400">{revenue}</span>
-        </p>
+        <h3 className="text-base font-black text-indigo-400 mb-3 tracking-wider uppercase">{zone}</h3>
+        <div className="text-xs text-slate-400 mb-4 font-medium space-y-1">
+            <p>
+                {countLabel} | <span className="font-bold text-slate-300">{bannerCount.toLocaleString('pt-BR')}</span> espaços de banner por R$ {bannerPrice} | Faturamento: <span className="font-bold text-emerald-400/80">{bannerRevenue}</span>
+            </p>
+            <p>
+                {countLabel} | <span className="font-bold text-slate-300">{destaqueCount.toLocaleString('pt-BR')}</span> espaços de Destaque por R$ {destaquePrice} | Faturamento: <span className="font-bold text-emerald-400/80">{destaqueRevenue}</span>
+            </p>
+            <p className="font-bold text-emerald-400 pt-1">
+                Faturamento total – {totalRevenue}
+            </p>
+        </div>
         <div className="columns-2 sm:columns-3 md:columns-4 gap-x-6">
             {locations.map((location, index) => (
                 <p key={index} className="text-[11px] text-slate-500 mb-1.5 break-inside-avoid">{location}</p>
@@ -267,7 +280,7 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                   <div className="mt-6 pt-6 border-t border-white/5">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-slate-300">Faturamento Potencial Total <span className="text-slate-500 font-medium">(100%)</span>:</span>
-                      <span className="text-xl font-black text-emerald-400">R$ 495.008,00 ✅</span>
+                      <span className="text-xl font-black text-emerald-400">R$ 1.287.184,00 ✅</span>
                     </div>
                   </div>
                 </div>
