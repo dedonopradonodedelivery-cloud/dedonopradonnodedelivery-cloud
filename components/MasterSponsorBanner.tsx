@@ -20,8 +20,8 @@ export const MasterSponsorBanner: React.FC<MasterSponsorBannerProps> = ({ onClic
            
            {/* Badge Master Flutuante */}
            <div className="absolute top-0 right-8 -translate-y-1/2 z-20">
-              <span className="bg-[#FF6501] text-white text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-[0.2em] shadow-lg border border-white/20 flex items-center gap-2">
-                 <Crown className="w-3 h-3 fill-white" /> Patrocinador Master
+              <span className="bg-white text-[#FF6501] text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-[0.2em] shadow-lg border border-[#FF6501]/20 flex items-center gap-2">
+                 <Crown className="w-3 h-3 fill-[#FF6501]" /> Patrocinador Master
               </span>
            </div>
 
