@@ -143,7 +143,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                 {filteredStories.length > 0 ? (
                     <>
                         {/* -mx-6 px-6 allows full width scroll while keeping first item aligned */}
-                        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x pb-2">
+                        <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x pb-2 -mr-6">
                             {filteredStories.map((item, index) => (
                                 <StoryCard key={item.id} item={item} onClick={() => setSelectedStoryIndex(index)} />
                             ))}
