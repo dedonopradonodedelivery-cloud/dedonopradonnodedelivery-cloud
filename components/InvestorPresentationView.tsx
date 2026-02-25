@@ -28,17 +28,19 @@ const InvestmentItem: React.FC<{ title: string; items: string[]; subItems?: stri
 );
 
 const expansionPlan = [
-    { zone: 'Zona Sudoeste', neighborhoods: 18, banners: 2880, locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
-    { zone: 'Zona Sul', neighborhoods: 16, banners: 2560, locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
-    { zone: 'Zona Norte', neighborhoods: 12, banners: 1920, locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
-    { zone: 'Zona Oeste', neighborhoods: 9, banners: 1440, locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
-    { zone: 'Centro', neighborhoods: 7, banners: 1120, locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
+    { zone: 'ZONA SUDOESTE', neighborhoods: 18, banners: 2880, revenue: 'R$ 143.712,00', locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
+    { zone: 'ZONA SUL', neighborhoods: 16, banners: 2560, revenue: 'R$ 127.744,00', locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
+    { zone: 'ZONA NORTE', neighborhoods: 12, banners: 1920, revenue: 'R$ 95.808,00', locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
+    { zone: 'ZONA OESTE', neighborhoods: 9, banners: 1440, revenue: 'R$ 71.856,00', locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
+    { zone: 'CENTRO', neighborhoods: 7, banners: 1120, revenue: 'R$ 55.888,00', locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
 ];
 
-const ExpansionRegion: React.FC<{ zone: string; neighborhoods: number; banners: number; locations: string[] }> = ({ zone, neighborhoods, banners, locations }) => (
+const ExpansionRegion: React.FC<{ zone: string; neighborhoods: number; banners: number; revenue: string; locations: string[] }> = ({ zone, neighborhoods, banners, revenue, locations }) => (
     <div className="pb-6 border-b border-white/5 last:border-b-0 last:pb-0 mb-6 last:mb-0">
         <h3 className="text-base font-black text-indigo-400 mb-2 tracking-wider uppercase">{zone}</h3>
-        <p className="text-xs text-slate-400 mb-4 font-medium">{neighborhoods} bairros | <span className="font-bold text-slate-300">{banners.toLocaleString('pt-BR')}</span> espaços de banner</p>
+        <p className="text-xs text-slate-400 mb-4 font-medium">
+            {neighborhoods} bairros | <span className="font-bold text-slate-300">{banners.toLocaleString('pt-BR')}</span> espaços de banner | Faturamento: <span className="font-bold text-emerald-400">{revenue}</span>
+        </p>
         <div className="columns-2 sm:columns-3 md:columns-4 gap-x-6">
             {locations.map((location, index) => (
                 <p key={index} className="text-[11px] text-slate-500 mb-1.5 break-inside-avoid">{location}</p>
@@ -264,7 +266,7 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                   </div>
                   <div className="mt-6 pt-6 border-t border-white/5">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-slate-300">Faturamento Potencial <span className="text-slate-500 font-medium">(100% de ocupação)</span>:</span>
+                      <span className="font-bold text-slate-300">Faturamento Potencial Total <span className="text-slate-500 font-medium">(100%)</span>:</span>
                       <span className="text-xl font-black text-emerald-400">R$ 495.008,00 ✅</span>
                     </div>
                   </div>
