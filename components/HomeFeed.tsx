@@ -228,33 +228,20 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
             </section>
         )}
 
-        {/* 4. VAGAS DE EMPREGO (IA LOKA REFINEMENT) */}
-        <section className="px-6 py-6 space-y-6">
-            <SectionHeader icon={Briefcase} title="Empregos no Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Oportunidades em JPA" : `Trabalhe em ${currentNeighborhood}`} iconColor="text-emerald-500" />
-            <div onClick={() => onNavigate('jobs')} className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse">
-                <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="flex items-center gap-2 mb-6 bg-white/15 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg group-hover:bg-white/25 transition-all">
-                        <Cpu size={14} className="text-emerald-100" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA LOKA • MATCH INTELIGENTE</span>
+        {/* 4. VAGAS DE EMPREGO (DISCREET SHORTCUT) */}
+        <section className="px-6 py-2 space-y-4">
+            <button onClick={() => onNavigate('jobs')} className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                        <Briefcase size={20} strokeWidth={2.5} />
                     </div>
-                    
-                    <h3 className="text-3xl font-display font-black text-white leading-none mb-3 tracking-tighter uppercase drop-shadow-md">
-                        AS MELHORES VAGAS <br/> PERTO DE VOCÊ
-                    </h3>
-                    
-                    <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[260px] opacity-90 drop-shadow-sm">
-                        A LOKA encontra compatibilidade real entre vagas e profissionais do bairro.
-                    </p>
-                    
-                    <div className="w-full bg-white text-emerald-700 font-black py-5 rounded-2xl text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-xl group-hover:shadow-emerald-900/40 transition-all">
-                        VER MATCHES 
-                        <ArrowRight size={18} strokeWidth={4} />
+                    <div className="text-left">
+                        <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Empregos no Bairro</h3>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vagas perto de você</p>
                     </div>
                 </div>
-                
-                {/* Decorative Tech Ring */}
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full border-[10px] border-white/5 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
-            </div>
+                <ChevronRight size={16} className="text-gray-300 group-hover:text-emerald-500 transition-colors" />
+            </button>
         </section>
 
         {/* 5. EXPLORAR GUIA */}

@@ -16,10 +16,13 @@ import {
   Dog,
   Gift,
   Briefcase,
-  ChevronRight
+  ChevronRight,
+  Cpu
 } from "lucide-react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MOCK_CLASSIFIEDS, MOCK_JOBS } from "@/constants";
+
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
 
 // --- MOCK DATA & TYPES ---
 
@@ -84,10 +87,10 @@ type ExploreViewProps = {
 
 // --- CARD COMPONENTS ---
 
-const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void }> = ({ icon: Icon, title, subtitle, onSeeMore }) => (
+const SectionHeader: React.FC<{ icon: React.ElementType; title: string; subtitle: string; onSeeMore?: () => void; iconColor?: string }> = ({ icon: Icon, title, subtitle, onSeeMore, iconColor = "text-gray-900 dark:text-white" }) => (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-900 dark:text-white shadow-sm border border-gray-100 dark:border-gray-800">
+        <div className={`w-10 h-10 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center ${iconColor} shadow-sm border border-gray-100 dark:border-gray-800`}>
           <Icon size={20} strokeWidth={2.5} />
         </div>
         <div>
@@ -212,6 +215,7 @@ const OpportunityCard: React.FC<{ item: Job; onClick: () => void }> = ({ item, o
 // --- MAIN EXPLORE VIEW ---
 
 export const ExploreView: React.FC<ExploreViewProps> = ({ stores, onStoreClick, onNavigate }) => {
+  const { currentNeighborhood } = useNeighborhood();
 
   const dynamicFeed = useMemo(() => {
     // Shuffle on mount to feel dynamic
@@ -241,6 +245,35 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, onStoreClick, 
       <div className="p-6 space-y-12">
         <NeighborhoodPulse onNavigate={onNavigate} />
         
+        {/* VAGAS DE EMPREGO (IA LOKA REFINEMENT) */}
+        <section className="space-y-6">
+            <SectionHeader icon={Briefcase} title="Empregos no Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Oportunidades em JPA" : `Trabalhe em ${currentNeighborhood}`} iconColor="text-emerald-500" />
+            <div onClick={() => onNavigate('jobs')} className="w-full bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(16,185,129,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden animate-ai-pulse">
+                <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="flex items-center gap-2 mb-6 bg-white/15 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg group-hover:bg-white/25 transition-all">
+                        <Cpu size={14} className="text-emerald-100" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">IA LOKA • MATCH INTELIGENTE</span>
+                    </div>
+                    
+                    <h3 className="text-3xl font-display font-black text-white leading-none mb-3 tracking-tighter uppercase drop-shadow-md">
+                        AS MELHORES VAGAS <br/> PERTO DE VOCÊ
+                    </h3>
+                    
+                    <p className="text-xs font-bold text-emerald-50 mb-10 leading-relaxed max-w-[260px] opacity-90 drop-shadow-sm">
+                        A LOKA encontra compatibilidade real entre vagas e profissionais do bairro.
+                    </p>
+                    
+                    <div className="w-full bg-white text-emerald-700 font-black py-5 rounded-2xl text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-xl group-hover:shadow-emerald-900/40 transition-all">
+                        VER MATCHES 
+                        <ArrowRight size={18} strokeWidth={4} />
+                    </div>
+                </div>
+                
+                {/* Decorative Tech Ring */}
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full border-[10px] border-white/5 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            </div>
+        </section>
+
         <div className="space-y-6">
             <SectionHeader icon={Sparkles} title="Para Você Descobrir" subtitle="Um feed de novidades do bairro" />
             <div className="space-y-6">
