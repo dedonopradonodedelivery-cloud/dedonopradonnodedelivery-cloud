@@ -1,10 +1,12 @@
 import React from 'react';
 import { ChevronLeft, CheckCircle2, ArrowRight } from 'lucide-react';
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface SpecialtiesViewProps {
   subcategoryName: string;
   onBack: () => void;
   onSelectSpecialty: (specialty: string) => void;
+  onNavigate: (view: string) => void;
 }
 
 // Mock Data for Specialties based on Subcategory Name
@@ -35,29 +37,30 @@ const SPECIALTIES_DATA: Record<string, string[]> = {
   'default': ['Consultoria', 'Orçamento geral', 'Manutenção preventiva', 'Reparo específico', 'Instalação']
 };
 
-export const SpecialtiesView: React.FC<SpecialtiesViewProps> = ({ subcategoryName, onBack, onSelectSpecialty }) => {
+export const SpecialtiesView: React.FC<SpecialtiesViewProps> = ({ subcategoryName, onBack, onSelectSpecialty, onNavigate }) => {
   const items = SPECIALTIES_DATA[subcategoryName] || SPECIALTIES_DATA['default'];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 animate-in slide-in-from-right duration-300">
+    <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in slide-in-from-right duration-300">
       
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 px-5 pt-8 pb-6 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 flex items-center gap-4">
-        <button 
-          onClick={onBack}
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-white" />
-        </button>
-        <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-display leading-tight">
-              {subcategoryName}
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Escolha a especialidade mais próxima do que você precisa
-            </p>
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onBack} 
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <div>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">{subcategoryName}</h1>
+            <p className="text-[10px] text-blue-100 font-bold uppercase tracking-widest mt-1">Especialidades</p>
+          </div>
         </div>
-      </div>
+        <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
+      </header>
+
+      <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
 
       {/* Content List */}
       <div className="p-5">

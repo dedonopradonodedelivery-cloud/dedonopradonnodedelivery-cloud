@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Zap, Wrench, Hammer, PaintRoller, User, Car, Droplet, Key, Truck, Shield, Smartphone, Laptop, Wifi, Dog, Scissors, Sparkles, Briefcase, Scale, Calculator, PenTool, Truck as TruckIcon, Flower, Search, Star, ShieldCheck, Rocket } from 'lucide-react';
+import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface SubcategoriesViewProps {
   macroId: string;
   macroName: string;
   onBack: () => void;
   onSelectSubcategory: (subName: string) => void;
+  onNavigate: (view: string) => void;
 }
 
 // Banners Mock para o topo
@@ -147,29 +149,28 @@ const SUBCATEGORIES_DATA: Record<string, { name: string; icon: React.ElementType
   ],
 };
 
-export const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ macroId, macroName, onBack, onSelectSubcategory }) => {
+export const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ macroId, macroName, onBack, onSelectSubcategory, onNavigate }) => {
   const items = SUBCATEGORIES_DATA[macroId] || SUBCATEGORIES_DATA['other'];
 
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen animate-in slide-in-from-right duration-300">
       
       {/* Header */}
-      <div className="bg-brand-blue px-5 pt-8 pb-6 border-b border-white/10 sticky top-0 z-50 flex items-center gap-4 mb-4">
-        <button 
-          onClick={onBack}
-          className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors"
-        >
-          <ChevronLeft className="w-6 h-6 text-white" />
-        </button>
-        <div>
-            <h1 className="text-xl font-bold text-white font-display leading-tight">
-              {macroName}
-            </h1>
-            <p className="text-xs text-blue-100">
-              Escolha o tipo de serviço que você precisa
-            </p>
+      <header className="sticky top-0 z-50 bg-brand-blue px-6 pt-12 pb-6 flex items-center justify-between border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onBack} 
+            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white active:scale-90 transition-all"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <div>
+            <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">{macroName}</h1>
+            <p className="text-[10px] text-blue-100 font-bold uppercase tracking-widest mt-1">Serviços no Bairro</p>
+          </div>
         </div>
-      </div>
+        <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
+      </header>
 
       <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         <main className="p-6 pt-12 space-y-10">

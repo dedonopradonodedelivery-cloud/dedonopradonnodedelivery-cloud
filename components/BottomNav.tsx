@@ -66,18 +66,21 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
             <button 
               key={item.id}
               onClick={() => handleTabClick(item.id)} 
-              className="w-full h-full flex flex-col items-center justify-center outline-none active:scale-95 transition-all relative group"
+              className="w-full h-full flex flex-col items-center justify-center outline-none active:scale-95 transition-all relative group pt-1"
             >
-              <div className="relative mb-1">
+              <div className="relative flex flex-col items-center">
                 <Icon 
                   size={24}
-                  className={`transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-500'}`} 
+                  className={`transition-colors duration-200 mb-1 ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-500'}`} 
                   strokeWidth={isActive ? 2.5 : 2} 
                 />
+                <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-500'}`}>
+                  {item.label}
+                </span>
               </div>
-              <span className={`text-xs font-bold transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-500'}`}>
-                {item.label}
-              </span>
+              {isActive && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-full" />
+              )}
             </button>
           );
         })}
