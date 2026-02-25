@@ -176,45 +176,46 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               </div>
             ) : section === 'Modelo de Negócio' ? (
               <div className="bg-slate-900/50 border border-white/10 rounded-[2rem] p-8">
-                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-4">
+                <div className="text-slate-300 text-sm font-medium leading-relaxed space-y-6">
                   <p>O comerciante não paga para aparecer na plataforma.</p>
+                  
                   <div>
-                    <p>Receitas atuais:</p>
-                    <ul className="mt-2 space-y-2 ml-2">
+                    <p className="text-white font-bold mb-2">Receitas atuais:</p>
+                    <ul className="space-y-4 ml-2">
                       <li>
-                        <p>✔ Patrocinador Master Fundador</p>
-                        <p className="ml-4">Investimento inicial: R$ 1.000,00</p>
-                        <p className="ml-4">Após fase fundadora: R$ 2.500,00 / mês</p>
+                        <p className="text-indigo-400 font-bold">✔ Banners por Especialidade</p>
+                        <p className="ml-4">Valor: <span className="text-white">R$ 49,90</span></p>
                       </li>
                       <li>
-                        <p>✔ Banners por Especialidade</p>
-                        <p className="ml-4">Valor: R$ 49,90</p>
+                        <p className="text-indigo-400 font-bold">✔ Patrocinador Master Fundador</p>
+                        <p className="ml-4">Valor promocional: <span className="text-white">R$ 2.500,00 / mês</span></p>
+                        <p className="ml-4 text-xs text-slate-500 italic">Preço pode ser alterado sem aviso prévio.</p>
+                      </li>
+                      <li>
+                        <p className="text-indigo-400 font-bold">✔ Destaques por Especialidade</p>
+                        <p className="ml-4">3 destaques por comerciante</p>
+                        <p className="ml-4">Valor: <span className="text-white">R$ 9,90</span></p>
                       </li>
                     </ul>
                   </div>
-                  <div>
-                    <p>Mais de 1.500 espaços publicitários disponíveis, considerando:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>• Especialidades</li>
-                      <li>• Segmentação por bairro</li>
-                      <li>• 9 bairros disponíveis</li>
-                    </ul>
+
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-white font-bold mb-2">Estimativa de Faturamento Total:</p>
+                    <p className="text-slate-400 mb-2">Modelo com potencial de geração de receita recorrente e previsível.</p>
+                    <p className="text-lg font-black text-emerald-400">✔ Potencial superior a R$ 229.248,00 / mês</p>
+                    <p className="mt-2 text-xs text-slate-500">Modelo baseado em receita recorrente e previsível. ✅</p>
                   </div>
-                  <div>
-                    <p>Estimativa de Faturamento (Cenário Conservador):</p>
-                    <p className="mt-2">Considerando:</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ 80% dos espaços de banners vendidos</li>
-                      <li>✔ 1 Patrocinador Master ativo</li>
+
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-white font-bold mb-2">Inventário Publicitário – Zona Sudoeste (RJ):</p>
+                    <ul className="space-y-2 ml-2">
+                      <li className="flex items-center gap-2">
+                        <span className="text-indigo-500">✔</span> 2.880 espaços de banner
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-indigo-500">✔</span> 8.640 espaços de destaque
+                      </li>
                     </ul>
-                    <p className="mt-2">Modelo com potencial de geração de receita recorrente e previsível.</p>
-                  </div>
-                  <div>
-                    <p>Faturamento Estimado (Cenário Conservador):</p>
-                    <ul className="mt-2 space-y-1 ml-2">
-                      <li>✔ Potencial superior a R$ 63.000,00 / mês</li>
-                    </ul>
-                    <p className="mt-2">Modelo baseado em receita recorrente e previsível.</p>
                   </div>
                 </div>
               </div>
