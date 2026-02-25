@@ -28,24 +28,20 @@ const InvestmentItem: React.FC<{ title: string; items: string[]; subItems?: stri
 );
 
 const expansionPlan = [
-    { zone: 'Zona Sudoeste', locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
-    { zone: 'Zona Sul', locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
-    { zone: 'Zona Norte', locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
-    { zone: 'Zona Oeste', locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
-    { zone: 'Centro (RJ)', locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
-    { zone: 'Região Serrana', locations: ['Petrópolis', 'Teresópolis', 'Nova Friburgo', 'Guapimirim'] },
-    { zone: 'Baixada Fluminense', locations: ['Duque de Caxias', 'Nova Iguaçu', 'São João de Meriti', 'Belford Roxo', 'Nilópolis', 'Mesquita', 'Queimados', 'Japeri', 'Seropédica', 'Magé', 'Itaguaí', 'Paracambi'] },
-    { zone: 'Niterói', locations: ['Centro', 'Icaraí', 'Ingá', 'Boa Viagem', 'São Domingos', 'Gragoatá', 'Ponta d’Areia', 'Santa Rosa', 'Charitas', 'São Francisco'] },
-    { zone: 'Região dos Lagos', locations: ['Cabo Frio', 'Arraial do Cabo', 'Armação dos Búzios', 'Araruama', 'São Pedro da Aldeia', 'Iguaba Grande', 'Saquarema'] },
-    { zone: 'Costa Verde', locations: ['Angra dos Reis', 'Paraty', 'Mangaratiba', 'Itaguaí', 'Rio Claro'] }
+    { zone: 'Zona Sudoeste', neighborhoods: 18, banners: 2880, locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
+    { zone: 'Zona Sul', neighborhoods: 16, banners: 2560, locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
+    { zone: 'Zona Norte', neighborhoods: 12, banners: 1920, locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
+    { zone: 'Zona Oeste', neighborhoods: 9, banners: 1440, locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
+    { zone: 'Centro', neighborhoods: 7, banners: 1120, locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
 ];
 
-const ExpansionRegion: React.FC<{ zone: string; locations: string[] }> = ({ zone, locations }) => (
+const ExpansionRegion: React.FC<{ zone: string; neighborhoods: number; banners: number; locations: string[] }> = ({ zone, neighborhoods, banners, locations }) => (
     <div className="pb-6 border-b border-white/5 last:border-b-0 last:pb-0 mb-6 last:mb-0">
-        <h3 className="text-base font-black text-indigo-400 mb-4 tracking-wider uppercase">{zone}</h3>
-        <div className="columns-2 sm:columns-3 md:columns-4 gap-x-8">
+        <h3 className="text-base font-black text-indigo-400 mb-2 tracking-wider uppercase">{zone}</h3>
+        <p className="text-xs text-slate-400 mb-4 font-medium">{neighborhoods} bairros | <span className="font-bold text-slate-300">{banners.toLocaleString('pt-BR')}</span> espaços de banner</p>
+        <div className="columns-2 sm:columns-3 md:columns-4 gap-x-6">
             {locations.map((location, index) => (
-                <p key={index} className="text-xs text-slate-400 mb-2 break-inside-avoid">{location}</p>
+                <p key={index} className="text-[11px] text-slate-500 mb-1.5 break-inside-avoid">{location}</p>
             ))}
         </div>
     </div>
@@ -253,14 +249,25 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
                 <div className="space-y-6">
                   {expansionPlan.map((region, index) => (
-                    <ExpansionRegion key={index} zone={region.zone} locations={region.locations} />
+                    <ExpansionRegion key={index} {...region} />
                   ))}
                 </div>
-                <div className="mt-8 pt-8 border-t border-white/10 text-center">
-                  <p className="text-indigo-300 font-bold mb-2">Escala Potencial do Modelo</p>
-                  <p className="text-sm text-indigo-200/70 mb-4">Considerando replicação em todas as regiões previstas:</p>
-                  <p className="text-3xl font-black text-white">Superior a R$ 800.000,00 <span className="text-lg font-medium text-slate-400">/ mês</span></p>
-                  <p className="mt-2 text-xs text-indigo-300/50 uppercase tracking-widest">(Cenário Estratégico)</p>
+                <div className="mt-8 pt-8 border-t border-white/10">
+                  <h4 className="text-base font-black text-indigo-400 mb-4 tracking-wider uppercase">Resumo Comercial – Inventário Publicitário</h4>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
+                    <div className="font-medium text-slate-400">Total de bairros:</div>
+                    <div className="font-bold text-white text-right">62</div>
+                    <div className="font-medium text-slate-400">Total de espaços de banner:</div>
+                    <div className="font-bold text-white text-right">9.920</div>
+                    <div className="font-medium text-slate-400">Valor por espaço:</div>
+                    <div className="font-bold text-white text-right">R$ 49,90</div>
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-white/5">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-slate-300">Faturamento Potencial <span className="text-slate-500 font-medium">(100% de ocupação)</span>:</span>
+                      <span className="text-xl font-black text-emerald-400">R$ 495.008,00 ✅</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : section === 'Plano de Investimento' ? (
