@@ -55,15 +55,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
   if (activeNavItems.length === 0) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl z-[1000] h-[85px] rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.06)] border-t border-gray-100 dark:border-gray-800 px-2 flex items-center">
-      <div className="relative w-full h-full grid" style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}>
+    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl z-[1000] h-[85px] rounded-t-[32px] shadow-[0_-10px_50px_rgba(0,0,0,0.08)] border-t border-gray-100 dark:border-gray-800/50 px-4 flex items-center">
+      <div className="relative w-full h-full grid" style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, 1fr)` }}>
         
-        {/* REFINED MAGNETIC INDICATOR (Liquid Movement) */}
+        {/* Floating Bubble Indicator */}
         <div 
-          className="absolute top-[15%] h-[60%] bg-blue-500/5 dark:bg-blue-400/10 blur-md rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] z-0"
+          className="absolute top-1/2 -translate-y-1/2 h-[52px] bg-brand-blue rounded-full shadow-lg shadow-blue-500/20 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-0 flex items-center justify-center"
           style={{ 
-            width: `${(100 / activeNavItems.length) * 0.8}%`,
-            left: `${(activeIndex * (100 / activeNavItems.length)) + (100 / activeNavItems.length) * 0.1}%`,
+            width: `calc(${(100 / activeNavItems.length)}% - 16px)`,
+            left: `calc(${(activeIndex * (100 / activeNavItems.length))}% + 8px)`,
           }}
         />
 
@@ -84,28 +84,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
             <button 
               key={item.id}
               onClick={() => handleTabClick(item.id)} 
-              className="w-full h-full flex flex-col items-center justify-center outline-none relative z-10 active:scale-95 transition-all duration-300"
+              className="w-full h-full flex flex-col items-center justify-center outline-none relative z-10 active:scale-95 transition-transform duration-200"
             >
-              <div className="relative mb-1 flex items-center justify-center">
-                {/* SUBTLE ACTIVE BACKGROUND CIRCLE */}
-                <div className={`absolute w-10 h-10 rounded-full bg-[#1E5BFF]/5 dark:bg-[#1E5BFF]/10 transition-all duration-500 ${isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}></div>
-                
-                <Icon 
-                  size={24}
-                  className={`transition-all duration-300 transform ${
-                    isActive 
-                      ? 'text-[#1E5BFF] scale-110 -translate-y-1' 
-                      : 'text-[#1E5BFF] opacity-60 scale-100 translate-y-0'
-                  }`} 
-                  strokeWidth={isActive ? 2.5 : 2} 
-                />
-              </div>
-              
-              <span className={`text-[9px] font-black uppercase tracking-[0.12em] transition-all duration-300 ${
-                isActive 
-                  ? 'text-[#1E5BFF] opacity-100 translate-y-0' 
-                  : 'text-slate-400 dark:text-slate-500 opacity-40 translate-y-0.5'
-              }`}>
+              <Icon 
+                size={24}
+                className={`transition-all duration-300 transform mb-1 ${isActive ? 'text-white' : 'text-brand-blue'}`}
+                strokeWidth={isActive ? 2.5 : 2} 
+              />
+              <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'text-white' : 'text-brand-blue'}`}>
                 {item.label}
               </span>
             </button>
