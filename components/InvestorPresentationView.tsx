@@ -27,6 +27,30 @@ const InvestmentItem: React.FC<{ title: string; items: string[]; subItems?: stri
   </div>
 );
 
+const expansionPlan = [
+    { zone: 'Zona Sudoeste', locations: ['Barra da Tijuca', 'Recreio dos Bandeirantes', 'Freguesia', 'Anil', 'Taquara', 'Pechincha', 'Vargem Grande', 'Vargem Pequena', 'Joá', 'Itanhangá', 'Camorim', 'Cidade de Deus', 'Gardênia Azul', 'Grumari', 'Rio das Pedras', 'Praça Seca', 'Tanque', 'Vila Valqueire'] },
+    { zone: 'Zona Sul', locations: ['Leblon', 'Ipanema', 'Lagoa', 'Jardim Botânico', 'Gávea', 'Copacabana', 'Leme', 'Botafogo', 'Flamengo', 'Catete', 'Laranjeiras', 'Glória', 'Humaitá', 'Urca', 'São Conrado', 'Cosme Velho'] },
+    { zone: 'Zona Norte', locations: ['Tijuca', 'Vila Isabel', 'Grajaú', 'Maracanã', 'Méier', 'Madureira', 'Penha', 'Ramos', 'Del Castilho', 'Cascadura', 'Rocha', 'São Cristóvão'] },
+    { zone: 'Zona Oeste', locations: ['Campo Grande', 'Bangu', 'Realengo', 'Santa Cruz', 'Deodoro', 'Padre Miguel', 'Senador Camará', 'Paciência', 'Sepetiba'] },
+    { zone: 'Centro (RJ)', locations: ['Centro', 'Lapa', 'Santa Teresa', 'Cidade Nova', 'Gamboa', 'Santo Cristo', 'Catumbi'] },
+    { zone: 'Região Serrana', locations: ['Petrópolis', 'Teresópolis', 'Nova Friburgo', 'Guapimirim'] },
+    { zone: 'Baixada Fluminense', locations: ['Duque de Caxias', 'Nova Iguaçu', 'São João de Meriti', 'Belford Roxo', 'Nilópolis', 'Mesquita', 'Queimados', 'Japeri', 'Seropédica', 'Magé', 'Itaguaí', 'Paracambi'] },
+    { zone: 'Niterói', locations: ['Centro', 'Icaraí', 'Ingá', 'Boa Viagem', 'São Domingos', 'Gragoatá', 'Ponta d’Areia', 'Santa Rosa', 'Charitas', 'São Francisco'] },
+    { zone: 'Região dos Lagos', locations: ['Cabo Frio', 'Arraial do Cabo', 'Armação dos Búzios', 'Araruama', 'São Pedro da Aldeia', 'Iguaba Grande', 'Saquarema'] },
+    { zone: 'Costa Verde', locations: ['Angra dos Reis', 'Paraty', 'Mangaratiba', 'Itaguaí', 'Rio Claro'] }
+];
+
+const ExpansionRegion: React.FC<{ zone: string; locations: string[] }> = ({ zone, locations }) => (
+    <div className="pb-6 border-b border-white/5 last:border-b-0 last:pb-0 mb-6 last:mb-0">
+        <h3 className="text-base font-black text-indigo-400 mb-4 tracking-wider uppercase">{zone}</h3>
+        <div className="columns-2 sm:columns-3 md:columns-4 gap-x-8">
+            {locations.map((location, index) => (
+                <p key={index} className="text-xs text-slate-400 mb-2 break-inside-avoid">{location}</p>
+            ))}
+        </div>
+    </div>
+);
+
 export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> = ({ onBack }) => {
   const sections = [
     'Visão Geral',
@@ -227,48 +251,16 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
               </div>
             ) : section === 'Plano de Expansão' ? (
               <div className="bg-slate-900/40 border border-white/5 rounded-[2rem] p-8 backdrop-blur-sm shadow-xl shadow-black/20">
-                <div className="text-slate-300 text-[15px] font-medium leading-relaxed space-y-8">
-                  <p className="text-white font-bold text-xl">
-                    Modelo replicável e escalável.
-                  </p>
-                  
-                  <div className="space-y-4">
-                    <p className="text-slate-400">Expansão prevista para bairros e regiões estratégicas:</p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Barra da Tijuca</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Recreio dos Bandeirantes</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Zona Sul</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Centro</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Méier</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Tijuca</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Ilha do Governador</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Duque de Caxias</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Nova Iguaçu</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> São João de Meriti</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Belford Roxo</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Região Serrana</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Região dos Lagos</div>
-                      <div className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Costa Verde</div>
-                    </div>
-                    <p className="text-indigo-400 font-bold mt-4">Total previsto: 14 frentes de expansão</p>
-                  </div>
-
-                  <div className="space-y-4 pt-6 border-t border-white/5">
-                    <p className="text-white font-bold text-lg">Escala Potencial</p>
-                    <p className="text-slate-400">Mantendo apenas cenário conservador por região:</p>
-                    <ul className="space-y-3 ml-2">
-                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Expansão proporcional da base de receita</li>
-                      <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Crescimento previsível e replicável</li>
-                    </ul>
-                    <p className="text-white font-medium">Estrutura com alto potencial de valorização.</p>
-                  </div>
-
-                  <div className="bg-indigo-500/10 border border-indigo-500/20 p-6 rounded-xl mt-6">
-                    <p className="text-indigo-300 font-bold mb-2">Escala Potencial do Modelo</p>
-                    <p className="text-sm text-indigo-200/70 mb-4">Considerando replicação em todas as regiões previstas:</p>
-                    <p className="text-2xl font-black text-white">Superior a R$ 800.000,00 <span className="text-sm font-medium text-slate-400">/ mês</span></p>
-                    <p className="mt-2 text-xs text-indigo-300/50 uppercase tracking-widest">(Cenário Estratégico)</p>
-                  </div>
+                <div className="space-y-6">
+                  {expansionPlan.map((region, index) => (
+                    <ExpansionRegion key={index} zone={region.zone} locations={region.locations} />
+                  ))}
+                </div>
+                <div className="mt-8 pt-8 border-t border-white/10 text-center">
+                  <p className="text-indigo-300 font-bold mb-2">Escala Potencial do Modelo</p>
+                  <p className="text-sm text-indigo-200/70 mb-4">Considerando replicação em todas as regiões previstas:</p>
+                  <p className="text-3xl font-black text-white">Superior a R$ 800.000,00 <span className="text-lg font-medium text-slate-400">/ mês</span></p>
+                  <p className="mt-2 text-xs text-indigo-300/50 uppercase tracking-widest">(Cenário Estratégico)</p>
                 </div>
               </div>
             ) : section === 'Plano de Investimento' ? (
