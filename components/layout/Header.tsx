@@ -99,7 +99,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   const contextData = NEIGHBORHOOD_CONTEXT_DATA[currentNeighborhood] || NEIGHBORHOOD_CONTEXT_DATA["Jacarepaguá (todos)"];
   const isHomeOrExplore = activeTab === 'home' || activeTab === 'explore';
-  const blueTabs = ['home', 'explore', 'health_selection', 'services_selection', 'pets_selection', 'fashion_selection', 'beauty_selection', 'autos_selection', 'category_detail'];
+  const blueTabs = [
+    'home', 'explore', 'category_detail',
+    'health_selection', 'health_women', 'health_pediatrics',
+    'services_selection', 'services_manual', 'services_specialized',
+    'pets_selection', 'pets_dogs', 'pets_cats', 'pets_others',
+    'fashion_selection', 'fashion_women', 'fashion_men', 'fashion_kids',
+    'beauty_selection', 'beauty_women', 'beauty_men',
+    'autos_selection', 'autos_carros', 'autos_motos', 'autos_bikes', 'autos_eletricos'
+  ];
   const isBlueHeader = blueTabs.includes(activeTab);
 
   useEffect(() => {

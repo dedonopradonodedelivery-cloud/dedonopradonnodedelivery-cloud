@@ -249,15 +249,9 @@ export const App: React.FC = () => {
     'admin_panel', 'services', 'service_chat', 'notifications',
     'adoption', 'donations', 'desapega', 'real_estate', 'jobs', 'job_wizard', 
     'real_estate_wizard', 'about_app', 'privacy_policy', 'support',
-    'health_women', 'health_pediatrics',
-    'services_manual', 'services_specialized', 
-    'pets_dogs', 'pets_cats', 'pets_others', 
-    'fashion_women', 'fashion_men', 'fashion_kids',
-    'beauty_women', 'beauty_men',
-    'autos_carros', 'autos_motos', 'autos_bikes', 'autos_eletricos',
     'classified_detail', 'job_detail', 'real_estate_detail', 'classified_search_results', 'plan_selection',
     'troca_troca', 'troca_troca_intro', 'troca_troca_swipe', 'user_trade_items', 'user_resume', 'merchant_jobs',
-    'patrocinador_master', 'investor_presentation', 'category_detail'
+    'patrocinador_master', 'investor_presentation'
   ];
 
   return (
