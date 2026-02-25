@@ -356,7 +356,7 @@ export const InvestorPresentationView: React.FC<InvestorPresentationViewProps> =
                     <p>O investidor passa a ser dono de <span className="text-white font-bold">30% da empresa</span></p>
                     
                     <p className="text-white font-bold mt-4 mb-1">Garantia de Execução:</p>
-                    <p>O protótipo já está funcionando (MVP), reduzindo o risco, pois o projeto já saiu do papel.</p>
+                    <p>O protótipo já está 85% funcionando (MVP), reduzindo o risco, pois o projeto já saiu do papel.</p>
                   </div>
 
                   <div className="pt-4 border-t border-white/5">

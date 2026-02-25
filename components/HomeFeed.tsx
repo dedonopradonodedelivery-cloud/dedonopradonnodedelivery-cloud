@@ -182,7 +182,7 @@ export const HomeFeed: React.FC<{ onNavigate: (view: string, data?: any) => void
                     <button onClick={() => onNavigate('user_coupons')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Ver todos</button>
                 </div>
 
-                <div className="relative p-4 rounded-[3rem] shadow-[0_0_40px_rgba(30,91,255,0.08)] dark:shadow-[0_0_50px_rgba(30,91,255,0.05)]">
+                <div className="relative">
                     <button 
                         onClick={() => onNavigate('coupon_landing')} 
                         className="w-full h-[180px] relative flex bg-slate-50 dark:bg-gray-900 shadow-xl shadow-blue-900/5 active:scale-[0.99] transition-all overflow-hidden rounded-[2.5rem] group"
