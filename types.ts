@@ -6,7 +6,8 @@ export type PlanType = 'free' | 'professional' | 'enterprise' | 'master' | 'foun
 
 export enum AdType {
   ORGANIC = 'ORGANIC',
-  LOCAL = 'LOCAL',   
+  LOCAL = 'LOCAL',
+  STANDARD = 'STANDARD',
   PREMIUM = 'PREMIUM' 
 }
 

@@ -79,7 +79,7 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({
                className="relative w-full cursor-pointer group active:scale-[0.98] transition-all mb-6 mt-6"
            >
                <div className="absolute top-0 right-6 -translate-y-1/2 z-20">
-                  <div className="bg-slate-900 text-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg">
+                  <div className="bg-brand-orange text-white px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg">
                       <Crown className="w-4 h-4 text-white fill-white" />
                       <div className="flex flex-col items-center leading-none">
                           <span className="text-[7px] font-bold uppercase tracking-widest">Patrocinador</span>
@@ -88,23 +88,23 @@ export const LojasEServicosList: React.FC<LojasEServicosListProps> = ({
                   </div>
                </div>
 
-               <div className="bg-brand-orange rounded-3xl p-5 pt-8 shadow-lg shadow-orange-500/20">
+               <div className="bg-white dark:bg-gray-900 rounded-3xl p-5 pt-8 shadow-lg border border-gray-100 dark:border-gray-800">
                    <div className="flex gap-4 items-center">
-                       <div className="w-16 h-16 rounded-full bg-white flex-shrink-0 flex items-center justify-center shadow-md">
-                           <span className="text-brand-orange font-black text-3xl">AC</span>
+                       <div className="w-16 h-16 rounded-full bg-brand-orange flex-shrink-0 flex items-center justify-center shadow-md">
+                           <span className="text-white font-black text-3xl">AC</span>
                        </div>
                        <div className="flex-1 min-w-0">
-                           <h3 className="font-black text-2xl text-white uppercase tracking-tight">Atual Clube</h3>
-                           <p className="text-white/90 text-xs mt-1 leading-tight font-medium line-clamp-2">{masterStore?.description}</p>
+                           <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tight">Atual Clube</h3>
+                           <p className="text-gray-500 dark:text-gray-400 text-xs mt-1 leading-tight font-medium line-clamp-2">{masterStore?.description}</p>
                        </div>
                    </div>
                    <div className="flex items-center gap-2 mt-4">
-                       <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/20 px-2.5 py-1 rounded-md">
+                       <div className="flex items-center gap-1 text-[10px] font-bold text-brand-orange bg-orange-50 dark:bg-orange-950/50 px-2.5 py-1 rounded-md">
                           <Star className="w-3 h-3 fill-current" />
                           {masterStore.rating?.toFixed(1)}
                        </div>
-                       <div className="bg-black/20 px-2.5 py-1 rounded-md">
-                           <span className="text-[10px] font-bold text-white uppercase">Proteção</span>
+                       <div className="bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-md">
+                           <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Proteção</span>
                        </div>
                    </div>
                </div>
