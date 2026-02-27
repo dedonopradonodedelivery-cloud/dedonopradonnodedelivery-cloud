@@ -28,8 +28,8 @@ export const EditorialListView: React.FC<EditorialListViewProps> = ({
       return collection.keywords.some(keyword => searchStr.includes(keyword.toLowerCase()));
     });
 
-    let sponsored = filtered.filter(s => s.adType === AdType.PREMIUM || s.isSponsored || s.adType === AdType.LOCAL);
-    let organic = filtered.filter(s => s.adType === AdType.ORGANIC && !s.isSponsored);
+    const sponsored = filtered.filter(s => s.adType === AdType.PREMIUM || s.isSponsored || s.adType === AdType.LOCAL);
+    const organic = filtered.filter(s => s.adType === AdType.ORGANIC && !s.isSponsored);
 
     organic.sort((a, b) => (b.rating || 0) - (a.rating || 0));
 

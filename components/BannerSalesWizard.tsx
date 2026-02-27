@@ -47,7 +47,7 @@ export const BannerSalesWizard: React.FC<BannerSalesWizardProps> = ({ user, onBa
     
     const base = prices[placement];
     const numHoods = selectedHoods.length;
-    let subtotal = base * numHoods;
+    const subtotal = base * numHoods;
     let discountPercent = 0;
 
     if (numHoods >= 9) discountPercent = 0.10;

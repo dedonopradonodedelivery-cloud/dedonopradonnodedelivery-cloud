@@ -66,21 +66,6 @@ const GROUPS: SpecialtyGroup[] = [
   }
 ];
 
-const SpecialtyCard: React.FC<{ item: SpecialtyItem; onClick: () => void }> = ({ item, onClick }) => (
-  <button
-    onClick={onClick}
-    className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm mb-2"
-  >
-    <div className="flex items-center gap-3">
-        <span className="text-sm font-bold text-gray-800 dark:text-gray-200 tracking-tight">{item.name}</span>
-        {item.isPopular && (
-            <span className="bg-indigo-100 text-indigo-700 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">Destaque</span>
-        )}
-    </div>
-    <ChevronRight size={16} className="text-gray-300 group-hover:text-indigo-600 transition-colors" />
-  </button>
-);
-
 export const PetsCatsView: React.FC<PetsCatsViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
   const handleHeroClick = () => {
     onStoreClick({

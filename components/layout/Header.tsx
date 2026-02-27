@@ -1,10 +1,9 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, X, ChevronLeft, Sun, Zap, Mic, Cloud, CloudRain, Thermometer } from 'lucide-react';
+import { MapPin, ChevronDown, Check, Bell, ShieldCheck, Search, ChevronLeft, Mic } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
-import { Store, Category } from '@/types';
+import { Category } from '@/types';
 import { GeminiAssistant } from '@/components/GeminiAssistant';
-import { LOKA_MASCOT_BASE64 } from '@/constants';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 const NEIGHBORHOOD_CONTEXT_DATA: Record<string, { traffic: string, temp: string, status: string }> = {
@@ -75,7 +74,6 @@ export const Header: React.FC<HeaderProps> = ({
   user,
   activeTab,
   isAdmin,
-  viewMode,
   onOpenViewSwitcher,
   onBack,
   customTitle,
@@ -93,7 +91,6 @@ export const Header: React.FC<HeaderProps> = ({
     return user.email?.split('@')[0] || "Morador";
   }, [user]);
 
-  const contextData = NEIGHBORHOOD_CONTEXT_DATA[currentNeighborhood] || NEIGHBORHOOD_CONTEXT_DATA["Jacarepaguá (todos)"];
   const isHomeOrExplore = activeTab === 'home' || activeTab === 'explore';
   const blueTabs = [
     'home', 'explore', 'category_detail',
@@ -108,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     const checkNotifs = () => {
-      let saved = localStorage.getItem('app_notifications');
+      const saved = localStorage.getItem('app_notifications');
       if (!saved) return;
       const notifs = JSON.parse(saved);
       setUnreadCount(notifs.filter((n: any) => !n.read).length);

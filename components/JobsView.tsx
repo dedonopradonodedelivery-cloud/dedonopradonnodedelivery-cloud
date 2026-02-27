@@ -150,7 +150,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onJobClick, onNavigate, onBa
 // FIX: The type `MerchantJob` from `MOCK_JOBS_FOR_TESTING` is incompatible with the expected `Job` type for this component's logic.
 // This fix explicitly maps the properties from `MerchantJob` to `Job` to resolve the type mismatch and ensure the component renders correctly.
   const jobsWithCompatibility = useMemo(() => {
-    let jobs = MOCK_JOBS_FOR_TESTING.map(merchantJob => {
+    const jobs = MOCK_JOBS_FOR_TESTING.map(merchantJob => {
       const compatibility = candidateProfile 
         ? calculateCompatibility(candidateProfile, merchantJob) 
         : undefined;

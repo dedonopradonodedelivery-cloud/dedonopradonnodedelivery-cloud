@@ -97,7 +97,7 @@ export const ContactsBaseView: React.FC<ContactsBaseViewProps> = ({ onBack }) =>
   }, [contacts, activeTab, searchTerm, sortOrder]);
 
   const handleExport = (type: 'current' | 'all') => {
-    let dataToExport = type === 'current' ? filteredContacts : contacts;
+    const dataToExport = type === 'current' ? filteredContacts : contacts;
     
     // CSV Header
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for Excel compatibility

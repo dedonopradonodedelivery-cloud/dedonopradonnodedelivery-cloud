@@ -118,7 +118,7 @@ export const TrocaTrocaSwipeView: React.FC<TrocaTrocaSwipeViewProps> = ({ onBack
             isVerified: false
         }));
 
-        let combinedDeck: SwipeCardData[] = [...userItemsMapped, ...mockItemsMapped];
+        const combinedDeck: SwipeCardData[] = [...userItemsMapped, ...mockItemsMapped];
         
         // Remove duplicates and filter by neighborhood
         const uniqueIds = new Set();

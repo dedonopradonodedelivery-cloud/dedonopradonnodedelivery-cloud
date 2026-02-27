@@ -22,13 +22,6 @@ const GROUPS: SpecialtyGroup[] = [
   { title: "Inspeção & Regularização", icon: ClipboardCheck, items: [{ name: "Inspeção veicular" }] },
 ];
 
-const SpecialtyCard: React.FC<{ name: string; onClick: () => void }> = ({ name, onClick }) => (
-  <button onClick={onClick} className="w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all shadow-sm mb-2">
-    <span className="text-sm font-bold text-gray-800 dark:text-gray-200 tracking-tight">{name}</span>
-    <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-600 transition-colors" />
-  </button>
-);
-
 export const AutosCarrosView: React.FC<AutosCarrosViewProps> = ({ onBack, onSelect, onNavigate, onStoreClick }) => {
   const handleHeroClick = () => {
     onStoreClick({
