@@ -18,9 +18,22 @@ export const MestreDaFreguesiaView: React.FC<MestreDaFreguesiaViewProps> = ({ on
   const progress = (xp / nextLevelXp) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0a192f] text-white pb-40 font-sans selection:bg-blue-500/30 relative overflow-hidden">
+    <div className="min-h-screen text-white pb-40 font-sans selection:bg-blue-500/30 relative">
+      <style>{`
+        @keyframes pulse-scale {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.03); }
+        }
+        .animate-pulse-scale {
+          animation: pulse-scale 2.5s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Fixed Full Bleed Background */}
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0a192f] -z-10" />
+      
       {/* Background Animated Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md overflow-hidden pointer-events-none -z-10">
         <div className="absolute -top-[20%] -right-[10%] w-[70%] h-[50%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }}></div>
         <div className="absolute bottom-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[100px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
       </div>
@@ -73,7 +86,7 @@ export const MestreDaFreguesiaView: React.FC<MestreDaFreguesiaViewProps> = ({ on
                 <div className="absolute inset-0 bg-white/20 animate-pulse" />
               </div>
             </div>
-            <p className="text-xs font-medium text-white/40 text-right">{xp} / {nextLevelXp} Prestígio</p>
+            <p className="text-xs font-medium text-white/40 text-right">{xp} / {nextLevelXp} Recompensa</p>
           </div>
 
           {/* Other Modes */}
@@ -131,7 +144,7 @@ export const MestreDaFreguesiaView: React.FC<MestreDaFreguesiaViewProps> = ({ on
                   </div>
                   <div className="text-right">
                     <p className="font-black text-blue-400">{user.xp}</p>
-                    <p className="text-[10px] font-bold text-white/40 uppercase">Prestígio</p>
+                    <p className="text-[10px] font-bold text-white/40 uppercase">Recompensa</p>
                   </div>
                 </div>
               ))}
@@ -141,18 +154,19 @@ export const MestreDaFreguesiaView: React.FC<MestreDaFreguesiaViewProps> = ({ on
       </div>
 
       {/* Fixed Bottom Action */}
-      <div className="fixed bottom-24 left-0 right-0 p-6 z-50 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/90 to-transparent pt-12 pointer-events-none">
+      <div className="fixed bottom-24 left-0 right-0 p-6 z-50 pointer-events-none">
         <div className="max-w-md mx-auto pointer-events-auto">
           <button 
             onClick={() => onNavigate('quiz', { mode: 'daily' })}
-            className="w-full relative overflow-hidden rounded-3xl bg-blue-600 p-4 flex items-center justify-center gap-4 group active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)]"
+            className="w-full relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-blue-600 to-blue-500 p-6 flex items-center justify-center gap-5 group active:scale-[0.95] transition-all shadow-[0_0_40px_rgba(37,99,235,0.5)] hover:shadow-[0_0_50px_rgba(37,99,235,0.7)] animate-pulse-scale border border-blue-400/30"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="absolute inset-0 bg-blue-400/20 animate-pulse" />
-            <Play size={28} className="text-white fill-white relative z-10" />
+            <div className="absolute inset-0 bg-white/0 active:bg-white/20 transition-colors duration-300" />
+            
+            <Play size={36} className="text-white fill-white relative z-10 drop-shadow-lg" />
             <div className="text-left relative z-10">
-              <h3 className="text-lg font-black uppercase tracking-tight leading-none mb-1">Desafio Diário</h3>
-              <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">+50 Prestígio</p>
+              <h3 className="text-2xl font-black uppercase tracking-tight leading-none mb-1.5 drop-shadow-md">Desafio Diário</h3>
+              <p className="text-[10px] font-bold text-blue-100 uppercase tracking-[0.2em] opacity-90">+50 Recompensa</p>
             </div>
           </button>
         </div>

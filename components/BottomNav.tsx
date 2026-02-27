@@ -40,8 +40,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
 
   if (activeNavItems.length === 0) return null;
 
+  const isDarkPremium = activeTab === 'mestre_freguesia' || activeTab === 'quiz';
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white dark:bg-gray-900 z-[1000] h-[80px] rounded-t-[24px] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 dark:border-gray-800 px-1">
+    <div className={`fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md z-[1000] h-[80px] rounded-t-[24px] px-1 transition-colors duration-300 ${
+      isDarkPremium 
+        ? 'bg-[#0A0A0A]/80 backdrop-blur-xl border-t border-white/10 shadow-none' 
+        : 'bg-white dark:bg-gray-900 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 dark:border-gray-800'
+    }`}>
       <div 
         className="grid w-full h-full"
         style={{ gridTemplateColumns: `repeat(${activeNavItems.length}, minmax(0, 1fr))` }}
@@ -71,15 +77,23 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
               <div className="relative flex flex-col items-center">
                 <Icon 
                   size={24}
-                  className={`transition-colors duration-200 mb-1 ${isActive ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-500'}`} 
+                  className={`transition-colors duration-200 mb-1 ${
+                    isActive 
+                      ? (isDarkPremium ? 'text-blue-400' : 'text-blue-600') 
+                      : (isDarkPremium ? 'text-white/40 group-hover:text-white/70' : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-500')
+                  }`} 
                   strokeWidth={isActive ? 2.5 : 2} 
                 />
-                <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-500'}`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-200 ${
+                  isActive 
+                    ? (isDarkPremium ? 'text-blue-400' : 'text-blue-600') 
+                    : (isDarkPremium ? 'text-white/40 group-hover:text-white/70' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-500')
+                }`}>
                   {item.label}
                 </span>
               </div>
               {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-full" />
+                <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full ${isDarkPremium ? 'bg-blue-400' : 'bg-blue-600'}`} />
               )}
             </button>
           );

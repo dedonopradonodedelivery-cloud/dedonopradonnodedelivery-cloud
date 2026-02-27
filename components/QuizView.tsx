@@ -166,9 +166,12 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
 
   if (isFinished) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0a192f] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 relative">
+        {/* Fixed Full Bleed Background */}
+        <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0a192f] -z-10" />
+        
         {/* Background Animated Gradients */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md overflow-hidden pointer-events-none -z-10">
           <div className="absolute top-[20%] right-[10%] w-[60%] h-[60%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }}></div>
         </div>
 
@@ -178,7 +181,7 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
           
           <div className="bg-white/5 border border-white/10 rounded-3xl p-8 w-full mt-6 mb-8 backdrop-blur-sm">
             <div className="text-center mb-8">
-              <p className="text-white/60 mb-2 font-bold uppercase tracking-widest text-xs">Prestígio Total</p>
+              <p className="text-white/60 mb-2 font-bold uppercase tracking-widest text-xs">Recompensa Total</p>
               <div className="text-6xl font-black text-blue-500 drop-shadow-[0_0_30px_rgba(37,99,235,0.3)]">+{prestigioRodada}</div>
             </div>
             
@@ -245,9 +248,12 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0a192f] text-white flex flex-col font-sans relative overflow-hidden pb-24">
+    <div className="min-h-screen text-white flex flex-col font-sans relative pb-24">
+      {/* Fixed Full Bleed Background */}
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0a192f] -z-10" />
+      
       {/* Background Animated Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md overflow-hidden pointer-events-none -z-10">
         <div className="absolute -top-[10%] -right-[10%] w-[70%] h-[50%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }}></div>
         <div className="absolute top-[30%] left-[10%] w-[80%] h-[40%] rounded-full bg-indigo-600/10 blur-[100px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
       </div>
