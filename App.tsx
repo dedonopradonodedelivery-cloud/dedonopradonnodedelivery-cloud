@@ -68,6 +68,8 @@ import { UserResumeView } from '@/components/UserResumeView';
 import { RoleSwitcherModal } from '@/components/RoleSwitcherModal';
 import { PatrocinadorMasterScreen } from '@/components/PatrocinadorMasterScreen';
 import { InvestorPresentationView } from '@/components/InvestorPresentationView';
+import { MestreDaFreguesiaView } from '@/components/MestreDaFreguesiaView';
+import { QuizView } from '@/components/QuizView';
 
 export const App: React.FC = () => {
   const { user: authUser, userRole: authRole, loading: authLoading, signOut } = useAuth();
@@ -210,7 +212,7 @@ export const App: React.FC = () => {
     'real_estate_wizard', 'about_app', 'privacy_policy', 'support',
     'classified_detail', 'job_detail', 'real_estate_detail', 'classified_search_results', 'plan_selection',
     'troca_troca', 'troca_troca_intro', 'troca_troca_swipe', 'user_trade_items', 'user_resume', 'merchant_jobs',
-    'patrocinador_master', 'investor_presentation'
+    'patrocinador_master', 'investor_presentation', 'mestre_freguesia', 'quiz'
   ];
 
   return (
@@ -353,6 +355,8 @@ export const App: React.FC = () => {
                     {activeTab === 'merchant_scheduling' && <MerchantSchedulingModule onBack={() => handleNavigate('store_area')} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
                     {activeTab === 'investor_presentation' && <InvestorPresentationView onBack={() => handleNavigate('admin_panel')} />}
+                    {activeTab === 'mestre_freguesia' && <MestreDaFreguesiaView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />}
+                    {activeTab === 'quiz' && <QuizView onBack={() => handleNavigate('mestre_freguesia')} mode={selectedData?.mode || 'daily'} />}
                     </main>
                 </Layout>
             )}

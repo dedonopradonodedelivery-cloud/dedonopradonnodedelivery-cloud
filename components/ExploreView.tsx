@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Flame, MessageSquare, Repeat, Search, Sparkles, TrendingUp, ChevronRight, Briefcase, Cpu, ArrowRight } from 'lucide-react';
+import { Flame, MessageSquare, Repeat, Search, Sparkles, TrendingUp, ChevronRight, Briefcase, Cpu, ArrowRight, Trophy, Play } from 'lucide-react';
 import { Store, Classified, Job } from "@/types";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MOCK_CLASSIFIEDS, MOCK_JOBS } from "@/constants";
@@ -228,6 +228,36 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ stores, onStoreClick, 
       <div className="p-6 space-y-12">
         <NeighborhoodPulse onNavigate={onNavigate} />
         
+        {/* MESTRE DA FREGUESIA BANNER */}
+        <section className="space-y-6">
+            <SectionHeader icon={Trophy} title="Mestre da Freguesia" subtitle="Teste seus conhecimentos" iconColor="text-amber-500" />
+            <div onClick={() => onNavigate('mestre_freguesia')} className="w-full bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(37,99,235,0.25)] border border-white/20 cursor-pointer group active:scale-[0.99] transition-all relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="flex items-center gap-2 mb-6 bg-white/15 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-lg group-hover:bg-white/25 transition-all">
+                        <Flame size={14} className="text-orange-400" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">NOVO JOGO</span>
+                    </div>
+                    
+                    <h3 className="text-3xl font-display font-black text-white leading-none mb-3 tracking-tighter uppercase drop-shadow-md">
+                        VOCÊ CONHECE <br/> O SEU BAIRRO?
+                    </h3>
+                    
+                    <p className="text-xs font-bold text-blue-100 mb-10 leading-relaxed max-w-[260px] opacity-90 drop-shadow-sm">
+                        Jogue o quiz diário, ganhe XP, suba no ranking e prove que você é o Mestre da Freguesia.
+                    </p>
+                    
+                    <div className="w-full bg-white text-blue-700 font-black py-5 rounded-2xl text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-xl group-hover:shadow-blue-900/40 transition-all">
+                        JOGAR AGORA
+                        <Play size={18} strokeWidth={4} className="fill-blue-700" />
+                    </div>
+                </div>
+                
+                {/* Decorative Elements */}
+                <Trophy size={120} className="absolute -bottom-10 -right-10 text-white/10 rotate-12 group-hover:scale-110 transition-transform duration-700" />
+            </div>
+        </section>
+
         {/* VAGAS DE EMPREGO (IA LOKA REFINEMENT) */}
         <section className="space-y-6">
             <SectionHeader icon={Briefcase} title="Empregos no Bairro" subtitle={currentNeighborhood === "Jacarepaguá (todos)" ? "Oportunidades em JPA" : `Trabalhe em ${currentNeighborhood}`} iconColor="text-emerald-500" />
