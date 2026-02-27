@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   Briefcase
 } from 'lucide-react';
-import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Baby, User, Users, Heart, ArrowRight, Info, ChevronLeft } from 'lucide-react';
+import { Baby, User, Users, Heart, ArrowRight, Info, ChevronLeft, Stethoscope, Activity, Brain, Apple } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface HealthSelectionViewProps {
@@ -35,13 +35,17 @@ export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onSele
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
       
+      <div className="pt-12 pb-6 px-6 flex justify-end">
+        <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
+      </div>
+
       <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         <main className="p-6 pt-12 space-y-10">
             <div className="text-center space-y-3 mb-4 relative">
                 <button 
                   onClick={onBack}
-                  className="absolute left-0 top-0 p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-gray-900"
+                  className="absolute left-0 top-0 p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-500 hover:text-gray-900 active:scale-90 transition-all shadow-sm"
                 >
                   <ChevronLeft size={20} />
                 </button>
@@ -49,9 +53,9 @@ export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onSele
                     <Heart size={32} fill="currentColor" />
                 </div>
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight">
-                    Para quem você busca <br/> atendimento? <span className="text-blue-500">✨</span>
+                    Saúde em <br/> Jacarepaguá <span className="text-blue-500">✨</span>
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">Escolha uma opção para ver os especialistas do bairro.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">Escolha uma especialidade para ver os profissionais.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -97,6 +101,50 @@ export const HealthSelectionView: React.FC<HealthSelectionViewProps> = ({ onSele
                     </div>
                     <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
                         Geriatria
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Odontologia')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-emerald-500 bg-opacity-10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform duration-500">
+                        <Stethoscope size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Odontologia
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Fisioterapia')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-cyan-500 bg-opacity-10 flex items-center justify-center text-cyan-500 group-hover:scale-110 transition-transform duration-500">
+                        <Activity size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Fisioterapia
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Psicologia')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-purple-500 bg-opacity-10 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform duration-500">
+                        <Brain size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Psicologia
+                    </span>
+                </button>
+                <button
+                    onClick={() => onSelect('Nutrição')}
+                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-6 rounded-[2.2rem] flex flex-col items-center justify-center text-center gap-4 transition-all active:scale-95 shadow-sm hover:shadow-md group"
+                >
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-lime-500 bg-opacity-10 flex items-center justify-center text-lime-500 group-hover:scale-110 transition-transform duration-500">
+                        <Apple size={32} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none px-1">
+                        Nutrição
                     </span>
                 </button>
             </div>

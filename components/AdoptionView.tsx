@@ -3,24 +3,20 @@ import React, { useState, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { 
   ChevronLeft, 
-  PawPrint, 
   MapPin, 
   Clock, 
   Plus, 
   Search, 
   X, 
-  ArrowRight, 
-  Info,
   ChevronRight,
   SlidersHorizontal,
-  Check,
   Camera,
   Loader2,
   CheckCircle2
 } from 'lucide-react';
-import { useNeighborhood, NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
-import { Classified, Store } from '../types';
-import { MOCK_CLASSIFIEDS, STORES } from '../constants';
+import { NEIGHBORHOODS } from '../contexts/NeighborhoodContext';
+import { Classified } from '../types';
+import { MOCK_CLASSIFIEDS } from '../constants';
 
 interface AdoptionViewProps {
   onBack: () => void;
@@ -94,7 +90,7 @@ const AdoptionCard: React.FC<{ item: Classified; onClick: () => void }> = ({ ite
 export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequireLogin, onNavigate }) => {
   const [viewState, setViewState] = useState<'list' | 'form' | 'success'>('list');
   const [filterHood, setFilterHood] = useState<string | null>(null);
-  const [filterSpecies, setFilterSpecies] = useState<string | null>(null);
+  const [filterSpecies] = useState<string | null>(null);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -114,7 +110,7 @@ export const AdoptionView: React.FC<AdoptionViewProps> = ({ onBack, user, onRequ
   }, []);
 
   const filteredAdoptions = useMemo(() => {
-    let list = adoptions.filter(item => {
+    const list = adoptions.filter(item => {
       const matchHood = !filterHood || item.neighborhood === filterHood;
       const content = (item.title + item.description).toLowerCase();
       const matchSpecies = !filterSpecies || 

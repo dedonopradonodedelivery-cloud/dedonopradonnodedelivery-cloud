@@ -21,6 +21,7 @@ import {
   Settings,
   Users,
   Zap,
+  Calendar,
   Store as StoreIcon,
   PieChart,
   Building,
@@ -236,6 +237,15 @@ export const StoreAreaView: React.FC<StoreAreaViewProps> = ({ onNavigate, user }
 
           <section>
             <SectionHeader title="Relacionamento" icon={Users} />
+            {user?.user_metadata?.is_verified && (
+              <NavCard 
+                icon={Calendar} 
+                label="Agendamento Localizei" 
+                description="Gerencie horários e serviços"
+                onClick={() => onNavigate('merchant_scheduling')}
+                colorClass="bg-blue-50 text-blue-600 dark:bg-blue-900/20"
+              />
+            )}
             <NavCard 
               icon={Star} 
               label="Avaliações de Clientes" 

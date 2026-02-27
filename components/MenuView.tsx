@@ -84,6 +84,7 @@ const MenuItem: React.FC<{
 
 export const MenuView: React.FC<MenuViewProps> = ({ 
   user, 
+  userRole,
   onAuthClick, 
   onNavigate, 
   onBack 
@@ -203,6 +204,20 @@ export const MenuView: React.FC<MenuViewProps> = ({
               <span className="text-[9px] font-bold text-gray-400 underline mt-2 block">Ver perfil completo</span>
             </div>
           </div>
+
+          {/* SEÇÃO DO LOJISTA */}
+          {userRole === 'lojista' && (
+            <MenuSection title="Gestão do Parceiro">
+              <MenuItem 
+                icon={Crown} 
+                label="Painel do Parceiro" 
+                sublabel="Gerencie sua loja e resultados"
+                onClick={() => onNavigate('store_area')}
+                isSpecial
+                badge="Premium"
+              />
+            </MenuSection>
+          )}
 
           {/* SEÇÃO DE BENEFÍCIOS (MAIOR DESTAQUE) */}
           {isFeatureActive('coupons') && (

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Sparkles } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
 import { HomeFeed } from '@/components/HomeFeed';
@@ -19,25 +20,21 @@ import { MerchantCouponsModule } from '@/components/MerchantCouponsModule';
 import { MerchantJobsModule } from '@/components/MerchantJobsModule';
 import { StoreFinanceModule } from '@/components/StoreFinanceModule';
 import { StoreSupportModule } from '@/components/StoreSupportModule';
+import { StoreAreaView } from '@/components/StoreAreaView';
+import { MerchantSchedulingModule } from '@/components/MerchantSchedulingModule';
 import { AuthModal } from '@/components/AuthModal';
-import { HealthSelectionView } from '@/components/HealthSelectionView';
 import { HealthWomenView } from '@/components/HealthWomenView';
 import { HealthPediatricsView } from '@/components/HealthPediatricsView';
-import { ServicesSelectionView } from '@/components/ServicesSelectionView';
 import { ServicesManualView } from '@/components/ServicesManualView';
 import { ServicesSpecializedView } from '@/components/ServicesSpecializedView';
-import { PetsSelectionView } from '@/components/PetsSelectionView';
 import { PetsDogsView } from '@/components/PetsDogsView';
 import { PetsCatsView } from '@/components/PetsCatsView';
 import { PetsOthersView } from '@/components/PetsOthersView';
-import { FashionSelectionView } from '@/components/FashionSelectionView';
 import { FashionWomenView } from '@/components/FashionWomenView';
 import { FashionMenView } from '@/components/FashionMenView';
 import { FashionKidsView } from '@/components/FashionKidsView';
-import { BeautySelectionView } from '@/components/BeautySelectionView';
 import { BeautyWomenView } from '@/components/BeautyWomenView';
 import { BeautyMenView } from '@/components/BeautyMenView';
-import { AutosSelectionView } from '@/components/AutosSelectionView';
 import { AutosCarrosView } from '@/components/AutosCarrosView';
 import { AutosMotosView } from '@/components/AutosMotosView';
 import { AutosBikesView } from '@/components/AutosBikesView';
@@ -59,7 +56,8 @@ import { JobDetailView } from '@/components/JobDetailView';
 import { RealEstateDetailView } from '@/components/RealEstateDetailView';
 import { ClassifiedSearchResultsView } from '@/components/ClassifiedSearchResultsView';
 import { PlanSelectionView } from '@/components/PlanSelectionView';
-import { STORES } from '@/constants';
+import { GenericSelectionView } from '@/components/GenericSelectionView';
+import { STORES, SUBCATEGORIES } from '@/constants';
 import { Store, Category, AdType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -226,18 +224,7 @@ export const App: React.FC = () => {
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
-
-    const slugMap: Record<string, string> = {
-        'saude': 'health_selection',
-        'servicos': 'services_selection',
-        'pets': 'pets_selection',
-        'moda': 'fashion_selection',
-        'beleza': 'beauty_selection',
-        'autos': 'autos_selection'
-    };
-
-    const target = slugMap[category.slug] || 'category_detail';
-    handleNavigate(target);
+    handleNavigate('generic_selection');
   };
 
   const handleSignOut = async () => {
@@ -305,99 +292,75 @@ export const App: React.FC = () => {
                     {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={simulatedRole} />}
                     {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={handleBack} onStoreClick={handleSelectStore} stores={STORES} userRole={simulatedRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
                     
-                    {/* FLUXO SAÚDE */}
-                    {activeTab === 'health_selection' && (
-                        <HealthSelectionView 
-                            onBack={handleBack} 
-                            onSelect={(intent) => {
-                                if (intent === 'Mulher') { handleNavigate('health_women'); }
-                                else if (intent === 'Pediatria') { handleNavigate('health_pediatrics'); }
-                                else { handleNavigate('category_detail'); }
-                            }} 
+                    {/* GENERIC CATEGORY SELECTION */}
+                    {activeTab === 'generic_selection' && selectedCategory && (
+                        <GenericSelectionView
+                            title={`${selectedCategory.name} em Jacarepaguá`}
+                            subtitle="Encontre os melhores profissionais e lojas do bairro."
+                            icon={(selectedCategory.icon as any).type || Sparkles}
+                            subcategories={(SUBCATEGORIES[selectedCategory.name] || []).map(sub => ({
+                                name: sub.name,
+                                icon: sub.icon,
+                                color: 'bg-blue-500'
+                            }))}
+                            onBack={handleBack}
+                            onSelect={(subName) => {
+                                const subSlug = subName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+                                const specificRoute = `${selectedCategory.slug}_${subSlug}`;
+                                
+                                const specialRoutes: Record<string, string> = {
+                                    'saude_mulher': 'health_women',
+                                    'saude_pediatria': 'health_pediatrics',
+                                    'servicos_manuais': 'services_manual',
+                                    'servicos_especializados': 'services_specialized',
+                                    'pets_caes': 'pets_dogs',
+                                    'pets_gatos': 'pets_cats',
+                                    'pets_outros': 'pets_others',
+                                    'moda_feminino': 'fashion_women',
+                                    'moda_masculino': 'fashion_men',
+                                    'moda_infantil': 'fashion_kids',
+                                    'beleza_mulher': 'beauty_women',
+                                    'beleza_homem': 'beauty_men',
+                                    'autos_carros': 'autos_carros',
+                                    'autos_motos': 'autos_motos',
+                                    'autos_bikes': 'autos_bikes',
+                                    'autos_eletricos': 'autos_eletricos'
+                                };
+
+                                if (specialRoutes[specificRoute]) {
+                                    handleNavigate(specialRoutes[specificRoute]);
+                                } else {
+                                    setSelectedCategory({ ...selectedCategory, name: subName });
+                                    handleNavigate('category_detail');
+                                }
+                            }}
                             onNavigate={handleNavigate}
                         />
                     )}
+
+                    {/* FLUXO SAÚDE */}
                     {activeTab === 'health_women' && <HealthWomenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'health_pediatrics' && <HealthPediatricsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO SERVIÇOS */}
-                    {activeTab === 'services_selection' && (
-                        <ServicesSelectionView 
-                            onBack={handleBack} 
-                            onSelect={(intent) => {
-                                if (intent === 'Manuais') { handleNavigate('services_manual'); }
-                                else if (intent === 'Especializados') { handleNavigate('services_specialized'); }
-                                else { handleNavigate('category_detail'); }
-                            }}
-                            onNavigate={handleNavigate}
-                        />
-                    )}
                     {activeTab === 'services_manual' && <ServicesManualView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'services_specialized' && <ServicesSpecializedView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO PETS */}
-                    {activeTab === 'pets_selection' && (
-                        <PetsSelectionView 
-                            onBack={handleBack} 
-                            onSelect={(intent) => {
-                                if (intent === 'Cães') { handleNavigate('pets_dogs'); }
-                                else if (intent === 'Gatos') { handleNavigate('pets_cats'); }
-                                else if (intent === 'Outros Pets') { handleNavigate('pets_others'); }
-                                else { handleNavigate('category_detail'); }
-                            }}
-                            onNavigate={handleNavigate}
-                        />
-                    )}
                     {activeTab === 'pets_dogs' && <PetsDogsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'pets_cats' && <PetsCatsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'pets_others' && <PetsOthersView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
 
                     {/* FLUXO MODA */}
-                    {activeTab === 'fashion_selection' && (
-                        <FashionSelectionView 
-                            onBack={handleBack}
-                            onSelect={(intent) => {
-                                if (intent === 'Feminino') { handleNavigate('fashion_women'); }
-                                else if (intent === 'Masculino') { handleNavigate('fashion_men'); }
-                                else if (intent === 'Infantil') { handleNavigate('fashion_kids'); }
-                                else { handleNavigate('category_detail'); }
-                            }}
-                            onNavigate={handleNavigate}
-                        />
-                    )}
                     {activeTab === 'fashion_women' && <FashionWomenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'fashion_men' && <FashionMenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'fashion_kids' && <FashionKidsView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO BELEZA */}
-                    {activeTab === 'beauty_selection' && (
-                        <BeautySelectionView
-                            onBack={handleBack}
-                            onSelect={(intent) => {
-                                if (intent === 'Mulher') { handleNavigate('beauty_women'); }
-                                else if (intent === 'Homem') { handleNavigate('beauty_men'); }
-                                else { handleNavigate('category_detail'); }
-                            }}
-                            onNavigate={handleNavigate}
-                        />
-                    )}
                     {activeTab === 'beauty_women' && <BeautyWomenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'beauty_men' && <BeautyMenView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     
                     {/* FLUXO AUTOS */}
-                    {activeTab === 'autos_selection' && (
-                        <AutosSelectionView
-                            onBack={handleBack}
-                            onSelect={(intent) => {
-                                if (intent === 'Carros') { handleNavigate('autos_carros'); }
-                                else if (intent === 'Motos') { handleNavigate('autos_motos'); }
-                                else if (intent === 'Bikes') { handleNavigate('autos_bikes'); }
-                                else if (intent === 'Elétricos') { handleNavigate('autos_eletricos'); }
-                                else { handleNavigate('category_detail'); }
-                            }}
-                            onNavigate={handleNavigate}
-                        />
-                    )}
                     {activeTab === 'autos_carros' && <AutosCarrosView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'autos_motos' && <AutosMotosView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
                     {activeTab === 'autos_bikes' && <AutosBikesView onBack={handleBack} onSelect={() => { handleNavigate('category_detail'); }} onStoreClick={handleSelectStore} onNavigate={handleNavigate} />}
@@ -421,6 +384,8 @@ export const App: React.FC = () => {
                     {activeTab === 'merchant_jobs' && <MerchantJobsModule onBack={() => handleNavigate('profile')} user={simulatedUser} />}
                     {activeTab === 'store_finance' && <StoreFinanceModule onBack={() => handleNavigate('profile')} />}
                     {activeTab === 'store_support' && <StoreSupportModule onBack={() => handleNavigate('profile')} />}
+                    {activeTab === 'store_area' && <StoreAreaView onNavigate={handleNavigate} user={simulatedUser} />}
+                    {activeTab === 'merchant_scheduling' && <MerchantSchedulingModule onBack={() => handleNavigate('store_area')} />}
                     {activeTab === 'patrocinador_master' && <PatrocinadorMasterScreen onBack={() => handleNavigate('home')} />}
                     {activeTab === 'investor_presentation' && <InvestorPresentationView onBack={() => handleNavigate('admin_panel')} />}
                     </main>

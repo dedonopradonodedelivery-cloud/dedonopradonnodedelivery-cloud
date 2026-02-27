@@ -5,7 +5,6 @@ import {
   Lightbulb, 
   Send, 
   CheckCircle2, 
-  AlertCircle,
   Loader2,
   Bug,
   Sparkles,
