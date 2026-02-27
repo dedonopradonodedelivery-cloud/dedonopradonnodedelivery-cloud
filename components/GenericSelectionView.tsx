@@ -1,17 +1,17 @@
 import React from 'react';
-import { ChevronLeft, Sparkles, LucideIcon } from 'lucide-react';
+import { ChevronLeft, Sparkles } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 
 interface Subcategory {
   name: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   color: string;
 }
 
 interface GenericSelectionViewProps {
   title: string;
   subtitle: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   subcategories: Subcategory[];
   onBack: () => void;
   onSelect: (sub: string) => void;

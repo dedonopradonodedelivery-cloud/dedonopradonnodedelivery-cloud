@@ -247,24 +247,18 @@ export const App: React.FC = () => {
       <div className="min-h-screen bg-brand-blue dark:bg-slate-950 flex justify-center relative transition-colors duration-300">
         <div className={`w-full max-w-md h-[100dvh] bg-white dark:bg-gray-900 transition-opacity duration-1000 ease-in-out ${appReady ? 'opacity-100' : 'opacity-0'}`}>
             {appReady && (
-                <Layout activeTab={activeTab} setActiveTab={handleNavigate} userRole={simulatedRole} hideNav={false}>
+                <Layout activeTab={activeTab} setActiveTab={handleNavigate} hideNav={false}>
                     {!headerExclusionList.includes(activeTab) && (
                     <Header 
                         onNotificationClick={() => handleNavigate('notifications')} 
                         user={simulatedUser} 
                         searchTerm={globalSearch} 
                         onSearchChange={setGlobalSearch} 
-                        onNavigate={handleNavigate} 
                         activeTab={activeTab} 
-                        userRole={simulatedRole} 
-                        stores={STORES} 
-                        onStoreClick={handleSelectStore} 
                         isAdmin={isRealAdmin} 
                         viewMode={viewMode} 
                         onOpenViewSwitcher={() => setIsRoleSwitcherOpen(true)} 
                         onSelectCategory={handleSelectCategory} 
-                        customTitle={headerTitle}
-                        onBack={handleBack}
                     />
                     )}
                     <main className="w-full mx-auto">
@@ -290,7 +284,7 @@ export const App: React.FC = () => {
                     {activeTab === 'classified_search_results' && selectedData?.searchTerm && <ClassifiedSearchResultsView searchTerm={selectedData.searchTerm} onBack={() => handleNavigate('classifieds')} onNavigate={handleNavigate} />}
 
                     {activeTab === 'notifications' && <NotificationsView onBack={() => handleNavigate('home')} onNavigate={handleNavigate} userRole={simulatedRole} />}
-                    {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={handleBack} onStoreClick={handleSelectStore} stores={STORES} userRole={simulatedRole} onAdvertiseInCategory={() => {}} onNavigate={handleNavigate} />}
+                    {activeTab === 'category_detail' && selectedCategory && <CategoryView category={selectedCategory} onBack={handleBack} onStoreClick={handleSelectStore} stores={STORES} onNavigate={handleNavigate} />}
                     
                     {/* GENERIC CATEGORY SELECTION */}
                     {activeTab === 'generic_selection' && selectedCategory && (

@@ -1,13 +1,11 @@
 
 import React, { useMemo } from 'react';
-import { Home, Newspaper, Compass, User } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Home, Compass, User } from 'lucide-react';
 import { useFeatures, FeatureKey } from '@/contexts/FeatureContext';
 
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: 'cliente' | 'lojista' | 'admin' | null;
 }
 
 interface NavItem {

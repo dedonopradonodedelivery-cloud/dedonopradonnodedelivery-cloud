@@ -6,11 +6,10 @@ interface LayoutProps {
   children: ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole?: 'cliente' | 'lojista' | 'admin' | null;
   hideNav?: boolean;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userRole, hideNav = false }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, hideNav = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position when activeTab changes
@@ -44,7 +43,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         <BottomNav
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          userRole={userRole}
         />
       )}
     </div>

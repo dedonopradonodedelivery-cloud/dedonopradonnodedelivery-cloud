@@ -1,9 +1,9 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 // Added missing icons: Heart, Wrench, PawPrint, Shirt, Scissors, CarFront
-import { Search, MapPin, ChevronDown, Check, ChevronRight, SearchX, ShieldCheck, Tag, Mic, Bell, Loader2, X, Plus, Sun, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Check, ShieldCheck, Mic, Bell, X, Plus, Heart, Wrench, PawPrint, Shirt, Scissors, CarFront } from 'lucide-react';
 import { useNeighborhood, NEIGHBORHOODS } from '@/contexts/NeighborhoodContext';
-import { Store, Category } from '@/types';
+import { Category } from '@/types';
 // Corrected import from TUCO_MASCOT_BASE64 to LOKA_MASCOT_BASE64
 import { CATEGORIES, LOKA_MASCOT_BASE64 } from '@/constants';
 import { MoreCategoriesModal } from './MoreCategoriesModal';
@@ -13,16 +13,12 @@ interface HeaderProps {
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onNavigate: (view: string, data?: any) => void;
   activeTab: string;
-  stores?: Store[];
-  onStoreClick?: (store: Store) => void;
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
   isDarkMode?: boolean;
   toggleTheme?: () => void;
-  userRole?: string | null;
   onSelectCategory: (category: Category) => void;
 }
 
@@ -62,23 +58,17 @@ const NeighborhoodSelectorModal: React.FC = () => {
 };
 
 // Renamed and updated to use LOKA_MASCOT_BASE64
-const LokaMascot: React.FC = () => (
-  <img src={LOKA_MASCOT_BASE64} alt="Mascote Loka" className="w-full h-full object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.4)]" />
-);
+// LokaMascot component removed as it was unused
 
 export const Header: React.FC<HeaderProps> = ({
   onNotificationClick, 
   user,
   searchTerm,
   onSearchChange,
-  onNavigate,
   activeTab,
-  stores = [],
-  onStoreClick,
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
-  userRole,
   onSelectCategory
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
@@ -142,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
     const fullName = user.user_metadata?.full_name;
     if (fullName) return fullName.split(' ')[0];
     return user.email?.split('@')[0] || "Morador";
-  }, [user, userRole, isAdmin, viewMode]);
+  }, [user, isAdmin, viewMode]);
 
   return (
     <>

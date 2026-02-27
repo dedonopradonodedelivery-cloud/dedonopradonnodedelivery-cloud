@@ -39,8 +39,6 @@ interface CategoryViewProps {
   onBack: () => void;
   onStoreClick: (store: Store) => void;
   stores: Store[];
-  userRole: 'cliente' | 'lojista' | 'admin' | null;
-  onAdvertiseInCategory: (categoryName: string | null) => void;
   onNavigate: (view: string) => void;
   onSubcategoryClick?: (subName: string) => void;
 }
@@ -50,8 +48,6 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   onBack,
   onStoreClick, 
   stores, 
-  userRole, 
-  onAdvertiseInCategory, 
   onNavigate
 }) => {
 
@@ -78,7 +74,16 @@ export const CategoryView: React.FC<CategoryViewProps> = ({
   return (
     <div className="flex flex-col bg-brand-blue w-full max-w-md mx-auto min-h-screen">
       
-      {/* Overlap Card System */}
+      <div className="pt-12 pb-6 px-6 flex justify-between items-center">
+        <button 
+          onClick={onBack}
+          className="p-3 bg-white/10 backdrop-blur-md rounded-2xl text-white hover:bg-white/20 active:scale-90 transition-all border border-white/10"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
+      </div>
+
       <div className="flex-1 bg-white dark:bg-gray-950 rounded-t-[3.5rem] -mt-6 pb-32 relative z-40 shadow-[0_-12px_40px_rgba(0,0,0,0.12)]">
         
         <main className="p-6 pt-12 space-y-10">
