@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Clock, X, Check, Trophy } from 'lucide-react';
+import { Heart, Clock, X, Check, Trophy, Flame, RefreshCw, Home } from 'lucide-react';
 
 interface QuizViewProps {
   onBack: () => void;
@@ -39,6 +39,22 @@ const MOCK_QUESTIONS: Question[] = [
     correctAnswer: 1,
     difficulty: 'hard',
     xp: 40
+  },
+  {
+    id: '4',
+    text: 'Onde fica localizado o Bosque da Freguesia?',
+    options: ['Rua Tirol', 'Estrada do Pau-Ferro', 'Avenida Geremário Dantas', 'Estrada do Gabinal'],
+    correctAnswer: 1,
+    difficulty: 'medium',
+    xp: 20
+  },
+  {
+    id: '5',
+    text: 'Qual é o nome da praça principal do Anil?',
+    options: ['Praça Seca', 'Praça do Anil', 'Praça da Freguesia', 'Largo do Anil'],
+    correctAnswer: 3,
+    difficulty: 'easy',
+    xp: 10
   }
 ];
 
@@ -46,12 +62,23 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [score, setScore] = useState(0);
+  
+  // Game State
+  const [prestigioRodada, setPrestigioRodada] = useState(0);
   const [lives, setLives] = useState(3);
+  const [streak, setStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
+  
   const [timeLeft, setTimeLeft] = useState(mode === 'lightning' ? 60 : 15);
   const [isFinished, setIsFinished] = useState(false);
 
-  const question = MOCK_QUESTIONS[currentQuestionIdx];
+  // Get a random question for infinite mode
+  const [question, setQuestion] = useState<Question>(MOCK_QUESTIONS[0]);
+
+  useEffect(() => {
+    // Pick a random question on start
+    setQuestion(MOCK_QUESTIONS[Math.floor(Math.random() * MOCK_QUESTIONS.length)]);
+  }, []);
 
   useEffect(() => {
     if (isFinished || isAnswered) return;
@@ -67,11 +94,12 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [currentQuestionIdx, isFinished, isAnswered]);
+  }, [question, isFinished, isAnswered]);
 
   const handleTimeOut = () => {
     setIsAnswered(true);
     setLives(prev => Math.max(0, prev - 1));
+    setStreak(0);
     setTimeout(nextQuestion, 2000);
   };
 
@@ -82,30 +110,58 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
     setIsAnswered(true);
     
     if (idx === question.correctAnswer) {
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      setMaxStreak(prev => Math.max(prev, newStreak));
+      
       let earnedXp = question.xp;
       if (timeLeft > 10) earnedXp += 10; // Fast answer bonus
-      setScore(prev => prev + earnedXp);
+      if (newStreak >= 5) earnedXp += 30; // Streak bonus
+      
+      setPrestigioRodada(prev => prev + earnedXp);
     } else {
       setLives(prev => Math.max(0, prev - 1));
+      setStreak(0);
     }
     
-    setTimeout(nextQuestion, 2000);
+    setTimeout(nextQuestion, 1500); // Faster transition for infinite mode
   };
 
   const nextQuestion = () => {
-    if (lives <= 1 && selectedOption !== question.correctAnswer) {
+    if (lives <= 1 && selectedOption !== question.correctAnswer && selectedOption !== null) {
+      // If they just lost their last life
+      setIsFinished(true);
+      return;
+    }
+    if (lives === 0) {
       setIsFinished(true);
       return;
     }
     
-    if (currentQuestionIdx < MOCK_QUESTIONS.length - 1) {
-      setCurrentQuestionIdx(prev => prev + 1);
-      setSelectedOption(null);
-      setIsAnswered(false);
-      setTimeLeft(mode === 'lightning' ? timeLeft : 15); // Reset or keep timer based on mode
-    } else {
-      setIsFinished(true);
+    // Pick next random question (try to avoid repeating the exact same one immediately)
+    let nextQ = MOCK_QUESTIONS[Math.floor(Math.random() * MOCK_QUESTIONS.length)];
+    while (nextQ.id === question.id && MOCK_QUESTIONS.length > 1) {
+      nextQ = MOCK_QUESTIONS[Math.floor(Math.random() * MOCK_QUESTIONS.length)];
     }
+    
+    setQuestion(nextQ);
+    setCurrentQuestionIdx(prev => prev + 1);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setTimeLeft(mode === 'lightning' ? timeLeft : 15);
+  };
+
+  const handleRestart = () => {
+    setLives(3);
+    setPrestigioRodada(0);
+    setStreak(0);
+    setMaxStreak(0);
+    setCurrentQuestionIdx(0);
+    setIsFinished(false);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setTimeLeft(mode === 'lightning' ? 60 : 15);
+    setQuestion(MOCK_QUESTIONS[Math.floor(Math.random() * MOCK_QUESTIONS.length)]);
   };
 
   if (isFinished) {
@@ -116,20 +172,73 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
           <div className="absolute top-[20%] right-[10%] w-[60%] h-[60%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }}></div>
         </div>
 
-        <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="relative z-10 flex flex-col items-center w-full max-w-md">
           <Trophy size={80} className="text-amber-400 mb-6 drop-shadow-[0_0_30px_rgba(251,191,36,0.5)]" />
-          <h1 className="text-3xl font-black tracking-tighter mb-2">Quiz Concluído!</h1>
-          <p className="text-white/60 mb-8 font-bold uppercase tracking-widest text-xs">Você ganhou</p>
-          <div className="text-6xl font-black text-blue-500 mb-2 drop-shadow-[0_0_30px_rgba(37,99,235,0.3)]">+{score}</div>
-          <p className="text-blue-400 font-bold uppercase tracking-widest mb-12">Prestígio</p>
+          <h1 className="text-3xl font-black tracking-tighter mb-2">Fim da Rodada!</h1>
           
-          <button 
-            onClick={onBack}
-            className="w-full max-w-xs bg-blue-600 text-white font-black uppercase tracking-widest py-4 rounded-2xl active:scale-95 transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-blue-400/20 animate-pulse" />
-            <span className="relative z-10">Voltar ao Início</span>
-          </button>
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 w-full mt-6 mb-8 backdrop-blur-sm">
+            <div className="text-center mb-8">
+              <p className="text-white/60 mb-2 font-bold uppercase tracking-widest text-xs">Prestígio Total</p>
+              <div className="text-6xl font-black text-blue-500 drop-shadow-[0_0_30px_rgba(37,99,235,0.3)]">+{prestigioRodada}</div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
+                <Flame size={24} className="text-amber-500 mx-auto mb-2" />
+                <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-1">Max Streak</p>
+                <p className="text-2xl font-black text-white">{maxStreak}</p>
+              </div>
+              <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
+                <Check size={24} className="text-emerald-500 mx-auto mb-2" />
+                <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-1">Acertos</p>
+                <p className="text-2xl font-black text-white">{currentQuestionIdx}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Ranking Semanal</span>
+                  <span className="text-lg font-black text-white">12º Lugar <span className="text-emerald-400 text-sm">↑ 3</span></span>
+                </div>
+                <Trophy size={24} className="text-amber-400 opacity-50" />
+              </div>
+
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="flex justify-between items-end mb-2">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Nível 2</span>
+                    <span className="text-sm font-black text-white">Explorador</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-blue-400">850 / 1000</span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 w-[85%] relative">
+                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="w-full space-y-3">
+            <button 
+              onClick={handleRestart}
+              className="w-full bg-blue-600 text-white font-black uppercase tracking-widest py-4 rounded-2xl active:scale-95 transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] relative overflow-hidden flex items-center justify-center gap-2"
+            >
+              <div className="absolute inset-0 bg-blue-400/20 animate-pulse" />
+              <RefreshCw size={20} className="relative z-10" />
+              <span className="relative z-10">Jogar Novamente</span>
+            </button>
+            
+            <button 
+              onClick={onBack}
+              className="w-full bg-white/5 text-white font-black uppercase tracking-widest py-4 rounded-2xl active:scale-95 transition-all border border-white/10 hover:bg-white/10 flex items-center justify-center gap-2"
+            >
+              <Home size={20} />
+              <span>Voltar para Home</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -150,20 +259,22 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
             <X size={24} />
           </button>
           
-          <div className="flex-1 mx-6">
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-blue-500 transition-all duration-300 relative"
-                style={{ width: `${((currentQuestionIdx) / MOCK_QUESTIONS.length) * 100}%` }}
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
-              </div>
+          <div className="flex-1 mx-6 flex items-center justify-center gap-4">
+            <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+              <Trophy size={14} className="text-blue-400" />
+              <span className="text-sm font-black text-blue-400">{prestigioRodada}</span>
             </div>
+            {streak > 1 && (
+              <div className="flex items-center gap-1 text-amber-500 animate-in zoom-in duration-300">
+                <Flame size={16} className="fill-amber-500" />
+                <span className="text-sm font-black">{streak}</span>
+              </div>
+            )}
           </div>
           
-          <div className="flex items-center gap-2 text-rose-500 font-bold">
-            <Heart size={20} className="fill-rose-500" />
-            {lives}
+          <div className="flex items-center gap-1.5 text-rose-500 font-bold bg-rose-500/10 px-3 py-1.5 rounded-full border border-rose-500/20">
+            <Heart size={16} className="fill-rose-500" />
+            <span>{lives}</span>
           </div>
         </div>
 
@@ -229,3 +340,4 @@ export const QuizView: React.FC<QuizViewProps> = ({ onBack, mode }) => {
     </div>
   );
 };
+

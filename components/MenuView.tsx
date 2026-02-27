@@ -297,10 +297,10 @@ export const MenuView: React.FC<MenuViewProps> = ({
           <div className="mt-4 mb-10 px-2 opacity-80">
               <div onClick={() => onNavigate('patrocinador_master')} className="bg-slate-900 rounded-3xl p-5 border border-white/5 flex items-center justify-between cursor-pointer group shadow-xl">
                   <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400"><Crown size={18} /></div>
+                      <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400"><Crown size={18} /></div>
                       <div>
-                          <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
-                          <p className="text-sm font-bold text-white mt-1">Grupo Esquematiza</p>
+                          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">Patrocinador Master</p>
+                          <p className="text-sm font-bold text-white mt-1">Rio Phone Store</p>
                       </div>
                   </div>
                   <ArrowRight size={16} className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
