@@ -86,35 +86,6 @@ export const App: React.FC = () => {
 
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
 
-  const headerTitle = useMemo(() => {
-    const titles: Record<string, string> = {
-      category_detail: selectedCategory?.name.toUpperCase() || 'CATEGORIA',
-      health_selection: 'SAÚDE',
-      health_women: 'MULHER',
-      health_pediatrics: 'PEDIATRIA',
-      services_selection: 'SERVIÇOS',
-      services_manual: 'SERVIÇOS MANUAIS',
-      services_specialized: 'SERVIÇOS ESPECIALIZADOS',
-      pets_selection: 'PETS',
-      pets_dogs: 'CÃES',
-      pets_cats: 'GATOS',
-      pets_others: 'OUTROS PETS',
-      fashion_selection: 'MODA',
-      fashion_women: 'MODA FEMININA',
-      fashion_men: 'MODA MASCULINA',
-      fashion_kids: 'MODA INFANTIL',
-      beauty_selection: 'BELEZA',
-      beauty_women: 'BELEZA FEMININA',
-      beauty_men: 'BELEZA MASCULINA',
-      autos_selection: 'AUTOS',
-      autos_carros: 'CARROS',
-      autos_motos: 'MOTOS',
-      autos_bikes: 'BIKES',
-      autos_eletricos: 'ELÉTRICOS',
-    };
-    return titles[activeTab] || '';
-  }, [activeTab, selectedCategory]);
-
   // Lógica de Admin Real
   const isRealAdmin = authUser?.email === 'dedonopradonodedelivery@gmail.com';
 

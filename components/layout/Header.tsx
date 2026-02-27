@@ -22,19 +22,16 @@ interface HeaderProps {
   user: any;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onNavigate: (view: string, data?: any) => void;
   activeTab: string;
-  stores?: Store[];
-  onStoreClick?: (store: Store) => void;
   isAdmin?: boolean;
   viewMode?: string;
   onOpenViewSwitcher?: () => void;
   isDarkMode?: boolean;
   toggleTheme?: () => void;
-  userRole?: string | null;
   onSelectCategory: (category: Category) => void;
-  customTitle?: string;
   onBack?: () => void;
+  customTitle?: string;
+  onNavigate?: (view: string, data?: any) => void;
 }
 
 const NeighborhoodSelectorModal: React.FC = () => {
@@ -80,10 +77,9 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   viewMode,
   onOpenViewSwitcher,
-  onNavigate,
-  customTitle,
   onBack,
-  userRole
+  customTitle,
+  onNavigate
 }) => {
   const { currentNeighborhood, toggleSelector } = useNeighborhood();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -174,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 </button>
                             </>
                         ) : (
-                            <MasterSponsorBadge onClick={() => onNavigate('patrocinador_master')} />
+                            <MasterSponsorBadge onClick={() => onNavigate && onNavigate('patrocinador_master')} />
                         )}
 
                         {isAdmin && (

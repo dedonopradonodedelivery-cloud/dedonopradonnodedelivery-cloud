@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, ShoppingCart, Settings, Bike, Package, Palette, Repeat } from 'lucide-react';
+import { ChevronLeft, ShoppingCart, Settings, Bike, Package, Palette, Repeat } from 'lucide-react';
 import { MasterSponsorBadge } from '@/components/MasterSponsorBadge';
 import { Store } from '@/types';
 
